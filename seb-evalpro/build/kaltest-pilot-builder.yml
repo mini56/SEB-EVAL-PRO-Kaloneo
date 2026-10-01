@@ -15,7 +15,6 @@ files:
 win:
   target:
     - nsis
-  icon: build/app-icon.ico
 
 nsis:
   oneClick: false
@@ -23,8 +22,5 @@ nsis:
   createDesktopShortcut: always
   createStartMenuShortcut: true
   shortcutName: "SEB EvalPro Kalonéo - PILOTE"
-  installerIcon: build/app-icon.ico
-  uninstallerIcon: build/app-icon.ico
-  installerHeader: build/installerHeader.bmp
   deleteAppDataOnUninstall: true
   artifactName: "SEB-EvalPro-Kaloneo-PILOTE-0.0.1-Windows-Setup.${ext}"
