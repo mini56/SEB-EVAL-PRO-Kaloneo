@@ -1,0 +1,39 @@
+name: Migration architecture guards
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tests/migration/**'
+      - 'tests/fixtures/kaltests/**'
+      - 'seb-evalpro/source/js/seb-parcours.js'
+      - '.github/workflows/migration-guards.yml'
+  pull_request:
+    paths:
+      - 'tests/migration/**'
+      - 'tests/fixtures/kaltests/**'
+      - 'seb-evalpro/source/js/seb-parcours.js'
+      - '.github/workflows/migration-guards.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  migration-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Verify Build 20 migration coverage
+        run: node tests/migration/check-migration-coverage.js
+
+      - name: Verify KALTEST contract and first migrated fixture
+        working-directory: kaltest-contract
+        run: npm test
