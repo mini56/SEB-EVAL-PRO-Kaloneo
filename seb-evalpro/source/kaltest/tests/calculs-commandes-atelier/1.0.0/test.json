@@ -1,0 +1,136 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "id": "calculs_commandes_atelier",
+  "version": "1.0.0",
+  "title": "Calculs de commandes en atelier",
+  "category": "mathematiques",
+  "description": "Calculer des quantités, des coûts et une durée dans une situation de petites commandes en atelier.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "qcmv1.0.html#page2",
+    "sourceScript": "source/js/qcm-page2.js",
+    "legacyParcoursId": "qcm-2"
+  },
+  "calculator": {
+    "compatible": true,
+    "defaultEnabled": true
+  },
+  "scenario": "Vous venez d'intégrer l'atelier de fabrication. Votre responsable vous confie la gestion de petites commandes.\n\nVous devez calculer les quantités, les coûts et la durée de certaines tâches.",
+  "instruction": "Notez votre réponse pour chaque question dans ce tableau :",
+  "presentation": {
+    "layout": "single-block",
+    "responseTable": {
+      "headers": [
+        "Question N°",
+        "Réponse",
+        "Unités"
+      ],
+      "roundedInstitutionalStyle": true
+    }
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "id1_calculs_commandes_atelier",
+      "prompt": "Un client commande 12 boîtes de vis, chaque boîte contient 85 vis. Combien de vis en tout devez-vous préparer ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "1020"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": []
+    },
+    {
+      "id": "id2_calculs_commandes_atelier",
+      "prompt": "Votre équipe fabrique 250 pièces par jour. Combien de pièces seront produites en 5 jours ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "1250"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": []
+    },
+    {
+      "id": "id3_calculs_commandes_atelier",
+      "prompt": "Vous avez 420 vis à répartir également dans 7 boîtes. Combien de vis y aurait-il par boîte ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "60"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": []
+    },
+    {
+      "id": "id4_calculs_commandes_atelier",
+      "prompt": "Une commande coûte 175 euros. Si le client achète 3 commandes identiques, quel sera le montant total à payer ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "525"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": []
+    },
+    {
+      "id": "id5_calculs_commandes_atelier",
+      "prompt": "Vous devez assembler 48 produits et vous pouvez en monter 6 par heure. Combien d'heures de travail seront nécessaires pour finir la commande ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "8"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": []
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.savoirs_fondamentaux.mathematiques.comprendre_enonce_consigne",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ]
+}
