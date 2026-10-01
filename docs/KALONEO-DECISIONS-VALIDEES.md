@@ -1779,3 +1779,56 @@ Un garde automatique doit empêcher la réintroduction accidentelle :
 - d’un verrou candidat conditionné par un marqueur d’installation plutôt que par l’état runtime de la session Administrateur.
 
 Cette architecture devient la référence pour la suite de KALONÉO / SEB EvalPro.
+
+
+---
+
+## 54. Barre Administrateur contextuelle selon l'état réel du parcours
+
+**Statut : VALIDÉ — décision fonctionnelle du 1er octobre 2026**
+
+La barre Administrateur doit afficher uniquement les commandes utiles au contexte courant.
+
+### Barre verrouillée
+
+Lorsque la barre est verrouillée :
+
+- aucun bouton Administrateur n'est visible ;
+- aucune partie de bouton ne doit dépasser de la barre repliée ;
+- seule la zone sensible supérieure permet d'appeler l'accès Administrateur.
+
+### Parcours candidat actif
+
+Après déverrouillage pendant un parcours actif :
+
+- ne pas afficher les fonctions de consultation ou de gestion qui ne servent pas au parcours en cours ;
+- masquer notamment **Bilan**, **Ouvrir un candidat** et les autres commandes sans utilité immédiate pendant l'évaluation ;
+- ne conserver que les commandes réellement liées au parcours actif, notamment la **fin du parcours**, **Quitter** et le retour au mode candidat / **Verrouiller** lorsque nécessaire ;
+- **Quitter** conserve son sens validé : fermer proprement l'application sans terminer le parcours actif ;
+- une commande de fin de parcours doit clairement terminer définitivement le parcours actif selon le mécanisme commun validé.
+
+### Aucun parcours actif / parcours terminé
+
+Lorsque aucun parcours n'est actif :
+
+- les fonctions Administrateur utiles à la gestion redeviennent visibles selon le contexte ;
+- peuvent alors être proposés les accès aux candidats, Résultats, Replay, Bilan, Import / Export et autres fonctions de gestion disponibles ;
+- une commande qui n'a pas d'utilité dans l'état courant doit rester masquée plutôt que simplement occuper la barre.
+
+### Principe général
+
+La visibilité des boutons est pilotée par **l'état réel de l'application et du parcours**, et non par une liste fixe affichée en permanence.
+
+Objectif :
+
+- simplifier la barre ;
+- éviter les commandes inutiles ou ambiguës ;
+- rendre immédiatement compréhensible ce qu'il est possible de faire à l'instant présent ;
+- conserver le fonctionnement sûr du Build #20 tout en améliorant l'ergonomie.
+
+### Temporisation de repli
+
+Le comportement réel doit conserver environ **1 seconde** entre la sortie de la souris de la barre ouverte et son repli effectif.
+
+Le simple fait qu'une constante `BAR_HIDE_DELAY = 1000` soit présente dans le code ne suffit pas : le comportement observé en situation réelle doit respecter cette temporisation.
+
