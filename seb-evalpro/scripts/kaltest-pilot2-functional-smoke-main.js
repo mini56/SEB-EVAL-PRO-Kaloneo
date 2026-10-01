@@ -66,7 +66,7 @@ async function fillOneAnswer(win) {
     );
   } else {
     await win.webContents.executeJavaScript(
-      "(function(){const test=window.sebKaltestPilot2.currentTest();const q=test.questions[0];const input=document.querySelector('[data-question-id="'+q.id+'"]');const value=q.response?.type==='duration'?q.acceptedMinutes+' min':q.acceptedAnswers[0];input.value=String(value);input.dispatchEvent(new Event('input',{bubbles:true}));return true;})()",
+      `(function(){const test=window.sebKaltestPilot2.currentTest();const q=test.questions[0];const input=document.querySelector('[data-question-id="'+q.id+'"]');const value=q.response?.type==='duration'?q.acceptedMinutes+' min':q.acceptedAnswers[0];input.value=String(value);input.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`,
       true
     );
   }
