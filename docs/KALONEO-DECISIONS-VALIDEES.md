@@ -1656,3 +1656,42 @@ Validation explicite des sept règles d’architecture suivantes :
 5. intervention Administrateur unique fournie par KALONÉO ;
 6. `.kaltest` totalement autonome, ressources fournies à la création et jamais téléchargées pendant le parcours ;
 7. identifiant/version/compatibilité minimale afin de bloquer les incompatibilités avant démarrage.
+
+
+---
+
+## 51. Accès Windows temporaire pendant les tests réels
+
+**Statut : VALIDÉ — TEMPORAIRE JUSQU’À LA FIN DES TESTS EN SITUATION RÉELLE**
+
+Pendant la phase actuelle de tests réels sur les postes candidats, la touche Windows reste volontairement utilisable comme **porte de secours**.
+
+Motif :
+
+- si un parcours se bloque complètement pendant un test réel ;
+- si l’interface candidat ne répond plus ;
+- si l’accès Administrateur interne ne permet pas de reprendre la main ;
+
+l’utilisateur de test doit pouvoir revenir à Windows sans être obligé d’éteindre brutalement le PC.
+
+Cette règle reprend le principe utilisé pendant les essais du **Build #20**.
+
+Conséquences pendant la phase de test :
+
+- ne pas supprimer ni désactiver la tolérance temporaire `TEMP_ALLOW_WINDOWS_RECOVERY` ;
+- la réapparition de la barre des tâches Windows après utilisation de cette porte de secours n’est pas, à elle seule, considérée comme une régression fonctionnelle ;
+- en revanche, toute réapparition spontanée de la barre Windows sans action volontaire de récupération doit rester surveillée et investiguée ;
+- le mécanisme normal candidat continue de conserver le mode plein écran / kiosk, la sauvegarde et la reprise du parcours.
+
+### Avant version candidat finale
+
+Cette tolérance est **strictement temporaire**.
+
+Avant validation finale de l’installation Candidat :
+
+- la touche Windows et les raccourcis de sortie devront être bloqués ;
+- le verrou plein écran / kiosk devra être réactivé sans exception temporaire ;
+- une procédure de sortie / récupération Administrateur interne devra être validée afin d’éviter tout risque de poste bloqué ;
+- un test de régression devra confirmer qu’aucune barre Windows ni application externe n’est accessible pendant un parcours candidat normal.
+
+Cette décision ne doit donc pas être interprétée comme une autorisation permanente d’accès à Windows dans la version finale.
