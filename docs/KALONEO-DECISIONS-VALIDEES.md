@@ -489,6 +489,8 @@ L’objectif est qu’une page produite par KALONÉO reste structurellement pré
 
 **Statut : VALIDÉ**
 
+Référence CSS anti-régression associée : `docs/KALONEO-CSS-REFERENCE-VALIDEE.md`.
+
 La charte commune doit être appliquée à KALONÉO, à SEB EvalPro et à la prévisualisation du Builder.
 
 Règles retrouvées et validées :
@@ -897,3 +899,47 @@ Ajouts retrouvés dans la discussion précédente :
 - contrat minimal d’une nouvelle ligne de compétence ;
 - page Gestion des parcours et conservation de l’intégrité ;
 - résultats complexes explicitement reportés.
+
+---
+
+## 37. Conservation des anciennes versions validées
+
+**Statut : VALIDÉ**
+
+Une ancienne version d’un test qui a déjà été validée et importée reste utilisable tant qu’elle demeure compatible avec le contrat KALTEST et la version de SEB EvalPro installée.
+
+La publication d’une version plus récente :
+
+- n’invalide pas automatiquement les versions précédentes ;
+- ne supprime pas les versions déjà utilisées ;
+- ne remplace pas silencieusement une version existante ;
+- ne doit pas empêcher la relecture d’un parcours historique qui dépend d’une version antérieure.
+
+Cette règle complète le principe de mise à jour additive et la compatibilité ascendante.
+
+---
+
+## 38. Référence CSS anti-régression
+
+**Statut : VALIDÉ**
+
+Le fichier suivant fait partie de la documentation de référence :
+
+`docs/KALONEO-CSS-REFERENCE-VALIDEE.md`
+
+Il enregistre :
+
+- les fichiers CSS canoniques ;
+- leurs blobs Git de référence au 1er octobre 2026 ;
+- les variables de couleurs et polices ;
+- les rayons, ombres et dimensions principales ;
+- les états des boutons Crystal ;
+- les règles de focus ;
+- les règles images/vidéos ;
+- le rendu des tableaux ;
+- le comportement sans scroll du PILOTE #2 ;
+- les dimensions/règles de Scénario et Consignes ;
+- les ratios d’exercice ;
+- les règles responsive actuellement utilisées.
+
+Une modification CSS qui change le rendu ne doit pas être classée comme simple nettoyage. Elle doit être réévaluée comme une modification fonctionnelle/visuelle.
