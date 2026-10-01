@@ -1,0 +1,10 @@
+{
+  "name": "@seb-evalpro/kaltest-contract",
+  "version": "0.1.0-dev",
+  "private": true,
+  "description": "Contrat partagé entre Kalonéo et SEB EvalPro",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test/validate.test.js"
+  }
+}
