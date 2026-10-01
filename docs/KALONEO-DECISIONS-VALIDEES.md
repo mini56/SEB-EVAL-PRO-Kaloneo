@@ -198,90 +198,53 @@ Si le texte seul déborde de son bloc, KALONÉO bloque également la validation.
 
 ## 9. Médias
 
-**Statut : VALIDÉ**
+**Statut : PARTIELLEMENT VALIDÉ — valeurs techniques exactes à confirmer**
 
-Le lecteur audio de la dictée du Build #20 sert de référence de comportement.
+Décisions explicitement retrouvées :
 
-Un média intégré peut proposer selon le test :
+- KALONÉO ne doit valider aucun média qu’une version compatible de SEB EvalPro ne sait pas reproduire fidèlement ;
+- le fonctionnement candidat doit rester entièrement **hors ligne** ;
+- les ressources nécessaires au test doivent être intégrées au paquet autonome et ne doivent pas dépendre d’une URL Internet ou d’un chemin externe ;
+- les médias ne doivent pas être déformés ni provoquer de débordement du rendu ;
+- Image, Audio et Vidéo font partie des types de contenu acceptés par le Builder.
 
-- Lire / Reprendre ;
-- Pause ;
-- Stop ;
-- Recommencer ;
-- progression ;
-- temps courant / durée ;
-- compteur de lectures.
+Éléments présents dans la conception précédente mais dont la validation explicite n’a pas encore été retrouvée dans l’historique :
 
-La vidéo suit le même principe visuel et fonctionnel.
-
-Les médias ne doivent jamais être déformés.
-
-Tout média validé doit être embarqué localement dans le contenu exporté.
-
-Aucun test validé ne doit dépendre :
-
-- d’une URL Internet ;
-- d’un fichier du Bureau ;
-- d’un chemin externe à l’application ou au paquet.
-
-Formats retenus par le contrat :
-
-- vidéo : WebM, VP8 ou VP9, audio Opus ou Vorbis ;
-- audio : MP3, WAV PCM, OGG Opus/Vorbis, WebM Opus/Vorbis, FLAC.
-
-KALONÉO vérifie le conteneur et le codec réel, pas seulement l’extension.
-
-Limites actuelles :
-
-- avertissement à partir de **250 Mo** pour un média ;
+- utilisation du lecteur audio de la dictée du Build #20 comme référence exacte ;
+- commandes Lire / Reprendre, Pause, Stop, Recommencer, progression, temps courant / durée et compteur de lectures ;
+- formats/codecs exacts : WebM VP8/VP9, Opus/Vorbis, MP3, WAV PCM, OGG, FLAC ;
+- contrôle du conteneur et du codec réel au-delà de l’extension ;
+- avertissement à **250 Mo** ;
 - maximum **500 Mo** par média ;
 - maximum **1 Go** par paquet complet.
+
+Ces valeurs sont conservées comme **À CONFIRMER** et ne doivent pas être présentées comme décisions définitivement validées tant qu’une validation explicite n’a pas été retrouvée ou redonnée.
 
 ---
 
 ## 10. Transitions
 
-**Statut : VALIDÉ**
+**Statut : PARTIELLEMENT VALIDÉ — règles générales à confirmer**
 
-Une transition est un élément de parcours et non un exercice noté.
+Décision explicitement retrouvée pour la gestion d’une erreur média :
 
-Elle peut contenir les mêmes familles de contenu que les tests : texte, image, audio et vidéo.
+- le candidat ne peut pas contourner seul l’erreur ;
+- le secours Administrateur / moniteur utilise le code `SVG56`, insensible à la casse ;
+- il permet de réessayer le média ou de passer à la page suivante ;
+- un contournement doit être enregistré avec sa date/heure dans l’historique / Replay.
 
-Deux modes sont prévus :
+Les règles suivantes figuraient dans la conception de la discussion précédente, mais leur validation explicite n’a pas encore été retrouvée :
 
-### Mode manuel
+- transition considérée comme élément de parcours non noté ;
+- contenu texte, image, audio ou vidéo ;
+- mode manuel avec bouton **Suivant** ;
+- mode automatique avec démarrage automatique, sans bouton candidat, puis passage à l’élément suivant ;
+- absence de contribution aux Résultats et au Bilan ;
+- absence de score et d’abandon d’exercice ;
+- conservation dans le parcours figé et dans la reprise ;
+- redémarrage du média depuis le début après interruption d’une transition automatique.
 
-- bouton **Suivant** vert.
-
-### Mode automatique
-
-- principalement destiné aux médias ;
-- démarrage automatique ;
-- aucun bouton candidat ;
-- passage automatique à l’élément suivant lorsque le média est terminé.
-
-Une transition :
-
-- ne contribue jamais aux Résultats ;
-- ne contribue jamais au Bilan ;
-- ne possède aucun score ;
-- ne possède aucun abandon d’exercice ;
-- reste enregistrée dans le parcours figé et dans la reprise de session.
-
-Après interruption pendant une transition automatique, le média recommence depuis le début.
-
-### Erreur de média pendant une transition
-
-Le candidat ne peut pas contourner seul l’erreur.
-
-SEB EvalPro demande de prévenir le moniteur.
-
-Le secours Administrateur utilise le code `SVG56`, insensible à la casse, et permet :
-
-- de réessayer le média ;
-- de passer à la page suivante.
-
-Le contournement doit être enregistré dans l’historique / Replay.
+Ces points restent consignés comme **À CONFIRMER** afin de ne pas perdre la conception antérieure sans les transformer artificiellement en décisions validées.
 
 ---
 
@@ -851,7 +814,20 @@ KALONÉO doit refuser la validation d’un nouvel exercice automatique si les do
 
 **Statut : VALIDÉ**
 
-Une page **Gestion des parcours** est prévue avec des commandes dédiées **Exporter** et **Importer**.
+La page **Gestion des parcours** comporte les commandes dédiées suivantes :
+
+- **Créer** ;
+- **Ouvrir** ;
+- **Dupliquer** ;
+- **Supprimer** ;
+- **Exporter** ;
+- **Importer**.
+
+Règles :
+
+- **Supprimer** est une action à risque et suit la règle visuelle rouge ;
+- Créer, Ouvrir, Dupliquer, Exporter et Importer suivent la règle des actions fonctionnelles bleues ;
+- l’import/export d’un parcours ne doit modifier, supprimer ni écraser aucun candidat ni aucun résultat existant.
 
 L’export d’un parcours doit conserver :
 
@@ -1288,6 +1264,19 @@ Avant injection d’un test, la discussion proposait de vérifier :
 - absence de ressources externes manquantes.
 
 Le principe général **validation bloquante / injection interdite en cas d’échec** est déjà validé. Le détail exact de cette checklist reste à consolider dans le Validateur.
+
+---
+
+## Historique complémentaire — récupération via l’historique de la discussion partagée
+
+### 1er octobre 2026 — contrôle de provenance
+
+La récupération étendue de la discussion précédente a permis de corriger le registre sur deux points :
+
+- les formats/codecs et limites 250 Mo / 500 Mo / 1 Go des médias étaient des propositions de conception dont la validation explicite n’a pas été retrouvée : elles sont désormais **À CONFIRMER** ;
+- plusieurs règles détaillées des transitions n’avaient pas de validation explicite retrouvée : elles restent consignées sans être présentées comme définitivement validées ;
+- la page **Gestion des parcours** est confirmée avec **Créer, Ouvrir, Dupliquer, Supprimer, Exporter, Importer** ;
+- l’import/export d’un parcours ne doit toucher ni aux candidats ni aux résultats existants.
 
 ---
 
