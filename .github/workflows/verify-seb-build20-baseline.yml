@@ -1,0 +1,97 @@
+name: Verify imported SEB Build 20 baseline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'seb-evalpro/**'
+      - '.github/workflows/verify-seb-build20-baseline.yml'
+  pull_request:
+    paths:
+      - 'seb-evalpro/**'
+      - '.github/workflows/verify-seb-build20-baseline.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-baseline:
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    defaults:
+      run:
+        working-directory: seb-evalpro
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Verify imported baseline identity
+        shell: pwsh
+        run: |
+          $p = Get-Content package.json -Raw | ConvertFrom-Json
+          if ([string]$p.version -ne '0.3.10') {
+            throw "Version attendue 0.3.10, trouvée : $($p.version)"
+          }
+          if ([string]$p.sebBuildNumber -ne '20') {
+            throw "Build attendu #20, trouvé : #$($p.sebBuildNumber)"
+          }
+          Write-Host "BASELINE_VERSION=$($p.version)"
+          Write-Host "BASELINE_BUILD=$($p.sebBuildNumber)"
+
+      - name: Prepare web application
+        run: npm run prepare:web
+
+      - name: Validate SEB-IA baseline
+        run: npm run test:seb-ia
+
+      - name: Validate candidate data security baseline
+        run: npm run test:security
+
+      - name: Candidate functional smoke tests
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tests = @(
+            'test:qcm-page2-functional',
+            'test:qcm-page2-1-functional',
+            'test:qcm-page3-functional',
+            'test:qcm-texte-trous-functional',
+            'test:qcm-page4-functional',
+            'test:qcm-page5-functional',
+            'test:qcm-page5-1-functional',
+            'test:qcm-page6-functional',
+            'test:autoeval1-functional',
+            'test:brique-functional',
+            'test:stock-functional',
+            'test:planning-functional',
+            'test:genrenombres-functional',
+            'test:dictee-functional',
+            'test:tri-functional',
+            'test:nwtexte-functional',
+            'test:nvmail-functional',
+            'test:autoeval2-functional',
+            'test:paronymes-functional',
+            'test:carre-functional',
+            'test:qcm-final-functional'
+          )
+
+          foreach ($test in $tests) {
+            Write-Host "RUN=$test"
+            npm run $test
+            if ($LASTEXITCODE -ne 0) {
+              throw "Smoke échoué : $test"
+            }
+          }
+
+          Write-Host 'SEB_BUILD20_FULL_CANDIDATE_SMOKES=OK'
