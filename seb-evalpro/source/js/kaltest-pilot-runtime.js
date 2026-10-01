@@ -134,7 +134,7 @@ function validateIdentity(){
     nom:document.getElementById('nom').value.trim(),
     prenom:document.getElementById('prenom').value.trim(),
     naissance:document.getElementById('naissance').value,
-    ss6:document.getElementById('ss6').value.trim(),
+    ss7:document.getElementById('ss7').value.trim(),
     lieu:document.getElementById('lieu').value.trim(),
     groupe:document.getElementById('groupe').value.trim(),
     dateEvaluation:document.getElementById('dateEvaluation').value,
@@ -142,7 +142,7 @@ function validateIdentity(){
   };
   const missing=['nom','prenom','naissance','lieu','groupe','dateEvaluation'].filter(k=>!values[k]);
   if(missing.length) return {ok:false,message:'Tous les champs obligatoires doivent être renseignés.'};
-  if(!/^\d{6}$/.test(values.ss6)) return {ok:false,message:'Les 6 premiers chiffres du n° de sécurité sociale doivent contenir exactement 6 chiffres.'};
+  if(!/^\d{7}$/.test(values.ss7)) return {ok:false,message:'Les 7 premiers chiffres du n° de sécurité sociale doivent contenir exactement 7 chiffres.'};
   return {ok:true,values};
 }
 
@@ -266,8 +266,8 @@ async function loadDefinitions(){
 function install(){
   renderIdentity();
 
-  document.getElementById('ss6').addEventListener('input',event=>{
-    event.target.value=event.target.value.replace(/\D/g,'').slice(0,6);
+  document.getElementById('ss7').addEventListener('input',event=>{
+    event.target.value=event.target.value.replace(/\D/g,'').slice(0,7);
   });
 
   document.getElementById('identity-next').addEventListener('click',()=>{
