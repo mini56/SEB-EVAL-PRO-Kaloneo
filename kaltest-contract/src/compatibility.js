@@ -9,6 +9,7 @@ const PACKAGE_MAX_BYTES = 1024 * 1024 * 1024;
 const DEFAULT_SUPPORTED_FEATURES = Object.freeze([
   'runtime.basic',
   'questionnaire.basic',
+  'questionnaire.table',
   'layout.single',
   'layout.split',
   'layout.nested-one-level',
