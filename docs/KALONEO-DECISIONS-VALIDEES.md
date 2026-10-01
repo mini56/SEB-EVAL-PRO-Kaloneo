@@ -1881,3 +1881,54 @@ Règles :
 **KALONÉO / KALTEST = architecture, contrat, services communs et code final.**
 
 L'objectif n'est pas de recopier aveuglément l'ancien code, mais de conserver ce qui fonctionnait bien pour le candidat tout en modernisant proprement l'architecture interne.
+
+
+---
+
+## 56. Habillage visuel commun KALONÉO pour tous les exercices migrés
+
+**Statut : VALIDÉ — décision fonctionnelle du 1er octobre 2026**
+
+Les exercices historiques du Build #20 servent de **modèles de structure et de mise en page**, mais leur ancien habillage visuel n'est pas repris tel quel.
+
+### Règle générale
+
+Pour tous les exercices migrés vers KALONÉO / KALTEST :
+
+- utiliser le **background officiel KALONÉO** ;
+- utiliser le **style de tableaux KALONÉO** ;
+- harmoniser les champs de saisie, bordures, boutons, typographies, titres et couleurs selon la charte KALONÉO ;
+- conserver les pictogrammes et éléments fonctionnels validés lorsqu'ils font partie du fonctionnement ;
+- conserver la structure propre à chaque exercice lorsqu'elle est adaptée et lisible.
+
+### Ce qui est conservé du Build #20
+
+- organisation générale de la page ;
+- nombre et largeur relative des colonnes ;
+- disposition des tableaux ;
+- emplacement des images ;
+- zones de saisie ;
+- position des blocs fonctionnels ;
+- densité de contenu ;
+- logique de lecture ;
+- proportions qui assurent une bonne lisibilité.
+
+### Ce qui passe au style KALONÉO
+
+- arrière-plan ;
+- tableaux ;
+- en-têtes de tableaux ;
+- bordures ;
+- champs de réponse ;
+- boutons ;
+- typographie ;
+- couleurs ;
+- panneaux et cartes ;
+- éléments décoratifs.
+
+### Principe de référence
+
+**Build #20 fournit le squelette fonctionnel et la composition.**  
+**KALONÉO fournit l'identité visuelle commune.**
+
+L'objectif est d'obtenir des exercices aussi lisibles et efficaces que dans le Build #20, mais avec une présentation homogène KALONÉO sur l'ensemble du parcours.
