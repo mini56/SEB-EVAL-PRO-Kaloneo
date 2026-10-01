@@ -1,0 +1,126 @@
+name: TEST Installed Ministral AI Pack
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - tmp-split-candidat-admin-ai-pack
+    paths:
+      - '.github/workflows/test-ai-pack-install.yml'
+      - 'src/local-ai.js'
+      - 'scripts/ministral-admin-rewrite-smoke.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-installed-ministral-ai-pack-direct
+  cancel-in-progress: true
+
+jobs:
+  install-and-run:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download stable AI Pack release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path '_pack' | Out-Null
+          $tag = 'seb-evalpro-ai-pack-ministral3-8b-v1'
+          $repo = '${{ github.repository }}'
+          gh release download $tag --repo $repo --dir '_pack' --pattern 'SEB-EvalPro-IA-Pack-Setup.exe'
+          if ($LASTEXITCODE -ne 0) { throw 'Téléchargement installateur Pack IA échoué.' }
+          gh release download $tag --repo $repo --dir '_pack' --pattern 'Ministral-3-8B-Instruct-2512-Q4_K_M.gguf.part*'
+          if ($LASTEXITCODE -ne 0) { throw 'Téléchargement parties Pack IA échoué.' }
+
+      - name: Verify downloaded parts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = @{
+            'SEB-EvalPro-IA-Pack-Setup.exe' = 'f2145c4fea1555916a0374a8209a33fe26f17f92605433d4b5b4365a31a62c85'
+            'Ministral-3-8B-Instruct-2512-Q4_K_M.gguf.part01' = 'e248ea453f406faea1f3d3046525ee442b2aba670ae65ad28d645700503f8dd8'
+            'Ministral-3-8B-Instruct-2512-Q4_K_M.gguf.part02' = '316a901fd32000a39b591eff20aa11e4b99a050e44154cfc7e771b61931e97a1'
+            'Ministral-3-8B-Instruct-2512-Q4_K_M.gguf.part03' = 'ab5e2c77404f6227a3473b96fd5f98ea728212c5bba5289a434be9cfc2db1961'
+          }
+          foreach ($name in $expected.Keys) {
+            $path = Join-Path '_pack' $name
+            if (-not (Test-Path $path)) { throw "Fichier Pack IA absent: $name" }
+            $sha = (Get-FileHash $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($sha -ne $expected[$name]) { throw "SHA invalide pour $name : $sha" }
+          }
+          Write-Host 'AI_PACK_PARTS_VERIFIED: OK'
+
+      - name: Materialize AI Pack in ProgramData for CI
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:ProgramData 'SEB EvalPro\IA'
+          New-Item -ItemType Directory -Force -Path $root,'_llama-ci' | Out-Null
+
+          $model = Join-Path $root 'Ministral-3-8B-Instruct-2512-Q4_K_M.gguf'
+          Remove-Item $model -Force -ErrorAction SilentlyContinue
+          $parts = @(
+            '_pack\Ministral-3-8B-Instruct-2512-Q4_K_M.gguf.part01',
+            '_pack\Ministral-3-8B-Instruct-2512-Q4_K_M.gguf.part02',
+            '_pack\Ministral-3-8B-Instruct-2512-Q4_K_M.gguf.part03'
+          )
+          $buffer = New-Object byte[] 8388608
+          $output = [System.IO.File]::Create($model)
+          try {
+            foreach ($part in $parts) {
+              $input = [System.IO.File]::OpenRead((Resolve-Path $part).Path)
+              try {
+                while (($read = $input.Read($buffer,0,$buffer.Length)) -gt 0) {
+                  $output.Write($buffer,0,$read)
+                }
+              } finally {
+                $input.Dispose()
+              }
+            }
+          } finally {
+            $output.Dispose()
+          }
+
+          $sha = (Get-FileHash $model -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($sha -ne '33e7a72cf5e6e2cfc2f2847075acc013d68bba023e35310cef86b5cf8fdca761') {
+            throw "Modèle CI reconstitué invalide: $sha"
+          }
+
+          $llamaZip = '_llama-ci\llama.zip'
+          curl.exe -L --fail --retry 3 --retry-delay 3 -o $llamaZip 'https://github.com/ggml-org/llama.cpp/releases/download/b10964/llama-b10964-bin-win-cpu-x64.zip'
+          if ($LASTEXITCODE -ne 0) { throw 'Téléchargement llama.cpp CI échoué.' }
+          $llamaSha = (Get-FileHash $llamaZip -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($llamaSha -ne '917f39c076402c421224824607397af20f53625a60defc20e8dd22446bf4c5d7') { throw "SHA llama.cpp inattendu: $llamaSha" }
+          Expand-Archive -Path $llamaZip -DestinationPath '_llama-ci\runtime' -Force
+          $server = Get-ChildItem '_llama-ci\runtime' -Recurse -Filter 'llama-server.exe' | Select-Object -First 1
+          if (-not $server) { throw 'llama-server CI introuvable.' }
+          Copy-Item -Path (Join-Path $server.Directory.FullName '*') -Destination $root -Recurse -Force
+
+          Set-Content -Path (Join-Path $root 'pack.json') -Value '{"pack":"ministral3-8b-2512-q4km-v1-ci"}' -Encoding UTF8
+          Write-Host "AI_PACK_CI_MATERIALIZED: $sha"
+
+      - name: Smoke test Admin rewrite with installed Ministral
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          node scripts/ministral-admin-rewrite-smoke.js
+          if ($LASTEXITCODE -ne 0) { throw 'Réécriture réelle Admin avec Ministral échouée.' }
+
+      - name: Verify published Pack installer remains separate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Test-Path '_pack\SEB-EvalPro-IA-Pack-Setup.exe')) { throw 'Installateur Pack IA publié absent.' }
+          $size = (Get-Item '_pack\SEB-EvalPro-IA-Pack-Setup.exe').Length
+          if ($size -lt 1000000) { throw "Installateur Pack IA anormalement petit: $size" }
+          Write-Host "AI_PACK_PUBLISHED_INSTALLER_PRESENT: $size octets"

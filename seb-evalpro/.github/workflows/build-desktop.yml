@@ -1,0 +1,268 @@
+name: Build SEB-éval-PRO desktop
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - desktop-foundation
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install
+      - name: Ensure ImageMagick
+        shell: pwsh
+        run: |
+          if (-not (Get-Command magick -ErrorAction SilentlyContinue)) {
+            choco install imagemagick --no-progress -y
+          }
+      - name: Generate installer branding
+        shell: pwsh
+        run: ./scripts/generate-installer-branding.ps1
+      - name: Normalize Windows NSIS encodings
+        shell: pwsh
+        run: |
+          $utf8Bom = New-Object System.Text.UTF8Encoding($true)
+          foreach ($relativePath in @(
+            'build\installer.nsh',
+            'build\standalone-uninstaller.nsi'
+          )) {
+            $path = (Resolve-Path $relativePath).Path
+            $text = [System.IO.File]::ReadAllText($path)
+            [System.IO.File]::WriteAllText($path, $text, $utf8Bom)
+          }
+      - name: Build Windows installer
+        run: npm run dist:win
+      - name: Build standalone Windows uninstaller
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $makensis = Get-Command makensis.exe -ErrorAction SilentlyContinue
+          if (-not $makensis) {
+            choco install nsis --no-progress -y
+            $candidate = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
+            if (Test-Path $candidate) {
+              $makensis = Get-Item $candidate
+            }
+          }
+          if (-not $makensis) {
+            throw 'makensis.exe introuvable après installation de NSIS.'
+          }
+          $makensisPath = if ($makensis.Source) { $makensis.Source } else { $makensis.FullName }
+          & $makensisPath "/DAPP_VERSION=$version" 'build\standalone-uninstaller.nsi'
+          if ($LASTEXITCODE -ne 0) {
+            throw "Compilation du désinstallateur autonome échouée (code $LASTEXITCODE)."
+          }
+          $uninstaller = "dist\SEB-eval-PRO-$version-Windows-Desinstallation.exe"
+          if (-not (Test-Path $uninstaller)) {
+            throw "Désinstallateur autonome absent : $uninstaller"
+          }
+          Write-Host "Désinstallateur autonome généré : $uninstaller"
+      - name: Test real Windows install and uninstall
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $setup = (Resolve-Path "dist\SEB-eval-PRO-$version-Windows-Setup.exe").Path
+          $uninstaller = (Resolve-Path "dist\SEB-eval-PRO-$version-Windows-Desinstallation.exe").Path
+          $eAcute = [char]0x00E9
+          $eGrave = [char]0x00E8
+          $accentedName = "SEB-$($eAcute)val-PRO"
+
+          $nsiPath = (Resolve-Path 'build\standalone-uninstaller.nsi').Path
+          $nsiBytes = [System.IO.File]::ReadAllBytes($nsiPath)
+          if ($nsiBytes.Length -lt 3 -or $nsiBytes[0] -ne 0xEF -or $nsiBytes[1] -ne 0xBB -or $nsiBytes[2] -ne 0xBF) {
+            throw "Le fichier NSIS du désinstalleur n'est pas en UTF-8 avec BOM."
+          }
+          $nsiText = [System.IO.File]::ReadAllText($nsiPath, [System.Text.Encoding]::UTF8)
+          $expectedNsiStrings = @(
+            "$accentedName - D$($eAcute)sinstallation compl$($eGrave)te",
+            "Cette op$($eAcute)ration va d$($eAcute)sinstaller $accentedName",
+            "Les bilans et documents export$($eAcute)s dans Documents seront conserv$($eAcute)s."
+          )
+          foreach ($expectedString in $expectedNsiStrings) {
+            if (-not $nsiText.Contains($expectedString)) {
+              throw "Chaîne française absente ou mal encodée dans la source NSIS : $expectedString"
+            }
+          }
+          if ($nsiText -match '(?i)powershell\.exe|uninstall-clean\.ps1') {
+            throw 'Le nouveau désinstalleur ne doit dépendre d aucun script PowerShell externe.'
+          }
+
+          function ConvertTo-SebAscii {
+            param([string]$Value)
+            if ([string]::IsNullOrWhiteSpace($Value)) {
+              return ''
+            }
+            $normalized = $Value.Trim().ToLowerInvariant()
+            $normalized = $normalized.Replace([string]$eAcute, 'e')
+            $normalized = $normalized -replace '[\s_]+', '-'
+            return $normalized
+          }
+
+          function Test-SebEvalRegistryEntry {
+            param($Entry)
+            $displayName = ConvertTo-SebAscii $Entry.DisplayName
+            $displayName = $displayName -replace '-?\d+(?:\.\d+){1,3}(?:-.*)?$', ''
+            if ($displayName -in @('seb-eval-pro', 'seb-evalpro')) {
+              return $true
+            }
+            foreach ($candidate in @($Entry.InstallLocation, $Entry.UninstallString, $Entry.QuietUninstallString)) {
+              if ((ConvertTo-SebAscii $candidate) -match 'seb-eval-?pro') {
+                return $true
+              }
+            }
+            return $false
+          }
+
+          $registryPatterns = @(
+            'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+            'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+            'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+          )
+
+          function Get-SebEvalRegistryEntries {
+            $entries = @()
+            foreach ($pattern in $registryPatterns) {
+              $entries += @(Get-ItemProperty $pattern -ErrorAction SilentlyContinue | Where-Object {
+                Test-SebEvalRegistryEntry $_
+              })
+            }
+            return @($entries)
+          }
+
+          $documents = [Environment]::GetFolderPath('MyDocuments')
+          $preservedFile = Join-Path $documents 'SEB EvalPro\Bilans\ci-preserve-after-uninstall.txt'
+          New-Item -ItemType Directory -Force -Path (Split-Path -Parent $preservedFile) | Out-Null
+          Set-Content -LiteralPath $preservedFile -Value 'must survive uninstall' -Encoding ascii
+
+          $setupProcess = Start-Process -FilePath $setup -ArgumentList '/S' -Wait -PassThru
+          if ($setupProcess.ExitCode -ne 0) {
+            throw "Le Setup silencieux a échoué avec le code $($setupProcess.ExitCode)."
+          }
+
+          Start-Sleep -Seconds 2
+          $installedEntries = @(Get-SebEvalRegistryEntries)
+          if ($installedEntries.Count -eq 0) {
+            throw 'Le Setup a terminé sans créer une installation SEB EvalPro détectable dans le registre.'
+          }
+
+          $trackedInstallRoots = New-Object System.Collections.Generic.List[string]
+          foreach ($entry in $installedEntries) {
+            if ($entry.InstallLocation) {
+              $trackedInstallRoots.Add([Environment]::ExpandEnvironmentVariables($entry.InstallLocation.Trim('"')))
+            }
+
+            $command = $entry.QuietUninstallString
+            if (-not $command) {
+              $command = $entry.UninstallString
+            }
+            if ($command -match '^\s*"([^"]+)"') {
+              $trackedInstallRoots.Add((Split-Path -Parent $matches[1]))
+            } elseif ($command -match '^\s*(.+?\.exe)') {
+              $trackedInstallRoots.Add((Split-Path -Parent $matches[1].Trim()))
+            }
+          }
+
+          $existingInstallRoots = @($trackedInstallRoots | Where-Object {
+            $_ -and (Test-Path -LiteralPath $_)
+          } | Select-Object -Unique)
+
+          if ($existingInstallRoots.Count -eq 0) {
+            throw "Le Setup est enregistré mais aucun dossier d'installation réel n'a été trouvé."
+          }
+
+          $cacheProbePaths = @(
+            (Join-Path $env:APPDATA $accentedName),
+            (Join-Path $env:LOCALAPPDATA $accentedName)
+          )
+          foreach ($path in $cacheProbePaths) {
+            New-Item -ItemType Directory -Force -Path $path | Out-Null
+            Set-Content -LiteralPath (Join-Path $path 'ci-cleanup-probe.txt') -Value 'remove me' -Encoding ascii
+          }
+
+          $uninstallProcess = Start-Process -FilePath $uninstaller -ArgumentList '/S' -Wait -PassThru
+          if ($uninstallProcess.ExitCode -ne 0) {
+            throw "Le nouveau désinstalleur autonome a échoué avec le code $($uninstallProcess.ExitCode)."
+          }
+
+          Start-Sleep -Seconds 2
+
+          $remainingEntries = @(Get-SebEvalRegistryEntries)
+          if ($remainingEntries.Count -ne 0) {
+            throw "Entrées de désinstallation encore présentes : $($remainingEntries.Count)"
+          }
+
+          foreach ($path in $existingInstallRoots) {
+            if (Test-Path -LiteralPath $path) {
+              throw "Dossier d installation encore présent après désinstallation : $path"
+            }
+          }
+
+          foreach ($path in $cacheProbePaths) {
+            if (Test-Path -LiteralPath $path) {
+              throw "Données/cache encore présents après désinstallation : $path"
+            }
+          }
+
+          if (-not (Test-Path -LiteralPath $preservedFile)) {
+            throw 'Le fichier témoin dans Documents\SEB EvalPro\Bilans a été supprimé à tort.'
+          }
+
+          Write-Host 'Nouveau désinstalleur NSIS pur : OK'
+          Write-Host 'Test réel installation -> désinstallation : OK'
+          Write-Host 'Encodage UTF-8/accents NSIS : OK'
+          Write-Host 'Bilans/Documents conservés : OK'
+      - name: Publish Windows executables to private GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $tag = "seb-evalpro-v$version-build-${{ github.run_number }}"
+          $setup = "dist\SEB-eval-PRO-$version-Windows-Setup.exe"
+          $uninstaller = "dist\SEB-eval-PRO-$version-Windows-Desinstallation.exe"
+          $title = "SEB EvalPro $version - Build #${{ github.run_number }}"
+          $notes = "Build Windows validé automatiquement : installation, désinstallation, accents UTF-8 et conservation des bilans/Documents testés. Dépôt privé : téléchargement réservé aux utilisateurs autorisés."
+
+          gh release view $tag --repo "${{ github.repository }}" *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag $setup $uninstaller --clobber --repo "${{ github.repository }}"
+          } else {
+            gh release create $tag $setup $uninstaller --target "${{ github.sha }}" --title $title --notes $notes --prerelease --repo "${{ github.repository }}"
+          }
+          if ($LASTEXITCODE -ne 0) {
+            throw "Publication de la Release privée échouée (code $LASTEXITCODE)."
+          }
+          Write-Host "Release privée publiée : $tag"
+      - uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: SEB-eval-PRO-Windows
+          path: dist/*
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install
+      - name: Build Linux AppImage
+        run: npm run dist:linux
+      - uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: SEB-eval-PRO-Linux
+          path: dist/*

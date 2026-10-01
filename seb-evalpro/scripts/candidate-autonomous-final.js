@@ -1,0 +1,573 @@
+const fs = require('fs');
+const path = require('path');
+
+const root = path.resolve(__dirname, '..');
+
+function fail(message, code = 2) {
+  console.error('SEB EvalPro candidats autonomes final: ' + message);
+  process.exit(code);
+}
+function read(rel) {
+  const file = path.join(root, rel);
+  if (!fs.existsSync(file)) fail('fichier introuvable: ' + rel);
+  return { file, text: fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n') };
+}
+function write(file, text) { fs.writeFileSync(file, text, 'utf8'); }
+function parseJs(text, label) {
+  try { new Function(text); } catch (error) { fail(label + ': ' + error.message, 9); }
+}
+
+// -----------------------------------------------------------------------------
+// MAIN : import depuis la racine USB + branchement du catalogue candidat.
+// -----------------------------------------------------------------------------
+{
+  const { file, text } = read('src/main.js');
+  let out = text;
+
+  out = out.replace(
+    "ipcMain.handle('admin:import-candidates', async (_event, groupName) => {",
+    "ipcMain.handle('admin:import-candidates', async () => {"
+  );
+  out = out.replace(
+    "title: 'Choisir la clé USB contenant SEB EvalPro\\\\Candidats',",
+    "title: 'Choisir la racine de la clé USB contenant les dossiers candidats',"
+  );
+  out = out.replace(
+    "const result = getCandidateTransfer().importAll(selection.filePaths[0], groupName);",
+    "const result = getCandidateTransfer().importAll(selection.filePaths[0]);"
+  );
+
+  const marker = "require('./session-close')({";
+  if (!out.includes("require('./candidate-catalog-main')")) {
+    if (!out.includes(marker)) fail('ancre session-close absente dans main', 3);
+    out = out.replace(marker, `require('./candidate-catalog-main')({
+  app,
+  ipcMain,
+  getAdminUnlocked: () => adminSessionUnlocked,
+  getActiveCandidate: () => getCandidateStore().getActiveCandidate(),
+  dataRoot: sebInternalRoot()
+});
+
+` + marker);
+  }
+
+  if (out.includes("importAll(selection.filePaths[0], groupName)")) fail('ancien import par regroupement encore actif', 4);
+  if (!out.includes("candidate:set-admin-export-context")) fail('contexte export Word candidat absent', 4);
+  if (!out.includes('SEB_RUNTIME_OFFLINE') || !out.includes('devTools: false')) fail('verrouillage hors-ligne/DevTools absent', 4);
+  if (!out.includes('SEB_CANDIDATE_CLOSE_GUARD')) fail('garde de fermeture candidat absent', 4);
+  parseJs(out, 'src/main.js');
+  write(file, out);
+}
+
+// -----------------------------------------------------------------------------
+// PRELOAD : catalogue Admin, import sans nom de regroupement, message USB sûr.
+// -----------------------------------------------------------------------------
+{
+  const { file, text } = read('src/preload.js');
+  let out = text;
+
+  if (!out.includes("const candidateCatalog = require('./candidate-catalog-preload');")) {
+    const anchor = "const bilanHistory = require('./bilan-history-preload');";
+    if (!out.includes(anchor)) fail('ancre bilanHistory preload absente', 3);
+    out = out.replace(anchor, anchor + "\nconst candidateCatalog = require('./candidate-catalog-preload');");
+  }
+
+  if (out.includes('candidateCatalog.install();')) {
+    out = out.replace('candidateCatalog.install();', 'candidateCatalog.install({ beforeNavigate: () => saveNow(true) });');
+  } else if (!out.includes('candidateCatalog.install({ beforeNavigate: () => saveNow(true) });')) {
+    const anchor = '  bilanHistory.install();';
+    if (!out.includes(anchor)) fail('installation bilanHistory absente', 3);
+    out = out.replace(anchor, anchor + '\n  candidateCatalog.install({ beforeNavigate: () => saveNow(true) });');
+  }
+
+  out = out.replace(/\s*const groupName = await createTransferNameDialog\(\);[\s\S]*?if \(!groupName\) \{[\s\S]*?return;\s*\}\s*/m, '\n');
+  out = out.replace("ipcRenderer.invoke('admin:import-candidates', groupName)", "ipcRenderer.invoke('admin:import-candidates')");
+  // SEB_BUILD94_ADMIN_HOME_EXPORT
+  const exportGuardMarker = '// SEB_ADMIN_EXPORT_FINALIZES_ACTIVE_CANDIDATE';
+  if (!out.includes(exportGuardMarker)) {
+    const exportAnchor = "  exportCandidatesButton.addEventListener('click', async () => {\n    showBar();\n    saveNow(true);\n    exportCandidatesButton.disabled = true;\n    importCandidatesButton.disabled = true;\n    try {\n      const password = await createTransferPasswordDialog('export');";
+    if (!out.includes(exportAnchor)) fail('ancre export dossiers candidats absente', 3);
+    const exportReplacement = [
+      "  exportCandidatesButton.addEventListener('click', async () => {",
+      "    showBar();",
+      "    // SEB_ADMIN_EXPORT_REQUIRES_CLOSED_CANDIDATE",
+      "    const candidateFolderOpen = !!document.getElementById('seb-candidate-detail')",
+      "      || !!adminCandidateWorkspace",
+      "      || !!adminCandidateResultsWorkspace",
+      "      || !!document.getElementById('seb-bilan-history-editor')",
+      "      || !!document.getElementById('seb-replay-viewer');",
+      "    if (candidateFolderOpen) {",
+      "      await showTransferMessage('Export impossible', 'Fermez le dossier candidat avant de lancer l’export.', true);",
+      "      scheduleHideBar();",
+      "      return;",
+      "    }",
+      "",
+      "    saveNow(true);",
+      "    exportCandidatesButton.disabled = true;",
+      "    importCandidatesButton.disabled = true;",
+      "    try {",
+      "      // SEB_ADMIN_EXPORT_FINALIZES_ACTIVE_CANDIDATE",
+      "      const activeCandidate = await ipcRenderer.invoke('candidate:active').catch(() => null);",
+      "      if (activeCandidate && String(activeCandidate.status || '') === 'EN_COURS') {",
+      "        const confirmed = await createExportCandidateFinishDialog(activeCandidate);",
+      "        if (!confirmed) return;",
+      "        const completed = await ipcRenderer.invoke('candidate:complete-active', 'admin-export').catch((error) => ({",
+      "          ok:false,",
+      "          error:String(error && error.message ? error.message : error)",
+      "        }));",
+      "        if (!completed || !completed.ok) {",
+      "          await showTransferMessage('Fin de parcours impossible', completed && completed.error ? completed.error : 'Le parcours n’a pas pu être terminé avant l’export.', true);",
+      "          return;",
+      "        }",
+      "        finishCandidateButton.hidden = true;",
+      "        await refreshCandidateBadge();",
+      "      }",
+      "",
+      "      const password = await createTransferPasswordDialog('export');"
+    ].join('\n');
+    out = out.replace(exportAnchor, exportReplacement);
+  }
+
+  const adminHomeButtonMarker = '// SEB_ADMIN_HOME_PRIVACY_BUTTON_IN_BAR';
+  if (!out.includes(adminHomeButtonMarker)) {
+    const toggleAnchor = "  function ensurePrivacyToggle(){\n    let button = document.getElementById('seb-evalpro-privacy-toggle');\n    if (button) return button;";
+    if (!out.includes(toggleAnchor)) fail('ancre bouton écran accueil absente', 3);
+    const toggleReplacement = [
+      "  // SEB_ADMIN_HOME_PRIVACY_BUTTON_IN_BAR",
+      "  function placePrivacyToggleForAdminHome(button){",
+      "    if (!button) return button;",
+      "    const onAdminHome = typeof isAdminCandidatesPage === 'function' && isAdminCandidatesPage();",
+      "    if (!onAdminHome) return button;",
+      "    const bar = document.getElementById('seb-evalpro-topbar');",
+      "    if (!bar) return button;",
+      "    if (button.parentElement !== bar) bar.appendChild(button);",
+      "    const centered = {",
+      "      position:'absolute', left:'50%', right:'auto', bottom:'auto', top:'50%',",
+      "      transform:'translate(-50%, -50%)', zIndex:'2147483647', margin:'0',",
+      "      padding:'6px 12px', border:'2px solid #0070c0', borderRadius:'6px',",
+      "      background:'#fff', color:'#0070c0', whiteSpace:'nowrap',",
+      "      font:'700 14px Arial, sans-serif', boxShadow:'0 2px 5px rgba(0,0,0,.18)'",
+      "    };",
+      "    Object.entries(centered).forEach(([name, value]) => {",
+      "      const cssName = name.replace(/[A-Z]/g, (letter) => '-' + letter.toLowerCase());",
+      "      button.style.setProperty(cssName, value, 'important');",
+      "    });",
+      "    return button;",
+      "  }",
+      "",
+      "  function ensurePrivacyToggle(){",
+      "    let button = document.getElementById('seb-evalpro-privacy-toggle');",
+      "    if (button) return placePrivacyToggleForAdminHome(button);"
+    ].join('\n');
+    out = out.replace(toggleAnchor, toggleReplacement);
+    const appendAnchor = "    document.body.appendChild(button);\n    return button;\n  }\n\n  function ensurePrivacyLayer(){";
+    if (!out.includes(appendAnchor)) fail('ancre insertion bouton écran accueil absente', 3);
+    out = out.replace(appendAnchor, "    document.body.appendChild(button);\n    return placePrivacyToggleForAdminHome(button);\n  }\n\n  function ensurePrivacyLayer(){");
+  }
+
+  for (const token of [
+    'adminCandidateResultsWorkspace',
+    'showReadOnlyCandidateResults',
+    "candidate-catalog:results-workspace-load-sync"
+  ]) if (!out.includes(token)) fail('résultats candidat Admin incomplets: ' + token, 7);
+
+  for (const token of [
+    'Copie des fichiers terminée.',
+    'Vous pouvez retirer la clé USB en toute sécurité.',
+    'déjà présent(s) et ignoré(s)',
+    'Fermeture impossible'
+  ]) {
+    if (!out.includes(token)) fail('règle interface absente: ' + token, 4);
+  }
+  if (out.includes("ipcRenderer.invoke('admin:import-candidates', groupName)")) fail('ancien import frontend encore actif', 4);
+  parseJs(out, 'src/preload.js');
+  write(file, out);
+}
+
+// -----------------------------------------------------------------------------
+// WORD 0.3.8 : le document visible est uniquement dans Documents\\SEB EvalPro.
+// L'archive interne du candidat conserve sa propre copie.
+// -----------------------------------------------------------------------------
+{
+  const { file, text } = read('src/bilan-history-main.js');
+  let out = text;
+
+  // Compatibilité si un ancien script a encore injecté le dossier Bilans visible.
+  out = out.replace(
+    "function historicalWordDir() {\n    return path.join(app.getPath('documents'), 'SEB EvalPro', 'Bilans');\n  }",
+    "function historicalWordDir() {\n    return path.join(app.getPath('documents'), 'SEB EvalPro');\n  }"
+  );
+
+  if (out.includes("bilan-history:write-word-sync")) {
+    if (!out.includes("return path.join(app.getPath('documents'), 'SEB EvalPro');")) {
+      fail('writer Word visible 0.3.8 absent de Documents\\SEB EvalPro', 5);
+    }
+    if (!out.includes('historicalWordArchiveDir(candidate)')) {
+      fail('archive Word interne du candidat absente', 5);
+    }
+    if (!out.includes("path.join(record.candidateDir, 'bilan', 'exports')")) {
+      fail('archive Word non rattachée au dossier candidat interne', 5);
+    }
+  }
+
+  parseJs(out, 'src/bilan-history-main.js');
+  write(file, out);
+}
+
+{
+  const { file, text } = read('src/bilan-history-preload.js');
+  let out = text;
+  out = out.replace(
+    "ipcRenderer.sendSync('bilan-history:write-word-sync', { filename: wordFilename, html })",
+    "ipcRenderer.sendSync('bilan-history:write-word-sync', { filename: wordFilename, html, candidate })"
+  );
+  if (out.includes("bilan-history:write-word-sync") && !out.includes("{ filename: wordFilename, html, candidate }")) {
+    fail('identité candidat absente de l’export Word', 5);
+  }
+  if (out.includes('module.exports = { install };')) {
+    out = out.replace('module.exports = { install };', 'module.exports = { install, openEditor };');
+  }
+  if (!out.includes('module.exports = { install, openEditor };')) fail('export openEditor bilan absent', 5);
+  parseJs(out, 'src/bilan-history-preload.js');
+  write(file, out);
+}
+
+// -----------------------------------------------------------------------------
+// ÉCRAN ADMIN NEUTRE : visuel SEB EvalPro centré, sans modifier le parcours.
+// -----------------------------------------------------------------------------
+{
+  const adminHomeFile = path.join(root, 'app', 'web', 'admin-candidats.html');
+  if (!fs.existsSync(adminHomeFile)) fail('page Admin candidats générée introuvable', 6);
+  let adminHome = fs.readFileSync(adminHomeFile, 'utf8').replace(/\r\n/g, '\n');
+  if (!adminHome.includes('seb-admin-home-program-image')) {
+    if (!adminHome.includes('</style>')) fail('style page Admin candidats introuvable', 6);
+    adminHome = adminHome.replace('</style>', "    #seb-admin-home-program-image{display:block;width:min(560px,36vw);max-width:72%;max-height:42vh;height:auto;object-fit:contain;margin:0 auto;user-select:none;-webkit-user-drag:none}\n  </style>");
+    const titleAnchor = '<h1>Espace administrateur</h1>';
+    if (!adminHome.includes(titleAnchor)) fail('contenu page Admin candidats introuvable', 6);
+    adminHome = adminHome.replace(titleAnchor, titleAnchor + '\n    <img id="seb-admin-home-program-image" src="imageqcm/seb-evalpro-privacy-screen.jpg" alt="SEB EvalPro">');
+  }
+  fs.writeFileSync(adminHomeFile, adminHome, 'utf8');
+}
+// -----------------------------------------------------------------------------
+// Contrôles bloquants : ces choix sont désormais des invariants fonctionnels.
+// -----------------------------------------------------------------------------
+{
+  const transfer = read('src/candidate-transfer-main.js').text;
+  const store = read('src/candidate-store-main.js').text;
+  const catalogMain = read('src/candidate-catalog-main.js').text;
+  const catalogPreload = read('src/candidate-catalog-preload.js').text;
+  const replay = read('src/replay-main.js').text;
+  const replayPreload = read('src/replay-preload.js').text;
+  const bilan = read('src/bilan-history-main.js').text;
+  const main = read('src/main.js').text;
+  const preload = read('src/preload.js').text;
+  const qcm = read('source/qcmv1.0.html').text;
+  const qcmPage3 = fs.existsSync(path.join(root, 'source', 'js', 'qcm-page3.js')) ? read('source/js/qcm-page3.js').text : '';
+  const carre = read('source/carre.html').text;
+  const localAi = read('src/local-ai.js').text;
+  const installer = read('build/installer.nsh').text;
+  const priorityFixes = read('scripts/priority-fixes.js').text;
+  const packageText = read('package.json').text;
+  const build135Audit = read('scripts/build135-audit-fixes.js').text;
+  const build135Runner = read('scripts/build135-runner.js').text;
+  const cleanRegressionGuard = read('scripts/build159-clean-regression-guard.js').text;
+  const adminCandidatesPage = read('overrides/admin-candidats.html').text;
+  const adminCandidatesGenerated = read('app/web/admin-candidats.html').text;
+  const runtimeGenerated = read('app/web/js/seb-ui-runtime.js').text;
+  const replayNavigation = read('src/replay-navigation-capture.js').text;
+  const nativeKeyguard = read('native/candidate-keyguard.cpp').text;
+  const dicteeGenerated = read('app/web/dictee.html').text;
+
+  for (const token of [
+    'copyVerifiedAtomic',
+    'verifyExactCopy',
+    'sha256',
+    'skipped',
+    'updated:0',
+    'sameCandidate',
+    'candidateShapeValid',
+    'SEB-EVALPRO-USB-1',
+    'aes-256-gcm',
+    'scryptSync',
+    'Mot de passe incorrect ou fichier de transfert endommagé'
+  ]) if (!transfer.includes(token)) fail('transfert USB sécurisé incomplet: ' + token, 7);
+
+  for (const forbidden of [
+    'mergeDirectory(source.candidateDir, target)',
+    'unmarkDeleted(documentsPath',
+    'updated += 1'
+  ]) if (transfer.includes(forbidden)) fail('ancien comportement de fusion/écrasement encore présent: ' + forbidden, 7);
+
+  for (const token of [
+    "function buildFolderName(candidateId, shortId = '')",
+    "const baseFolderName = buildFolderName(candidateId, shortId)",
+    "function candidateIdentityKey(candidate)",
+    "function existingCandidateForIdentity(identity)",
+    "return activateExistingCandidate(existing, identity)",
+    "function migrateCandidateFolderNames()",
+    "codedFolderName"
+  ]) if (!store.includes(token)) fail('unicité/confidentialité dossier candidat incomplète: ' + token, 7);
+
+  for (const token of [
+    "candidate-catalog:list",
+    "candidate-catalog:detail",
+    "candidate-catalog:delete",
+    "candidate-catalog:open-export",
+    "candidate-catalog:begin-bilan",
+    "candidate-catalog:workspace-load-sync",
+    "candidate-catalog:workspace-save-sync",
+    "candidate-catalog:begin-results",
+    "candidate-catalog:results-workspace-load-sync",
+    "seb_evalpro_admin_candidate_id",
+    "cleanupDuplicateWordExports",
+    "verifyBilan",
+    "syncLegacyArtifacts",
+    "consolidateDuplicateCandidateFolders",
+    "'Corbeille', 'Doublons'",
+    "consolidatedDuplicates"
+  ]) if (!catalogMain.includes(token)) fail('catalogue backend incomplet: ' + token, 7);
+
+  for (const token of [
+    "candidate-catalog:delete",
+    "La suppression d’un dossier candidat est désactivée"
+  ]) if (!catalogMain.includes(token)) fail('protection anti-suppression candidat incomplète: ' + token, 7);
+  for (const forbidden of [
+    'confirmCandidateDeletion',
+    'seb-cc-detail-delete',
+    'Supprimer définitivement',
+    "ipcRenderer.invoke('candidate-catalog:delete'"
+  ]) if (catalogPreload.includes(forbidden)) fail('suppression candidat encore exposée dans l’interface: ' + forbidden, 7);
+  if (catalogPreload.includes('function statusLabel') || catalogPreload.includes('Session fermée') || catalogPreload.includes('>En cours<')) {
+    fail('statut technique candidat encore affiché dans le catalogue', 7);
+  }
+
+  for (const token of [
+    "openCandidateReplay(candidateId, filename)",
+    "candidate-catalog:open-export",
+    "Faire le bilan",
+    "Résultats du candidat",
+    "Ouvrir les résultats",
+    "beginCandidateResults",
+    "Document Word du bilan",
+    "admin:open-candidate-browser",
+    "isCandidateAdminHost",
+    "requestedCandidateId",
+    "openCatalog(initialCandidateId = '')",
+    "closeButton.addEventListener('click', close)",
+    "if (isCandidateAdminHost()) {\n        await openCatalog();",
+    "button.hidden = !unlocked || onBilan || !!(results && results.ok);"
+  ]) if (!catalogPreload.includes(token)) fail('accès/navigation exacte candidat incomplet: ' + token, 7);
+
+  if (catalogPreload.includes("closeButton.hidden = true")) {
+    fail('bouton Fermer du catalogue Admin encore neutralisé', 7);
+  }
+
+  if (catalogPreload.includes("bilan.textContent='Faire le bilan'")) {
+    fail('Faire le bilan encore proposé directement depuis la liste candidats', 7);
+  }
+  if (!adminCandidatesPage.includes('Espace administrateur')) fail('page Admin candidats incomplète: Espace administrateur', 7);
+  if (adminCandidatesPage.includes('<p>Dossiers candidats</p>')) fail('texte noir Dossiers candidats encore présent sur l’écran Admin neutre', 7);
+
+  for (const token of ['seb-admin-home-program-image', 'imageqcm/seb-evalpro-privacy-screen.jpg']) {
+    if (!adminCandidatesGenerated.includes(token)) fail('écran Admin neutre incomplet: ' + token, 7);
+  }
+  if (adminCandidatesGenerated.includes('<p>Dossiers candidats</p>')) fail('texte Dossiers candidats réintroduit dans l’écran Admin neutre', 7);
+  if (!preload.includes('const BAR_HIDE_DELAY = 1000;')) fail('temporisation de fermeture barre Admin différente de 1 seconde', 7);
+  for (const token of [
+    '.seb-cc-detail-actions .danger{margin-left:auto;background:#fff!important;color:#c00000!important;border-color:#c00000!important}',
+    '.seb-delete-actions .danger{background:#fff!important;color:#c00000!important;border-color:#c00000!important}'
+  ]) if (!catalogPreload.includes(token)) fail('style blanc/contour rouge des boutons Supprimer incomplet: ' + token, 7);
+
+  if (/\.(?:pdf)\b/i.test(catalogMain) || /Word\s*\/\s*PDF|Word\/PDF/i.test(catalogPreload)) {
+    fail('référence PDF encore active dans le catalogue candidat', 7);
+  }
+
+  if (preload.includes('id="seb-evalpro-results"')) {
+    fail('ancien bouton global Résultats stagiaires encore injecté malgré les résultats par dossier candidat', 7);
+  }
+
+  for (const token of [
+    'SEB_CANDIDATE_AUTONOMOUS_REPLAY',
+    "admin:load-candidate-parcours",
+    "admin:get-candidate-parcours-slide",
+    "path.join(candidateDir, 'replay')"
+  ]) if (!replay.includes(token)) fail('replay candidat incomplet: ' + token, 7);
+
+  if (!replayPreload.includes('openCandidateReplay')) fail('lecteur replay exact candidat absent', 7);
+
+  for (const token of [
+    'SEB_CANDIDATE_AUTONOMOUS_BILAN',
+    "path.join(candidateDir, 'bilan', 'historique')",
+    "candidateHistoryDir(candidate, candidateId)",
+    "candidateId:String(source.candidateId || '')"
+  ]) if (!bilan.includes(token)) fail('bilan candidat incomplet: ' + token, 7);
+
+  for (const token of [
+    'SEB_RUNTIME_OFFLINE',
+    'devTools: false',
+    'SEB_CANDIDATE_CLOSE_GUARD',
+    'candidate:set-admin-export-context',
+    'const visibleDirectory = bilanDocumentsDir();',
+    'Archivage interne du Word impossible',
+    'cleanupNumberedCandidateWordCopies',
+    'admin:open-candidate-results',
+    'adminCandidateResultsMode',
+    'admin:open-candidate-browser',
+    'admin:return-candidate-browser',
+    'admin-candidats.html',
+    'isAdminNavigationPage(page)',
+    'initializeCandidateSecurity',
+    'safeStorage',
+    'createCandidateLocalProtection'
+  ]) if (!main.includes(token)) fail('confinement/navigation Admin incomplet: ' + token, 7);
+
+  for (const token of [
+    'Copie des fichiers terminée.',
+    'Vous pouvez retirer la clé USB en toute sécurité.',
+    'déjà présent(s) et ignoré(s)',
+    "closeSessionButton.hidden = !adminUnlocked;",
+    'seb-admin-results-close',
+    'Fermer les résultats',
+    'adminNavigationLeaving',
+    'isAdminCandidatesPage',
+    "returnButton.textContent = 'Retour au candidat'",
+    'admin:return-candidate-browser',
+    'SEB_ADMIN_NAVIGATION_SAFE_LOCK',
+    'bilanButton.hidden = true',
+    'candidateCatalog.install({ beforeNavigate: () => saveNow(true) });',
+    'SEB_ADMIN_EXPORT_REQUIRES_CLOSED_CANDIDATE',
+    'Fermez le dossier candidat avant de lancer l’export.',
+    'SEB_ADMIN_EXPORT_FINALIZES_ACTIVE_CANDIDATE',
+    'createExportCandidateFinishDialog',
+    'Terminer le parcours et exporter',
+    "candidate:complete-active', 'admin-export'",
+    'SEB_ADMIN_HOME_PRIVACY_BUTTON_IN_BAR',
+    'createTransferPasswordDialog',
+    'Afficher le mot de passe'
+  ]) if (!preload.includes(token)) fail('interface/navigation Admin candidat incomplète: ' + token, 7);
+
+  const sebIaIntegrated = packageText.includes('build165plus-seb-ia-v1.js');
+  if (sebIaIntegrated) {
+    for (const forbidden of [
+      'Ministral-3-8B-Instruct',
+      'SEB-EvalPro-IA-Pack-Setup.exe',
+      'vc_redist.x64.exe',
+      'ExecShellWait "runas"'
+    ]) if (installer.includes(forbidden)) fail('ancien prérequis Pack IA encore présent dans le Setup SEB-IA: ' + forbidden, 7);
+    if (packageText.includes('build165plus-local-ai-prototype.js')) fail('ancien moteur Mistral encore exécuté après SEB-IA', 7);
+  } else {
+    for (const token of [
+      'Microsoft Visual C++ x64',
+      '3221225781',
+      "serverProcess.on('error'"
+    ]) if (!localAi.includes(token)) fail('diagnostic runtime IA incomplet: ' + token, 7);
+
+    for (const token of [
+      'vc_redist.x64.exe',
+      'ExecShellWait "runas"',
+      'VC\\Runtimes\\x64'
+    ]) if (!installer.includes(token)) fail('prérequis Visual C++ absent du Setup: ' + token, 7);
+  }
+
+  for (const forbidden of [
+    'admin:list-results',
+    'admin:open-result',
+    'seb-evalpro-results',
+    'createCandidateResultsDialog',
+    'sauvegarderResultatStagiaireDocx',
+    'seb-result-docx-lib'
+  ]) if (priorityFixes.includes(forbidden)) fail('ancien flux Résultats global encore présent dans priority-fixes: ' + forbidden, 7);
+
+  if (packageText.includes('result-docx-style-fix.js')) {
+    fail('ancien script result-docx-style-fix encore exécuté par prepare:web', 7);
+  }
+  if (qcm.includes('sauvegarderResultatStagiaireDocx') || qcm.includes('seb-result-docx-lib')) {
+    fail('ancien DOCX automatique Résultat encore généré', 7);
+  }
+
+  for (const [label, source] of [
+    ['build135-audit', build135Audit],
+    ['build135-runner', build135Runner],
+    ['build159-clean-regression-guard', cleanRegressionGuard]
+  ]) {
+    for (const forbidden of ['sauvegarderResultatStagiaireDocx', 'seb_evalpro_candidate_result_saved']) {
+      if (source.includes(forbidden)) fail(label + ' dépend encore de l’ancien DOCX Résultat: ' + forbidden, 7);
+    }
+  }
+
+  for (const token of ['SAVE_DEBOUNCE_MS = 750', 'SAVE_CHECKPOINT_MS = 5000', 'lastSavedFingerprint', 'saveInFlight']) {
+    if (!preload.includes(token)) fail('stabilisation sauvegarde absente: ' + token, 7);
+  }
+  if (preload.includes('setInterval(() => saveNow(false), 1000)')) fail('ancienne sauvegarde disque chaque seconde réintroduite', 7);
+  if (!store.includes('atomicWriteCounter') || !main.includes('atomicReplaceState')) fail('écriture atomique robuste absente', 7);
+  if (!replay.includes('captureQueues') || !replay.includes('atomicWriteReplayFile') || !replay.includes('Capture Replay trop longue.')) {
+    fail('stabilisation Replay backend absente', 7);
+  }
+  for (const token of ['NAV_CAPTURE_TIMEOUT_MS = 2000', 'await captureBeforeNavigation()', "captureNow('navigation-before-guaranteed')"]) {
+    if (!replayNavigation.includes(token)) fail('navigation Replay bornée absente: ' + token, 7);
+  }
+  if (!replayNavigation.includes("replace(/^[^A-Za-zÀ-ÖØ-öø-ÿ0-9]+/, '')")) {
+    fail('navigation Replay ne normalise pas les icônes des boutons', 7);
+  }
+  if (!replayNavigation.includes("dataset.sebReplayNavigationCaptureInstalled = '1'") || replayNavigation.includes('let installed = false')) {
+    fail('installation Replay encore globale au lieu d’être liée au document', 7);
+  }
+  if (!runtimeGenerated.includes("if (!button.classList.contains(desiredKind)) button.classList.add(desiredKind)")) {
+    fail('normalisation boutons non idempotente', 7);
+  }
+  if (!dicteeGenerated.includes("finish.id='seb-dictee-action'") || dicteeGenerated.includes('seb-dictee-finish-next')) {
+    fail('Dictée encore confondue avec une navigation Replay', 7);
+  }
+  if (!dicteeGenerated.includes('position:fixed!important;left:50%!important;right:auto!important;bottom:22px!important;transform:translateX(-50%)!important')) {
+    fail('Dictée: le bouton final « Dictée terminée / Suivant » n’est pas centré dans le rendu final', 7);
+  }
+  const page3Source = qcm.includes('js/qcm-page3.js') ? qcmPage3 : qcm;
+  for (const token of [
+    qcm.includes('js/qcm-page3.js')
+      ? "1:'9h15', 2:'8h50', 3:'9h05', 4:'9h20', 5:'8h45', 6:'5h15'"
+      : "1:\"9h15\", 2:'8h50', 3:'9h05', 4:'9h20', 5:'8h45', 6:'5h15'",
+    "7:'9h45', 8:'9h15', 9:'9h30', 10:'9h55', 11:'9h25', 12:'2h35'",
+    "13:'0h31', 14:'1h03'"
+  ]) {
+    if (!page3Source.includes(token)) fail('Page 3: grille horaire finale incorrecte: ' + token, 7);
+  }
+  if (page3Source.includes("9:'9h25', 10:'9h55', 11:'9h25', 12:'2h30'")) {
+    fail('Page 3: anciennes réponses erronées réintroduites', 7);
+  }
+  if (!main.includes('SEB_TEMP_WINDOWS_RECOVERY') || !main.includes('TEMP_ALLOW_WINDOWS_RECOVERY = true')) {
+    fail('sortie Windows temporaire de récupération absente', 7);
+  }
+  for (const token of [
+    'SEB_WINDOWS_RETURN_KIOSK_GUARD',
+    'forceCandidateWindowLockAfterWindowsReturn',
+    'installCandidateWindowsReturnGuard',
+    "['resume', 'unlock-screen', 'user-did-become-active']",
+    'win.setKiosk(false)',
+    'win.setKiosk(true)',
+    'mainWindow.setSkipTaskbar(true)'
+  ]) {
+    if (!main.includes(token)) fail('réaffirmation kiosk après reprise Windows absente: ' + token, 7);
+  }
+  if (nativeKeyguard.includes('if (vk == VK_LWIN || vk == VK_RWIN) return 1;') || !nativeKeyguard.includes('winHeld')) {
+    fail('touche Windows temporaire encore bloquée', 7);
+  }
+
+  if (/https:\/\/cdnjs\.cloudflare\.com/i.test(qcm)) fail('CDN jsPDF encore présent', 7);
+  if (/url\(\s*['"]?https?:\/\//i.test(carre)) fail('image Internet encore présente dans carre.html', 7);
+
+  for (const [label, source] of [
+    ['candidate-transfer-main', transfer],
+    ['candidate-store-main', store],
+    ['candidate-catalog-main', catalogMain],
+    ['candidate-catalog-preload', catalogPreload],
+    ['replay-main', replay],
+    ['replay-preload', replayPreload],
+    ['bilan-history-main', bilan],
+    ['main', main],
+    ['preload', preload],
+    ['local-ai', localAi],
+    ['priority-fixes', priorityFixes]
+  ]) parseJs(source, label);
+}
+
+console.log('SEB EvalPro candidats autonomes final: stockage candidat interne source unique, Word visible dans Documents, USB vérifié sans écrasement, replay exact, corruption contrôlée et runtime hors ligne — OK.');

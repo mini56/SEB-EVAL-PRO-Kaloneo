@@ -1,0 +1,111 @@
+{
+  "name": "seb-evalpro",
+  "version": "0.3.10",
+  "description": "SEB EvalPro - versions Candidat et Administrateur avec SEB-IA intégrée",
+  "main": "src/main.js",
+  "author": "Sauvegarde 56",
+  "license": "UNLICENSED",
+  "scripts": {
+    "prepare:web": "node scripts/prepare-web.js && node scripts/source-html-architecture-guard.js && node scripts/build-number-consistency-guard.js && node scripts/build159-clean-regression-guard.js && node scripts/build161-regression-guard.js && node scripts/nwtexte-architecture-guard.js && node scripts/parcours-registry-guard.js && node scripts/nvmail-architecture-guard.js && node scripts/autoeval2-architecture-guard.js && node scripts/paronymes-architecture-guard.js && node scripts/carre-architecture-guard.js && node scripts/tri-architecture-guard.js && node scripts/autoeval1-architecture-guard.js && node scripts/brique-architecture-guard.js && node scripts/stock-architecture-guard.js && node scripts/planning-architecture-guard.js && node scripts/genrenombres-architecture-guard.js && node scripts/dictee-architecture-guard.js && node scripts/qcm-final-architecture-guard.js && node scripts/qcm-page2-architecture-guard.js && node scripts/qcm-page2-1-architecture-guard.js && node scripts/qcm-page3-architecture-guard.js && node scripts/qcm-texte-trous-architecture-guard.js && node scripts/qcm-page4-architecture-guard.js && node scripts/qcm-page5-architecture-guard.js && node scripts/qcm-page5-1-architecture-guard.js && node scripts/qcm-page6-architecture-guard.js",
+    "start": "npm run prepare:web && electron .",
+    "dist:win": "npm run prepare:web && electron-builder --win --publish never",
+    "dist:linux": "npm run prepare:web && electron-builder --linux AppImage --publish never",
+    "test:seb-ia": "node scripts/test-seb-ia-v1.js && node scripts/audit-repository-names.js",
+    "test:nwtexte": "npm run prepare:web && node scripts/nwtexte-architecture-guard.js",
+    "audit:names": "node scripts/audit-repository-names.js",
+    "test:security": "node scripts/storage-layout-smoke.js && node scripts/candidate-local-protection-smoke.js && node scripts/candidate-store-smoke.js && node scripts/candidate-transfer-smoke.js && node scripts/candidate-lifecycle-smoke.js && node scripts/candidate-full-cycle-github-smoke.js && node scripts/candidate-loss-prevention-smoke.js && node scripts/candidate-catalog-smoke.js",
+    "test:nwtexte-functional": "electron --no-sandbox scripts/nwtexte-functional-smoke-main.js",
+    "test:parcours": "npm run prepare:web && node scripts/parcours-registry-guard.js",
+    "test:nvmail": "npm run prepare:web && node scripts/nvmail-architecture-guard.js",
+    "test:nvmail-functional": "electron --no-sandbox scripts/nvmail-functional-smoke-main.js",
+    "test:autoeval2": "npm run prepare:web && node scripts/autoeval2-architecture-guard.js",
+    "test:autoeval2-functional": "electron --no-sandbox scripts/autoeval2-functional-smoke-main.js",
+    "test:paronymes": "npm run prepare:web && node scripts/paronymes-architecture-guard.js",
+    "test:paronymes-functional": "electron --no-sandbox scripts/paronymes-functional-smoke-main.js",
+    "test:carre": "npm run prepare:web && node scripts/carre-architecture-guard.js",
+    "test:carre-functional": "electron --no-sandbox scripts/carre-functional-smoke-main.js",
+    "test:tri": "npm run prepare:web && node scripts/tri-architecture-guard.js",
+    "test:tri-functional": "electron --no-sandbox scripts/tri-functional-smoke-main.js",
+    "test:autoeval1": "npm run prepare:web && node scripts/autoeval1-architecture-guard.js",
+    "test:autoeval1-functional": "electron --no-sandbox scripts/autoeval1-functional-smoke-main.js",
+    "test:brique": "npm run prepare:web && node scripts/brique-architecture-guard.js",
+    "test:brique-functional": "electron --no-sandbox scripts/brique-functional-smoke-main.js",
+    "test:stock": "npm run prepare:web && node scripts/stock-architecture-guard.js",
+    "test:stock-functional": "electron --no-sandbox scripts/stock-functional-smoke-main.js",
+    "test:planning": "npm run prepare:web && node scripts/planning-architecture-guard.js",
+    "test:planning-functional": "electron --no-sandbox scripts/planning-functional-smoke-main.js",
+    "test:genrenombres": "npm run prepare:web && node scripts/genrenombres-architecture-guard.js",
+    "test:genrenombres-functional": "electron --no-sandbox scripts/genrenombres-functional-smoke-main.js",
+    "test:dictee": "npm run prepare:web && node scripts/dictee-architecture-guard.js",
+    "test:dictee-functional": "electron --no-sandbox scripts/dictee-functional-smoke-main.js",
+    "test:qcm-final": "npm run prepare:web && node scripts/qcm-final-architecture-guard.js",
+    "test:qcm-final-functional": "electron --no-sandbox scripts/qcm-final-functional-smoke-main.js",
+    "test:qcm-page2": "npm run prepare:web && node scripts/qcm-page2-architecture-guard.js",
+    "test:qcm-page2-functional": "electron --no-sandbox scripts/qcm-page2-functional-smoke-main.js",
+    "test:qcm-page2-1": "npm run prepare:web && node scripts/qcm-page2-1-architecture-guard.js",
+    "test:qcm-page2-1-functional": "electron --no-sandbox scripts/qcm-page2-1-functional-smoke-main.js",
+    "test:qcm-page3": "npm run prepare:web && node scripts/qcm-page3-architecture-guard.js",
+    "test:qcm-page3-functional": "electron --no-sandbox scripts/qcm-page3-functional-smoke-main.js",
+    "test:qcm-texte-trous": "npm run prepare:web && node scripts/qcm-texte-trous-architecture-guard.js",
+    "test:qcm-texte-trous-functional": "electron --no-sandbox scripts/qcm-texte-trous-functional-smoke-main.js",
+    "test:qcm-page4": "npm run prepare:web && node scripts/qcm-page4-architecture-guard.js",
+    "test:qcm-page4-functional": "electron --no-sandbox scripts/qcm-page4-functional-smoke-main.js",
+    "test:qcm-page5": "npm run prepare:web && node scripts/qcm-page5-architecture-guard.js",
+    "test:qcm-page5-functional": "electron --no-sandbox scripts/qcm-page5-functional-smoke-main.js",
+    "test:qcm-page5-1": "npm run prepare:web && node scripts/qcm-page5-1-architecture-guard.js",
+    "test:qcm-page5-1-functional": "electron --no-sandbox scripts/qcm-page5-1-functional-smoke-main.js",
+    "test:qcm-page6": "npm run prepare:web && node scripts/qcm-page6-architecture-guard.js",
+    "test:qcm-page6-functional": "electron --no-sandbox scripts/qcm-page6-functional-smoke-main.js"
+  },
+  "dependencies": {
+    "quill": "2.0.3"
+  },
+  "devDependencies": {
+    "electron": "44.3.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "fr.sauvegarde56.sebevalpro",
+    "productName": "SEB-éval-PRO",
+    "asar": true,
+    "compression": "store",
+    "files": [
+      "src/**/*",
+      "app/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/candidate-keyguard.exe",
+        "to": "candidate-keyguard.exe"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/app-icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "SEB-éval-PRO",
+      "installerIcon": "build/app-icon.ico",
+      "uninstallerIcon": "build/app-icon.ico",
+      "installerHeader": "build/installerHeader.bmp",
+      "include": "build/installer.nsh",
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "SEB-eval-PRO-${version}-Windows-Setup.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Education",
+      "artifactName": "SEB-eval-PRO-${version}-Linux.${ext}"
+    }
+  },
+  "sebBuildNumber": 20
+}
