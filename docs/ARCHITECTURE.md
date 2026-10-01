@@ -31,7 +31,7 @@ Champs obligatoires :
 - Nom
 - Prénom
 - Date de naissance
-- 6 premiers chiffres du numéro de sécurité sociale
+- 7 premiers chiffres du numéro de sécurité sociale
 - Lieu
 - Groupe
 - Date de l'évaluation
