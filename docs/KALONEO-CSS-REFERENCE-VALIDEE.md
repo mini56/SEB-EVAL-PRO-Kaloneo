@@ -243,3 +243,33 @@ Elle ne doit jamais être introduite comme simple « nettoyage » si elle modifi
 - la géométrie des boutons.
 
 Toute évolution volontaire doit être documentée dans le registre des décisions et accompagnée des contrôles visuels/CI appropriés.
+
+## 15. Priorité fonctionnelle — rendu candidat Build #20
+
+**Statut : VALIDÉ**
+
+Les valeurs CSS du PILOTE #2 servent de référence technique pour le pilote, mais elles ne doivent pas remplacer silencieusement l’interface candidat réelle du **Build #20**.
+
+La référence fonctionnelle prioritaire impose :
+
+- pages candidat sans scroll ni débordement dans les conditions prévues ;
+- conservation de la géométrie et du comportement des composants existants lorsque le test migré les utilise ;
+- calculatrice flottante identique au composant Build #20 lorsqu’elle est activée ;
+- mécanisme d’abandon et barre Administrateur conservés ;
+- Scénario / Consignes et leurs icônes reproduits conformément au modèle validé ;
+- prévisualisation KALONÉO et rendu SEB EvalPro équivalents.
+
+Une règle CSS spécifique au PILOTE #2 ne devient pas automatiquement une règle universelle du produit. Si elle modifie le rendu Build #20, elle doit être explicitement validée comme évolution avant généralisation.
+
+## 16. Médias communs — principe de rendu
+
+**Statut : VALIDÉ POUR LE PRINCIPE**
+
+- l’audio intégré utilise comme référence le lecteur de Dictée du Build #20 ;
+- la vidéo suit le même principe de composant commun ;
+- les médias restent contenus dans leur zone, sans déformation ni débordement ;
+- seuls les médias compatibles avec le lecteur retenu sous Windows et Linux peuvent être validés ;
+- aucun exercice ne doit recréer localement un lecteur concurrent lorsque le composant commun peut être utilisé.
+
+Les codecs exacts et limites de taille restent définis dans le registre principal comme éléments à confirmer.
+
