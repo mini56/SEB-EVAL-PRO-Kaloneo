@@ -136,7 +136,7 @@ app.whenReady().then(async () => {
 
     console.log('PILOT2_SMOKE_STAGE=first-test');
     const first = await win.webContents.executeJavaScript(
-      "({id:window.sebKaltestPilot2.currentTest().id,scenario:Boolean(document.querySelector('#page-exercise img[src="imageqcm/scenario.png"]')),consigne:Boolean(document.querySelector('#page-exercise img[src="imageqcm/avatar_transparant.png"]')),calcHidden:document.getElementById('kaltest-calculator').hidden})",
+      `({id:window.sebKaltestPilot2.currentTest().id,scenario:Boolean(document.querySelector('#page-exercise img[src="imageqcm/scenario.png"]')),consigne:Boolean(document.querySelector('#page-exercise img[src="imageqcm/avatar_transparant.png"]')),calcHidden:document.getElementById('kaltest-calculator').hidden})`,
       true
     );
     if (first.id !== 'calculs_commandes_atelier') throw new Error('Premier KALTEST inattendu.');
