@@ -55,6 +55,8 @@ ipcMain.handle('replay:capture-page', async (_event, payload) => {
   return { ok:true };
 });
 let smokeAdminUnlocked = true;
+let smokeActiveCandidate = null;
+ipcMain.handle('candidate:active', () => smokeActiveCandidate);
 ipcMain.handle('admin:status', () => smokeAdminUnlocked);
 ipcMain.handle('admin:verify', () => { smokeAdminUnlocked = true; return true; });
 ipcMain.handle('admin:verify-password', () => false);
@@ -124,13 +126,38 @@ app.whenReady().then(async () => {
       };
     })()`);
 
-    if (!result.bar || !result.hotzone || !result.adminButton || !result.openCandidate || !result.openCandidateVisible || !result.closeSessionVisible || result.bilanVisible || !result.oldBilanVisible || result.oldReplayVisible || result.oldResultsVisible || !result.visible || result.adminText !== 'Verrouiller') {
-      fail('barre Admin incorrecte : Ouvrir un candidat/Fermer cette session requis, Bilan global interdit, Replay global interdit, accès historiques conservés', result);
+    if (!result.bar || !result.hotzone || !result.adminButton || !result.openCandidate || !result.openCandidateVisible || result.closeSessionVisible || result.bilanVisible || !result.oldBilanVisible || result.oldReplayVisible || result.oldResultsVisible || !result.visible || result.adminText !== 'Verrouiller') {
+      fail('barre Admin sans parcours incorrecte : Ouvrir un candidat requis, Fermer session/Bilan global/Replay global interdits', result);
       return;
     }
 
-    console.log('SEB EvalPro Admin smoke: OK - Ouvrir un candidat et Fermer cette session visibles; Bilan global et Replay global masqués; accès historiques conservés.');
+    console.log('SEB EvalPro Admin smoke: OK - état sans parcours : gestion disponible, commandes de fin masquées.');
     console.log(JSON.stringify(result));
+
+    smokeActiveCandidate = { candidateId:'smoke-active', displayName:'XX YY', status:'EN_COURS' };
+    await win.webContents.executeJavaScript("window.dispatchEvent(new Event('pageshow')); true");
+    await new Promise((resolve) => setTimeout(resolve, 120));
+
+    const activeBar = await win.webContents.executeJavaScript(`(()=>{
+      const visible=id=>{const el=document.getElementById(id);if(!el)return false;const css=getComputedStyle(el);return !el.hidden&&css.display!=='none'&&css.visibility!=='hidden'};
+      return {
+        openCandidate:visible('seb-evalpro-open-candidate'),
+        exportCandidates:visible('seb-evalpro-export-candidates'),
+        importCandidates:visible('seb-evalpro-import-candidates'),
+        finishCandidate:visible('seb-evalpro-finish-candidate'),
+        quit:visible('seb-evalpro-quit-application'),
+        closeSession:visible('seb-evalpro-close-session'),
+        bilan:visible('seb-evalpro-bilan'),
+        adminText:String(document.getElementById('seb-evalpro-admin')?.textContent||'').trim()
+      };
+    })()`);
+
+    if (activeBar.openCandidate || activeBar.exportCandidates || activeBar.importCandidates || !activeBar.finishCandidate || !activeBar.quit || activeBar.closeSession || activeBar.bilan || activeBar.adminText !== 'Verrouiller') {
+      fail('barre Admin avec parcours actif incorrecte : seulement Terminer / Quitter / Verrouiller attendus', activeBar);
+      return;
+    }
+    console.log('SEB EvalPro Admin smoke: OK - état parcours actif : Terminer / Quitter / Verrouiller uniquement.');
+    smokeActiveCandidate = null;
 
     // Vérification réelle du correctif IA #25 : un seul bouton visible,
     // libellé exact, et indicateur explicite du sort de la reformulation.
