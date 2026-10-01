@@ -1,26 +1,6 @@
 name: Build Windows KALTEST Pilot 2 setup
 
 on:
-  push:
-    branches:
-      - dev-kaloneo-v2
-    paths:
-      - 'seb-evalpro/build/kaltest-pilot2-builder.yml'
-      - 'seb-evalpro/source/kaltest-pilot2.html'
-      - 'seb-evalpro/source/css/kaltest-pilot2.css'
-      - 'seb-evalpro/source/css/seb-design-system.css'
-      - 'seb-evalpro/source/css/seb-floating-calculator.css'
-      - 'seb-evalpro/source/js/kaltest-pilot2-runtime.js'
-      - 'seb-evalpro/source/js/seb-floating-calculator.js'
-      - 'seb-evalpro/source/js/seb-ui-runtime.js'
-      - 'seb-evalpro/src/main.js'
-      - 'seb-evalpro/src/preload.js'
-      - 'seb-evalpro/src/kaltest-pilot2-main.js'
-      - 'seb-evalpro/scripts/build-kaltest-pilot2-data.js'
-      - 'seb-evalpro/scripts/kaltest-pilot2-functional-smoke-main.js'
-      - 'kaltest-contract/**'
-      - 'tests/fixtures/kaltests/**'
-      - '.github/workflows/build-kaltest-pilot2-setup.yml'
   workflow_dispatch:
 
 permissions:
