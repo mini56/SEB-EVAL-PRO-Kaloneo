@@ -423,10 +423,23 @@ Dans la construction des pages de test :
 
 - le bloc **Scénario** est obligatoire ;
 - le bloc **Consignes** est obligatoire ;
-- les icônes institutionnelles déjà prévues pour ces blocs sont fournies par KALONÉO et doivent être utilisées de façon cohérente ;
+- ces deux blocs sont présentés en pleine largeur selon les modèles validés ;
+- les icônes institutionnelles prévues pour ces blocs sont fournies par KALONÉO et doivent être utilisées de façon cohérente ;
 - ces éléments d’en-tête ne doivent pas être réinventés différemment dans chaque exercice ;
 - le bloc **Exercice** vient ensuite et reçoit le contenu spécifique du test ;
 - les commandes communes comme Calculatrice, Chronomètre, Suivant et Abandonner sont pilotées par la définition du test / du parcours et les composants communs déjà validés.
+
+### Icône Scénario validée
+
+L’icône **Scénario** retenue est :
+
+- personnage + ordinateur + engrenage ;
+- fond transparent ;
+- couleurs bleu / orange de la charte ;
+- sans texte ;
+- lisible à la taille d’affichage de référence d’environ **45 px**.
+
+Pour **Consignes**, la règle retrouvée est de conserver l’icône existante de SEB EvalPro ; aucun nouveau visuel détaillé n’a été validé dans la discussion récupérée.
 
 L’objectif est qu’une page produite par KALONÉO reste structurellement prévisible et reproductible par SEB EvalPro.
 
@@ -586,9 +599,16 @@ Le tableau institutionnel du Bilan conserve les **6 colonnes** :
 
 `Modules | NE | I | II | III | Commentaires`
 
+### Trois grandes familles conservées
+
+Le Bilan conserve les trois familles institutionnelles existantes :
+
+1. **Compétences techniques** ;
+2. **Utilisation des techniques de l'information et de la communication** ;
+3. **Savoirs fondamentaux**.
+
 Règles de construction :
 
-- conservation des grandes familles institutionnelles ;
 - les lignes sont dynamiques selon les compétences réellement évaluées ;
 - le rattachement d’un test à une ou plusieurs lignes de Bilan est défini lors de la **création du test dans KALONÉO** ;
 - un test peut alimenter **plusieurs lignes de compétence** lorsque sa définition le prévoit ;
@@ -1371,3 +1391,114 @@ Le déplacement des conversations KALONÉO dans le même Projet ChatGPT a permis
 - présence dans le Builder des capacités Intervention Administrateur, Autoévaluation et Matériel extérieur.
 
 Les points encore seulement proposés ou insuffisamment documentés restent marqués **À CONFIRMER** ou **À VALIDER** au lieu d’être transformés artificiellement en décisions acquises.
+
+---
+
+## 48. Création d’un parcours — catalogue, sélection et ordre
+
+**Statut : VALIDÉ**
+
+La page de création d’un parcours s’appuie sur un **catalogue dynamique des tests ACTIFS**.
+
+### Catalogue et stabilité
+
+- le catalogue est rechargé avec les tests actuellement **ACTIFS** ;
+- un nouveau test ajouté au catalogue n’est **jamais ajouté automatiquement** à un parcours déjà enregistré ;
+- un parcours enregistré reste stable tant que l’Administrateur ne le modifie pas volontairement ;
+- les tests déjà sélectionnés conservent leur version et leurs réglages conformément aux règles de versionnement du présent registre.
+
+### Sélection des tests
+
+Le créateur de parcours prévoit :
+
+- glisser-déposer des tests ;
+- refus d’un dépôt dans une mauvaise section lorsqu’il ne respecte pas la configuration prévue ;
+- interdiction des doublons d’un même élément dans le parcours lorsque le modèle n’en prévoit pas ;
+- sections extensibles ;
+- totalisation des points par section ;
+- enregistrement du parcours.
+
+### Sections de catalogue explicitement validées
+
+Les sections retrouvées comme validées sont notamment :
+
+- **Mathématiques** ;
+- **Français** ;
+- **Organisation** ;
+- **Numérique** ;
+- **Technique** ;
+- **Planification**.
+
+**Raisonnement / Logique** a été proposé dans la discussion mais sa validation explicite n’a pas été retrouvée : ne pas le traiter comme acquis sans nouvelle preuve/décision.
+
+### Ordre de passage
+
+Pour chaque test sélectionné :
+
+- l’Administrateur définit un **ordre de passage** ;
+- cet ordre est **unique** ;
+- il est **continu** ;
+- il est **sauvegardé** avec le parcours ;
+- l’ordre de passage détermine l’exécution côté candidat ;
+- la **section** sert au regroupement / au Bilan et ne détermine pas l’ordre d’exécution.
+
+### Informations non modifiables du test
+
+Dans la création du parcours :
+
+- la **durée** provient de la définition du test ;
+- les **points** proviennent de la définition du test ;
+- ces valeurs ne sont pas modifiées arbitrairement par le créateur du parcours.
+
+### Contrôles de la création
+
+La maquette validée prévoit également :
+
+- contrôles avant enregistrement ;
+- résumé du parcours ;
+- possibilité de modification ;
+- alerte en cas de sortie avec modifications non enregistrées.
+
+La calculatrice, la navigation et l’abandon suivent les règles communes déjà définies dans les sections 15, 16 et 40.
+
+---
+
+## 49. Autonomie des parcours et absence de Bilan global multi-parcours
+
+**Statut : VALIDÉ**
+
+La décision de conception conserve les résultats d’une évaluation **par parcours**.
+
+Il n’existe pas de Bilan global mélangeant automatiquement plusieurs parcours d’un même candidat.
+
+Chaque parcours conserve ses propres éléments associés :
+
+- Résultats ;
+- Replay ;
+- Bilan ;
+- documents / Word associés lorsque le parcours en produit.
+
+L’export/import `.kalparcours` décidé ultérieurement sert uniquement à **déployer la définition d’un parcours** sur plusieurs ordinateurs. Il ne réintroduit pas de Bilan global multi-parcours et ne transporte pas les données candidat.
+
+Cette distinction doit être conservée afin de ne pas confondre :
+
+- **définition de parcours** transférable ;
+- **données d’évaluation d’un candidat**, rattachées à son parcours réalisé.
+
+---
+
+## Historique complémentaire — cinquième passe de récupération
+
+### 1er octobre 2026
+
+La relecture des conversations du Projet a permis d’ajouter :
+
+- l’icône Scénario validée (personnage + ordinateur + engrenage, transparent, bleu/orange, sans texte, lisible à 45 px) ;
+- les trois grandes familles exactes du Bilan ;
+- le catalogue dynamique des tests ACTIFS ;
+- la stabilité des parcours enregistrés face aux nouveaux tests ;
+- le glisser-déposer contrôlé, l’interdiction des doublons et les points par section ;
+- l’ordre de passage unique, continu et sauvegardé, indépendant de la section Bilan ;
+- les sections de catalogue validées Mathématiques, Français, Organisation, Numérique, Technique et Planification ;
+- durée et points issus du test et non modifiables dans la création du parcours ;
+- le maintien d’un Bilan propre à chaque parcours, sans Bilan global multi-parcours.
