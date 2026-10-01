@@ -518,3 +518,56 @@ Il doit permettre à chaque test de conserver :
 - l'utilisation maximale de l'espace écran disponible.
 
 Statut : **référence visuelle confirmée — priorité haute avant conversion massive des exercices restants**.
+
+
+## 30. Captures historiques supplémentaires — Stock, Traitement de texte, Mail, Puzzle et barre Admin
+
+Nouvelles captures utilisateur conservées comme références visuelles complémentaires.
+
+### Stock
+La capture confirme une mise en page très spécifique :
+- consignes compactes en haut ;
+- zone « Pots à ranger » et zone de tri à gauche ;
+- casiers 1 et 2 occupant la grande zone droite ;
+- casier 3 sur toute la largeur basse de cette zone ;
+- bouton Vérifier intégré en haut à droite ;
+- utilisation quasi complète de l'écran sans réduction globale du contenu.
+
+### Traitement de texte
+La capture confirme :
+- vraie composition en deux colonnes approximativement 50/50 ;
+- consignes complètes à gauche ;
+- éditeur riche complet à droite ;
+- barre d'outils en haut de l'éditeur ;
+- grande zone de saisie ;
+- bouton Suivant sous l'éditeur ;
+- aucune réduction artificielle du contenu pour le faire entrer dans un cadre générique.
+
+### Mail
+La capture confirme :
+- composition en deux colonnes ;
+- scénario / consignes détaillés à gauche ;
+- interface de messagerie à droite ;
+- champs À, Cc, Objet, Message, pièce jointe et Envoyer ;
+- occupation pleine et lisible de la surface disponible.
+
+### Puzzle / Carré magique
+La capture confirme une mise en page spécifique avec :
+- règles / exemple / astuces à gauche ;
+- puzzle principal à droite ;
+- actions Recommencer / Valider en bas ;
+- fond visuel conservé.
+
+### Barre Administrateur — référence historique Build #132
+La dernière capture affiche explicitement **Build #132** et ne doit donc pas être étiquetée Build #20.
+
+Elle constitue néanmoins une référence historique utile pour la barre Admin déverrouillée :
+- barre horizontale compacte ;
+- boutons visibles : « Résultats stagiaires », « Bilan », « Fermer cette session », « Verrouiller » ;
+- boutons contenus dans la hauteur de la barre ;
+- aucune commande ne dépasse visuellement ;
+- l'interface candidate reste lisible sous la barre.
+
+Cette capture renforce la décision de rendre la barre Admin contextuelle et compacte, tout en distinguant clairement les références Build #20 des références d'autres builds historiques.
+
+Statut : **références visuelles complémentaires enregistrées**.
