@@ -38,8 +38,17 @@ if (JSON.stringify(migratedIds) !== JSON.stringify(expectedMigrated)) {
 
 for (const step of migrated) {
   if (!step.targetTestId) throw new Error('targetTestId manquant pour ' + step.id);
-  const fixture = path.join(root, 'tests/fixtures/kaltests', step.targetTestId, '1.0.0', 'test.json');
+  if (!step.fixturePath) throw new Error('fixturePath manquant pour ' + step.id);
+  const fixture = path.join(root, step.fixturePath);
   if (!fs.existsSync(fixture)) throw new Error('Fixture KALTEST absente pour ' + step.id + ' : ' + fixture);
+
+  const fixtureJson = JSON.parse(fs.readFileSync(fixture, 'utf8'));
+  if (fixtureJson.id !== step.targetTestId) {
+    throw new Error(
+      'Fixture KALTEST incohérente pour ' + step.id +
+      ' : id attendu ' + step.targetTestId + ', trouvé ' + fixtureJson.id
+    );
+  }
 }
 
 console.log('LEGACY_PARCOURS_BUILD20_COVERAGE: OK — 24/24 étapes suivies');
