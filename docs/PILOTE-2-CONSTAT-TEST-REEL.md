@@ -184,3 +184,166 @@ Le second parcours utilisateur confirme :
 - exemples indésirables dans Réception / Contrôle.
 
 Ces observations restent consignées comme **constats de test réel**. Les exercices non présents dans le PILOTE #2 ne doivent pas être jugés sur cette base.
+
+
+## 14. Bouton « Afficher l'écran d'accueil » présent pendant le parcours
+
+Confirmation visuelle : captures 35 à 45.
+
+Constat :
+- le bouton « Afficher l'écran d'accueil » reste visible en bas à droite pendant les pages candidat ;
+- il est encore présent sur la page finale ;
+- dans l'espace Administrateur il apparaît ensuite au niveau supérieur et peut se superposer à la barre.
+
+Risque :
+- ce bouton de pilote / secours ne doit pas devenir une sortie candidate permanente ni perturber la barre Administrateur.
+
+Statut : **élément de pilote à retirer ou à réserver strictement au contexte prévu**.
+
+## 15. Fonctions Administrateur visibles pendant un parcours actif
+
+Confirmation visuelle : capture 37.
+
+Constat :
+- lorsque la barre Administrateur est ouverte pendant le parcours, le bouton **Bilan** est affiché ;
+- « Ouvrir un candidat » et plusieurs autres fonctions de gestion sont également visibles.
+
+Référence attendue :
+- la règle validée « jamais de Bilan pendant un parcours actif » doit être respectée ;
+- les fonctions incompatibles avec un parcours actif doivent être masquées ou rendues réellement indisponibles.
+
+Statut : **régression de cycle de vie / priorité haute**.
+
+## 16. Scénario / Consigne et occupation de la surface
+
+Confirmation visuelle : captures 38 à 44.
+
+Constat :
+- les blocs Scénario et Consigne sont affichés côte à côte ;
+- l'exercice reste ensuite enfermé dans un grand panneau dont une partie importante reste vide ;
+- le contenu utile est souvent concentré dans la moitié supérieure de la fenêtre ;
+- les éléments sont réduits alors qu'une grande surface reste inutilisée.
+
+Conséquence :
+- texte plus petit que nécessaire ;
+- tableaux et champs comprimés ;
+- perte de lisibilité, particulièrement visible sur Paronymes.
+
+À comparer / réaligner avec la référence Build #20 et les règles KALONÉO déjà validées.
+
+Statut : **régression de mise en page / priorité haute**.
+
+## 17. Calculatrice proposée sur des exercices où elle ne devrait pas être globale
+
+Confirmation visuelle : captures 41, 43 et 44.
+
+Constat :
+- « Ouvrir la calculatrice » apparaît également sur Texte à trous, Genre et nombre et Paronymes ;
+- le PILOTE #2 semble donc traiter la calculatrice comme une option globale du parcours plutôt que comme une capacité déclarée par test puis activée lors de la préparation du parcours.
+
+Référence attendue :
+- un test déclare s'il est compatible Calculatrice ;
+- l'Administrateur choisit son activation uniquement pour les tests compatibles ;
+- lorsqu'elle n'est pas activée pour la page, le bouton est invisible.
+
+Statut : **écart fonctionnel / à corriger**.
+
+## 18. Genre et nombre — deux colonnes mais pas la présentation Build #20
+
+Confirmation visuelle : capture 43.
+
+Constat :
+- l'écran contient bien deux zones « Singulier — Pluriel » et « Masculin — Féminin » ;
+- cependant elles sont rendues comme une succession de lignes question + champ ;
+- la présentation n'est pas celle des deux tableaux du Build #20 signalée par l'utilisateur.
+
+Statut : **écart de fidélité visuelle / à corriger**.
+
+## 19. Paronymes — lisibilité insuffisante
+
+Confirmation visuelle : capture 44.
+
+Constat :
+- le tableau est très dense ;
+- la police est fortement réduite pour faire tenir l'ensemble ;
+- la surface disponible autour du tableau est pourtant importante.
+
+Référence attendue :
+- priorité à la lisibilité ;
+- utiliser réellement la surface de l'écran au lieu de réduire la police pour faire tenir le contenu.
+
+Statut : **régression ergonomique nette / à corriger**.
+
+## 20. Date candidat perdue dans les écrans Administrateur
+
+Confirmation visuelle : captures 35, 48 et 50.
+
+Constat :
+- la page Identification contient une date d'évaluation ;
+- dans le dossier candidat, la ligne « Date : » est vide ;
+- dans la page Résultats, l'identité affiche également « Date : » vide.
+
+Statut : **défaut de persistance / mapping des métadonnées**.
+
+## 21. Page Résultats non raccordée aux réponses KALTEST
+
+Confirmation visuelle : capture 50.
+
+Constat :
+- la page Résultats affiche encore les anciennes rubriques « Page 2 », « Page 2.1 », « Page 3 — Réception & Rangement » ;
+- toutes les réponses y sont indiquées « Non répondu » ;
+- pourtant des réponses ont bien été saisies dans le parcours PILOTE #2, visibles dans les captures précédentes.
+
+Conclusion de constat :
+- la chaîne KALTEST et l'ancienne page Résultats ne sont pas raccordées correctement ;
+- ce défaut explique probablement au moins une partie du Bilan automatique vide, à confirmer par inspection du code.
+
+Statut : **bloquant fonctionnel / priorité maximale**.
+
+## 22. Replay réellement limité à une seule vue
+
+Confirmation visuelle : capture 49.
+
+Constat :
+- le Replay affiche « 1 / 1 » ;
+- il ne contient que la vue Genre et nombre ;
+- le reste du parcours effectué n'est pas disponible dans le Replay.
+
+Statut : **régression confirmée / priorité maximale**.
+
+## 23. Page finale et état de parcours incohérents
+
+Confirmation visuelle : capture 45.
+
+Constat :
+- la page finale affiche seulement « Votre évaluation est terminée. Merci. Vous pouvez maintenant prévenir l'administrateur. » ;
+- elle ne reprend pas la page finale Build #20 ;
+- l'utilisateur a dû ensuite passer par l'Administrateur pour terminer réellement le parcours.
+
+Statut : **régression de fidélité et de cycle de vie / priorité maximale**.
+
+## 24. Barre Administrateur et bouton d'accueil se chevauchent
+
+Confirmation visuelle : capture 46.
+
+Constat :
+- en mode Administrateur, « Afficher l'écran d'accueil » apparaît au-dessus / au milieu de la barre ;
+- il masque ou chevauche les commandes supérieures ;
+- la barre ne dispose donc pas d'une géométrie stable entre les états candidat et administrateur.
+
+Statut : **régression d'interface / à corriger**.
+
+## Synthèse visuelle après captures 35 à 50
+
+Les captures montrent que le problème principal du PILOTE #2 n'est pas le contrat KALTEST en lui-même mais son intégration incomplète dans le shell Build #20 :
+
+1. les réponses KALTEST ne sont pas correctement reprises par Résultats / Bilan ;
+2. le Replay n'enregistre pas le parcours complet ;
+3. la fin normale du parcours ne clôture pas réellement l'évaluation ;
+4. la barre Administrateur et les contrôles de pilote empiètent sur le rendu candidat ;
+5. la mise en page réduit inutilement la lisibilité alors que beaucoup d'espace reste disponible ;
+6. certains exercices migrés ne reproduisent pas encore fidèlement leur présentation Build #20 ;
+7. la calculatrice n'est pas encore pilotée correctement test par test ;
+8. certaines métadonnées candidat, notamment la date, ne sont pas propagées jusqu'aux écrans Administrateur.
+
+Ces points doivent être corrigés avant d'utiliser le PILOTE #2 comme base visuelle de migration des exercices restants.
