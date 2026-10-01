@@ -1,0 +1,32 @@
+name: KALTEST contract tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'kaltest-contract/**'
+      - '.github/workflows/kaltest-contract.yml'
+  pull_request:
+    paths:
+      - 'kaltest-contract/**'
+      - '.github/workflows/kaltest-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Test KALTEST contract
+        working-directory: kaltest-contract
+        run: npm test
