@@ -99,6 +99,6 @@ jobs:
           $main = Get-Content src/main.js -Raw
           if ($wrapper -notmatch "require\('./main'\)") { throw 'Le PILOTE 2 ne réutilise pas le main SEB réel.' }
           if ($main -notmatch 'KALTEST_PILOT2_MODE') { throw 'Le mode PILOTE 2 isolé est absent du main SEB.' }
-          if ($wrapper -notmatch "setPath\('userData'") { throw 'Le userData du PILOTE 2 n’est pas isolé.' }
-          if ($wrapper -notmatch "setPath\('documents'") { throw 'Les Documents du PILOTE 2 ne sont pas isolés.' }
+          if ($wrapper -notmatch "setPath\('userData'") { throw 'Le userData du PILOTE 2 doit etre isole.' }
+          if ($wrapper -notmatch "setPath\('documents'") { throw 'Les Documents du PILOTE 2 doivent etre isoles.' }
           Write-Host 'PILOT2_REAL_SEB_SHELL_REUSE=OK'
