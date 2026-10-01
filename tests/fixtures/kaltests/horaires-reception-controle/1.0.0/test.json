@@ -1,0 +1,302 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "questionnaire.table",
+    "questionnaire.duration-fr",
+    "layout.split",
+    "calculator.host",
+    "bilan.bindings"
+  ],
+  "id": "horaires_reception_controle",
+  "version": "1.0.0",
+  "title": "Réception, contrôle et horaires",
+  "category": "mathematiques",
+  "description": "Calculer des heures de fin, des totaux hebdomadaires et des moyennes quotidiennes dans une situation de réception et de rangement.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "qcmv1.0.html#page3",
+    "sourceScript": "source/js/qcm-page3.js",
+    "legacyParcoursId": "qcm-3"
+  },
+  "calculator": {
+    "compatible": true,
+    "defaultEnabled": true
+  },
+  "scenario": "Tous les matins, vous devez passer par le service de réception et de contrôle des marchandises pour déballer et contrôler les articles reçus la veille. La prise de poste est toujours à 8h00. En fin de semaine, vous devez compléter les horaires, les totaux et les moyennes.",
+  "instruction": "Calculez l'heure de fin de poste pour chaque jour. Indiquez aussi le total des heures pour chaque tâche sur la semaine et la moyenne quotidienne.",
+  "presentation": {
+    "layout": {
+      "type": "split",
+      "ratio": "60/40",
+      "blocks": [
+        {
+          "id": "tableau_semaine"
+        },
+        {
+          "id": "moyennes_calculatrice"
+        }
+      ]
+    },
+    "table": {
+      "id": "tableau_semaine",
+      "headers": [
+        "Jour",
+        "Prise de poste",
+        "Temps réception",
+        "Fin réception",
+        "Temps rangement",
+        "Fin de poste"
+      ],
+      "rows": [
+        {
+          "label": "Lundi",
+          "fixed": [
+            "8h00",
+            "1h15",
+            "0h30"
+          ],
+          "questionIds": [
+            "fin_reception_lundi",
+            "fin_poste_lundi"
+          ]
+        },
+        {
+          "label": "Mardi",
+          "fixed": [
+            "8h00",
+            "0h50",
+            "0h25"
+          ],
+          "questionIds": [
+            "fin_reception_mardi",
+            "fin_poste_mardi"
+          ]
+        },
+        {
+          "label": "Mercredi",
+          "fixed": [
+            "8h00",
+            "1h05",
+            "0h25"
+          ],
+          "questionIds": [
+            "fin_reception_mercredi",
+            "fin_poste_mercredi"
+          ]
+        },
+        {
+          "label": "Jeudi",
+          "fixed": [
+            "8h00",
+            "1h20",
+            "0h35"
+          ],
+          "questionIds": [
+            "fin_reception_jeudi",
+            "fin_poste_jeudi"
+          ]
+        },
+        {
+          "label": "Vendredi",
+          "fixed": [
+            "8h00",
+            "0h45",
+            "0h40"
+          ],
+          "questionIds": [
+            "fin_reception_vendredi",
+            "fin_poste_vendredi"
+          ]
+        },
+        {
+          "label": "Total",
+          "questionIds": [
+            "total_reception",
+            "total_rangement"
+          ]
+        }
+      ]
+    },
+    "averages": [
+      "moyenne_rangement",
+      "moyenne_reception"
+    ]
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "fin_reception_lundi",
+      "prompt": "Heure de fin de réception — Lundi",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 555,
+      "points": 1
+    },
+    {
+      "id": "fin_reception_mardi",
+      "prompt": "Heure de fin de réception — Mardi",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 530,
+      "points": 1
+    },
+    {
+      "id": "fin_reception_mercredi",
+      "prompt": "Heure de fin de réception — Mercredi",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 545,
+      "points": 1
+    },
+    {
+      "id": "fin_reception_jeudi",
+      "prompt": "Heure de fin de réception — Jeudi",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 560,
+      "points": 1
+    },
+    {
+      "id": "fin_reception_vendredi",
+      "prompt": "Heure de fin de réception — Vendredi",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 525,
+      "points": 1
+    },
+    {
+      "id": "total_reception",
+      "prompt": "Total du temps passé à la réception et au contrôle sur la semaine",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 315,
+      "points": 1
+    },
+    {
+      "id": "fin_poste_lundi",
+      "prompt": "Heure de fin de poste — Lundi",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 585,
+      "points": 1
+    },
+    {
+      "id": "fin_poste_mardi",
+      "prompt": "Heure de fin de poste — Mardi",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 555,
+      "points": 1
+    },
+    {
+      "id": "fin_poste_mercredi",
+      "prompt": "Heure de fin de poste — Mercredi",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 570,
+      "points": 1
+    },
+    {
+      "id": "fin_poste_jeudi",
+      "prompt": "Heure de fin de poste — Jeudi",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 595,
+      "points": 1
+    },
+    {
+      "id": "fin_poste_vendredi",
+      "prompt": "Heure de fin de poste — Vendredi",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 565,
+      "points": 1
+    },
+    {
+      "id": "total_rangement",
+      "prompt": "Total du temps de rangement du stock sur la semaine",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 155,
+      "points": 1
+    },
+    {
+      "id": "moyenne_rangement",
+      "prompt": "Moyenne quotidienne du temps de rangement du stock",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 31,
+      "points": 1
+    },
+    {
+      "id": "moyenne_reception",
+      "prompt": "Moyenne quotidienne du temps passé à la réception et au contrôle",
+      "response": {
+        "type": "duration",
+        "normalizer": "duration-fr"
+      },
+      "acceptedMinutes": 63,
+      "points": 1
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.savoirs_fondamentaux.mathematiques.resoudre_problemes",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ]
+}
