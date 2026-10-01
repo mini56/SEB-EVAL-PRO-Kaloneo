@@ -399,22 +399,48 @@ Correction attendue :
 
 Statut : **cause technique confirmée / priorité maximale**.
 
-## 27. Barre Admin — délai 1 seconde toujours présent dans le code
+## 27. Barre Admin — temporisation réelle de fermeture absente
 
 Comparaison Build #20 / PILOTE #2 :
-- les deux codes contiennent `BAR_HIDE_DELAY = 1000`;
-- la valeur d'une seconde n'a donc pas disparu du code.
+- les deux codes contiennent `BAR_HIDE_DELAY = 1000`.
 
-Constat :
-- malgré cela, le comportement réel du PILOTE #2 ne donne plus cette sensation de pause et la barre est difficile à manœuvrer ;
-- les captures montrent que les boutons dépassent de la hauteur de la barre lorsqu'elle est repliée.
+Constat utilisateur confirmé en situation réelle :
+- dès que la souris quitte la barre, celle-ci se referme ;
+- la pause d'environ 1 seconde n'est donc **pas effective dans le comportement réel**, même si la constante existe dans le code ;
+- la barre devient difficile à manœuvrer ;
+- les captures montrent également que les boutons dépassent de la hauteur de la barre lorsqu'elle est repliée.
 
-Hypothèse technique forte :
-- le défaut provient de la géométrie / hauteur / état de visibilité de la barre et des boutons, pas de la constante de délai elle-même.
-
-Correction attendue :
+Règle de correction :
+- le test réel fait foi : il faut rétablir une temporisation effectivement perceptible d'environ 1 seconde ;
 - reprendre la géométrie et le comportement visibles du Build #20 ;
 - barre verrouillée entièrement hors écran, aucun bouton visible ;
-- après sortie de la barre ouverte, maintien effectif d'environ 1 seconde avant repli complet.
+- après sortie de la barre ouverte, attendre environ 1 seconde avant le repli complet.
 
-Statut : **cause partiellement isolée / à corriger en bloc**.
+Statut : **régression confirmée / à corriger en bloc**.
+
+
+## 28. Barre Admin contextuelle — masquer les fonctions inutiles
+
+Décision utilisateur confirmée pendant le test réel.
+
+Pendant un parcours actif, la barre Administrateur ne doit pas afficher des fonctions telles que :
+
+- Bilan ;
+- Ouvrir un candidat ;
+- autres commandes de consultation / gestion sans utilité immédiate pendant l'évaluation.
+
+Après déverrouillage, elle doit afficher uniquement ce qui est utile à l'instant présent pour le parcours actif :
+
+- commande de fin du parcours actif ;
+- Quitter ;
+- retour / verrouillage vers le mode candidat lorsque nécessaire.
+
+Lorsque le parcours est terminé ou qu'aucun parcours n'est actif, les fonctions de gestion utiles redeviennent disponibles.
+
+Objectif :
+- rendre la barre immédiatement compréhensible ;
+- réduire le nombre de boutons ;
+- éviter les commandes inutiles ;
+- adapter la barre en temps réel à l'état du parcours.
+
+Statut : **règle fonctionnelle validée — à implémenter**.
