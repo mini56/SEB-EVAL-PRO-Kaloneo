@@ -559,12 +559,22 @@ Chaque test doit déclarer s’il est :
 
 Un test non noté reste présent dans le parcours mais **ne contribue pas au score de la section**.
 
-La validation KALTEST est obligatoire et bloquante :
+### Validation obligatoire et bloquante
 
+La validation se fait à deux niveaux :
+
+1. **KALONÉO / Builder** valide le paquet avant qu’il puisse devenir un test utilisable ;
+2. **SEB EvalPro** revalide le paquet à l’import / avant utilisation selon le contrat KALTEST.
+
+Règles :
+
+- un test non validé ne peut pas entrer dans le **catalogue actif** ;
 - un test non validé ne peut pas être utilisé dans un parcours ;
-- un parcours doit être refusé si un de ses tests n’est pas valide ;
+- un parcours doit être refusé si un de ses tests n’est pas valide ou compatible ;
 - une erreur de structure, de compatibilité ou de contenu bloquant doit être corrigée avant utilisation ;
 - la sauvegarde, la reprise et le Replay restent basés sur les mécanismes du Build #20.
+
+Principe : **aucune injection silencieuse d’un test en échec**.
 
 ---
 
@@ -580,9 +590,12 @@ Règles de construction :
 
 - conservation des grandes familles institutionnelles ;
 - les lignes sont dynamiques selon les compétences réellement évaluées ;
+- le rattachement d’un test à une ou plusieurs lignes de Bilan est défini lors de la **création du test dans KALONÉO** ;
+- un test peut alimenter **plusieurs lignes de compétence** lorsque sa définition le prévoit ;
 - un test absent du parcours ne crée aucune ligne artificielle ;
 - plusieurs tests peuvent alimenter une même compétence ;
 - pour une compétence alimentée par plusieurs tests, les points obtenus et les maximums sont additionnés avant calcul du niveau ;
+- les définitions de Bilan créées dans KALONÉO doivent être transférées avec le test et reproductibles par SEB EvalPro, au même titre que les autres éléments contractuels du test ;
 - hiérarchie possible :
   - Grande section ;
   - Sous-section / module ;
