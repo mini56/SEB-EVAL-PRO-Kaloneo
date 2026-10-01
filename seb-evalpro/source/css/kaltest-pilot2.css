@@ -327,7 +327,7 @@ body {
 
 .kaltest-word-bank {
   width: min(760px,100%);
-  margin: 0 auto 10px;
+  margin: 0 auto 6px;
   display: grid;
   grid-template-columns: repeat(3,1fr);
   border: 1px solid #8398B0;
@@ -336,25 +336,31 @@ body {
 }
 
 .kaltest-word-bank span {
-  padding: 5px 8px;
+  padding: 3px 6px;
+  line-height: 1.15;
+  font-size: 14px;
   text-align: center;
   border-right: 1px solid #C1C9D6;
   border-bottom: 1px solid #C1C9D6;
   background: rgba(255,255,255,.94);
 }
 
+/* PILOTE #2 : le texte à trous historique doit tenir entièrement dans la
+   page candidat sans scroll ni rognage. On conserve la banque en 3 colonnes
+   et les 15 champs, mais on utilise une densité proche de la page Build #20. */
 .kaltest-inline-flow {
-  line-height: 1.8;
-  font-size: 17px;
-  padding: 4px 10px;
+  line-height: 1.48;
+  font-size: 16px;
+  padding: 2px 6px;
 }
 
 .kaltest-inline-flow input {
   display: inline-block;
-  width: 145px;
-  min-height: 30px;
-  margin: 0 4px;
-  padding: 3px 6px;
+  width: 128px;
+  min-height: 27px;
+  margin: 0 3px;
+  padding: 2px 5px;
+  font-size: 15px;
   vertical-align: baseline;
 }
 
