@@ -3,6 +3,9 @@ productName: "SEB EvalPro Kalonéo - PILOTE"
 asar: true
 compression: store
 
+directories:
+  buildResources: build/pilot-resources
+
 extraMetadata:
   main: src/kaltest-pilot-main.js
   version: 0.0.1
