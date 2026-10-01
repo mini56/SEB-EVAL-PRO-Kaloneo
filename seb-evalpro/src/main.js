@@ -19,6 +19,7 @@ const MIN_SPLASH_MS = 1400;
 const DESIGN_WIDTH = 1600;
 const DESIGN_HEIGHT = 900;
 const MIN_ZOOM_FACTOR = 0.60;
+const KALTEST_PILOT2_MODE = process.env.SEB_KALTEST_PILOT2 === '1';
 let mainWindow = null;
 let splashWindow = null;
 let splashStartedAt = 0;
@@ -261,12 +262,13 @@ function installDownloadRouting() {
 }
 
 function defaultState() {
+  const initialPage = KALTEST_PILOT2_MODE ? 'kaltest-pilot2.html' : 'qcmv1.0.html';
   return {
     version: STATE_VERSION,
     sessionStorage: {},
     localStorage: {},
-    lastPage: 'qcmv1.0.html',
-    lastEvaluationPage: 'qcmv1.0.html',
+    lastPage: initialPage,
+    lastEvaluationPage: initialPage,
     updatedAt: null
   };
 }
