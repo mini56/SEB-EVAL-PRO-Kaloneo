@@ -268,7 +268,7 @@
     input.dataset.questionId = question.id;
     input.value = String(testState.answers[question.id] ?? '');
     if (question.response?.type === 'number') input.inputMode = 'decimal';
-    if (question.response?.type === 'duration') input.placeholder = options.compact ? 'ex. 1h15' : '';
+    input.placeholder = '';
     input.addEventListener('input', () => saveAnswer(test, question.id, input.value));
     return input;
   }
@@ -488,6 +488,11 @@
     host.appendChild(layout);
   }
 
+  function extractQuotedSource(prompt) {
+    const match = String(prompt || '').match(/«\s*([^»]+?)\s*»/);
+    return match ? match[1].trim() : '';
+  }
+
   function renderGenreNombre(test, host) {
     const layout = document.createElement('div');
     layout.className = 'kaltest-two-tables';
@@ -500,17 +505,47 @@
       title.textContent = definition.title || '';
       card.appendChild(title);
 
+      const table = document.createElement('table');
+      table.className = 'kaltest-table kaltest-grammar-table';
+
+      const thead = document.createElement('thead');
+      const trh = document.createElement('tr');
+      for (const header of definition.headers || []) {
+        const th = document.createElement('th');
+        th.textContent = header;
+        trh.appendChild(th);
+      }
+      thead.appendChild(trh);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
       for (const id of definition.questionIds || []) {
         const question = questionById(test, id);
         if (!question) continue;
-        const row = document.createElement('div');
-        row.className = 'kaltest-compact-question-row';
-        const label = document.createElement('span');
-        label.textContent = question.prompt;
-        row.append(label, makeInput(test, question, { compact:true }));
-        card.appendChild(row);
-      }
 
+        const prompt = normalizeText(question.prompt);
+        const source = extractQuotedSource(question.prompt);
+        const headers = definition.headers || [];
+        const targetLeft = headers.length > 1 && prompt.includes(normalizeText(headers[0]));
+        const tr = document.createElement('tr');
+        const left = document.createElement('td');
+        const right = document.createElement('td');
+
+        if (targetLeft) {
+          left.appendChild(makeInput(test, question, { compact:true }));
+          right.textContent = source;
+          right.className = 'kaltest-grammar-source';
+        } else {
+          left.textContent = source;
+          left.className = 'kaltest-grammar-source';
+          right.appendChild(makeInput(test, question, { compact:true }));
+        }
+
+        tr.append(left, right);
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+      card.appendChild(table);
       layout.appendChild(card);
     }
 
@@ -561,7 +596,109 @@
     host.appendChild(table);
   }
 
+
+  function parseStorageObject(key) {
+    try {
+      const value = JSON.parse(sessionStorage.getItem(key) || '{}');
+      return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function syncLegacyCompatibility(test, testState) {
+    if (!test || !testState || !testState.result) return;
+
+    const responses = parseStorageObject('reponses_data');
+    const scores = parseStorageObject('scores_data');
+    const result = testState.result;
+    const questions = test.questions || [];
+
+    const copyRange = (responsePrefix, scorePrefix, startIndex, includeUnits, includeSupplemental) => {
+      questions.forEach((question, offset) => {
+        const index = startIndex + offset;
+        const detail = result.details?.[question.id] || {};
+        responses[responsePrefix + index] = String(testState.answers?.[question.id] ?? '');
+        scores[scorePrefix + index] = detail.correct ? 1 : 0;
+        if (includeUnits) {
+          responses[responsePrefix.replace(/_q$/, '_unite') + index] = String(testState.units?.[question.id] ?? '');
+          scores[scorePrefix.replace(/_q$/, '_unite') + index] = 0;
+        }
+        if (includeSupplemental) {
+          const supplemental = testState.supplemental?.[question.id] || {};
+          const first = Object.values(supplemental)[0];
+          if (first !== undefined) {
+            responses[responsePrefix + index + '_operation'] = String(first ?? '');
+            scores[scorePrefix + index + '_operation'] = 0;
+          }
+        }
+      });
+    };
+
+    if (test.id === 'calculs_commandes_atelier') {
+      copyRange('page2_q', 'page2_q', 1, true, false);
+    } else if (test.id === 'calculs_poids_volumes') {
+      copyRange('page2_1_q', 'page2_1_q', 6, true, false);
+    } else if (test.id === 'horaires_reception_controle') {
+      questions.forEach((question, offset) => {
+        const index = offset + 1;
+        const key = 'page3_q' + index;
+        const detail = result.details?.[question.id] || {};
+        responses[key] = String(testState.answers?.[question.id] ?? '');
+        scores[key] = detail.correct ? 1 : 0;
+      });
+      const dedicatedResponses = {};
+      const dedicatedScores = {};
+      for (let index = 1; index <= questions.length; index += 1) {
+        dedicatedResponses['page3_q' + index] = responses['page3_q' + index] || '';
+        dedicatedScores['page3_q' + index] = scores['page3_q' + index] || 0;
+      }
+      sessionStorage.setItem('page3_resultats', JSON.stringify({
+        reponses: dedicatedResponses,
+        scores: dedicatedScores,
+        savedAt: Date.now()
+      }));
+    } else if (test.id === 'texte_a_trous_stage_logistique') {
+      responses.pageTexteTrous = questions.map(question => String(testState.answers?.[question.id] ?? ''));
+      scores.pageTexteTrous = Number(result.score) || 0;
+    } else if (test.id === 'conversions_atelier_expedition') {
+      copyRange('page6_q', 'page6_q', 1, true, true);
+    } else if (test.id === 'genre_nombre') {
+      const answers = questions.map(question => String(testState.answers?.[question.id] ?? ''));
+      const errors = Math.max(0, questions.length - (Number(result.score) || 0));
+      sessionStorage.setItem('user_genrenombres', JSON.stringify(answers));
+      sessionStorage.setItem('erreurs_exercice', String(errors));
+      sessionStorage.setItem('seb_genrenombres_validated', '1');
+      sessionStorage.setItem('seb_evalpro_genrenombres_state', JSON.stringify({
+        answers,
+        validated:true,
+        savedAt:Date.now()
+      }));
+    } else if (test.id === 'paronymes_rapport') {
+      const detailRows = questions.map(question => {
+        const answer = String(testState.answers?.[question.id] ?? '');
+        const detail = result.details?.[question.id] || {};
+        return {
+          mot: question.prompt,
+          reponseUtilisateur: answer || '(non repondu)',
+          bonnesReponses: Array.isArray(question.acceptedAnswers) ? question.acceptedAnswers : [],
+          correct: Boolean(detail.correct)
+        };
+      });
+      sessionStorage.setItem('paronymes_score', String(Number(result.score) || 0));
+      sessionStorage.setItem('paronymes_total', String(Number(result.scoreMax) || questions.length));
+      sessionStorage.setItem('paronymes_reponses', JSON.stringify(detailRows));
+      sessionStorage.setItem('paronymes_erreurs_detail', JSON.stringify(detailRows.filter(row => !row.correct)));
+      sessionStorage.setItem('seb_paronymes_validated', '1');
+      sessionStorage.setItem('seb_exercise_activity:paronymes.html', '1');
+    }
+
+    sessionStorage.setItem('reponses_data', JSON.stringify(responses));
+    sessionStorage.setItem('scores_data', JSON.stringify(scores));
+  }
+
   function renderCurrentTest() {
+    try { window.closeCalculator?.(); } catch (_) {}
     const test = currentTest();
     if (!test) {
       showPhase('final');
@@ -579,7 +716,10 @@
     document.getElementById('kaltest-instruction').textContent = test.instruction || '';
 
     const calculator = document.getElementById('kaltest-calculator');
-    calculator.hidden = !test.calculator?.compatible;
+    const calculatorEnabled = test.calculator?.compatible === true && test.calculator?.defaultEnabled !== false;
+    calculator.hidden = !calculatorEnabled;
+    if (calculatorEnabled) calculator.style.removeProperty('display');
+    else calculator.style.setProperty('display', 'none', 'important');
 
     const next = document.getElementById('kaltest-next');
     next.textContent = state.testIndex === DATA.tests.length - 1 ? 'Terminer le parcours' : 'Suivant';
@@ -652,6 +792,7 @@
     testState.result = evaluateTest(test, testState);
     testState.status = 'COMPLETED';
     testState.abandon = null;
+    syncLegacyCompatibility(test, testState);
     replay('EXERCISE_COMPLETED', {
       testId:test.id,
       version:test.version,
@@ -663,10 +804,12 @@
   }
 
   function advance() {
+    try { window.closeCalculator?.(); } catch (_) {}
     if (state.testIndex + 1 >= DATA.tests.length) {
       state.phase = 'final';
       persist();
       showPhase('final');
+      try { window.dispatchEvent(new CustomEvent('seb-kaltest-final')); } catch (_) {}
       return;
     }
 
@@ -685,6 +828,7 @@
     testState.result = evaluateTest(test, testState);
     testState.status = record?.nonEvaluated ? 'ABANDONED_NE' : 'ABANDONED_EVALUATED';
     testState.abandon = record || null;
+    syncLegacyCompatibility(test, testState);
 
     replay('EXERCISE_ABANDONED', {
       testId:test.id,
@@ -732,10 +876,16 @@
       }
 
       status.textContent = '';
-      state.identity = validation.values;
+      const candidateData = {
+        ...validation.values,
+        'prénom': validation.values.prenom,
+        date: validation.values.dateEvaluation,
+        dateTest: validation.values.dateEvaluation
+      };
+      state.identity = candidateData;
       state.personId = state.personId || crypto.randomUUID();
       state.evaluationId = state.evaluationId || crypto.randomUUID();
-      sessionStorage.setItem('candidat_data', JSON.stringify(validation.values));
+      sessionStorage.setItem('candidat_data', JSON.stringify(candidateData));
       replay('IDENTITY_VALIDATED', {
         fields:['nom','prenom','naissance','ss7','lieu','groupe','dateEvaluation','parcours']
       });
