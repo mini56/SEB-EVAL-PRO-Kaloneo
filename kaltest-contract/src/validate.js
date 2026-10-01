@@ -16,6 +16,7 @@ const MODES = new Set(['manual', 'automatic']);
 const DIRECTIONS = new Set(['higher-is-better', 'lower-is-better']);
 const AGGREGATIONS = new Set(['direct', 'sum-score', 'average']);
 const QUESTION_TYPES = new Set(['number', 'text', 'single-choice', 'multiple-choice', 'boolean']);
+const { validateManifest, validateMediaDescriptor, validateLayoutDefinition } = require('./compatibility');
 
 function isObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -416,6 +417,31 @@ function validateTestDefinition(test, bilanDefinitions = []) {
 
   if (!isObject(test)) {
     return { ok: false, errors: [{ path: '', message: 'objet test obligatoire' }] };
+  }
+
+  const manifestResult = validateManifest(test);
+  for (const issue of manifestResult.errors) {
+    push(errors, issue.path, issue.message);
+  }
+
+  if (test.presentation !== undefined) {
+    if (!isObject(test.presentation)) {
+      push(errors, 'presentation', 'objet de présentation attendu');
+    } else if (test.presentation.layout !== undefined) {
+      const layoutResult = validateLayoutDefinition(test.presentation.layout);
+      for (const issue of layoutResult.errors) push(errors, issue.path, issue.message);
+    }
+  }
+
+  if (test.media !== undefined) {
+    if (!Array.isArray(test.media)) {
+      push(errors, 'media', 'tableau de médias attendu');
+    } else {
+      test.media.forEach((descriptor, index) => {
+        const mediaResult = validateMediaDescriptor(descriptor, `media[${index}]`);
+        for (const issue of mediaResult.errors) push(errors, issue.path, issue.message);
+      });
+    }
   }
 
   requireId(errors, test.id, 'id');
