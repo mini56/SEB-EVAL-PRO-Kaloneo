@@ -188,31 +188,37 @@ Ces observations restent consignées comme **constats de test réel**. Les exerc
 
 ## 14. Bouton « Afficher l'écran d'accueil » présent pendant le parcours
 
-Confirmation visuelle : captures 35 à 45.
+Confirmation utilisateur : **comportement volontaire et validé**.
 
-Constat :
-- le bouton « Afficher l'écran d'accueil » reste visible en bas à droite pendant les pages candidat ;
-- il est encore présent sur la page finale ;
-- dans l'espace Administrateur il apparaît ensuite au niveau supérieur et peut se superposer à la barre.
+Fonction :
+- le bouton « Afficher l'écran d'accueil » doit rester disponible sur chaque page candidat ;
+- il permet au candidat, lorsqu'il quitte momentanément son poste, de masquer l'exercice affiché ;
+- l'objectif est d'éviter qu'un autre candidat puisse voir ou copier les réponses pendant cette absence.
 
-Risque :
-- ce bouton de pilote / secours ne doit pas devenir une sortie candidate permanente ni perturber la barre Administrateur.
+Règle :
+- ce bouton fait donc partie du fonctionnement candidat normal ;
+- il ne doit pas être supprimé au motif qu'il est présent sur toutes les pages ;
+- son intégration visuelle doit simplement rester propre et ne pas gêner la barre Administrateur.
 
-Statut : **élément de pilote à retirer ou à réserver strictement au contexte prévu**.
+Statut : **comportement attendu — à conserver**.
 
-## 15. Fonctions Administrateur visibles pendant un parcours actif
+## 15. Bouton Bilan pendant un parcours actif
 
 Confirmation visuelle : capture 37.
 
-Constat :
-- lorsque la barre Administrateur est ouverte pendant le parcours, le bouton **Bilan** est affiché ;
-- « Ouvrir un candidat » et plusieurs autres fonctions de gestion sont également visibles.
+Constat complémentaire utilisateur :
+- le bouton **Bilan** est visible dans la barre Administrateur pendant le parcours ;
+- lorsqu'il est cliqué pendant un parcours actif, **aucun Bilan ne s'ouvre**.
 
-Référence attendue :
-- la règle validée « jamais de Bilan pendant un parcours actif » doit être respectée ;
-- les fonctions incompatibles avec un parcours actif doivent être masquées ou rendues réellement indisponibles.
+Interprétation :
+- la règle validée « jamais de Bilan pendant un parcours actif » est donc respectée fonctionnellement ;
+- la visibilité du bouton n'est pas, à elle seule, une régression si l'action reste bloquée.
 
-Statut : **régression de cycle de vie / priorité haute**.
+Point d'ergonomie à décider ultérieurement :
+- conserver le bouton inactif tel quel ;
+- ou afficher un message explicite indiquant que le Bilan n'est disponible qu'après la fin du parcours.
+
+Statut : **fonctionnellement conforme — ergonomie éventuellement améliorable**.
 
 ## 16. Scénario / Consigne et occupation de la surface
 
@@ -322,16 +328,19 @@ Constat :
 
 Statut : **régression de fidélité et de cycle de vie / priorité maximale**.
 
-## 24. Barre Administrateur et bouton d'accueil se chevauchent
+## 24. Barre Administrateur et intégration du bouton d'accueil
 
 Confirmation visuelle : capture 46.
 
 Constat :
-- en mode Administrateur, « Afficher l'écran d'accueil » apparaît au-dessus / au milieu de la barre ;
-- il masque ou chevauche les commandes supérieures ;
-- la barre ne dispose donc pas d'une géométrie stable entre les états candidat et administrateur.
+- le bouton « Afficher l'écran d'accueil » est une fonction volontaire à conserver ;
+- en mode Administrateur, son positionnement visuel se rapproche fortement de la barre supérieure et peut donner une impression de chevauchement.
 
-Statut : **régression d'interface / à corriger**.
+Règle :
+- conserver la fonction « Afficher l'écran d'accueil » ;
+- corriger uniquement son positionnement si nécessaire afin qu'il ne gêne aucune commande de la barre Administrateur.
+
+Statut : **fonction à conserver — intégration visuelle à vérifier**.
 
 ## Synthèse visuelle après captures 35 à 50
 
@@ -340,7 +349,7 @@ Les captures montrent que le problème principal du PILOTE #2 n'est pas le contr
 1. les réponses KALTEST ne sont pas correctement reprises par Résultats / Bilan ;
 2. le Replay n'enregistre pas le parcours complet ;
 3. la fin normale du parcours ne clôture pas réellement l'évaluation ;
-4. la barre Administrateur et les contrôles de pilote empiètent sur le rendu candidat ;
+4. la barre Administrateur doit être corrigée sans supprimer le bouton volontaire « Afficher l'écran d'accueil » ;
 5. la mise en page réduit inutilement la lisibilité alors que beaucoup d'espace reste disponible ;
 6. certains exercices migrés ne reproduisent pas encore fidèlement leur présentation Build #20 ;
 7. la calculatrice n'est pas encore pilotée correctement test par test ;
