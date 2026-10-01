@@ -1832,3 +1832,52 @@ Le comportement réel doit conserver environ **1 seconde** entre la sortie de la
 
 Le simple fait qu'une constante `BAR_HIDE_DELAY = 1000` soit présente dans le code ne suffit pas : le comportement observé en situation réelle doit respecter cette temporisation.
 
+
+
+---
+
+## 55. Migration visuelle depuis Build #20 et calculatrice commune
+
+**Statut : VALIDÉ — décision fonctionnelle du 1er octobre 2026**
+
+### 55.1 Build #20 comme modèle de rendu des exercices
+
+Pour les exercices historiques déjà présents dans le Build #20 :
+
+- leur **rendu visuel existant** devient le modèle de référence ;
+- leurs structures spécifiques doivent être conservées autant que possible : tableaux, colonnes, images, disposition, zones de saisie, proportions, fonds et densité ;
+- KALONÉO ne doit pas forcer tous les exercices dans un gabarit visuel unique qui réduirait leur lisibilité ;
+- les captures et pages Build #20 servent de référence pour vérifier la fidélité de migration.
+
+Le travail de migration consiste donc à :
+
+1. reprendre la structure visuelle éprouvée du test Build #20 ;
+2. adapter / nettoyer le CSS pour l'intégrer à la charte et au shell KALONÉO ;
+3. réécrire la logique autour du test selon les conventions KALONÉO / KALTEST ;
+4. raccorder le test aux services communs : sauvegarde, reprise, Replay, Résultats, Bilan, navigation, abandon, chrono, intervention Administrateur, etc. ;
+5. conserver une lisibilité au moins équivalente à celle du Build #20.
+
+La présentation historique est donc **réutilisée comme modèle**, mais le code final doit être intégré proprement dans l'architecture KALONÉO.
+
+### 55.2 Calculatrice Build #20 comme calculatrice commune par défaut
+
+La calculatrice du Build #20 devient la **calculatrice officielle par défaut** de KALONÉO / SEB EvalPro.
+
+Règles :
+
+- reprendre son apparence et son comportement comme référence ;
+- conserver son fonctionnement flottant ;
+- conserver les touches numériques et opérations déjà utilisées ;
+- conserver son bouton de fermeture ;
+- utiliser une seule instance commune fournie par l'hôte ;
+- un test déclare seulement s'il est compatible avec la calculatrice ;
+- lors de la préparation du parcours, l'Administrateur choisit si elle est activée pour ce test compatible ;
+- si elle n'est pas activée, le bouton Calculatrice est invisible ;
+- au changement de page / exercice, une calculatrice ouverte doit être refermée afin de ne pas rester affichée sur l'étape suivante.
+
+### Principe de synthèse
+
+**Build #20 = modèle visuel et interactif éprouvé.**  
+**KALONÉO / KALTEST = architecture, contrat, services communs et code final.**
+
+L'objectif n'est pas de recopier aveuglément l'ancien code, mais de conserver ce qui fonctionnait bien pour le candidat tout en modernisant proprement l'architecture interne.
