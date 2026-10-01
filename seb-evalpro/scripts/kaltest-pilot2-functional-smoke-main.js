@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, screen } = require('electron');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..');
@@ -12,6 +12,21 @@ function fail(message, detail) {
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function applyBuild20AdaptiveZoom(win) {
+  const DESIGN_WIDTH = 1600;
+  const DESIGN_HEIGHT = 900;
+  const MIN_ZOOM_FACTOR = 0.60;
+  const bounds = win.getBounds();
+  const display = screen.getDisplayMatching(bounds);
+  const size = display && display.size ? display.size : { width: bounds.width, height: bounds.height };
+  const widthFactor = Number(size.width || bounds.width || DESIGN_WIDTH) / DESIGN_WIDTH;
+  const heightFactor = Number(size.height || bounds.height || DESIGN_HEIGHT) / DESIGN_HEIGHT;
+  const raw = Math.min(1, widthFactor, heightFactor);
+  const factor = Math.max(MIN_ZOOM_FACTOR, Math.round(raw * 100) / 100);
+  win.webContents.setZoomFactor(factor);
+  return { factor, displayWidth:size.width, displayHeight:size.height };
 }
 
 async function waitReady(win) {
@@ -92,6 +107,9 @@ app.whenReady().then(async () => {
   try {
     console.log('PILOT2_SMOKE_STAGE=load');
     await win.loadFile(page);
+    const zoom = applyBuild20AdaptiveZoom(win);
+    console.log('PILOT2_BUILD20_ADAPTIVE_ZOOM=' + JSON.stringify(zoom));
+    await sleep(80);
     await waitReady(win);
     console.log('PILOT2_SMOKE_STAGE=ready');
 
