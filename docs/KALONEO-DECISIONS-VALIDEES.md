@@ -724,3 +724,176 @@ Ont été réintégrées dans le registre les décisions qui manquaient après l
 - démarrage et clôture du Replay ;
 - différence entre **Quitter** et **Fermer la session active** ;
 - compatibilité ascendante et conservation des fixtures historiques.
+
+
+---
+
+## 31. Contenus et types de questions du bloc Exercice
+
+**Statut : VALIDÉ**
+
+Le bloc **Exercice** de KALONÉO doit proposer l’élément **Question** et accepter les familles de contenus validées suivantes :
+
+### Contenus généraux
+
+- Texte ;
+- HTML ;
+- HTML + JavaScript associé ;
+- Image ;
+- Audio ;
+- Vidéo.
+
+### Types de réponse validés pour une Question
+
+- texte ;
+- nombre ;
+- nombre + unité ;
+- choix unique ;
+- choix multiple ;
+- vrai / faux ;
+- liste déroulante.
+
+Les ressources nécessaires doivent être intégrées au paquet KALTEST selon les règles de médias locaux et de compatibilité déjà définies.
+
+---
+
+## 32. Questions d’exemple
+
+**Statut : VALIDÉ**
+
+KALONÉO doit permettre de créer une **question d’exemple**.
+
+Une question d’exemple :
+
+- est affichée au candidat ;
+- n’est pas notée ;
+- reçoit automatiquement **0 point** ;
+- est exclue du score ;
+- est exclue du Bilan ;
+- est exclue du résultat de section.
+
+Elle sert uniquement à montrer au candidat le fonctionnement attendu avant les questions évaluées.
+
+---
+
+## 33. Tableau insérable dans un exercice
+
+**Statut : VALIDÉ**
+
+Le Builder doit permettre d’insérer un tableau dans un exercice.
+
+Types de cellules validés :
+
+- texte fixe ;
+- réponse candidat ;
+- unité ;
+- liste déroulante ;
+- image.
+
+Le tableau doit permettre :
+
+- l’ajout de lignes ;
+- la suppression de lignes ;
+- l’ajout de colonnes ;
+- la suppression de colonnes ;
+- la fusion de cellules.
+
+Des médias peuvent également être utilisés dans une cellule lorsque le type de contenu le nécessite :
+
+- image ;
+- audio ;
+- vidéo.
+
+Les ressources utilisées par le tableau doivent être embarquées dans le `.kaltest` afin que le test reste autonome.
+
+---
+
+## 34. Lignes de Bilan : mode manuel ou automatique
+
+**Statut : VALIDÉ**
+
+Chaque ligne de compétence du Bilan doit déclarer son mode de remplissage :
+
+- **Automatique** ;
+- **Manuel**.
+
+### Automatique
+
+Le niveau et les informations de la ligne sont calculés à partir des données produites par le ou les tests rattachés.
+
+### Manuel
+
+L’Administrateur choisit le niveau lors du Bilan pour les compétences qui ne peuvent pas être déterminées automatiquement.
+
+Exemples déjà utilisés comme référence :
+
+- certaines lignes de l’**étoile 3D** sont manuelles ;
+- le **puzzle** peut alimenter automatiquement ses lignes.
+
+Lorsqu’une nouvelle ligne de Bilan est créée dans KALONÉO, sa définition doit prévoir au minimum :
+
+- sa grande section ;
+- sa sous-section / son module ;
+- son identifiant stable ;
+- son mode Manuel / Automatique ;
+- ses niveaux NE / I / II / III ;
+- ses commentaires ;
+- ses seuils lorsqu’ils sont nécessaires ;
+- les données dynamiques dont elle a besoin.
+
+KALONÉO doit refuser la validation d’un nouvel exercice automatique si les données nécessaires au calcul de ses lignes de Bilan ne sont pas définies.
+
+---
+
+## 35. Gestion des parcours dans SEB EvalPro
+
+**Statut : VALIDÉ**
+
+Une page **Gestion des parcours** est prévue avec des commandes dédiées **Exporter** et **Importer**.
+
+L’export d’un parcours doit conserver :
+
+- l’ordre exact des éléments ;
+- les versions exactes des tests ;
+- les tests nécessaires ;
+- les médias et autres ressources nécessaires ;
+- les informations d’intégrité permettant de vérifier que le parcours importé est identique à celui exporté.
+
+Objectif : permettre de reproduire une session identique sur plusieurs PC sans dépendance extérieure.
+
+Cette règle complète la décision déjà enregistrée d’un import/export en lot depuis un dossier, un disque ou une clé USB, sans mot de passe pour les tests et parcours.
+
+---
+
+## 36. Contrat des résultats complexes
+
+**Statut : REPORTÉ — NE PAS PRÉSENTER COMME IMPLÉMENTÉ**
+
+La discussion précédente a explicitement décidé de **reporter le contrat générique des résultats complexes**.
+
+Conséquence :
+
+- les mécanismes simples déjà définis et migrés restent utilisables ;
+- les règles de Bilan déjà validées restent applicables ;
+- les exercices complexes doivent déclarer explicitement les données qu’ils produisent lorsqu’ils en ont besoin ;
+- aucun moteur générique de résultats complexes ne doit être considéré comme terminé tant qu’une décision ultérieure ne l’a pas validé.
+
+Cette entrée empêche une future refactorisation de supposer à tort que ce contrat avait déjà été finalisé.
+
+---
+
+## Historique complémentaire — troisième passe
+
+### 1er octobre 2026
+
+Ajouts retrouvés dans la discussion précédente :
+
+- types de contenus du bloc Exercice ;
+- types de réponses Question ;
+- questions d’exemple à 0 point hors score/Bilan ;
+- tableaux éditables avec cellules spécialisées et fusion ;
+- médias dans les cellules et embarquement KALTEST ;
+- lignes de Bilan manuelles ou automatiques ;
+- contrat minimal d’une nouvelle ligne de compétence ;
+- page Gestion des parcours et conservation de l’intégrité ;
+- résultats complexes explicitement reportés.
