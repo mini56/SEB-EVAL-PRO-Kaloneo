@@ -15,7 +15,7 @@ const OUTPUT_TYPES = new Set([
 const MODES = new Set(['manual', 'automatic']);
 const DIRECTIONS = new Set(['higher-is-better', 'lower-is-better']);
 const AGGREGATIONS = new Set(['direct', 'sum-score', 'average']);
-const QUESTION_TYPES = new Set(['number', 'text', 'single-choice', 'multiple-choice', 'boolean']);
+const QUESTION_TYPES = new Set(['number', 'text', 'duration', 'single-choice', 'multiple-choice', 'boolean']);
 const { validateManifest, validateMediaDescriptor, validateLayoutDefinition } = require('./compatibility');
 
 function isObject(value) {
@@ -96,6 +96,21 @@ function validateQuestions(test, errors) {
 
     if (!isObject(question.response) || !QUESTION_TYPES.has(question.response.type)) {
       push(errors, `${p}.response.type`, 'type de réponse non reconnu');
+    } else {
+      if (question.response.type === 'single-choice' || question.response.type === 'multiple-choice') {
+        if (!Array.isArray(question.response.options) || question.response.options.length < 2 ||
+            question.response.options.some(option => typeof option !== 'string' || !option.trim())) {
+          push(errors, `${p}.response.options`, 'au moins deux choix texte sont obligatoires');
+        }
+      }
+      if (question.response.type === 'duration') {
+        if (!Number.isInteger(question.acceptedMinutes) || question.acceptedMinutes < 0) {
+          push(errors, `${p}.acceptedMinutes`, 'durée attendue obligatoire en minutes');
+        }
+        if (question.response.normalizer !== undefined && question.response.normalizer !== 'duration-fr') {
+          push(errors, `${p}.response.normalizer`, 'normaliseur de durée attendu : duration-fr');
+        }
+      }
     }
 
     if (typeof question.points !== 'number' || question.points < 0) {
@@ -106,9 +121,35 @@ function validateQuestions(test, errors) {
       push(errors, `${p}.points`, 'une question d’exemple doit valoir 0 point');
     }
 
-    if (question.example !== true && test.scored !== false) {
+    if (question.example !== true && test.scored !== false && question.response?.type !== 'duration') {
       if (!Array.isArray(question.acceptedAnswers) || question.acceptedAnswers.length === 0) {
         push(errors, `${p}.acceptedAnswers`, 'au moins une réponse attendue est obligatoire');
+      }
+    }
+
+    if (question.supplementalFields !== undefined) {
+      if (!Array.isArray(question.supplementalFields)) {
+        push(errors, `${p}.supplementalFields`, 'tableau attendu');
+      } else {
+        const supplementalIds = new Set();
+        question.supplementalFields.forEach((field, fieldIndex) => {
+          const fp = `${p}.supplementalFields[${fieldIndex}]`;
+          if (!isObject(field)) {
+            push(errors, fp, 'objet obligatoire');
+            return;
+          }
+          if (requireId(errors, field.id, `${fp}.id`)) {
+            if (supplementalIds.has(field.id)) push(errors, `${fp}.id`, 'identifiant de champ complémentaire dupliqué');
+            supplementalIds.add(field.id);
+          }
+          requireString(errors, field.label, `${fp}.label`);
+          if (!['text', 'number', 'duration'].includes(field.type)) {
+            push(errors, `${fp}.type`, 'type de champ complémentaire non reconnu');
+          }
+          if (field.scored !== false) {
+            push(errors, `${fp}.scored`, 'un champ complémentaire doit être explicitement non noté');
+          }
+        });
       }
     }
 
