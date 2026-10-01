@@ -2,8 +2,6 @@
 'use strict';
 
 const STATE_KEY='seb_kaltest_pilot_state_v1';
-const TEST_URL='kaltest/tests/calculs-commandes-atelier/1.0.0/test.json';
-const BILAN_URL='kaltest/catalog/bilan-seb-v1.json';
 const PAGES=['identification','intro','exercise','final'];
 
 let testDefinition=null;
@@ -258,11 +256,11 @@ function reset(){
 }
 
 async function loadDefinitions(){
-  const [testResponse,bilanResponse]=await Promise.all([fetch(TEST_URL),fetch(BILAN_URL)]);
-  if(!testResponse.ok) throw new Error('Test KALTEST introuvable.');
-  if(!bilanResponse.ok) throw new Error('Catalogue bilan introuvable.');
-  testDefinition=await testResponse.json();
-  bilanCatalog=await bilanResponse.json();
+  const definitions=window.sebKaltestPilotDefinitions;
+  if(!definitions?.test) throw new Error('Test KALTEST introuvable.');
+  if(!definitions?.bilanCatalog) throw new Error('Catalogue bilan introuvable.');
+  testDefinition=JSON.parse(JSON.stringify(definitions.test));
+  bilanCatalog=JSON.parse(JSON.stringify(definitions.bilanCatalog));
 }
 
 function install(){
