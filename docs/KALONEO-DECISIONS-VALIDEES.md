@@ -991,3 +991,314 @@ Un `.kalparcours` :
 - conserve les versions de tests nécessaires afin de reproduire exactement la session prévue.
 
 L’import/export en lot depuis dossier, disque ou clé USB reste sans mot de passe pour les tests et parcours.
+
+
+---
+
+## 40. Calculatrice — compatibilité du test et activation par le parcours
+
+**Statut : VALIDÉ — décision récupérée de la discussion précédente**
+
+La calculatrice fonctionne sur deux niveaux distincts :
+
+1. dans le **Test Builder**, le test déclare `Calculatrice compatible : OUI / NON` ;
+2. lors de la **création du parcours**, l’Administrateur décide si la calculatrice est effectivement affichée pour chaque test compatible.
+
+Conséquences :
+
+- si le test déclare `Calculatrice compatible : NON`, l’option **Afficher la calculatrice** n’est pas proposée dans la création du parcours ;
+- si le test est compatible mais que la case n’est pas cochée dans le parcours, aucun bouton Calculatrice n’apparaît côté candidat ;
+- si la case est cochée, le bouton Calculatrice apparaît automatiquement ;
+- le test n’embarque jamais son propre code de calculatrice ;
+- il n’existe qu’une seule calculatrice officielle commune, fournie par l’hôte KALONÉO / SEB EvalPro.
+
+Cette précision complète la section 13.
+
+---
+
+## 41. Bloc Exercice — éditeur continu et insertion de Questions
+
+**Statut : VALIDÉ — décision récupérée de la discussion précédente**
+
+Le bloc **Exercice** fonctionne comme un éditeur de contenu continu.
+
+Familles d’éléments prévues :
+
+- **Question** ;
+- Texte ;
+- HTML ;
+- HTML + JavaScript ;
+- Image ;
+- Audio ;
+- Vidéo.
+
+Le bouton **Question** insère un bloc Question **à l’endroit du curseur** dans le contenu en cours.
+
+L’auteur peut donc construire une page dans un ordre libre, par exemple :
+
+`texte → image → texte → question → texte → question → audio → question → HTML`.
+
+Les champs d’un bloc Question ne doivent pas être limités à une petite zone fixe : ils s’agrandissent ou passent sur plusieurs lignes à mesure que le contenu augmente.
+
+---
+
+## 42. Bloc Question — champs et aide à la saisie
+
+**Statut : VALIDÉ POUR LE NOYAU — options avancées à confirmer séparément**
+
+Chaque groupe Question possède au minimum :
+
+- un **ID automatique** ;
+- **Question** ;
+- **Réponse(s) attendue(s)** ;
+- **Unité(s)** ;
+- **Points**.
+
+Règles de saisie :
+
+- plusieurs réponses acceptées sont séparées par un point-virgule `;` ;
+- plusieurs écritures d’unité acceptées sont également séparées par `;` ;
+- l’unité peut rester vide si aucune unité n’est demandée ;
+- l’interface doit fournir une aide au survol expliquant le rôle de chaque champ ;
+- le champ de correction doit être nommé **Réponse(s) attendue(s)** afin de ne pas le confondre avec la réponse saisie par le candidat ;
+- le candidat ne voit jamais les réponses attendues ni le nombre de points attribué.
+
+### Options avancées retrouvées mais non encore reclassées comme décision définitive
+
+La discussion proposait derrière un bouton **Options** :
+
+- type de réponse ;
+- réponse obligatoire ;
+- respect des majuscules/minuscules ;
+- respect des accents ;
+- tolérance numérique.
+
+Ces options sont conservées ici comme **À CONFIRMER** tant qu’une validation explicite ultérieure n’a pas été retrouvée.
+
+---
+
+## 43. Identifiant automatique et stable des Questions
+
+**Statut : VALIDÉ**
+
+L’identifiant d’une Question est généré automatiquement à partir :
+
+- de son numéro séquentiel ;
+- de l’identifiant normalisé du titre du test.
+
+Format retenu :
+
+`ID<n>_<titre_normalise>`
+
+Exemples :
+
+- `ID1_calculs_de_surface` ;
+- `ID2_calculs_de_surface` ;
+- `ID1_fractions` ;
+- `ID1_paronymes`.
+
+Normalisation du titre :
+
+- passage en minuscules ;
+- suppression des accents ;
+- espaces remplacés par `_` ;
+- caractères spéciaux supprimés.
+
+Règles anti-régression :
+
+- l’ID est généré automatiquement ;
+- il n’est pas modifiable manuellement ;
+- une fois le test enregistré, l’ID reste stable ;
+- modifier le texte de la question ne change pas son ID ;
+- déplacer une question ne doit pas casser son ID historique ;
+- cette stabilité protège les réponses enregistrées, le barème, le Replay, le Bilan et les anciens résultats.
+
+---
+
+## 44. Question d’exemple — comportement détaillé
+
+**Statut : VALIDÉ POUR LE NOYAU**
+
+Chaque Question peut proposer l’option :
+
+`Question d’exemple`
+
+Lorsqu’elle est activée :
+
+- un ID normal est tout de même généré ;
+- la question est affichée au candidat ;
+- elle peut disposer d’une réponse attendue ;
+- **Points = 0** automatiquement ;
+- le champ Points est verrouillé à 0 ;
+- elle ne compte pas dans le score maximum ;
+- elle ne compte pas dans le résultat de la section ;
+- elle n’influence pas le Bilan ;
+- le Builder l’identifie visuellement comme **EXEMPLE — non noté** ;
+- côté candidat, une indication discrète **Exemple** peut être affichée.
+
+Le document évoquait la possibilité de conserver l’action du candidat dans le Replay, mais cette partie n’était pas formulée comme une décision ferme. Elle reste donc **À CONFIRMER**.
+
+---
+
+## 45. Points techniques retrouvés comme restant à verrouiller
+
+**Statut : À VALIDER — NE PAS PRÉSENTER COMME IMPLÉMENTÉ OU DÉFINITIVEMENT VALIDÉ**
+
+La discussion précédente avait explicitement identifié les points suivants comme encore incomplets. Ils sont consignés ici pour éviter de les perdre.
+
+### Contrat commun des réponses candidat
+
+Prévoir un format capable de représenter selon l’exercice :
+
+- champ texte ;
+- plusieurs réponses ;
+- cases cochées ;
+- ordre d’éléments ;
+- glisser-déposer ;
+- nombre d’erreurs ;
+- durée ;
+- résultat d’une activité physique ou d’une manipulation.
+
+### Correction et barème
+
+Points à définir complètement :
+
+- réponses attendues ;
+- points par réponse ;
+- score maximum ;
+- réponses alternatives acceptées ;
+- cas où la correction est gérée par le JavaScript de l’exercice.
+
+### Résultat standard
+
+La discussion proposait un résultat commun comprenant au minimum :
+
+- score obtenu ;
+- score maximum ;
+- pourcentage ;
+- statut terminé / abandonné / non réalisé ;
+- données détaillées.
+
+Cette partie reste liée au **contrat des résultats complexes reporté** de la section 36.
+
+### Sauvegarde et reprise fine
+
+Le Validateur devra à terme vérifier que l’exercice sait restaurer les éléments qui le concernent, notamment :
+
+- réponses ;
+- positions d’objets ;
+- chrono ;
+- étape interne ;
+- autoévaluation éventuelle.
+
+### Replay
+
+Un exercice ne doit pas embarquer son propre moteur Replay.
+
+Restent à formaliser dans le contrat les déclarations éventuelles de :
+
+- nom du test ;
+- événements utiles ;
+- captures ;
+- état avant/après validation.
+
+### Contenu réel du paquet `.kaltest`
+
+La discussion décrivait le paquet comme devant pouvoir embarquer les ressources nécessaires au test, notamment :
+
+- manifest ;
+- HTML ;
+- JavaScript ;
+- CSS ;
+- images ;
+- audio ;
+- vidéo ;
+- correction ;
+- définition Bilan ;
+- données/tests nécessaires.
+
+Aucune simple référence à un fichier externe ne suffit.
+
+### Paramétrage du chronomètre commun
+
+Cas d’usage identifiés :
+
+- chrono simple ;
+- chrono répété, par exemple 3 à 5 mesures ;
+- remise à zéro automatique ;
+- focus automatique après arrêt ;
+- temps affiché ou masqué.
+
+Le moteur doit rester unique ; seuls ses paramètres varient.
+
+### Intervention Administrateur standardisée
+
+Un exercice ne doit pas inventer son propre mot de passe ou son propre mécanisme de sécurité.
+
+Exemples de besoins identifiés :
+
+- saisir un nombre d’erreurs ;
+- confirmer qu’un exercice est terminé.
+
+Le composant d’accès sécurisé doit être fourni par l’hôte.
+
+### Fin d’exercice standardisée
+
+La discussion a identifié comme architecture cible qu’un exercice ne devrait pas connaître directement la page suivante ni exécuter une navigation du type :
+
+`window.location = "planning.html"`
+
+Le module devrait signaler sa fin à l’hôte, par exemple via un événement/contrat `EXERCICE_TERMINE`, puis l’hôte prend en charge :
+
+- sauvegarde ;
+- calcul ;
+- Replay si nécessaire ;
+- ouverture du prochain élément selon l’ordre réel du parcours.
+
+**Ce nom d’événement et son contrat restent À VALIDER avant d’être considérés comme API définitive.**
+
+### Version minimale et capacités
+
+La discussion évoquait aussi :
+
+- une version minimale de KALONÉO lorsque nécessaire ;
+- une zone de capacités particulières pouvant déclarer Calculatrice, Chronomètre, Intervention Administrateur, Autoévaluation et Matériel extérieur.
+
+Ces éléments doivent être confirmés dans le contrat final avant implémentation généralisée.
+
+### Checklist de validation automatique proposée
+
+Avant injection d’un test, la discussion proposait de vérifier :
+
+- ouverture ;
+- scénario ;
+- consignes ;
+- exercice ;
+- saisie ;
+- sauvegarde ;
+- rechargement ;
+- correction ;
+- score ;
+- abandon ;
+- chronomètre si utilisé ;
+- résultat ;
+- Bilan ;
+- fin d’exercice ;
+- fonctionnement sans Internet ;
+- absence de ressources externes manquantes.
+
+Le principe général **validation bloquante / injection interdite en cas d’échec** est déjà validé. Le détail exact de cette checklist reste à consolider dans le Validateur.
+
+---
+
+## Historique complémentaire — extrait de discussion fourni le 1er octobre 2026
+
+Le document `Oui.docx` fourni par l’utilisateur a permis de récupérer et de distinguer :
+
+- les précisions de calculatrice compatible / activation par parcours ;
+- le fonctionnement de l’éditeur continu du Bloc Exercice ;
+- l’insertion des Questions au curseur ;
+- les champs et aides de saisie d’une Question ;
+- la règle d’identifiant `ID<n>_<titre_normalise>` stable ;
+- le comportement détaillé des Questions d’exemple ;
+- plusieurs chantiers explicitement identifiés comme encore à verrouiller, conservés avec le statut **À VALIDER** afin de ne pas les transformer artificiellement en décisions acquises.
