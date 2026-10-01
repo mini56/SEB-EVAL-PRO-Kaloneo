@@ -281,6 +281,7 @@ function install(){
   });
 
   document.getElementById('intro-next').addEventListener('click',()=>showPage('exercise'));
+  document.getElementById('pilot-restart')?.addEventListener('click',reset);
   document.getElementById('exercise-next').addEventListener('click',finishExercise);
   document.getElementById('abandon-open').addEventListener('click',openAbandon);
   document.getElementById('abandon-cancel').addEventListener('click',closeAbandon);
