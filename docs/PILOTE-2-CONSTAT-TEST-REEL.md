@@ -110,3 +110,77 @@ Priorités de correction avant un nouveau test réel :
 7. fidélité de présentation des exercices migrés, notamment Genre / Nombre.
 
 Aucune de ces remarques ne doit être interprétée comme une remise en cause du principe KALTEST lui-même tant que les causes exactes n'ont pas été reproduites et isolées.
+
+
+## 8. Exemples de réponses affichés dans Réception / Contrôle
+
+Constat :
+- dans l'exercice Réception / Contrôle, des exemples sont affichés dans les zones de réponse ;
+- ces exemples n'ont pas lieu d'être dans le test réel et peuvent guider inutilement le candidat.
+
+Référence attendue :
+- conserver uniquement les champs de réponse prévus dans le Build #20 ;
+- ne pas afficher d'exemples de réponses lorsqu'ils n'étaient pas présents dans la référence.
+
+Statut : **écart fonctionnel / à corriger**.
+
+## 9. Calculatrice non fermée au changement de page
+
+Constat :
+- lorsqu'elle est ouverte, la calculatrice reste visible après le passage à la page suivante.
+
+Référence attendue :
+- la calculatrice est un outil de la page courante ;
+- au changement d'étape, elle doit être refermée / réinitialisée visuellement ;
+- sa présence sur la page suivante ne doit dépendre que du réglage Calculatrice de cette nouvelle étape.
+
+Statut : **régression fonctionnelle / à corriger**.
+
+## 10. Résultats de pages / scores non retrouvés
+
+Constat utilisateur confirmé lors d'un second parcours :
+- les pages sont parcourues mais leurs scores / résultats ne sont pas retrouvés comme attendu dans les résultats enregistrés ;
+- le Bilan automatique reste vide malgré le parcours terminé.
+
+Conséquence :
+- le problème du Bilan vide ne doit pas être traité comme un simple défaut d'affichage tant que la chaîne complète KALTEST → résultats persistés → Bilan n'a pas été vérifiée.
+
+Statut : **bloquant fonctionnel / priorité haute**.
+
+## 11. Page finale Build #20 manquante
+
+Constat :
+- la page finale du Build #20 avec le message de fin de parcours (« Félicitations… » et contenu associé) n'est pas reproduite ;
+- le candidat n'a donc pas le même signal clair de fin normale de parcours.
+
+Référence attendue :
+- reprendre la page finale Build #20 dans le parcours KALONÉO ;
+- cette page doit en même temps déclencher la clôture normale du parcours selon les règles déjà validées.
+
+Statut : **écart de fidélité + cycle de vie / à corriger**.
+
+## 12. Confirmation visuelle par capture — page Identification
+
+Capture utilisateur : `Capture d’écran (35).png`.
+
+Constats visibles :
+- les boutons de la barre Administrateur sont coupés par le bord supérieur de la fenêtre ;
+- seule leur partie basse apparaît, ce qui confirme un mauvais positionnement / dimensionnement de la barre ;
+- la zone principale d'identification n'utilise qu'une faible partie de la hauteur disponible ;
+- une très grande zone vide reste sous le formulaire ;
+- le bouton « Afficher l'écran d'accueil » apparaît isolé en bas à droite ;
+- l'ensemble confirme que la composition verticale du PILOTE #2 n'exploite pas correctement la surface d'écran disponible.
+
+Statut : **confirmation visuelle des régressions de barre et de mise en page**.
+
+## 13. Second parcours réel — portée du constat
+
+Le second parcours utilisateur confirme :
+- Replay limité à une seule image ;
+- Bilan automatique vide ;
+- absence / non-récupération des scores et résultats de pages attendus ;
+- calculatrice persistante au changement de page ;
+- page finale Build #20 absente ;
+- exemples indésirables dans Réception / Contrôle.
+
+Ces observations restent consignées comme **constats de test réel**. Les exercices non présents dans le PILOTE #2 ne doivent pas être jugés sur cette base.
