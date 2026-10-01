@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEB EvalPro — Parcours pilote KALTEST</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;margin:0;min-height:100vh;background:linear-gradient(to bottom,#fff,#ebeef5);color:#222}
+main{max-width:1100px;margin:0 auto;padding:28px}
+h1{color:#1f4e79;margin:0 0 6px}
+h2{color:#1a73e8}
+.page{display:none;background:#fff;border:1px solid #c8d7ea;border-radius:10px;padding:26px;box-shadow:0 3px 12px rgba(0,0,0,.08)}
+.page.visible{display:block}
+.subtitle{color:#555;margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 22px}
+.field{display:flex;flex-direction:column;gap:5px}
+label{font-weight:700}
+input{font:inherit;padding:9px;border:1px solid #8c8c8c;border-radius:6px}
+.readonly{background:#f2f2f2}
+.actions{display:flex;justify-content:center;gap:12px;margin-top:24px;flex-wrap:wrap}
+button{font:inherit;font-weight:700;padding:10px 18px;border-radius:7px;border:2px solid #0070c0;background:#fff;color:#0070c0;cursor:pointer}
+button.primary{background:#0070c0;color:#fff}
+button.danger{border-color:#c00000;color:#c00000}
+.scenario,.instruction{padding:12px 14px;border-left:5px solid #0070c0;background:#f7fbff;margin:14px 0}
+.instruction{border-left-color:#ed7d31;background:#fff9f2}
+table{width:100%;border-collapse:separate;border-spacing:6px;margin-top:18px}
+th{background:#0070c0;color:#fff;padding:10px;border-radius:7px}
+td{border:1px solid #b7c5d7;padding:8px;border-radius:7px;background:#fff;vertical-align:middle}
+td:first-child{background:#eef4ff;font-weight:700;text-align:center;width:130px}
+td input{width:100%}
+.question-list{margin:15px 0 0;padding-left:24px}
+.question-list li{margin:12px 0;line-height:1.45}
+.status{min-height:22px;margin-top:12px;text-align:center;color:#a00000;font-weight:700}
+#calculator{display:none;border:1px solid #9cc2e5;background:#f7fbff;border-radius:8px;padding:12px;margin:12px auto;max-width:360px}
+#calculator.visible{display:block}
+#calculator input{width:100%;margin-bottom:8px}
+.final{font-size:20px;text-align:center;padding:40px 10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.42);display:none;align-items:center;justify-content:center;z-index:99}
+.modal.visible{display:flex}
+.modal-card{width:520px;max-width:calc(100vw - 30px);background:#fff;border-radius:10px;padding:22px;box-shadow:0 12px 35px rgba(0,0,0,.28)}
+.checkline{display:flex;gap:10px;align-items:flex-start;margin:18px 0}
+.checkline input{width:20px;height:20px}
+.small{font-size:13px;color:#555}
+@media(max-width:720px){.grid{grid-template-columns:1fr}main{padding:12px}}
+</style>
+</head>
+<body>
+<main>
+  <h1>SEB EvalPro</h1>
+  <p class="subtitle">Parcours pilote dynamique KALTEST — validation technique</p>
+
+  <section id="page-identification" class="page visible">
+    <h2>Informations du candidat</h2>
+    <div class="grid">
+      <div class="field"><label for="nom">Nom *</label><input id="nom" autocomplete="off"></div>
+      <div class="field"><label for="prenom">Prénom *</label><input id="prenom" autocomplete="off"></div>
+      <div class="field"><label for="naissance">Date de naissance *</label><input id="naissance" type="date"></div>
+      <div class="field"><label for="ss6">6 premiers chiffres du n° de sécurité sociale *</label><input id="ss6" inputmode="numeric" maxlength="6" autocomplete="off"></div>
+      <div class="field"><label for="lieu">Lieu *</label><input id="lieu" autocomplete="off"></div>
+      <div class="field"><label for="groupe">Groupe *</label><input id="groupe" autocomplete="off"></div>
+      <div class="field"><label for="dateEvaluation">Date de l’évaluation *</label><input id="dateEvaluation" type="date"></div>
+      <div class="field"><label for="parcours">Parcours</label><input id="parcours" class="readonly" readonly value="Parcours pilote KALTEST"></div>
+    </div>
+    <div id="identity-status" class="status"></div>
+    <div class="actions"><button id="identity-next" class="primary">Suivant</button></div>
+  </section>
+
+  <section id="page-intro" class="page">
+    <h2>Le contexte :</h2>
+    <p>Vous débutez un stage dans une usine de fabrication. Vous allez passer par plusieurs situations professionnelles avec des missions simulées, un peu comme un parcours d'essai.</p>
+    <p>Chacune correspond à un exercice. L'objectif est d'évaluer vos compétences pratiques, logiques et rédactionnelles dans un contexte proche du travail réel.</p>
+    <p style="text-align:center;font-size:19px"><strong>Bonne découverte et bon parcours !</strong></p>
+    <div class="actions"><button id="intro-next" class="primary">Commencez l’évaluation</button></div>
+  </section>
+
+  <section id="page-exercise" class="page">
+    <h2 id="test-title">Chargement du test…</h2>
+    <div class="scenario"><strong>Scénario :</strong><div id="scenario"></div></div>
+    <div id="questions"></div>
+    <div class="instruction"><strong>Consigne :</strong> <span id="instruction"></span></div>
+    <div id="response-table"></div>
+    <div id="calculator">
+      <strong>Calculatrice pilote</strong>
+      <input id="calc-expression" placeholder="Ex. 12*85">
+      <div class="actions"><button id="calc-equals">=</button><button id="calc-close">Fermer</button></div>
+      <div id="calc-result" class="status"></div>
+    </div>
+    <div class="actions">
+      <button id="calculator-open">Ouvrir la calculatrice</button>
+      <button id="abandon-open" class="danger">Abandonner l’exercice</button>
+      <button id="exercise-next" class="primary">Suivant</button>
+    </div>
+    <div id="exercise-status" class="status"></div>
+  </section>
+
+  <section id="page-final" class="page final">
+    <h2>Votre évaluation est terminée.</h2>
+    <p>Merci. Vous pouvez maintenant prévenir l’administrateur.</p>
+  </section>
+</main>
+
+<div id="abandon-modal" class="modal" aria-hidden="true">
+  <div class="modal-card">
+    <h2>Valider l’abandon de l’exercice</h2>
+    <p>L’Administrateur confirme l’abandon et choisit le traitement dans le bilan.</p>
+    <label class="checkline">
+      <input id="abandon-ne" type="checkbox">
+      <span><strong>Exercice non évalué dans le bilan</strong><br><span class="small">Si cette case est cochée, l’exercice est NE et ses points sont totalement exclus des calculs du bilan.</span></span>
+    </label>
+    <div class="actions">
+      <button id="abandon-cancel">Annuler</button>
+      <button id="abandon-confirm" class="danger">Valider l’abandon</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/kaltest-pilot-runtime.js"></script>
+</body>
+</html>
