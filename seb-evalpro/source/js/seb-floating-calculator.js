@@ -156,8 +156,13 @@
     if (value === 'C') return reset();
   }, true);
 
-  document.getElementById('close')?.addEventListener('click', function () {
+  window.closeCalculator = function () {
     container.style.display = 'none';
+    reset(false);
+  };
+
+  document.getElementById('close')?.addEventListener('click', function () {
+    window.closeCalculator();
   });
 
   window.openCalculator = function () {
