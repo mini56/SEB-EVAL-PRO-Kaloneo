@@ -1915,16 +1915,23 @@ Pour tous les exercices migrés vers KALONÉO / KALTEST :
 
 ### Ce qui passe au style KALONÉO
 
+- **l'intégralité du CSS** de l'exercice ;
 - arrière-plan ;
 - tableaux ;
 - en-têtes de tableaux ;
 - bordures ;
 - champs de réponse ;
 - boutons ;
-- typographie ;
+- **police / famille typographique** ;
+- tailles de caractères ;
+- graisses ;
+- interlignage ;
+- espacements et marges ;
 - couleurs ;
 - panneaux et cartes ;
 - éléments décoratifs.
+
+La structure et les proportions du Build #20 servent de référence de composition, mais aucun ancien style CSS ne doit rester par défaut lorsqu'il entre en conflit avec la charte KALONÉO.
 
 ### Principe de référence
 
