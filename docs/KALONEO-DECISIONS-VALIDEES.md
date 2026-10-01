@@ -1695,3 +1695,24 @@ Avant validation finale de l’installation Candidat :
 - un test de régression devra confirmer qu’aucune barre Windows ni application externe n’est accessible pendant un parcours candidat normal.
 
 Cette décision ne doit donc pas être interprétée comme une autorisation permanente d’accès à Windows dans la version finale.
+
+
+---
+
+## 52. IA du Bilan — SEB-IA actuelle et ouverture future
+
+**Statut : VALIDÉ — orientation fonctionnelle**
+
+La partie **Bilan** utilise actuellement **SEB-IA**, moteur rédactionnel intégré et léger.
+
+Règles validées :
+
+- SEB-IA reste le moteur utilisé pour le Bilan tant que ses résultats sont jugés suffisants ;
+- les efforts d’amélioration doivent d’abord porter sur **SEB-IA elle-même** : qualité rédactionnelle, variété, fidélité aux résultats, gestion des abandons, niveaux et commentaires ;
+- l’éventuelle intégration future d’une **véritable IA locale plus puissante** reste possible si SEB-IA atteint ses limites ;
+- cette éventuelle IA future concerne **uniquement la partie Bilan / synthèse** ;
+- elle ne doit pas devenir une dépendance du parcours candidat, des tests KALTEST, du chronomètre, du Replay, de la navigation ou des autres fonctions cœur de SEB EvalPro ;
+- aucune architecture lourde, aucun modèle volumineux ni aucun runtime supplémentaire n’est imposé aujourd’hui ;
+- si une vraie IA est ajoutée plus tard, elle devra pouvoir être branchée sur le Bilan sans casser le fonctionnement actuel de SEB-IA.
+
+Objectif : conserver une architecture simple aujourd’hui tout en laissant une voie d’évolution propre pour une IA plus performante demain.
