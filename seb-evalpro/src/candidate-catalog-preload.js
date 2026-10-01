@@ -1,7 +1,7 @@
 const { ipcRenderer } = require('electron');
 const bilanHistory = require('./bilan-history-preload');
 const replayPreload = require('./replay-preload');
-const editionCapabilities = ipcRenderer.sendSync('app:edition-sync') || { edition:'admin', canBilan:true };
+const editionCapabilities = ipcRenderer.sendSync('app:edition-sync') || { edition:'unified', canBilan:true };
 
 let installed = false;
 let beforeAdminNavigate = null;
