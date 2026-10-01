@@ -90,8 +90,10 @@ app.whenReady().then(async () => {
   });
 
   try {
+    console.log('PILOT2_SMOKE_STAGE=load');
     await win.loadFile(page);
     await waitReady(win);
+    console.log('PILOT2_SMOKE_STAGE=ready');
 
     const initial = await win.webContents.executeJavaScript(
       "({page:document.querySelector('.pilot2-page.visible')?.id,tests:window.sebKaltestPilot2.data.tests.length,introImage:document.querySelector('#page-intro .pilot2-intro-cover img')?.getAttribute('src'),scenarioImage:document.querySelector('#page-exercise .kaltest-context img')?.getAttribute('src'),calculator:Boolean(document.getElementById('calc-container'))})",
@@ -125,12 +127,14 @@ app.whenReady().then(async () => {
     await sleep(50);
     if (await visiblePage(win) !== 'page-intro') throw new Error('Identification valide : Introduction attendue.');
 
+    console.log('PILOT2_SMOKE_STAGE=introduction');
     await assertNoOverflow(win, 'Introduction');
 
     await win.webContents.executeJavaScript("document.getElementById('intro-next').click();true",true);
     await sleep(70);
     if (await visiblePage(win) !== 'page-exercise') throw new Error('Introduction : premier KALTEST attendu.');
 
+    console.log('PILOT2_SMOKE_STAGE=first-test');
     const first = await win.webContents.executeJavaScript(
       "({id:window.sebKaltestPilot2.currentTest().id,scenario:Boolean(document.querySelector('#page-exercise img[src="imageqcm/scenario.png"]')),consigne:Boolean(document.querySelector('#page-exercise img[src="imageqcm/avatar_transparant.png"]')),calcHidden:document.getElementById('kaltest-calculator').hidden})",
       true
@@ -166,6 +170,7 @@ app.whenReady().then(async () => {
     ];
 
     for (let index = 0; index < expectedIds.length; index += 1) {
+      console.log('PILOT2_SMOKE_STAGE=test-' + (index + 1) + '-' + expectedIds[index]);
       const testId = await win.webContents.executeJavaScript("window.sebKaltestPilot2.currentTest().id",true);
       if (testId !== expectedIds[index]) {
         throw new Error('Ordre KALTEST incorrect : attendu ' + expectedIds[index] + ', trouvé ' + testId);
