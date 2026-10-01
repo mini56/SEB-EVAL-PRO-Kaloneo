@@ -965,7 +965,10 @@ function injectAdminBar() {
     }
   };
 
+  let adminBarRefreshGeneration = 0;
+
   const updateAdminButtons = () => {
+    const refreshGeneration = ++adminBarRefreshGeneration;
     const onBilan = isAdminBilanPage();
     const onCandidateResults = !!adminCandidateResultsWorkspace;
     const onAdminDetail = (!!adminCandidateWorkspace && onBilan) || onCandidateResults;
@@ -988,6 +991,7 @@ function injectAdminBar() {
     returnButton.textContent = 'Retour au candidat';
 
     ipcRenderer.invoke('candidate:active').then((active) => {
+      if (refreshGeneration !== adminBarRefreshGeneration) return;
       const hasActiveJourney = !!active;
       finishCandidateButton.hidden = !hasActiveJourney;
       openCandidateButton.hidden = hasActiveJourney || isAdminCandidatesPage() || onAdminDetail;
@@ -995,6 +999,7 @@ function injectAdminBar() {
       importCandidatesButton.hidden = hasActiveJourney || !editionCapabilities.canImport || onAdminDetail;
       refreshCandidateBadge();
     }).catch(() => {
+      if (refreshGeneration !== adminBarRefreshGeneration) return;
       finishCandidateButton.hidden = true;
       openCandidateButton.hidden = isAdminCandidatesPage() || onAdminDetail;
       exportCandidatesButton.hidden = !editionCapabilities.canExport || onAdminDetail;
