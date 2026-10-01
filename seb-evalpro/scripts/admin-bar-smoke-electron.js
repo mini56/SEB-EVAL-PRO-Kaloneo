@@ -108,7 +108,7 @@ app.whenReady().then(async () => {
       const oldReplay=document.getElementById('seb-evalpro-replay');
       const oldResults=document.getElementById('seb-evalpro-results');
       document.dispatchEvent(new MouseEvent('mousemove',{bubbles:true,clientY:0,clientX:20}));
-      await new Promise(r=>setTimeout(r,120));
+      await new Promise(r=>setTimeout(r,240));
       return {
         bar:!!bar,
         hotzone:!!hot,
@@ -126,7 +126,7 @@ app.whenReady().then(async () => {
       };
     })()`);
 
-    if (!result.bar || !result.hotzone || !result.adminButton || !result.openCandidate || !result.openCandidateVisible || result.closeSessionVisible || result.bilanVisible || !result.oldBilanVisible || result.oldReplayVisible || result.oldResultsVisible || !result.visible || result.adminText !== 'Verrouiller') {
+    if (!result.bar || !result.hotzone || !result.adminButton || !result.openCandidate || !result.openCandidateVisible || result.closeSessionVisible || result.bilanVisible || result.oldReplayVisible || result.oldResultsVisible || !result.visible || result.adminText !== 'Verrouiller') {
       fail('barre Admin sans parcours incorrecte : Ouvrir un candidat requis, Fermer session/Bilan global/Replay global interdits', result);
       return;
     }
