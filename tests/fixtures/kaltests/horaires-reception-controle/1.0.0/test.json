@@ -48,77 +48,94 @@
       "headers": [
         "Jour",
         "Prise de poste",
-        "Temps réception",
-        "Fin réception",
-        "Temps rangement",
-        "Fin de poste"
+        "Temps passé réception",
+        "Heure de fin de réception",
+        "Temps rangement stock",
+        "Heure de fin de poste"
       ],
       "rows": [
         {
-          "label": "Lundi",
-          "fixed": [
+          "cells": [
+            "Lundi",
             "8h00",
             "1h15",
-            "0h30"
-          ],
-          "questionIds": [
-            "fin_reception_lundi",
-            "fin_poste_lundi"
+            {
+              "questionId": "fin_reception_lundi"
+            },
+            "0h30",
+            {
+              "questionId": "fin_poste_lundi"
+            }
           ]
         },
         {
-          "label": "Mardi",
-          "fixed": [
+          "cells": [
+            "Mardi",
             "8h00",
             "0h50",
-            "0h25"
-          ],
-          "questionIds": [
-            "fin_reception_mardi",
-            "fin_poste_mardi"
+            {
+              "questionId": "fin_reception_mardi"
+            },
+            "0h25",
+            {
+              "questionId": "fin_poste_mardi"
+            }
           ]
         },
         {
-          "label": "Mercredi",
-          "fixed": [
+          "cells": [
+            "Mercredi",
             "8h00",
             "1h05",
-            "0h25"
-          ],
-          "questionIds": [
-            "fin_reception_mercredi",
-            "fin_poste_mercredi"
+            {
+              "questionId": "fin_reception_mercredi"
+            },
+            "0h25",
+            {
+              "questionId": "fin_poste_mercredi"
+            }
           ]
         },
         {
-          "label": "Jeudi",
-          "fixed": [
+          "cells": [
+            "Jeudi",
             "8h00",
             "1h20",
-            "0h35"
-          ],
-          "questionIds": [
-            "fin_reception_jeudi",
-            "fin_poste_jeudi"
+            {
+              "questionId": "fin_reception_jeudi"
+            },
+            "0h35",
+            {
+              "questionId": "fin_poste_jeudi"
+            }
           ]
         },
         {
-          "label": "Vendredi",
-          "fixed": [
+          "cells": [
+            "Vendredi",
             "8h00",
             "0h45",
-            "0h40"
-          ],
-          "questionIds": [
-            "fin_reception_vendredi",
-            "fin_poste_vendredi"
+            {
+              "questionId": "fin_reception_vendredi"
+            },
+            "0h40",
+            {
+              "questionId": "fin_poste_vendredi"
+            }
           ]
         },
         {
-          "label": "Total",
-          "questionIds": [
-            "total_reception",
-            "total_rangement"
+          "cells": [
+            "Total",
+            "",
+            {
+              "questionId": "total_reception"
+            },
+            "",
+            {
+              "questionId": "total_rangement"
+            },
+            ""
           ]
         }
       ]
