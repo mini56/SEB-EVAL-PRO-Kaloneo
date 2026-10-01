@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KALONÉO — Test Builder</title>
+  <link rel="stylesheet" href="../seb-evalpro/source/css/seb-design-system.css">
+  <link rel="stylesheet" href="test-builder.css">
+</head>
+<body>
+  <header class="builder-topbar">
+    <div>
+      <h1>KALONÉO — Test Builder</h1>
+      <p>Créer → Prévisualiser → Contrôler → Générer KALTEST</p>
+    </div>
+    <div class="builder-top-actions">
+      <button id="new-test" class="seb-action-btn seb-btn-danger" type="button">Nouveau</button>
+      <button id="save-draft" class="seb-action-btn seb-btn-functional" type="button">Sauvegarder</button>
+      <button id="download-json" class="seb-action-btn seb-btn-nav" type="button">Générer test.json</button>
+    </div>
+  </header>
+
+  <main class="builder-shell">
+    <section class="builder-editor seb-card">
+      <div class="section-title-row">
+        <h2>Définition du test</h2>
+        <span id="draft-status" class="status-pill">Brouillon local</span>
+      </div>
+
+      <div class="form-grid cols-3">
+        <label>Titre du test
+          <input id="test-title" type="text" placeholder="Ex. Calculs de commandes">
+        </label>
+        <label>ID du test
+          <div class="inline-field">
+            <input id="test-id" type="text" readonly>
+            <button id="make-id" class="mini-btn" type="button">Créer l’ID</button>
+          </div>
+        </label>
+        <label>Version
+          <input id="test-version" type="text" value="1.0.0">
+        </label>
+
+        <label>Catégorie
+          <select id="test-category">
+            <option value="mathematiques">Mathématiques</option>
+            <option value="francais">Français</option>
+            <option value="organisation">Organisation</option>
+            <option value="numerique">Numérique</option>
+            <option value="technique">Technique</option>
+            <option value="planification">Planification</option>
+          </select>
+        </label>
+
+        <label>Notation
+          <select id="test-scored">
+            <option value="true">Test noté</option>
+            <option value="false">Test non noté</option>
+          </select>
+        </label>
+
+        <label>Présentation de l’exercice
+          <select id="test-layout">
+            <option value="single">1 bloc — pleine largeur</option>
+            <option value="50-50">2 blocs — 50 / 50</option>
+            <option value="40-60">2 blocs — 40 / 60</option>
+            <option value="60-40">2 blocs — 60 / 40</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="form-grid cols-2">
+        <label>Scénario <span class="required">*</span>
+          <textarea id="test-scenario" rows="4" placeholder="Situation proposée au candidat"></textarea>
+        </label>
+        <label>Consignes <span class="required">*</span>
+          <textarea id="test-instruction" rows="4" placeholder="Ce que le candidat doit réaliser"></textarea>
+        </label>
+      </div>
+
+      <div class="option-row">
+        <label><input id="calculator-compatible" type="checkbox"> Calculatrice compatible</label>
+        <label><input id="chrono-enabled" type="checkbox"> Chronomètre commun</label>
+        <label><input id="admin-intervention" type="checkbox"> Intervention Administrateur</label>
+        <label><input id="autoevaluation-enabled" type="checkbox"> Autoévaluation</label>
+        <label><input id="external-material" type="checkbox"> Matériel extérieur</label>
+      </div>
+
+      <hr>
+
+      <div class="section-title-row">
+        <div>
+          <h2>Bloc Exercice</h2>
+          <p class="muted">Les blocs restent dans l’ordre ci-dessous. Un seul niveau de blocs est utilisé.</p>
+        </div>
+        <button id="add-block" class="seb-action-btn seb-btn-functional" type="button">+ Ajouter un bloc</button>
+      </div>
+
+      <div id="blocks-editor" class="blocks-editor"></div>
+
+      <div class="validation-box">
+        <strong>Contrôle avant génération</strong>
+        <ul id="validation-list"></ul>
+      </div>
+    </section>
+
+    <section class="builder-preview seb-card">
+      <div class="preview-toolbar">
+        <h2>Aperçu candidat</h2>
+        <button id="refresh-preview" class="seb-action-btn seb-btn-functional" type="button">Actualiser</button>
+      </div>
+
+      <div id="candidate-preview" class="candidate-preview">
+        <div class="preview-heading">
+          <h2 id="preview-title">Nouveau test</h2>
+          <span id="preview-version">v1.0.0</span>
+        </div>
+
+        <section class="preview-context">
+          <div class="preview-context-card">
+            <img src="../seb-evalpro/source/imageqcm/scenario.png" alt="">
+            <div><strong>Scénario :</strong><p id="preview-scenario"></p></div>
+          </div>
+          <div class="preview-context-card">
+            <img src="../seb-evalpro/source/imageqcm/avatar_transparant.png" alt="">
+            <div><strong>Consignes :</strong><p id="preview-instruction"></p></div>
+          </div>
+        </section>
+
+        <section id="preview-exercise" class="preview-exercise"></section>
+
+        <section id="preview-chrono" class="preview-common-tool" hidden>
+          <strong>Chronomètre</strong>
+          <span>00:00</span>
+          <div>
+            <button class="seb-action-btn seb-btn-functional" type="button" disabled>Démarrer</button>
+            <button class="seb-action-btn seb-btn-danger" type="button" disabled>Arrêter</button>
+          </div>
+        </section>
+
+        <footer class="preview-footer">
+          <button id="preview-calculator" class="seb-action-btn seb-btn-calculator" type="button" hidden>Calculatrice</button>
+          <button class="seb-action-btn seb-btn-danger" type="button">Abandonner l’exercice</button>
+          <button class="seb-action-btn seb-btn-nav" type="button">Suivant</button>
+        </footer>
+      </div>
+    </section>
+  </main>
+
+  <template id="block-template">
+    <article class="exercise-block seb-card">
+      <div class="block-header">
+        <div class="block-index"></div>
+        <select class="block-type">
+          <option value="text">Texte</option>
+          <option value="html">HTML</option>
+          <option value="html-js">HTML + JavaScript</option>
+          <option value="image">Image</option>
+          <option value="audio">Audio</option>
+          <option value="video">Vidéo</option>
+          <option value="question">Question</option>
+        </select>
+        <select class="block-zone">
+          <option value="left">Zone gauche</option>
+          <option value="right">Zone droite</option>
+        </select>
+        <button class="move-up mini-btn" type="button">↑</button>
+        <button class="move-down mini-btn" type="button">↓</button>
+        <button class="remove-block mini-btn danger" type="button">Supprimer</button>
+      </div>
+      <div class="block-body"></div>
+    </article>
+  </template>
+
+  <script src="test-builder.js"></script>
+</body>
+</html>
