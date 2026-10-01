@@ -373,3 +373,48 @@ Constat PILOTE #2 :
 - le code actuel conserve notamment le bouton Administrateur visible dans l'état verrouillé, ce qui ne correspond pas au fonctionnement attendu.
 
 Statut : **régression confirmée / priorité haute**.
+
+
+## 26. Cause identifiée — fin de parcours PILOTE #2 non raccordée au moteur Build #20
+
+Comparaison effectuée avec le dépôt d'origine Build #20.
+
+Build #20 :
+- le mécanisme commun de clôture surveille l'élément final `#pageFinale`;
+- lorsqu'il devient visible, `completeCandidateFromFinalPage()` déclenche la sauvegarde puis la clôture normale du candidat.
+
+PILOTE #2 :
+- la page finale du pilote est `#page-final`;
+- le runtime KALTEST passe simplement `state.phase = 'final'` puis affiche cette section ;
+- il n'appelle pas le mécanisme commun de fin candidat.
+
+Conséquence :
+- le candidat voit un écran indiquant que l'évaluation est terminée ;
+- mais le parcours reste techniquement actif ;
+- l'utilisateur doit ensuite intervenir via la barre Administrateur pour réellement terminer le parcours.
+
+Correction attendue :
+- ne pas créer une seconde logique de fin propre à KALTEST ;
+- raccorder la fin KALTEST au mécanisme commun de SEB EvalPro / Build #20 afin qu'une arrivée normale en fin de parcours sauvegarde, finalise le Replay et clôture automatiquement le candidat.
+
+Statut : **cause technique confirmée / priorité maximale**.
+
+## 27. Barre Admin — délai 1 seconde toujours présent dans le code
+
+Comparaison Build #20 / PILOTE #2 :
+- les deux codes contiennent `BAR_HIDE_DELAY = 1000`;
+- la valeur d'une seconde n'a donc pas disparu du code.
+
+Constat :
+- malgré cela, le comportement réel du PILOTE #2 ne donne plus cette sensation de pause et la barre est difficile à manœuvrer ;
+- les captures montrent que les boutons dépassent de la hauteur de la barre lorsqu'elle est repliée.
+
+Hypothèse technique forte :
+- le défaut provient de la géométrie / hauteur / état de visibilité de la barre et des boutons, pas de la constante de délai elle-même.
+
+Correction attendue :
+- reprendre la géométrie et le comportement visibles du Build #20 ;
+- barre verrouillée entièrement hors écran, aucun bouton visible ;
+- après sortie de la barre ouverte, maintien effectif d'environ 1 seconde avant repli complet.
+
+Statut : **cause partiellement isolée / à corriger en bloc**.
