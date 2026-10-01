@@ -6,7 +6,7 @@
 > Une décision marquée **VALIDÉE** ne doit pas être modifiée, supprimée ou contournée sans une nouvelle décision explicite.
 > Lorsqu’une décision évolue, l’ancienne entrée reste traçable et reçoit le statut **REMPLACÉE** avec la référence de la nouvelle décision.
 
-Dernière mise à jour : **1er octobre 2026**
+Dernière mise à jour : **1er octobre 2026 — récupération étendue de la discussion précédente**
 
 ---
 
@@ -481,3 +481,246 @@ L’objectif est qu’une page produite par KALONÉO reste structurellement pré
 - consignation de l’état du PILOTE #2 et du correctif `e8bbcd05b2e4260f4ff4cab80c1c0376982d266a`;
 - ajout des décisions retrouvées sur la séparation KALONÉO / SEB EvalPro et les deux Setup distincts;
 - ajout de la structure minimale validée des pages de test : Scénario, Consignes, icônes institutionnelles et bloc Exercice.
+
+
+---
+
+## 22. CSS et rendu visuel détaillé
+
+**Statut : VALIDÉ**
+
+La charte commune doit être appliquée à KALONÉO, à SEB EvalPro et à la prévisualisation du Builder.
+
+Règles retrouvées et validées :
+
+- aucune page ne doit recréer localement une apparence lorsqu’un composant commun existe déjà ;
+- le rendu de prévisualisation KALONÉO doit être reproductible fidèlement par SEB EvalPro ;
+- fond général : `linear-gradient(to bottom, #ffffff, #ebeef5)` ;
+- texte courant, champs, tableaux et boutons : **Calibri** ;
+- grands titres et titres de section : **Calibri Light** ;
+- le gras reste autorisé lorsqu’il améliore la hiérarchie ou la lisibilité ;
+- les conteneurs et blocs conservent les tailles, formes et proportions définies par les modèles KALONÉO validés ;
+- arrondis, ombres discrètes et espacements doivent rester harmonisés ;
+- les champs utilisent un état de focus bleu cohérent avec la charte ;
+- les tableaux utilisent le rendu institutionnel commun ;
+- les états **survol**, **actif/appuyé** et **désactivé** doivent être prévus et rester cohérents ;
+- une page candidat prévue sans défilement ne doit pas acquérir de scroll à cause d’une modification CSS ;
+- aucune apparence institutionnelle ne peut être modifiée silencieusement sans nouvelle règle validée.
+
+### Boutons Crystal
+
+Le rendu Crystal est commun à SEB EvalPro, KALONÉO et la barre Administrateur :
+
+- même géométrie ;
+- même fond clair ;
+- même arrondi ;
+- même ombre ;
+- mêmes effets de survol et de pression ;
+- seules la couleur du texte et celle du contour varient selon le rôle déjà défini : rouge, vert, orange ou bleu.
+
+---
+
+## 23. Présentations disponibles dans Test Builder
+
+**Statut : VALIDÉ**
+
+La présentation d’une page construite dans KALONÉO suit les règles suivantes :
+
+- **Scénario** : pleine largeur ;
+- **Consignes** : pleine largeur ;
+- **Exercice** : peut être présenté en un bloc ou en deux blocs ;
+- un modèle permet également de placer les **informations à gauche** et l’**exercice à droite** ;
+- pour une présentation à deux zones, les ratios disponibles sont :
+  - **50/50** ;
+  - **40/60** ;
+  - **60/40** ;
+- le choix de présentation est montré dans le Builder par des miniatures afin que l’auteur voie clairement la disposition choisie ;
+- un seul niveau de sous-blocs est autorisé ;
+- aucun sous-bloc ne peut contenir un autre sous-bloc.
+
+Le choix de présentation fait partie de la définition KALTEST afin que le rendu soit reproductible dans SEB EvalPro.
+
+---
+
+## 24. Bibliothèque d’icônes du Test Builder
+
+**Statut : VALIDÉ — nombre retrouvé dans l’historique : 70**
+
+La décision validée retrouvée dans la discussion précédente porte sur **70 icônes**, et non 80 :
+
+- 30 icônes initiales ;
+- 40 icônes supplémentaires validées ensuite ;
+- icônes petites ;
+- même taille ;
+- même style ;
+- bibliothèque harmonisée ;
+- recherche et sélection dans **Test Builder V5** ;
+- l’icône sélectionnée est enregistrée dans le fichier `.kaltest` ;
+- les icônes sont destinées à être réutilisables dans le projet.
+
+Pour les zones **Scénario** et **Consignes**, les deux icônes institutionnelles prévues sont gérées automatiquement par KALONÉO et ne doivent pas être recréées exercice par exercice.
+
+Au moment où la décision « 70 icônes » a été validée, l’intégration du catalogue dans le runtime KALONÉO / SEB EvalPro n’était pas encore considérée comme terminée.
+
+> **Contrôle anti-régression :** le registre ne doit pas passer de 70 à 80 icônes sur simple souvenir. Si 10 icônes supplémentaires ont été validées plus tard, il faut retrouver la preuve correspondante ou prendre explicitement une nouvelle décision avant de modifier ce nombre.
+
+---
+
+## 25. Validation d’un test et mode noté / non noté
+
+**Statut : VALIDÉ**
+
+Chaque test doit déclarer s’il est :
+
+- **noté** ;
+- **non noté**.
+
+Un test non noté reste présent dans le parcours mais **ne contribue pas au score de la section**.
+
+La validation KALTEST est obligatoire et bloquante :
+
+- un test non validé ne peut pas être utilisé dans un parcours ;
+- un parcours doit être refusé si un de ses tests n’est pas valide ;
+- une erreur de structure, de compatibilité ou de contenu bloquant doit être corrigée avant utilisation ;
+- la sauvegarde, la reprise et le Replay restent basés sur les mécanismes du Build #20.
+
+---
+
+## 26. Structure du Bilan et calcul des compétences
+
+**Statut : VALIDÉ**
+
+Le tableau institutionnel du Bilan conserve les **6 colonnes** :
+
+`Modules | NE | I | II | III | Commentaires`
+
+Règles de construction :
+
+- conservation des grandes familles institutionnelles ;
+- les lignes sont dynamiques selon les compétences réellement évaluées ;
+- un test absent du parcours ne crée aucune ligne artificielle ;
+- plusieurs tests peuvent alimenter une même compétence ;
+- pour une compétence alimentée par plusieurs tests, les points obtenus et les maximums sont additionnés avant calcul du niveau ;
+- hiérarchie possible :
+  - Grande section ;
+  - Sous-section / module ;
+  - famille éventuelle ;
+  - lignes de compétence ;
+- les seuils et textes de commentaires I / II / III / NE peuvent être configurés ;
+- des variables dynamiques peuvent être insérées dans les commentaires.
+
+### Seuils validés
+
+- **I** : de 70 % à 100 % ;
+- **II** : de 45 % à 69,99 % ;
+- **III** : de 0 % à 44,99 % ;
+- **NE** : uniquement lorsqu’une compétence est réellement non évaluée.
+
+---
+
+## 27. Abandon, points conservés et NE
+
+**Statut : VALIDÉ**
+
+Lorsqu’un exercice est abandonné :
+
+- les points déjà obtenus sont conservés ;
+- si l’abandon intervient au début, le score obtenu est 0 ;
+- sauf décision NE explicite de l’Administrateur, l’exercice reste inclus dans la moyenne.
+
+L’Administrateur dispose de la décision **« Exercice non évalué dans le bilan »** :
+
+### Case cochée
+
+- l’exercice est considéré comme non évalué pour le Bilan ;
+- ses contributions sont exclues du calcul ;
+- il alimente le statut **NE** lorsque la compétence n’a aucune autre contribution évaluée.
+
+### Case décochée
+
+- les points déjà réalisés sont conservés ;
+- l’exercice reste pris en compte dans le calcul de la compétence et dans la moyenne.
+
+Dans tous les cas :
+
+- le Replay et l’historique sont conservés ;
+- si une ligne de compétence possède d’autres contributions réellement évaluées, elle ne devient pas globalement NE ;
+- lorsqu’une case NE apparaît dans le Bilan, l’Administrateur peut ajouter un commentaire explicatif dans la colonne prévue.
+
+---
+
+## 28. Structure obligatoire d’un parcours candidat
+
+**Statut : VALIDÉ**
+
+Tous les parcours suivent la structure commune suivante :
+
+1. **Page 1 — Identification** ;
+2. **Page 2 — Introduction obligatoire** ;
+3. **Tests à partir de la page 3** ;
+4. **Page finale obligatoire**.
+
+Le parcours choisi et ses versions de tests doivent rester figés pour l’évaluation concernée afin que l’historique et le Replay restent reproductibles.
+
+### Identification candidat
+
+La décision initiale de 6 chiffres a été **REMPLACÉE** le 1er octobre 2026.
+
+Règle actuelle :
+
+- utiliser exactement les **7 premiers chiffres** de l’identifiant candidat basé sur le numéro de sécurité sociale ;
+- le champ et le contrôle de validation doivent imposer exactement 7 chiffres.
+
+---
+
+## 29. Replay, Quitter et fermeture définitive
+
+**Statut : VALIDÉ**
+
+- la **Page 1** démarre le Replay ;
+- la **Page finale** clôture normalement le Replay ;
+- **Quitter** sauvegarde l’état courant et permet la reprise ultérieure de l’évaluation ;
+- **Fermer la session active** termine définitivement l’évaluation ;
+- si l’Administrateur ferme volontairement la session avant la page finale, le Replay est finalisé et conservé jusqu’au point réellement atteint ;
+- les pages réellement parcourues doivent rester traçables afin que le Replay corresponde au parcours effectivement réalisé.
+
+---
+
+## 30. Compatibilité ascendante des tests
+
+**Statut : VALIDÉ**
+
+Un test validé pour une version de SEB EvalPro doit rester lisible par les versions mineures ultérieures de la même génération tant que le contrat reste compatible.
+
+Exemple de règle validée : un test validé pour SEB EvalPro **1.1** doit rester compatible avec **1.2 et les versions mineures ultérieures** de la même génération.
+
+Pour protéger cette règle :
+
+- les tests / fixtures historiques restent dans la CI ;
+- une nouveauté incompatible est refusée avant le parcours ;
+- la publication KALONÉO est bloquée si SEB EvalPro ne sait pas reproduire le nouveau contenu ;
+- SEB EvalPro ne change de version que lorsqu’une adaptation est réellement nécessaire.
+
+---
+
+## Historique complémentaire — récupération de la discussion précédente
+
+### 1er octobre 2026 — seconde passe
+
+Ont été réintégrées dans le registre les décisions qui manquaient après la première reconstruction :
+
+- CSS et rendu visuel détaillé ;
+- comportements hover / actif / désactivé et focus ;
+- préservation des pages sans scroll lorsque prévu ;
+- présentations Scénario / Consignes / Exercice et ratios 50/50, 40/60, 60/40 ;
+- bibliothèque validée de **70 icônes** et enregistrement dans `.kaltest` ;
+- test noté / non noté ;
+- validation KALTEST obligatoire et bloquante ;
+- structure et seuils du Bilan ;
+- agrégation de plusieurs tests sur une même compétence ;
+- règles abandon / NE ;
+- structure obligatoire Page 1 / Page 2 / tests / page finale ;
+- correction de 6 à **7 chiffres** pour l’identification candidat ;
+- démarrage et clôture du Replay ;
+- différence entre **Quitter** et **Fermer la session active** ;
+- compatibilité ascendante et conservation des fixtures historiques.
