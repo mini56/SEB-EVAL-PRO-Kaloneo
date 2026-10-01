@@ -13,10 +13,13 @@ Important : le PILOTE #2 ne contient qu'une partie du parcours Build #20. Certai
 
 Constat :
 - les boutons de la barre Administrateur sont plus hauts que la barre elle-même ;
-- ils restent visibles pendant tout le parcours candidat.
+- ils restent visibles pendant tout le parcours candidat ;
+- la barre a perdu le délai d'environ **1 seconde** avant de se replier ;
+- elle se ferme donc trop rapidement et devient difficile à manœuvrer lorsque l'utilisateur déplace la souris vers un bouton.
 
 Référence attendue :
 - reprendre le comportement et les proportions visuelles du Build #20 ;
+- rétablir le délai de fermeture d'environ **1 seconde** après la sortie de la zone active ;
 - la barre ne doit pas réduire inutilement la surface candidate.
 
 Statut : **régression probable / à corriger**.
