@@ -145,6 +145,14 @@ app.whenReady().then(async () => {
     await sleep(50);
     if (await visiblePage(win) !== 'page-intro') throw new Error('Identification valide : Introduction attendue.');
 
+    const candidateMeta = await win.webContents.executeJavaScript(
+      "JSON.parse(sessionStorage.getItem('candidat_data')||'{}')",
+      true
+    );
+    if (candidateMeta.date !== '2026-10-01' || candidateMeta.dateTest !== '2026-10-01') {
+      throw new Error('La date candidat n’est pas propagée vers le format SEB historique.');
+    }
+
     console.log('PILOT2_SMOKE_STAGE=introduction');
     await assertNoOverflow(win, 'Introduction');
 
@@ -167,7 +175,6 @@ app.whenReady().then(async () => {
       true
     );
     if (!calcVisible) throw new Error('La calculatrice flottante ne s’ouvre pas.');
-    await win.webContents.executeJavaScript("document.getElementById('close').click();true",true);
 
     const abandonUi = await win.webContents.executeJavaScript(
       `(function(){const b=document.getElementById('seb-evalpro-abandon-fixed');if(!b)return {button:false};b.click();const layer=document.getElementById('seb-evalpro-abandon-layer');const out={button:true,reasons:layer?.querySelectorAll('input[data-abandon-reason="1"]').length||0,ne:Boolean(layer?.querySelector('#seb-evalpro-abandon-ne')),password:Boolean(layer?.querySelector('#seb-evalpro-abandon-admin-password'))};layer?.querySelector('#seb-evalpro-abandon-cancel')?.click();return out;})()`,
@@ -201,12 +208,50 @@ app.whenReady().then(async () => {
       }
 
       await assertNoOverflow(win, testId);
+
+      const visualContract = await win.webContents.executeJavaScript(
+        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null};})()",
+        true
+      );
+
+      if (!visualContract.compatible && visualContract.calcDisplay !== 'none') {
+        throw new Error(testId + ' : bouton Calculatrice visible alors que le test est incompatible.');
+      }
+      if (testId === 'horaires_reception_controle' && visualContract.durationPlaceholders) {
+        throw new Error('Réception / contrôle : exemples de réponses encore affichés dans les champs.');
+      }
+      if (testId === 'genre_nombre' && visualContract.genreTables !== 2) {
+        throw new Error('Genre / Nombre : les deux tableaux Build #20 ne sont pas rendus.');
+      }
+      if (testId === 'paronymes_rapport' && (!visualContract.choiceFont || visualContract.choiceFont < 14)) {
+        throw new Error('Paronymes : police trop petite pour un test réel.');
+      }
+
       await fillOneAnswer(win);
       await win.webContents.executeJavaScript("document.getElementById('kaltest-next').click();true",true);
       await sleep(70);
+
+      if (index === 0) {
+        const calcAfterNavigation = await win.webContents.executeJavaScript(
+          "getComputedStyle(document.getElementById('calc-container')).display",
+          true
+        );
+        if (calcAfterNavigation !== 'none') {
+          throw new Error('La calculatrice reste ouverte après un changement d’exercice.');
+        }
+      }
     }
 
     if (await visiblePage(win) !== 'page-final') throw new Error('Page finale système attendue après les 7 tests.');
+
+    const finalAudit = await win.webContents.executeJavaScript(
+      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.getElementById('page-final')?.textContent||''),date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null};})()",
+      true
+    );
+    if (!finalAudit.congrats) throw new Error('La page finale Félicitations du Build #20 n’est pas restaurée.');
+    if (!finalAudit.requiredLegacy || !finalAudit.paronymes || !finalAudit.genre) {
+      throw new Error('Le pont KALTEST → Résultats/Bilan historiques est incomplet : ' + JSON.stringify(finalAudit));
+    }
 
     console.log('KALTEST_PILOT2_FUNCTIONAL_SMOKE: OK');
     console.log('PILOT2_REAL_SEB_VISUALS=Introduction image + Scenario/Consigne icons');
@@ -215,7 +260,11 @@ app.whenReady().then(async () => {
     console.log('PILOT2_FLOATING_CALCULATOR=OK');
     console.log('PILOT2_ABANDON_UI=4 reasons + admin password + NE');
     console.log('PILOT2_NO_VERTICAL_OVERFLOW=OK');
-    console.log('PILOT2_FINAL_PAGE=OK');
+    console.log('PILOT2_FINAL_PAGE=BUILD20_CONGRATULATIONS');
+    console.log('PILOT2_LEGACY_RESULTS_BRIDGE=OK');
+    console.log('PILOT2_CALCULATOR_CLOSE_ON_NAVIGATION=OK');
+    console.log('PILOT2_GENRE_NOMBRE_TWO_TABLES=OK');
+    console.log('PILOT2_PARONYMES_READABILITY=OK');
 
     win.destroy();
     app.exit(0);
