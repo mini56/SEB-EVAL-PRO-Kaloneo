@@ -28,7 +28,15 @@ if (duplicates.length) throw new Error('Étapes dupliquées dans la matrice : ' 
 
 const migrated = (matrix.steps || []).filter(step => step.status === 'contract-fixture-ready');
 const migratedIds = migrated.map(step => step.id);
-const expectedMigrated = ['qcm-2', 'qcm-2_1', 'genrenombres'];
+const expectedMigrated = [
+  'qcm-2',
+  'qcm-2_1',
+  'qcm-3',
+  'qcm-texte-trous',
+  'qcm-6',
+  'genrenombres',
+  'paronymes'
+];
 if (JSON.stringify(migratedIds) !== JSON.stringify(expectedMigrated)) {
   throw new Error(
     'Migrations contractuelles attendues : ' + expectedMigrated.join(', ') +
