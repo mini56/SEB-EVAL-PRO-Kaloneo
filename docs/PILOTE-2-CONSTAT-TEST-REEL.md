@@ -356,3 +356,20 @@ Les captures montrent que le problème principal du PILOTE #2 n'est pas le contr
 8. certaines métadonnées candidat, notamment la date, ne sont pas propagées jusqu'aux écrans Administrateur.
 
 Ces points doivent être corrigés avant d'utiliser le PILOTE #2 comme base visuelle de migration des exercices restants.
+
+
+## 25. Barre Administrateur verrouillée — aucun bouton visible
+
+Confirmation utilisateur : **règle de fonctionnement à respecter**.
+
+Lorsque la barre Administrateur est **verrouillée** :
+- aucun bouton Administrateur ne doit être visible ;
+- aucune partie de bouton ne doit dépasser de la barre repliée ;
+- la zone sensible en haut de l'écran reste le mécanisme permettant d'appeler / révéler l'accès Administrateur ;
+- les commandes Administrateur ne deviennent visibles qu'après déverrouillage / authentification.
+
+Constat PILOTE #2 :
+- des portions de boutons restent visibles en haut de l'écran alors que la barre est verrouillée ;
+- le code actuel conserve notamment le bouton Administrateur visible dans l'état verrouillé, ce qui ne correspond pas au fonctionnement attendu.
+
+Statut : **régression confirmée / priorité haute**.
