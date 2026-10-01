@@ -421,7 +421,42 @@ Règle de validation :
 
 ---
 
-## 19. Règle de tenue du présent registre
+## 19. Séparation KALONÉO / SEB EvalPro
+
+**Statut : VALIDÉ**
+
+Les deux programmes ont des rôles distincts :
+
+- **KALONÉO** construit, prépare, valide et exporte les tests / transitions au format KALTEST ;
+- **SEB EvalPro** reste le programme d’exécution des parcours candidats et doit reproduire fidèlement les contenus validés par KALONÉO ;
+- le contrat `.kaltest` constitue l’interface commune entre les deux programmes ;
+- le fonctionnement candidat reste **hors ligne** ;
+- KALONÉO ne doit pas valider une fonction que SEB EvalPro ne sait pas exécuter ;
+- KALONÉO et SEB EvalPro restent distribués comme **deux Setup distincts** ;
+- un même run de CI peut produire les deux Setup séparément, sans fusionner les deux applications.
+
+Cette séparation ne doit pas conduire à dupliquer plusieurs moteurs de rendu incompatibles : le contrat KALTEST et les contrôles de compatibilité restent la référence commune.
+
+---
+
+## 20. Structure minimale d’une page de test générée
+
+**Statut : VALIDÉ**
+
+Dans la construction des pages de test :
+
+- le bloc **Scénario** est obligatoire ;
+- le bloc **Consignes** est obligatoire ;
+- les icônes institutionnelles déjà prévues pour ces blocs sont fournies par KALONÉO et doivent être utilisées de façon cohérente ;
+- ces éléments d’en-tête ne doivent pas être réinventés différemment dans chaque exercice ;
+- le bloc **Exercice** vient ensuite et reçoit le contenu spécifique du test ;
+- les commandes communes comme Calculatrice, Chronomètre, Suivant et Abandonner sont pilotées par la définition du test / du parcours et les composants communs déjà validés.
+
+L’objectif est qu’une page produite par KALONÉO reste structurellement prévisible et reproductible par SEB EvalPro.
+
+---
+
+## 21. Règle de tenue du présent registre
 
 **Statut : VALIDÉ**
 
@@ -443,4 +478,6 @@ Règle de validation :
 - création du registre ;
 - reprise des décisions déjà validées dans la conception KALONÉO / KALTEST ;
 - ajout des règles de compatibilité et de non-régression ;
-- consignation de l’état du PILOTE #2 et du correctif `e8bbcd05b2e4260f4ff4cab80c1c0376982d266a`.
+- consignation de l’état du PILOTE #2 et du correctif `e8bbcd05b2e4260f4ff4cab80c1c0376982d266a`;
+- ajout des décisions retrouvées sur la séparation KALONÉO / SEB EvalPro et les deux Setup distincts;
+- ajout de la structure minimale validée des pages de test : Scénario, Consignes, icônes institutionnelles et bloc Exercice.
