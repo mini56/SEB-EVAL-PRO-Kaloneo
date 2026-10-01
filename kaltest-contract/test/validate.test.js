@@ -1,106 +1,99 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+
 const {
   validateBilanDefinition,
+  validateBilanCatalog,
   validateTestDefinition,
-  bilanEffectOfExercise
+  bilanEffectOfExercise,
+  aggregateLine,
+  resolveLevel
 } = require('../src/validate');
 
-const triBilan = {
-  id: 'bilan.competences_techniques.tri',
-  version: '1.0.0',
-  section: {
-    id: 'competences_techniques',
-    label: 'Compétences techniques'
-  },
-  subsection: {
-    id: 'tri_de_chevilles',
-    label: 'Tri de chevilles'
-  },
-  lines: [
-    {
-      id: 'bilan.competences_techniques.tri.temps',
-      label: 'Temps de réalisation',
-      mode: 'automatic',
-      inputs: [
-        { id: 'temps_moyen', type: 'duration', required: true }
-      ],
-      evaluation: {
-        sourceInput: 'temps_moyen',
-        direction: 'lower-is-better',
-        levelIThreshold: 720,
-        levelIIThreshold: 840
-      },
-      comments: {
-        I: '',
-        II: '',
-        III: '',
-        NE: 'Non évalué.'
-      }
-    },
-    {
-      id: 'bilan.competences_techniques.tri.erreurs',
-      label: 'Précision du tri',
-      mode: 'automatic',
-      inputs: [
-        { id: 'moyenne_erreurs', type: 'number', required: true }
-      ],
-      evaluation: {
-        sourceInput: 'moyenne_erreurs',
-        direction: 'lower-is-better',
-        levelIThreshold: 1,
-        levelIIThreshold: 3
-      },
-      comments: {
-        I: '',
-        II: '',
-        III: '',
-        NE: 'Non évalué.'
-      }
-    }
-  ]
-};
+function readJson(relativePath) {
+  return JSON.parse(fs.readFileSync(path.resolve(__dirname, relativePath), 'utf8'));
+}
 
-const triTest = {
-  id: 'tri_de_chevilles',
-  version: '1.0.0',
-  title: 'Tri de chevilles',
-  runtime: {
-    start: true,
-    save: true,
-    restore: true,
-    finish: true
-  },
-  outputs: [
-    { id: 'temps_moyen', type: 'duration' },
-    { id: 'moyenne_erreurs', type: 'number' },
-    { id: 'nombre_essais', type: 'integer' }
-  ],
-  bilanContributions: [
-    {
-      lineId: 'bilan.competences_techniques.tri.temps',
-      bindings: {
-        temps_moyen: 'temps_moyen'
-      }
-    },
-    {
-      lineId: 'bilan.competences_techniques.tri.erreurs',
-      bindings: {
-        moyenne_erreurs: 'moyenne_erreurs'
-      }
-    }
-  ]
-};
+const catalog = readJson('../catalog/bilan-seb-v1.json');
+const catalogResult = validateBilanCatalog(catalog);
+assert.deepStrictEqual(catalogResult, { ok: true, errors: [] });
 
-assert.deepStrictEqual(validateBilanDefinition(triBilan), { ok: true, errors: [] });
-assert.deepStrictEqual(validateTestDefinition(triTest, [triBilan]), { ok: true, errors: [] });
+const allLines = catalog.definitions.flatMap(definition => definition.lines || []);
+assert.strictEqual(catalog.definitions.length, 10);
+assert.strictEqual(allLines.length, 17);
+assert.strictEqual(allLines.filter(line => line.mode === 'manual').length, 5);
+assert.strictEqual(allLines.filter(line => line.mode === 'automatic').length, 12);
 
-const broken = JSON.parse(JSON.stringify(triTest));
-delete broken.bilanContributions[0].bindings.temps_moyen;
-const brokenResult = validateTestDefinition(broken, [triBilan]);
+for (const definition of catalog.definitions) {
+  assert.deepStrictEqual(validateBilanDefinition(definition), { ok: true, errors: [] });
+}
+
+const lineById = new Map(allLines.map(line => [line.id, line]));
+
+const migratedSimpleTest = readJson('../../tests/fixtures/kaltests/calculs-commandes-atelier/1.0.0/test.json');
+assert.deepStrictEqual(
+  validateTestDefinition(migratedSimpleTest, catalog.definitions),
+  { ok: true, errors: [] }
+);
+assert.strictEqual(migratedSimpleTest.questions.length, 5);
+assert.deepStrictEqual(
+  migratedSimpleTest.questions.map(question => question.acceptedAnswers[0]),
+  ['1020', '1250', '60', '525', '8']
+);
+
+const mathLine = lineById.get('bilan.savoirs_fondamentaux.mathematiques.comprendre_enonce_consigne');
+assert.ok(mathLine);
+
+const mathAggregate = aggregateLine(mathLine, [
+  { nonEvaluated: false, values: { score: 3, score_max: 5 } },
+  { nonEvaluated: false, values: { score: 4, score_max: 5 } }
+]);
+assert.strictEqual(mathAggregate.status, 'EVALUATED');
+assert.strictEqual(mathAggregate.metrics.score, 7);
+assert.strictEqual(mathAggregate.metrics.score_max, 10);
+assert.strictEqual(mathAggregate.metrics.pourcentage, 70);
+assert.strictEqual(resolveLevel(mathLine, mathAggregate), 'I');
+
+const oneExerciseIgnored = aggregateLine(mathLine, [
+  { nonEvaluated: false, values: { score: 3, score_max: 5 } },
+  { nonEvaluated: true, values: { score: 5, score_max: 5 } }
+]);
+assert.strictEqual(oneExerciseIgnored.metrics.score, 3);
+assert.strictEqual(oneExerciseIgnored.metrics.score_max, 5);
+assert.strictEqual(oneExerciseIgnored.metrics.pourcentage, 60);
+assert.strictEqual(resolveLevel(mathLine, oneExerciseIgnored), 'II');
+
+const allIgnored = aggregateLine(mathLine, [
+  { nonEvaluated: true, values: { score: 5, score_max: 5 } }
+]);
+assert.deepStrictEqual(allIgnored, { status: 'NE', metrics: {} });
+assert.strictEqual(resolveLevel(mathLine, allIgnored), 'NE');
+
+const triTimeLine = lineById.get('bilan.competences_techniques.tri_chevilles.temps');
+const triAggregate = aggregateLine(triTimeLine, [
+  { nonEvaluated: false, values: { temps_moyen: 730 } }
+]);
+assert.strictEqual(resolveLevel(triTimeLine, triAggregate), 'II');
+
+const manualLine = lineById.get('bilan.competences_techniques.fabrication.plan');
+assert.strictEqual(resolveLevel(manualLine, { status: 'EVALUATED', metrics: {} }), null);
+
+const brokenTest = JSON.parse(JSON.stringify(migratedSimpleTest));
+delete brokenTest.bilanContributions[0].bindings.score;
+const brokenResult = validateTestDefinition(brokenTest, catalog.definitions);
 assert.strictEqual(brokenResult.ok, false);
-assert.ok(brokenResult.errors.some(e => e.message.includes('liaison obligatoire manquante')));
+assert.ok(brokenResult.errors.some(error => error.message.includes('liaison obligatoire manquante')));
+
+const brokenTemplateDefinition = JSON.parse(JSON.stringify(catalog.definitions.find(
+  definition => definition.id === 'bilan.competences_techniques.tri_chevilles'
+)));
+brokenTemplateDefinition.lines[0].displayTemplates[0].template = 'Temps {{variable_inconnue}}';
+const brokenTemplateResult = validateBilanDefinition(brokenTemplateDefinition);
+assert.strictEqual(brokenTemplateResult.ok, false);
+assert.ok(brokenTemplateResult.errors.some(error => error.message.includes('variable dynamique inconnue')));
 
 assert.deepStrictEqual(
   bilanEffectOfExercise({ abandoned: true, nonEvaluated: false, earned: 4, maximum: 10 }),
@@ -122,6 +115,9 @@ assert.deepStrictEqual(
   }
 );
 
-console.log('KALTEST_CONTRACT_VALIDATION: OK');
+console.log('BILAN_CATALOG_BUILD20: OK — 10 définitions / 17 lignes');
+console.log('KALTEST_FIRST_SIMPLE_MIGRATION: OK — calculs_commandes_atelier 1.0.0');
+console.log('MULTI_TEST_AGGREGATION: OK — sommes score / score_max');
+console.log('DYNAMIC_BILAN_FIELDS: OK');
 console.log('ABANDON_WITH_POINTS: OK');
 console.log('ABANDON_NON_EVALUE_NE: OK');
