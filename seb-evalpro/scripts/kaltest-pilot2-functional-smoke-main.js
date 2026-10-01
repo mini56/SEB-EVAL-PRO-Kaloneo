@@ -35,14 +35,14 @@ async function visiblePage(win) {
 
 async function assertNoOverflow(win, label) {
   const metrics = await win.webContents.executeJavaScript(
-    "({bodyScrollHeight:document.body.scrollHeight,bodyClientHeight:document.body.clientHeight,contentScrollHeight:document.getElementById('kaltest-content')?.scrollHeight||0,contentClientHeight:document.getElementById('kaltest-content')?.clientHeight||0})",
+    "({bodyScrollHeight:document.body.scrollHeight,bodyClientHeight:document.body.clientHeight,contentScrollHeight:document.getElementById('kaltest-content')?.scrollHeight||0,contentClientHeight:document.getElementById('kaltest-content')?.clientHeight||0,contentInnerHeight:document.getElementById('kaltest-content')?.firstElementChild?.getBoundingClientRect().height||0})",
     true
   );
   if (metrics.bodyScrollHeight > metrics.bodyClientHeight + 2) {
-    throw new Error(label + ' : débordement vertical de la page candidat.');
+    throw new Error(label + ' : débordement vertical de la page candidat — ' + JSON.stringify(metrics));
   }
   if (metrics.contentClientHeight && metrics.contentScrollHeight > metrics.contentClientHeight + 3) {
-    throw new Error(label + ' : contenu KALTEST rogné dans son bloc.');
+    throw new Error(label + ' : contenu KALTEST rogné dans son bloc — ' + JSON.stringify(metrics));
   }
 }
 
