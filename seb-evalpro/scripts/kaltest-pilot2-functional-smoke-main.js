@@ -152,7 +152,7 @@ app.whenReady().then(async () => {
     await win.webContents.executeJavaScript("document.getElementById('close').click();true",true);
 
     const abandonUi = await win.webContents.executeJavaScript(
-      "(function(){const b=document.getElementById('seb-evalpro-abandon-fixed');if(!b)return {button:false};b.click();const layer=document.getElementById('seb-evalpro-abandon-layer');const out={button:true,reasons:layer?.querySelectorAll('input[data-abandon-reason="1"]').length||0,ne:Boolean(layer?.querySelector('#seb-evalpro-abandon-ne')),password:Boolean(layer?.querySelector('#seb-evalpro-abandon-admin-password'))};layer?.querySelector('#seb-evalpro-abandon-cancel')?.click();return out;})()",
+      `(function(){const b=document.getElementById('seb-evalpro-abandon-fixed');if(!b)return {button:false};b.click();const layer=document.getElementById('seb-evalpro-abandon-layer');const out={button:true,reasons:layer?.querySelectorAll('input[data-abandon-reason="1"]').length||0,ne:Boolean(layer?.querySelector('#seb-evalpro-abandon-ne')),password:Boolean(layer?.querySelector('#seb-evalpro-abandon-admin-password'))};layer?.querySelector('#seb-evalpro-abandon-cancel')?.click();return out;})()`,
       true
     );
     if (!abandonUi.button || abandonUi.reasons !== 4 || !abandonUi.ne || !abandonUi.password) {
