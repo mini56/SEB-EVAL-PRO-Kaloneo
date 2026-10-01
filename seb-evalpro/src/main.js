@@ -109,8 +109,12 @@ function stopCandidateKeyGuard() {
 }
 
 function startCandidateKeyGuard() {
-  // Le verrou clavier natif est strictement réservé à l'installation Candidat.
-  if (editionCapabilities.edition !== 'candidate') {
+  // SEB_UNIFIED_SETUP : le verrou dépend désormais du mode d'exécution,
+  // jamais d'une édition choisie à l'installation.
+  // Pendant les tests réels, la touche Windows reste volontairement disponible
+  // comme porte de secours. Mettre TEMP_ALLOW_WINDOWS_RECOVERY à false activera
+  // le verrou natif sur toute installation tant que l'Admin reste verrouillé.
+  if (TEMP_ALLOW_WINDOWS_RECOVERY) {
     stopCandidateKeyGuard();
     return;
   }
