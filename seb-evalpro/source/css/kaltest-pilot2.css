@@ -365,7 +365,22 @@ body {
 }
 
 .kaltest-choice-table {
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.08;
+  table-layout: fixed;
+}
+
+/* Le test Paronymes contient 20 lignes. Le tableau historique tenait sur une
+   seule page candidat : on conserve toutes les lignes et les 5 propositions
+   sans scroll, avec des cellules plus denses que les tableaux génériques. */
+.kaltest-choice-table th {
+  padding: 4px 5px;
+  line-height: 1.05;
+}
+
+.kaltest-choice-table td {
+  padding: 2px 4px;
+  line-height: 1.08;
 }
 
 .kaltest-choice {
