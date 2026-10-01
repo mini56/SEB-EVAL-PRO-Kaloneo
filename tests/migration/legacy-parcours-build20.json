@@ -1,0 +1,165 @@
+{
+  "source": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "registry": "seb-evalpro/source/js/seb-parcours.js"
+  },
+  "rule": "Chaque exercice est migré puis validé isolément et dans un nouveau parcours avant activation.",
+  "steps": [
+    {
+      "id": "qcm-1",
+      "file": "qcmv1.0.html",
+      "page": "1",
+      "role": "system-page-introduction",
+      "status": "preserve"
+    },
+    {
+      "id": "qcm-2",
+      "file": "qcmv1.0.html",
+      "page": "2",
+      "role": "test",
+      "status": "contract-fixture-ready",
+      "targetTestId": "calculs_commandes_atelier"
+    },
+    {
+      "id": "qcm-2_1",
+      "file": "qcmv1.0.html",
+      "page": "2_1",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "qcm-3",
+      "file": "qcmv1.0.html",
+      "page": "3",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "qcm-texte-trous",
+      "file": "qcmv1.0.html",
+      "page": "pageTexteTrous",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "qcm-4",
+      "file": "qcmv1.0.html",
+      "page": "4",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "qcm-5",
+      "file": "qcmv1.0.html",
+      "page": "5",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "qcm-5_1",
+      "file": "qcmv1.0.html",
+      "page": "5_1",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "qcm-6",
+      "file": "qcmv1.0.html",
+      "page": "6",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "autoeval1",
+      "file": "autoeval1.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "introbrique",
+      "file": "introbrique.html",
+      "role": "test-support",
+      "status": "pending"
+    },
+    {
+      "id": "brique",
+      "file": "brique.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "stock",
+      "file": "stock.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "planning",
+      "file": "planning.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "genrenombres",
+      "file": "genrenombres.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "dictee",
+      "file": "dictee.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "tri-de-cheville",
+      "file": "tri_de_cheville.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "nwtexte",
+      "file": "nwtexte.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "nvmail",
+      "file": "nvmail.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "autoeval2",
+      "file": "autoeval2.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "paronymes",
+      "file": "paronymes.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "carre",
+      "file": "carre.html",
+      "role": "test",
+      "status": "pending"
+    },
+    {
+      "id": "qcm-11",
+      "file": "qcmv1.0.html",
+      "page": "11",
+      "role": "legacy-step-review",
+      "status": "pending"
+    },
+    {
+      "id": "qcm-finale",
+      "file": "qcmv1.0.html",
+      "page": "finale",
+      "role": "system-page-final",
+      "status": "preserve"
+    }
+  ]
+}
