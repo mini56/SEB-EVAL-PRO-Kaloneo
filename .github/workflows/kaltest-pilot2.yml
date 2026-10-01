@@ -73,7 +73,24 @@ jobs:
         run: npm run prepare:web
 
       - name: Run real Electron Pilot 2 rendering smoke
-        run: npx electron --no-sandbox scripts/kaltest-pilot2-functional-smoke-main.js
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stdout = Join-Path $env:RUNNER_TEMP 'pilot2-smoke-out.log'
+          $stderr = Join-Path $env:RUNNER_TEMP 'pilot2-smoke-err.log'
+          $electron = Join-Path (Get-Location) 'node_modules/.bin/electron.cmd'
+          $process = Start-Process -FilePath $electron -ArgumentList '--no-sandbox','scripts/kaltest-pilot2-functional-smoke-main.js' -PassThru -NoNewWindow -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          if (-not $process.WaitForExit(150000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            Get-Content $stdout -ErrorAction SilentlyContinue
+            Get-Content $stderr -ErrorAction SilentlyContinue
+            throw 'Timeout du smoke Electron PILOTE 2 après 150 secondes.'
+          }
+          Get-Content $stdout -ErrorAction SilentlyContinue
+          Get-Content $stderr -ErrorAction SilentlyContinue
+          if ($process.ExitCode -ne 0) {
+            throw "Smoke Electron PILOTE 2 en échec (code $($process.ExitCode))."
+          }
 
       - name: Verify real SEB shell reuse
         shell: pwsh
