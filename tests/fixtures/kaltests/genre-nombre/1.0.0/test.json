@@ -1,0 +1,344 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "questionnaire.table",
+    "layout.split",
+    "bilan.bindings"
+  ],
+  "id": "genre_nombre",
+  "version": "1.0.0",
+  "title": "Genre et nombre",
+  "category": "francais",
+  "description": "Compléter des formes au singulier/pluriel et au masculin/féminin.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "genrenombres.html",
+    "sourceScript": "source/js/genrenombres-page.js",
+    "legacyParcoursId": "genrenombres"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "Dans de nombreuses situations de travail, il est nécessaire de rédiger des messages, remplir des formulaires, transmettre des informations ou compléter des documents. Complétez chaque case vide par la forme correcte.",
+  "instruction": "Complétez les cases vides en respectant les accents et les traits d'union.",
+  "presentation": {
+    "layout": {
+      "type": "split",
+      "ratio": "50/50",
+      "blocks": [
+        {
+          "id": "singulier_pluriel"
+        },
+        {
+          "id": "masculin_feminin"
+        }
+      ]
+    },
+    "tables": [
+      {
+        "id": "singulier_pluriel",
+        "title": "Singulier — Pluriel",
+        "headers": [
+          "Singulier",
+          "Pluriel"
+        ],
+        "questionIds": [
+          "singulier_pluriel_1",
+          "singulier_pluriel_2",
+          "singulier_pluriel_3",
+          "singulier_pluriel_4",
+          "singulier_pluriel_5",
+          "singulier_pluriel_6",
+          "singulier_pluriel_7",
+          "singulier_pluriel_8",
+          "singulier_pluriel_9",
+          "singulier_pluriel_10"
+        ]
+      },
+      {
+        "id": "masculin_feminin",
+        "title": "Masculin — Féminin",
+        "headers": [
+          "Masculin",
+          "Féminin"
+        ],
+        "questionIds": [
+          "masculin_feminin_1",
+          "masculin_feminin_2",
+          "masculin_feminin_3",
+          "masculin_feminin_4",
+          "masculin_feminin_5",
+          "masculin_feminin_6",
+          "masculin_feminin_7",
+          "masculin_feminin_8",
+          "masculin_feminin_9",
+          "masculin_feminin_10"
+        ]
+      }
+    ]
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "singulier_pluriel_1",
+      "prompt": "Complétez le singulier correspondant à « Des taux ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Un taux"
+      ],
+      "points": 1
+    },
+    {
+      "id": "singulier_pluriel_2",
+      "prompt": "Complétez le pluriel de « Un monsieur ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Des messieurs"
+      ],
+      "points": 1
+    },
+    {
+      "id": "singulier_pluriel_3",
+      "prompt": "Complétez le pluriel de « Un cheval ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Des chevaux"
+      ],
+      "points": 1
+    },
+    {
+      "id": "singulier_pluriel_4",
+      "prompt": "Complétez le pluriel de « Un gaz ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Des gaz"
+      ],
+      "points": 1
+    },
+    {
+      "id": "singulier_pluriel_5",
+      "prompt": "Complétez le singulier correspondant à « Des cieux ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Un ciel"
+      ],
+      "points": 1
+    },
+    {
+      "id": "singulier_pluriel_6",
+      "prompt": "Complétez le pluriel de « Un portail ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Des portails"
+      ],
+      "points": 1
+    },
+    {
+      "id": "singulier_pluriel_7",
+      "prompt": "Complétez le singulier correspondant à « Des yeux ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Un œil",
+        "un oeil"
+      ],
+      "points": 1
+    },
+    {
+      "id": "singulier_pluriel_8",
+      "prompt": "Complétez le pluriel de « Une Peugeot ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Des Peugeot"
+      ],
+      "points": 1
+    },
+    {
+      "id": "singulier_pluriel_9",
+      "prompt": "Complétez le pluriel de « Un chef-d'œuvre ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Des chefs-d'œuvre",
+        "Des chefs-d'oeuvre"
+      ],
+      "points": 1
+    },
+    {
+      "id": "singulier_pluriel_10",
+      "prompt": "Complétez le pluriel de « Un faire-part ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Des faire-part"
+      ],
+      "points": 1
+    },
+    {
+      "id": "masculin_feminin_1",
+      "prompt": "Complétez le masculin correspondant à « Publique ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Public"
+      ],
+      "points": 1
+    },
+    {
+      "id": "masculin_feminin_2",
+      "prompt": "Complétez le masculin correspondant à « Heureuse ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Heureux"
+      ],
+      "points": 1
+    },
+    {
+      "id": "masculin_feminin_3",
+      "prompt": "Complétez le féminin de « Blanc ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Blanche"
+      ],
+      "points": 1
+    },
+    {
+      "id": "masculin_feminin_4",
+      "prompt": "Complétez le masculin correspondant à « Finie ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Fini"
+      ],
+      "points": 1
+    },
+    {
+      "id": "masculin_feminin_5",
+      "prompt": "Complétez le féminin de « Comédien ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Comédienne"
+      ],
+      "points": 1
+    },
+    {
+      "id": "masculin_feminin_6",
+      "prompt": "Complétez le féminin de « Ministre ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Ministre"
+      ],
+      "points": 1
+    },
+    {
+      "id": "masculin_feminin_7",
+      "prompt": "Complétez le féminin de « Compagnon ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Compagne"
+      ],
+      "points": 1
+    },
+    {
+      "id": "masculin_feminin_8",
+      "prompt": "Complétez le masculin correspondant à « Mutuelle ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Mutuel"
+      ],
+      "points": 1
+    },
+    {
+      "id": "masculin_feminin_9",
+      "prompt": "Complétez le féminin de « Faux ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Fausse"
+      ],
+      "points": 1
+    },
+    {
+      "id": "masculin_feminin_10",
+      "prompt": "Complétez le féminin de « Minet ».",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "Minette"
+      ],
+      "points": 1
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    },
+    {
+      "id": "erreurs",
+      "type": "integer"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.savoirs_fondamentaux.expression_ecrite.maitrise",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ]
+}
