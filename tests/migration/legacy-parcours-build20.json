@@ -18,7 +18,8 @@
       "page": "2",
       "role": "test",
       "status": "contract-fixture-ready",
-      "targetTestId": "calculs_commandes_atelier"
+      "targetTestId": "calculs_commandes_atelier",
+      "fixturePath": "tests/fixtures/kaltests/calculs-commandes-atelier/1.0.0/test.json"
     },
     {
       "id": "qcm-2_1",
@@ -26,7 +27,8 @@
       "page": "2_1",
       "role": "test",
       "status": "contract-fixture-ready",
-      "targetTestId": "calculs_poids_volumes"
+      "targetTestId": "calculs_poids_volumes",
+      "fixturePath": "tests/fixtures/kaltests/calculs-poids-volumes/1.0.0/test.json"
     },
     {
       "id": "qcm-3",
@@ -105,7 +107,8 @@
       "file": "genrenombres.html",
       "role": "test",
       "status": "contract-fixture-ready",
-      "targetTestId": "genre_nombre"
+      "targetTestId": "genre_nombre",
+      "fixturePath": "tests/fixtures/kaltests/genre-nombre/1.0.0/test.json"
     },
     {
       "id": "dictee",
