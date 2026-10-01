@@ -40,8 +40,8 @@ async function reset(win) {
 
 async function fillIdentity(win, ss6) {
   const payload = JSON.stringify({
-    nom:'DUPONT',
-    prenom:'JEAN',
+    nom:'XX',
+    prenom:'YY',
     naissance:'1966-04-17',
     ss6:ss6,
     lieu:'Lorient',
