@@ -444,3 +444,77 @@ Objectif :
 - adapter la barre en temps réel à l'état du parcours.
 
 Statut : **règle fonctionnelle validée — à implémenter**.
+
+## 29. Captures Build #20 — référence visuelle confirmée pour la migration
+
+L'utilisateur a fourni une série de captures du Build #20 couvrant notamment :
+- page d'introduction et calculatrice ;
+- calculs de commandes ;
+- réception / contrôle / horaires ;
+- texte à trous ;
+- fractions ;
+- organisation ;
+- postures ;
+- conversions ;
+- autoévaluation ;
+- briques ;
+- stock ;
+- planning ;
+- dictée ;
+- tri de chevilles ;
+- paronymes ;
+- carré magique / puzzle ;
+- genre et nombre.
+
+Ces captures deviennent une **référence visuelle directe** pour comparer les migrations KALTEST.
+
+### Paronymes — comparaison particulièrement probante
+
+Build #20 :
+- le tableau contient le même volume d'information qu'en PILOTE #2 ;
+- il occupe largement la largeur utile de la fenêtre ;
+- la police reste confortable et lisible ;
+- les lignes conservent une hauteur suffisante ;
+- le scénario est compact en haut ;
+- l'exercice n'est pas enfermé dans un panneau générique qui oblige à réduire l'ensemble ;
+- la zone d'action du bas reste compacte.
+
+PILOTE #2 :
+- le tableau est fortement réduit ;
+- la police devient difficile à lire ;
+- une grande quantité d'espace reste pourtant inutilisée autour de l'exercice ;
+- les blocs génériques Scénario / Consigne / conteneur / pied de page consomment de l'espace avant le contenu réel ;
+- le rendu donne l'impression que l'exercice entier a été mis à l'échelle pour entrer dans une zone prédéfinie.
+
+Conclusion :
+- le nombre de lignes n'est pas le problème ;
+- la **composition générique du PILOTE #2 réduit inutilement le contenu** ;
+- la migration doit conserver la taille de lecture et la structure de chaque exercice Build #20 au lieu de forcer tous les tests dans un même gabarit rigide.
+
+### Genre et nombre
+
+Build #20 confirme la présentation attendue :
+- deux vrais tableaux distincts ;
+- « Singulier — Pluriel » à gauche ;
+- « Masculin — Féminin » à droite ;
+- mot source et champ de réponse disposés dans les deux colonnes du tableau ;
+- taille de police et hauteur de ligne confortables.
+
+Le rendu PILOTE #2 en simples lignes question + champ n'est donc pas fidèle.
+
+### Règle générale de migration visuelle
+
+Le moteur KALTEST ne doit pas imposer un redimensionnement uniforme aux exercices.
+
+Il doit permettre à chaque test de conserver :
+- sa structure d'origine ;
+- sa densité ;
+- ses proportions ;
+- ses tableaux ;
+- ses colonnes ;
+- ses images ;
+- ses arrière-plans lorsque pertinents ;
+- une taille de texte comparable au Build #20 ;
+- l'utilisation maximale de l'espace écran disponible.
+
+Statut : **référence visuelle confirmée — priorité haute avant conversion massive des exercices restants**.
