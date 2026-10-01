@@ -1,0 +1,52 @@
+name: KALTEST pilot parcours
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'seb-evalpro/source/kaltest-pilot.html'
+      - 'seb-evalpro/source/js/kaltest-pilot-*.js'
+      - 'seb-evalpro/source/kaltest/**'
+      - 'seb-evalpro/scripts/kaltest-pilot-*.js'
+      - '.github/workflows/kaltest-pilot.yml'
+  pull_request:
+    paths:
+      - 'seb-evalpro/source/kaltest-pilot.html'
+      - 'seb-evalpro/source/js/kaltest-pilot-*.js'
+      - 'seb-evalpro/source/kaltest/**'
+      - 'seb-evalpro/scripts/kaltest-pilot-*.js'
+      - '.github/workflows/kaltest-pilot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  pilot:
+    runs-on: windows-latest
+    timeout-minutes: 35
+
+    defaults:
+      run:
+        working-directory: seb-evalpro
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Verify offline pilot data
+        run: node scripts/kaltest-pilot-data-consistency.js
+
+      - name: Prepare SEB EvalPro web app
+        run: npm run prepare:web
+
+      - name: Run real Electron KALTEST pilot
+        run: npx electron --no-sandbox scripts/kaltest-pilot-functional-smoke-main.js
