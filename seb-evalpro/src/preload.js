@@ -746,29 +746,28 @@ function showTransferProgress(mode = 'export') {
 function sebSyncAdminBarState() {
   const bar = document.getElementById('seb-evalpro-topbar');
   if (!bar) return;
+
+  const buttons = Array.from(bar.querySelectorAll('button'));
+  const candidateBadge = document.getElementById('seb-evalpro-candidate-badge');
+
+  if (!adminUnlocked) {
+    buttons.forEach((button) => { button.hidden = button.id !== 'seb-evalpro-admin'; });
+    const adminButton = document.getElementById('seb-evalpro-admin');
+    if (adminButton) adminButton.textContent = 'Administrateur';
+    if (candidateBadge) candidateBadge.hidden = true;
+    return;
+  }
+
+  if (typeof bar.__sebUpdateButtons === 'function') {
+    bar.__sebUpdateButtons();
+    return;
+  }
+
   const adminButton = document.getElementById('seb-evalpro-admin');
-  const bilanButton = document.getElementById('seb-evalpro-bilan');
-  const returnButton = document.getElementById('seb-evalpro-return');
-  const exportCandidatesButton = document.getElementById('seb-evalpro-export-candidates');
-  const importCandidatesButton = document.getElementById('seb-evalpro-import-candidates');
-  const closeSessionButton = document.getElementById('seb-evalpro-close-session');
-  const quitApplicationButton = document.getElementById('seb-evalpro-quit-application');
-  const onBilan = isAdminBilanPage();
-  const onCandidateResults = !!adminCandidateResultsWorkspace;
-  const onAdminDetail = onBilan || onCandidateResults;
   if (adminButton) {
     adminButton.hidden = false;
-    adminButton.textContent = adminUnlocked ? 'Verrouiller' : 'Administrateur';
+    adminButton.textContent = 'Verrouiller';
   }
-  if (bilanButton) bilanButton.hidden = true;
-  if (returnButton) {
-    returnButton.hidden = !adminUnlocked || !onAdminDetail;
-    returnButton.textContent = 'Retour au candidat';
-  }
-  if (exportCandidatesButton) exportCandidatesButton.hidden = !adminUnlocked;
-  if (importCandidatesButton) importCandidatesButton.hidden = !adminUnlocked;
-  if (closeSessionButton) closeSessionButton.hidden = !adminUnlocked;
-  if (quitApplicationButton) quitApplicationButton.hidden = !adminUnlocked;
 }
 
 function injectAdminBar() {
@@ -782,6 +781,7 @@ function injectAdminBar() {
     <div id="seb-evalpro-candidate-badge" class="seb-evalpro-candidate-badge" hidden></div>
     <div class="seb-evalpro-spacer"></div>
     <button id="seb-evalpro-return" type="button" hidden>Retour à l'évaluation</button>
+    <button id="seb-evalpro-open-candidate" type="button" hidden>Ouvrir un candidat</button>
     <button id="seb-evalpro-bilan" type="button" hidden>Bilan</button>
     <button id="seb-evalpro-export-candidates" type="button" hidden>Exporter dossiers</button>
     <button id="seb-evalpro-import-candidates" type="button" hidden>Importer dossiers</button>
@@ -800,13 +800,13 @@ function injectAdminBar() {
     html{box-sizing:border-box}
     body{padding-top:0 !important;box-sizing:border-box}
     #seb-evalpro-top-hotzone{position:fixed;top:0;left:0;right:0;height:${HOTZONE_HEIGHT}px;z-index:2147483645;background:transparent}
-    #seb-evalpro-topbar{position:fixed;top:0;left:0;right:0;height:${BAR_HEIGHT}px;z-index:2147483646;display:flex;align-items:center;gap:8px;padding:0 12px;box-sizing:border-box;background:#004E70;color:#fff;font-family:Calibri,"Segoe UI",Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.25);transform:translateY(-100%);transition:transform .16s ease;will-change:transform}
+    #seb-evalpro-topbar{position:fixed;top:0;left:0;right:0;height:${BAR_HEIGHT}px;z-index:2147483646;display:flex;align-items:center;gap:8px;padding:0 12px;box-sizing:border-box;overflow:hidden;background:#004E70;color:#fff;font-family:Calibri,"Segoe UI",Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.25);transform:translateY(-100%);transition:transform .16s ease;will-change:transform}
     #seb-evalpro-topbar.seb-evalpro-visible{transform:translateY(0)}
     #seb-evalpro-topbar .seb-evalpro-name{font-size:18px;font-weight:700;white-space:nowrap}
     #seb-evalpro-topbar .seb-evalpro-build{font-size:12px;font-weight:700;white-space:nowrap;opacity:.9;padding:3px 7px;border:1px solid rgba(255,255,255,.55);border-radius:10px}
     #seb-evalpro-topbar .seb-evalpro-candidate-badge{font-size:13px;font-weight:700;white-space:nowrap;padding:5px 9px;border:1px solid rgba(255,255,255,.55);border-radius:4px;background:rgba(255,255,255,.14)}
     #seb-evalpro-topbar .seb-evalpro-spacer{flex:1}
-    #seb-evalpro-topbar button{font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;font-weight:400;padding:6px 12px;border:1px solid rgba(255,255,255,.75);border-radius:4px;background:#fff;color:#0070c0;cursor:pointer}
+    #seb-evalpro-topbar button{height:32px;max-height:32px;min-height:0!important;font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;font-weight:400;padding:4px 11px!important;border:1px solid rgba(255,255,255,.75);border-radius:7px;background:#fff;color:#0070c0;cursor:pointer;box-sizing:border-box}
     #seb-evalpro-topbar button:hover{background:#f2f2f2}
     #seb-evalpro-topbar #seb-evalpro-finish-candidate{background:#fff4e5;color:#8a4b00;border-color:#fff}
     #seb-evalpro-topbar #seb-evalpro-quit-application{background:#fff;color:#0070c0;border-color:#fff}
@@ -886,6 +886,7 @@ function injectAdminBar() {
   const candidateBadge = bar.querySelector('#seb-evalpro-candidate-badge');
   const bilanButton = bar.querySelector('#seb-evalpro-bilan');
   const returnButton = bar.querySelector('#seb-evalpro-return');
+  const openCandidateButton = bar.querySelector('#seb-evalpro-open-candidate');
   const exportCandidatesButton = bar.querySelector('#seb-evalpro-export-candidates');
   const importCandidatesButton = bar.querySelector('#seb-evalpro-import-candidates');
   const finishCandidateButton = bar.querySelector('#seb-evalpro-finish-candidate');
@@ -908,7 +909,10 @@ function injectAdminBar() {
 
   const scheduleHideBar = () => {
     clearTimeout(barHideTimer);
+    const leaveStartedAt = Date.now();
     barHideTimer = setTimeout(() => {
+      const elapsed = Date.now() - leaveStartedAt;
+      if (elapsed < BAR_HIDE_DELAY) return;
       if (!bar.matches(':hover') && !hotzone.matches(':hover')) hideBar();
     }, BAR_HIDE_DELAY);
   };
@@ -965,22 +969,40 @@ function injectAdminBar() {
     const onBilan = isAdminBilanPage();
     const onCandidateResults = !!adminCandidateResultsWorkspace;
     const onAdminDetail = (!!adminCandidateWorkspace && onBilan) || onCandidateResults;
-    bilanButton.hidden = true;
-    returnButton.hidden = !adminUnlocked || !onAdminDetail;
-    returnButton.textContent = 'Retour au candidat';
-    exportCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canExport;
-    importCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canImport;
-    finishCandidateButton.hidden = true;
-    closeSessionButton.hidden = !adminUnlocked;
-    quitApplicationButton.hidden = !adminUnlocked;
-    adminButton.textContent = adminUnlocked ? 'Verrouiller' : 'Administrateur';
-    refreshCandidateBadge();
-    if (adminUnlocked) {
-      ipcRenderer.invoke('candidate:active').then((active) => {
-        finishCandidateButton.hidden = !active;
-      }).catch(() => { finishCandidateButton.hidden = true; });
+
+    if (!adminUnlocked) {
+      [returnButton,openCandidateButton,bilanButton,exportCandidatesButton,importCandidatesButton,finishCandidateButton,quitApplicationButton,closeSessionButton]
+        .forEach((button) => { if (button) button.hidden = true; });
+      adminButton.hidden = false;
+      adminButton.textContent = 'Administrateur';
+      candidateBadge.hidden = true;
+      return;
     }
+
+    adminButton.hidden = false;
+    adminButton.textContent = 'Verrouiller';
+    bilanButton.hidden = true;
+    closeSessionButton.hidden = true;
+    quitApplicationButton.hidden = false;
+    returnButton.hidden = !onAdminDetail;
+    returnButton.textContent = 'Retour au candidat';
+
+    ipcRenderer.invoke('candidate:active').then((active) => {
+      const hasActiveJourney = !!active;
+      finishCandidateButton.hidden = !hasActiveJourney;
+      openCandidateButton.hidden = hasActiveJourney || isAdminCandidatesPage() || onAdminDetail;
+      exportCandidatesButton.hidden = hasActiveJourney || !editionCapabilities.canExport || onAdminDetail;
+      importCandidatesButton.hidden = hasActiveJourney || !editionCapabilities.canImport || onAdminDetail;
+      refreshCandidateBadge();
+    }).catch(() => {
+      finishCandidateButton.hidden = true;
+      openCandidateButton.hidden = isAdminCandidatesPage() || onAdminDetail;
+      exportCandidatesButton.hidden = !editionCapabilities.canExport || onAdminDetail;
+      importCandidatesButton.hidden = !editionCapabilities.canImport || onAdminDetail;
+      refreshCandidateBadge();
+    });
   };
+  bar.__sebUpdateButtons = updateAdminButtons;
 
   adminButton.addEventListener('click', async () => {
     showBar();
@@ -1028,13 +1050,29 @@ function injectAdminBar() {
       }
       adminUnlocked = true;
       updateAdminButtons();
-      // Après déverrouillage, quitter immédiatement l'écran du parcours :
-      // l'Administrateur arrive toujours sur l'écran neutre Espace administrateur.
-      adminNavigationLeaving = true;
-      await ipcRenderer.invoke('admin:open-candidate-browser').catch(() => false);
+      const active = await ipcRenderer.invoke('candidate:active').catch(() => null);
+      if (!active) {
+        adminNavigationLeaving = true;
+        await ipcRenderer.invoke('admin:open-candidate-browser').catch(() => false);
+        return;
+      }
+      // Parcours actif : rester sur la page courante et ne proposer que
+      // Terminer le parcours / Quitter / Verrouiller.
+      showBar();
       return;
     }
     scheduleHideBar();
+  });
+
+  openCandidateButton.addEventListener('click', async () => {
+    showBar();
+    const active = await ipcRenderer.invoke('candidate:active').catch(() => null);
+    if (active) {
+      updateAdminButtons();
+      return;
+    }
+    adminNavigationLeaving = true;
+    await ipcRenderer.invoke('admin:open-candidate-browser').catch(() => false);
   });
 
   bilanButton.addEventListener('click', () => {
@@ -1231,6 +1269,7 @@ function injectAdminBar() {
       'Le parcours candidat est maintenant terminé. Il ne pourra plus être repris et son dossier est désormais exportable.'
     );
     refreshCandidateBadge();
+    updateAdminButtons();
     scheduleHideBar();
   });
 
@@ -1428,7 +1467,7 @@ function showReadOnlyCandidateResults() {
 async function completeCandidateFromFinalPage() {
   if (candidateJourneyCompleted || candidateCompletionInFlight || adminUnlocked || adminCandidateWorkspace || adminCandidateResultsWorkspace) return;
   if (isAdminCandidatesPage() || isAdminBilanPage()) return;
-  const finalPage = document.getElementById('pageFinale');
+  const finalPage = document.getElementById('pageFinale') || document.getElementById('page-final');
   if (!finalPage) return;
   const style = window.getComputedStyle(finalPage);
   const visible = finalPage.classList.contains('visible')
@@ -1486,12 +1525,13 @@ window.addEventListener('DOMContentLoaded', async () => {
       periodicSaveTimer = setInterval(() => saveNow(false), SAVE_CHECKPOINT_MS);
     }
 
-    const finalPage = document.getElementById('pageFinale');
+    const finalPage = document.getElementById('pageFinale') || document.getElementById('page-final');
     if (finalPage && !isAdminCandidatesPage() && !isAdminBilanPage()) {
       const observer = new MutationObserver(() => { completeCandidateFromFinalPage(); });
       observer.observe(finalPage, { attributes:true, attributeFilter:['class','style'] });
       setTimeout(() => { completeCandidateFromFinalPage(); }, 0);
     }
+    window.addEventListener('seb-kaltest-final', () => { completeCandidateFromFinalPage(); });
   }
 });
 
@@ -1548,9 +1588,16 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   }
 
   function onFinalResults(){
-    if (String(pageName() || '').toLowerCase() !== 'qcmv1.0.html') return false;
-    const page = document.getElementById('pageFinale');
-    return !!(page && page.classList.contains('visible'));
+    const current = String(pageName() || '').toLowerCase();
+    if (current === 'qcmv1.0.html') {
+      const page = document.getElementById('pageFinale');
+      return !!(page && page.classList.contains('visible'));
+    }
+    if (current === 'kaltest-pilot2.html') {
+      const page = document.getElementById('page-final');
+      return !!(page && page.classList.contains('visible'));
+    }
+    return false;
   }
 
   function ensurePrivacyStyle(){
