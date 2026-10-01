@@ -9,7 +9,7 @@ const APP_BUILD_NUMBER = String(appPackage.sebBuildNumber || '').trim() || 'DEV'
 const APP_BUILD_LABEL = `Build #${APP_BUILD_NUMBER}`;
 // SEB_CANDIDATE_REPLAY_PROTO_PRELOAD
 const editionCapabilities = ipcRenderer.sendSync('app:edition-sync') || {
-  edition:'admin', canBilan:true, canAi:true, canImport:true, canExport:true
+  edition:'unified', canBilan:true, canAi:true, canImport:true, canExport:true
 };
 
 const BAR_HEIGHT = 44;
