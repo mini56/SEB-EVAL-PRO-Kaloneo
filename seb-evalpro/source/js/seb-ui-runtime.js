@@ -245,6 +245,20 @@
 
   function currentExerciseContext() {
     const file = pageName();
+
+    if (document.body?.dataset?.sebKaltestExercise === '1') {
+      const label = cleanText(document.body.dataset.sebKaltestLabel) || headingLabel(document.body, 'Exercice KALTEST');
+      const testId = cleanText(document.body.dataset.sebKaltestId) || 'kaltest';
+      return {
+        file,
+        qcmPage: '',
+        scope: document.body,
+        label,
+        key: file + '#kaltest:' + testId,
+        dynamicKaltest: true
+      };
+    }
+
     if (file === 'qcmv1.0.html') {
       const scope = visibleQcmPage();
       if (!scope || !scope.id || !QCM_EXERCISE_IDS.has(scope.id)) return null;
@@ -347,7 +361,7 @@
     }
   }
 
-  function saveAbandon(context, reasons, comment) {
+  function saveAbandon(context, reasons, comment, nonEvaluated = false) {
     const now = new Date();
     const record = {
       key: context.key,
@@ -356,6 +370,7 @@
       exercice: context.label,
       raisons: reasons.slice(),
       commentaire: String(comment || '').trim(),
+      nonEvaluated: Boolean(nonEvaluated),
       horodatage: now.toLocaleString('fr-FR'),
       iso: now.toISOString()
     };
@@ -414,7 +429,12 @@
     return false;
   }
 
-  function advanceAfterAbandon(context) {
+  function advanceAfterAbandon(context, record) {
+    if (context.dynamicKaltest && window.sebKaltestHost && typeof window.sebKaltestHost.onAbandon === 'function') {
+      window.sebKaltestHost.onAbandon(record || null);
+      return;
+    }
+
     if (context.file === 'qcmv1.0.html') {
       if (!invokeQcmNext(context)) {
         window.alert('L’abandon a bien été enregistré. Utilisez le bouton Suivant pour poursuivre.');
@@ -438,11 +458,12 @@
         <h2>Abandonner l’exercice</h2>
         <div class="seb-abandon-exercise"></div>
         <p class="seb-abandon-help">Indiquez la ou les raisons de votre abandon. Au moins une proposition doit être cochée. L’abandon doit ensuite être validé par un administrateur.</p>
-        <label class="seb-abandon-choice"><input type="checkbox" value="Je ne comprends pas la consigne"><span>Je ne comprends pas la consigne.</span></label>
-        <label class="seb-abandon-choice"><input type="checkbox" value="L’exercice est trop difficile"><span>L’exercice est trop difficile.</span></label>
-        <label class="seb-abandon-choice"><input type="checkbox" value="Fatigue, gêne ou douleur"><span>Je ressens de la fatigue, une gêne ou une douleur.</span></label>
-        <label class="seb-abandon-choice"><input type="checkbox" value="Autre raison" data-other="1"><span>Autre raison.</span></label>
+        <label class="seb-abandon-choice"><input type="checkbox" data-abandon-reason="1" value="Je ne comprends pas la consigne"><span>Je ne comprends pas la consigne.</span></label>
+        <label class="seb-abandon-choice"><input type="checkbox" data-abandon-reason="1" value="L’exercice est trop difficile"><span>L’exercice est trop difficile.</span></label>
+        <label class="seb-abandon-choice"><input type="checkbox" data-abandon-reason="1" value="Fatigue, gêne ou douleur"><span>Je ressens de la fatigue, une gêne ou une douleur.</span></label>
+        <label class="seb-abandon-choice"><input type="checkbox" data-abandon-reason="1" value="Autre raison" data-other="1"><span>Autre raison.</span></label>
         <textarea id="seb-evalpro-abandon-comment" placeholder="Précisez si nécessaire. Si vous cochez « Autre raison », indiquez ici la raison."></textarea>
+        <label class="seb-abandon-choice seb-abandon-ne-choice"><input type="checkbox" id="seb-evalpro-abandon-ne" data-abandon-ne="1"><span><strong>Exercice non évalué dans le bilan</strong><br><small>Les points obtenus et le barème de cet exercice seront exclus des calculs du bilan.</small></span></label>
         <div class="seb-abandon-admin"><label for="seb-evalpro-abandon-admin-password">Validation administrateur</label><input id="seb-evalpro-abandon-admin-password" type="password" autocomplete="off" placeholder="Mot de passe administrateur"><small>L’administrateur doit valider l’abandon avant de poursuivre.</small></div>
         <div id="seb-evalpro-abandon-error" aria-live="polite"></div>
         <div id="seb-evalpro-abandon-actions">
@@ -460,7 +481,8 @@
 
     layer.querySelector('#seb-evalpro-abandon-cancel').addEventListener('click', close);
     layer.querySelector('#seb-evalpro-abandon-confirm').addEventListener('click', async function () {
-      const checked = Array.from(layer.querySelectorAll('input[type="checkbox"]:checked'));
+      const checked = Array.from(layer.querySelectorAll('input[data-abandon-reason="1"]:checked'));
+      const nonEvaluated = !!layer.querySelector('#seb-evalpro-abandon-ne')?.checked;
       if (checked.length === 0) {
         error.textContent = 'Cochez au moins une raison avant de confirmer.';
         return;
@@ -502,9 +524,9 @@
           if (window.sebEvalPro && typeof window.sebEvalPro.save === 'function') window.sebEvalPro.save();
         } catch (_) {}
       }
-      saveAbandon(context, reasons, comment.value);
+      const record = saveAbandon(context, reasons, comment.value, nonEvaluated);
       close();
-      setTimeout(function () { advanceAfterAbandon(context); }, 40);
+      setTimeout(function () { advanceAfterAbandon(context, record); }, 40);
     });
 
     layer.addEventListener('keydown', function (event) {
