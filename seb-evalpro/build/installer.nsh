@@ -128,6 +128,10 @@ Function SebBrandingWelcomeCreate
   Pop $SebBrandingWelcomeImage
   ${NSD_SetBitmap} $SebBrandingWelcomeImage "$PLUGINSDIR\seb-eval-pro-branding.bmp" $SebBrandingWelcomeHandle
 
+  ; Le Build reste affiché dans le Setup unique sans réintroduire de choix d'édition.
+  ${NSD_CreateLabel} 8u 172u 92% 18u "SEB EvalPro — ${SEB_BUILD_LABEL}"
+  Pop $0
+
   GetDlgItem $0 $HWNDPARENT 1
   SendMessage $0 ${WM_SETTEXT} 0 "STR:Suivant >"
   nsDialogs::Show
