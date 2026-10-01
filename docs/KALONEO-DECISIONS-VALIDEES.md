@@ -198,53 +198,66 @@ Si le texte seul déborde de son bloc, KALONÉO bloque également la validation.
 
 ## 9. Médias
 
-**Statut : PARTIELLEMENT VALIDÉ — valeurs techniques exactes à confirmer**
+**Statut : PARTIELLEMENT VALIDÉ — principe et lecteurs validés, valeurs techniques exactes à confirmer**
 
-Décisions explicitement retrouvées :
+Décisions explicitement validées :
 
 - KALONÉO ne doit valider aucun média qu’une version compatible de SEB EvalPro ne sait pas reproduire fidèlement ;
 - le fonctionnement candidat doit rester entièrement **hors ligne** ;
 - les ressources nécessaires au test doivent être intégrées au paquet autonome et ne doivent pas dépendre d’une URL Internet ou d’un chemin externe ;
 - les médias ne doivent pas être déformés ni provoquer de débordement du rendu ;
-- Image, Audio et Vidéo font partie des types de contenu acceptés par le Builder.
+- Image, Audio et Vidéo font partie des types de contenu acceptés par le Builder ;
+- le **lecteur audio de la Dictée du Build #20** est la référence fonctionnelle retenue pour l’audio intégré aux pages de test ;
+- la vidéo intégrée suit le **même principe de lecteur commun**, adapté au support vidéo ;
+- KALONÉO n’accepte que des médias réellement lisibles par le lecteur retenu de façon compatible sous **Windows et Linux** ; un média non compatible avec les deux plateformes doit être rejeté avant utilisation.
 
-Éléments présents dans la conception précédente mais dont la validation explicite n’a pas encore été retrouvée dans l’historique :
+Règle anti-duplication :
 
-- utilisation du lecteur audio de la dictée du Build #20 comme référence exacte ;
-- commandes Lire / Reprendre, Pause, Stop, Recommencer, progression, temps courant / durée et compteur de lectures ;
-- formats/codecs exacts : WebM VP8/VP9, Opus/Vorbis, MP3, WAV PCM, OGG, FLAC ;
-- contrôle du conteneur et du codec réel au-delà de l’extension ;
+- un exercice ne doit pas embarquer son propre lecteur audio/vidéo concurrent lorsqu’un composant commun existe ;
+- le lecteur commun reste fourni par l’hôte KALONÉO / SEB EvalPro.
+
+Éléments techniques encore **À CONFIRMER** :
+
+- la liste exacte des commandes visibles du lecteur commun lorsqu’il est utilisé hors Dictée ;
+- les formats/codecs exacts autorisés (ex. WebM VP8/VP9, Opus/Vorbis, MP3, WAV PCM, OGG, FLAC) ;
+- le contrôle du conteneur et du codec réel au-delà de l’extension ;
 - avertissement à **250 Mo** ;
 - maximum **500 Mo** par média ;
 - maximum **1 Go** par paquet complet.
 
-Ces valeurs sont conservées comme **À CONFIRMER** et ne doivent pas être présentées comme décisions définitivement validées tant qu’une validation explicite n’a pas été retrouvée ou redonnée.
+Ces valeurs techniques restent conservées comme pistes de conception mais ne doivent pas être présentées comme décisions définitives tant qu’elles n’ont pas été explicitement validées ou confirmées par le contrat final.
 
 ---
 
 ## 10. Transitions
 
-**Statut : PARTIELLEMENT VALIDÉ — règles générales à confirmer**
+**Statut : VALIDÉ POUR LE FONCTIONNEMENT GÉNÉRAL — détails de reprise média à confirmer**
 
-Décision explicitement retrouvée pour la gestion d’une erreur média :
+Décisions validées :
+
+- l’Administrateur peut placer une **page de transition** où il le souhaite entre deux tests ;
+- la transition fait partie de l’**ordre du parcours** ;
+- les deux modes **manuel** et **automatique** sont prévus ;
+- le mode automatique est notamment utilisé pour une transition vidéo ;
+- lorsqu’une transition vidéo automatique suit un test, elle démarre après l’action **Suivant** du candidat ;
+- elle ne présente **aucun bouton candidat** ;
+- à la fin de la vidéo, la transition se masque et le **test suivant** est affiché automatiquement ;
+- plus généralement, une transition automatique démarre automatiquement et passe à l’élément suivant sans intervention du candidat.
+
+### Erreur ou média bloqué
 
 - le candidat ne peut pas contourner seul l’erreur ;
-- le secours Administrateur / moniteur utilise le code `SVG56`, insensible à la casse ;
+- il avertit le moniteur / Administrateur ;
+- le secours Administrateur utilise le code `SVG56`, insensible à la casse ;
 - il permet de réessayer le média ou de passer à la page suivante ;
 - un contournement doit être enregistré avec sa date/heure dans l’historique / Replay.
 
-Les règles suivantes figuraient dans la conception de la discussion précédente, mais leur validation explicite n’a pas encore été retrouvée :
+Éléments encore **À CONFIRMER** :
 
-- transition considérée comme élément de parcours non noté ;
-- contenu texte, image, audio ou vidéo ;
-- mode manuel avec bouton **Suivant** ;
-- mode automatique avec démarrage automatique, sans bouton candidat, puis passage à l’élément suivant ;
-- absence de contribution aux Résultats et au Bilan ;
-- absence de score et d’abandon d’exercice ;
-- conservation dans le parcours figé et dans la reprise ;
-- redémarrage du média depuis le début après interruption d’une transition automatique.
+- la règle exacte de reprise d’une transition automatique après interruption (reprendre à la position courante ou redémarrer depuis le début) ;
+- les détails de conservation interne de la position du média lorsque le parcours est quitté puis repris.
 
-Ces points restent consignés comme **À CONFIRMER** afin de ne pas perdre la conception antérieure sans les transformer artificiellement en décisions validées.
+Le caractère noté/non noté et l’impact éventuel sur Résultats/Bilan doivent rester cohérents avec la définition du type `transition` dans le contrat KALTEST et ne doivent pas être inventés par chaque média.
 
 ---
 
@@ -509,25 +522,29 @@ Le choix de présentation fait partie de la définition KALTEST afin que le rend
 
 ## 24. Bibliothèque d’icônes du Test Builder
 
-**Statut : VALIDÉ — nombre retrouvé dans l’historique : 70**
+**Statut : VALIDÉ — objectif actuel : 80 icônes ; historique documenté : 70**
 
-La décision validée retrouvée dans la discussion précédente porte sur **70 icônes**, et non 80 :
+La bibliothèque d’icônes du Test Builder est fixée à **80 icônes** comme objectif validé actuel.
 
-- 30 icônes initiales ;
-- 40 icônes supplémentaires validées ensuite ;
+Traçabilité de la discussion précédente :
+
+- première bibliothèque validée : environ **30 icônes** ;
+- ajout validé ensuite : **40 icônes supplémentaires**, soit **70 icônes** explicitement documentées dans l’historique ;
+- le 1er octobre 2026, l’objectif **80 icônes** a été retenu explicitement pour ne pas perdre la bibliothèque prévue lors de la récupération de la discussion précédente.
+
+Règles déjà validées pour la bibliothèque :
+
 - icônes petites ;
 - même taille ;
 - même style ;
 - bibliothèque harmonisée ;
 - recherche et sélection dans **Test Builder V5** ;
 - l’icône sélectionnée est enregistrée dans le fichier `.kaltest` ;
-- les icônes sont destinées à être réutilisables dans le projet.
+- les icônes sont réutilisables dans le projet.
 
-Pour les zones **Scénario** et **Consignes**, les deux icônes institutionnelles prévues sont gérées automatiquement par KALONÉO et ne doivent pas être recréées exercice par exercice.
+Pour les zones **Scénario** et **Consignes**, les icônes institutionnelles prévues sont gérées automatiquement par KALONÉO et ne doivent pas être recréées exercice par exercice.
 
-Au moment où la décision « 70 icônes » a été validée, l’intégration du catalogue dans le runtime KALONÉO / SEB EvalPro n’était pas encore considérée comme terminée.
-
-> **Contrôle anti-régression :** le registre ne doit pas passer de 70 à 80 icônes sur simple souvenir. Si 10 icônes supplémentaires ont été validées plus tard, il faut retrouver la preuve correspondante ou prendre explicitement une nouvelle décision avant de modifier ce nombre.
+> **Contrôle anti-régression :** conserver la nuance historique : 70 icônes sont précisément documentées (30 + 40). L’objectif actuel est 80 ; les 10 icônes complémentaires doivent être intégrées sans supprimer ni remplacer silencieusement les 70 déjà documentées.
 
 ---
 
@@ -1159,28 +1176,28 @@ Cette partie reste liée au **contrat des résultats complexes reporté** de la 
 
 ### Sauvegarde et reprise fine
 
-Le Validateur devra à terme vérifier que l’exercice sait restaurer les éléments qui le concernent, notamment :
+Le principe général de sauvegarde/reprise du Build #20 est validé. Le contrat KALTEST doit encore formaliser précisément la restauration des états internes propres à certains exercices, notamment :
 
-- réponses ;
 - positions d’objets ;
-- chrono ;
+- chrono interne ;
 - étape interne ;
-- autoévaluation éventuelle.
+- autoévaluation éventuelle ;
+- autres états complexes spécifiques.
 
 ### Replay
 
-Un exercice ne doit pas embarquer son propre moteur Replay.
+Le Replay reste centralisé et hérité du Build #20 : un exercice ne doit pas embarquer son propre moteur Replay.
 
 Restent à formaliser dans le contrat les déclarations éventuelles de :
 
-- nom du test ;
 - événements utiles ;
 - captures ;
-- état avant/après validation.
+- état avant/après validation ;
+- autres données spécifiques nécessaires au Replay d’un exercice complexe.
 
 ### Contenu réel du paquet `.kaltest`
 
-La discussion décrivait le paquet comme devant pouvoir embarquer les ressources nécessaires au test, notamment :
+Le principe d’un paquet **autonome et hors ligne** est validé. Le détail final du manifeste doit encore formaliser l’organisation des ressources, par exemple :
 
 - manifest ;
 - HTML ;
@@ -1193,54 +1210,44 @@ La discussion décrivait le paquet comme devant pouvoir embarquer les ressources
 - définition Bilan ;
 - données/tests nécessaires.
 
-Aucune simple référence à un fichier externe ne suffit.
+Une simple référence à une ressource externe n’est pas suffisante.
 
-### Paramétrage du chronomètre commun
+### Paramétrage avancé du chronomètre commun
 
-Cas d’usage identifiés :
+Le **moteur de chronomètre unique** est validé. Restent à formaliser comme paramètres contractuels les cas avancés tels que :
 
-- chrono simple ;
 - chrono répété, par exemple 3 à 5 mesures ;
 - remise à zéro automatique ;
 - focus automatique après arrêt ;
 - temps affiché ou masqué.
 
-Le moteur doit rester unique ; seuls ses paramètres varient.
+### Intervention Administrateur — contrat technique
 
-### Intervention Administrateur standardisée
-
-Un exercice ne doit pas inventer son propre mot de passe ou son propre mécanisme de sécurité.
+La présence d’une capacité **Intervention Administrateur** dans le Builder est une exigence validée. Reste à formaliser son contrat technique commun afin qu’un exercice n’invente pas son propre mot de passe ni son propre mécanisme de sécurité.
 
 Exemples de besoins identifiés :
 
 - saisir un nombre d’erreurs ;
 - confirmer qu’un exercice est terminé.
 
-Le composant d’accès sécurisé doit être fourni par l’hôte.
-
 ### Fin d’exercice standardisée
 
-La discussion a identifié comme architecture cible qu’un exercice ne devrait pas connaître directement la page suivante ni exécuter une navigation du type :
+Le principe de navigation centralisée par le parcours est validé : un exercice ne doit pas décider arbitrairement de sa page suivante.
 
-`window.location = "planning.html"`
-
-Le module devrait signaler sa fin à l’hôte, par exemple via un événement/contrat `EXERCICE_TERMINE`, puis l’hôte prend en charge :
+Le nom exact et l’API du signal de fin d’exercice restent à verrouiller. La discussion avait proposé un contrat du type `EXERCICE_TERMINE`, après quoi l’hôte prend en charge :
 
 - sauvegarde ;
 - calcul ;
 - Replay si nécessaire ;
 - ouverture du prochain élément selon l’ordre réel du parcours.
 
-**Ce nom d’événement et son contrat restent À VALIDER avant d’être considérés comme API définitive.**
+**Le nom `EXERCICE_TERMINE` reste une proposition tant que l’API finale n’est pas validée.**
 
-### Version minimale et capacités
+### Version minimale et manifeste de capacités
 
-La discussion évoquait aussi :
+La compatibilité minimale avec SEB EvalPro et les fonctions requises sont déjà validées dans le contrat KALTEST.
 
-- une version minimale de KALONÉO lorsque nécessaire ;
-- une zone de capacités particulières pouvant déclarer Calculatrice, Chronomètre, Intervention Administrateur, Autoévaluation et Matériel extérieur.
-
-Ces éléments doivent être confirmés dans le contrat final avant implémentation généralisée.
+Reste à formaliser précisément le manifeste des capacités particulières et leur schéma de données commun.
 
 ### Checklist de validation automatique proposée
 
@@ -1291,3 +1298,63 @@ Le document `Oui.docx` fourni par l’utilisateur a permis de récupérer et de 
 - la règle d’identifiant `ID<n>_<titre_normalise>` stable ;
 - le comportement détaillé des Questions d’exemple ;
 - plusieurs chantiers explicitement identifiés comme encore à verrouiller, conservés avec le statut **À VALIDER** afin de ne pas les transformer artificiellement en décisions acquises.
+
+---
+
+## 46. Interface candidat — référence Build #20
+
+**Statut : VALIDÉ**
+
+La référence fonctionnelle et visuelle du parcours candidat reste l’interface réelle du **Build #20**. Le pilote simplifié ne doit pas devenir la nouvelle référence par accident.
+
+Règles explicitement validées :
+
+- pages candidat conçues **sans scroll ni débordement** dans les conditions prévues ;
+- conservation de l’image / zone **Découverte** lorsqu’elle appartient au modèle de page concerné ;
+- conservation de la **calculatrice flottante existante** lorsqu’elle est activée par le parcours ;
+- conservation du mécanisme d’**abandon** du Build #20, avec les cases / raisons prévues et validation Administrateur ;
+- conservation de la **barre Administrateur** et de son comportement ;
+- la prévisualisation KALONÉO doit correspondre au rendu que SEB EvalPro produira réellement ;
+- une migration KALTEST ne doit pas remplacer silencieusement une page Build #20 par une version visuellement simplifiée si cette simplification n’a pas été validée.
+
+Cette règle est prioritaire lors des migrations : le contrat KALTEST doit reproduire le fonctionnement validé, pas seulement les réponses et les scores.
+
+---
+
+## 47. Capacités particulières déclarées par un test
+
+**Statut : VALIDÉ POUR LA PRÉSENCE DANS LE BUILDER — contrat détaillé à formaliser**
+
+Le Test Builder doit pouvoir déclarer des capacités particulières lorsqu’un exercice en a besoin, notamment :
+
+- **Calculatrice compatible** ;
+- **Utiliser le chronomètre KALONÉO** ;
+- **Intervention Administrateur** ;
+- **Autoévaluation** ;
+- **Matériel extérieur**.
+
+Règles déjà validées :
+
+- la calculatrice suit le fonctionnement à deux niveaux décrit en section 40 ;
+- le chronomètre utilise un moteur commun, jamais un chronomètre recodé exercice par exercice ;
+- Intervention Administrateur, Autoévaluation et Matériel extérieur font partie des capacités que le Builder doit pouvoir déclarer.
+
+Le détail technique de leur représentation dans le manifeste KALTEST reste à formaliser. Le statut de cette section valide **l’existence des capacités dans le Builder**, pas encore leur API interne finale.
+
+---
+
+## Historique complémentaire — récupération des conversations du Projet ChatGPT
+
+### 1er octobre 2026 — quatrième passe de consolidation
+
+Le déplacement des conversations KALONÉO dans le même Projet ChatGPT a permis de retrouver plusieurs validations explicites supplémentaires :
+
+- objectif actuel de **80 icônes**, avec conservation de la trace historique des 70 précisément documentées ;
+- lecteur audio de la Dictée Build #20 retenu comme modèle commun et vidéo sur le même principe ;
+- médias limités à ce qui est réellement compatible avec le lecteur retenu sous Windows et Linux ;
+- transition vidéo automatique sans bouton candidat : démarrage après **Suivant**, masquage à la fin et affichage automatique du test suivant ;
+- transitions manuelles / automatiques et positionnement libre dans l’ordre du parcours ;
+- interface candidat Build #20 conservée comme référence, notamment pages sans scroll, calculatrice flottante, abandon et barre Administrateur ;
+- présence dans le Builder des capacités Intervention Administrateur, Autoévaluation et Matériel extérieur.
+
+Les points encore seulement proposés ou insuffisamment documentés restent marqués **À CONFIRMER** ou **À VALIDER** au lieu d’être transformés artificiellement en décisions acquises.
