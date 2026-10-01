@@ -1502,3 +1502,157 @@ La relecture des conversations du Projet a permis d’ajouter :
 - les sections de catalogue validées Mathématiques, Français, Organisation, Numérique, Technique et Planification ;
 - durée et points issus du test et non modifiables dans la création du parcours ;
 - le maintien d’un Bilan propre à chaque parcours, sans Bilan global multi-parcours.
+
+
+---
+
+## 50. Socle contractuel des exercices — résultat, reprise, fin, chrono, Admin, autonomie et compatibilité
+
+**Statut : VALIDÉ — décision explicite du 1er octobre 2026**
+
+Cette section verrouille les points d’architecture qui étaient encore partiellement classés `À VALIDER` dans la section 45. En cas de contradiction, la présente section fait foi.
+
+### 50.1 Résultat standard minimal
+
+Tout exercice, quel que soit son type, doit produire au minimum un résultat commun comprenant :
+
+- **score obtenu** ;
+- **score maximum** ;
+- **pourcentage** ;
+- **statut** : terminé / abandonné / non réalisé ;
+- **données détaillées propres à l’exercice**.
+
+Les exercices complexes peuvent ajouter des données spécifiques, mais ne doivent pas supprimer ce noyau commun.
+
+### 50.2 Sauvegarde et reprise obligatoires — référence Build #20
+
+La sauvegarde doit empêcher toute perte totale **ou partielle** d’un parcours.
+
+Après fermeture/rechargement, l’exercice doit pouvoir restaurer exactement les données et états nécessaires, notamment selon le type d’exercice :
+
+- réponses ;
+- cases et sélections ;
+- positions d’objets ;
+- état du chronomètre ;
+- étape interne ;
+- autoévaluation éventuelle ;
+- autres états nécessaires à une reprise fidèle.
+
+Le comportement robuste déjà constaté et testé dans le **Build #20** constitue la référence à préserver.
+
+La reprise doit rester fiable y compris après des interruptions système telles que :
+
+- fermeture de session Windows ;
+- mise en veille ;
+- arrêt puis redémarrage du PC.
+
+Le Validateur KALTEST doit contrôler la sauvegarde/reprise afin qu’une régression ne puisse pas être injectée silencieusement.
+
+### 50.3 Fin d’exercice centralisée par KALONÉO / SEB EvalPro
+
+Un exercice ne choisit **jamais lui-même** sa page suivante et ne contient pas de navigation codée vers un nom de page fixe.
+
+Il signale uniquement qu’il est terminé.
+
+L’hôte KALONÉO / SEB EvalPro prend ensuite en charge :
+
+1. la sauvegarde ;
+2. le calcul / la consolidation du résultat ;
+3. l’enregistrement Replay lorsque nécessaire ;
+4. l’ouverture de l’élément suivant selon **l’ordre réel du parcours**.
+
+Cette règle est obligatoire afin qu’un même test puisse être réutilisé dans des parcours différents, avec des tests précédents et suivants différents.
+
+Le nom technique exact de l’événement ou de l’API de fin d’exercice reste un détail d’implémentation à formaliser ; il ne doit pas remettre en cause cette règle fonctionnelle.
+
+### 50.4 Chronomètre unique normalisé
+
+Il n’existe qu’**un seul moteur de chronomètre officiel KALONÉO / SEB EvalPro**.
+
+Un exercice déclare qu’il utilise le chronomètre commun et lui fournit les paramètres nécessaires.
+
+Aucun exercice ne doit embarquer ou recoder son propre moteur de chronomètre concurrent.
+
+Les variantes fonctionnelles nécessaires — chrono simple, mesures répétées, remise à zéro, focus après arrêt, affichage ou masquage du temps, etc. — doivent devenir des **paramètres du moteur commun**, et non des implémentations séparées.
+
+Le Tri de chevilles et les futurs exercices chronométrés doivent donc utiliser cette norme commune.
+
+### 50.5 Intervention Administrateur unique
+
+Il n’existe qu’**un seul mécanisme sécurisé d’Intervention Administrateur**, fourni par KALONÉO / SEB EvalPro.
+
+Un exercice peut demander une intervention — par exemple saisir un nombre d’erreurs ou confirmer une fin d’exercice — mais :
+
+- il ne crée pas son propre mot de passe ;
+- il ne crée pas son propre système de sécurité ;
+- il utilise la fenêtre / le composant commun fourni par l’hôte.
+
+### 50.6 Paquet `.kaltest` totalement autonome et hors ligne
+
+Un `.kaltest` doit être **entièrement autonome**.
+
+Toutes les ressources nécessaires à son fonctionnement doivent être fournies au moment de la **création du test** et intégrées au paquet ou à sa structure autonome, notamment selon les besoins :
+
+- HTML ;
+- JavaScript ;
+- CSS ;
+- images ;
+- audio ;
+- vidéo ;
+- correction ;
+- définition Bilan ;
+- autres ressources nécessaires.
+
+Exemple : si un test a besoin d’une vidéo, **la vidéo est fournie lors de la création du test**.
+
+Elle ne doit pas être téléchargée pendant la création, l’import, l’exécution ou le parcours candidat depuis Internet.
+
+Un test ne doit dépendre d’aucune URL Internet ni d’aucun fichier externe non embarqué pour fonctionner.
+
+### 50.7 Identifiant, version et compatibilité minimale
+
+Chaque `.kaltest` possède au minimum :
+
+- un **identifiant unique** ;
+- une **version** ;
+- la compatibilité / version minimale requise de KALONÉO / SEB EvalPro lorsque nécessaire ;
+- la déclaration des capacités utilisées.
+
+Objectif : empêcher le lancement d’un parcours contenant un test incompatible et éviter qu’une fonction non prise en charge fasse planter le parcours.
+
+Règles :
+
+- une version historique déjà utilisée reste disponible et reproductible ;
+- une version existante n’est jamais écrasée silencieusement ;
+- un paquet incompatible est refusé avant exécution ;
+- le parcours complet est bloqué avant démarrage si l’un de ses éléments n’est pas compatible.
+
+### Conséquence sur la section 45
+
+Les points suivants de la section 45 sont désormais **VALIDÉS dans leur principe** par la présente section :
+
+- résultat standard minimal ;
+- sauvegarde/reprise fine obligatoire ;
+- fin d’exercice centralisée ;
+- chronomètre commun ;
+- intervention Administrateur commune ;
+- autonomie réelle du paquet `.kaltest` ;
+- identifiant/version/compatibilité minimale.
+
+Restent à formaliser uniquement les **schémas techniques exacts**, noms d’API, structures JSON et paramètres détaillés qui n’ont pas encore été arrêtés.
+
+---
+
+## Historique complémentaire — validation du socle contractuel
+
+### 1er octobre 2026
+
+Validation explicite des sept règles d’architecture suivantes :
+
+1. résultat standard minimal commun ;
+2. sauvegarde/reprise sans perte totale ou partielle, avec Build #20 comme référence de robustesse face aux interruptions système ;
+3. fin d’exercice pilotée par l’ordre du parcours, jamais par une URL/page codée dans le test ;
+4. chronomètre unique normalisé ;
+5. intervention Administrateur unique fournie par KALONÉO ;
+6. `.kaltest` totalement autonome, ressources fournies à la création et jamais téléchargées pendant le parcours ;
+7. identifiant/version/compatibilité minimale afin de bloquer les incompatibilités avant démarrage.
