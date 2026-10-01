@@ -1716,3 +1716,66 @@ Règles validées :
 - si une vraie IA est ajoutée plus tard, elle devra pouvoir être branchée sur le Bilan sans casser le fonctionnement actuel de SEB-IA.
 
 Objectif : conserver une architecture simple aujourd’hui tout en laissant une voie d’évolution propre pour une IA plus performante demain.
+
+
+---
+
+## 53. SEB EvalPro — un seul Setup, deux modes
+
+**Statut : VALIDÉ — remplace la séparation d’installation Candidat / Administrateur**
+
+SEB EvalPro utilise désormais **un seul Setup complet** sur tous les postes.
+
+Il n’existe plus deux éditions choisies à l’installation. La distinction se fait uniquement **à l’exécution** :
+
+### Mode Candidat verrouillé
+
+Mode par défaut lors du parcours :
+
+- interface candidat en plein écran / kiosk selon les règles validées ;
+- fonctions administratives inaccessibles tant que l’Administrateur n’est pas authentifié ;
+- Import, Bilan, fonctions de gestion et SEB-IA restent masqués / protégés par le verrou Administrateur ;
+- sauvegarde, Replay, résultats et protections du parcours restent actifs ;
+- pendant la phase de tests réels, la porte de secours Windows temporaire de la section 51 reste conservée.
+
+### Mode Administrateur déverrouillé
+
+Après authentification par la barre Administrateur :
+
+- le verrou candidat est levé ;
+- la barre Windows peut réapparaître conformément au fonctionnement Admin validé ;
+- toutes les fonctions administratives sont disponibles : candidats, import/export, résultats, Replay, Bilan et SEB-IA ;
+- le même programme et les mêmes données sont utilisés ; aucun changement d’installation n’est nécessaire.
+
+### Reverrouillage
+
+Lorsque l’Administrateur verrouille de nouveau :
+
+- retour au mode Candidat ;
+- restauration du plein écran / kiosk ;
+- fonctions Admin à nouveau protégées ;
+- le parcours reprend selon les règles de sauvegarde et de navigation déjà validées.
+
+### Installation et compatibilité
+
+- l’ancien écran de choix **Version Candidat / Version Administrateur** est supprimé du Setup ;
+- les anciens marqueurs `edition-candidate.flag`, `edition-admin.flag`, `edition.json` et la valeur registre `Edition` sont nettoyés lors d’une mise à jour vers l’architecture unifiée ;
+- ces anciens marqueurs ne doivent plus piloter le comportement de l’application ;
+- les capacités du programme sont présentes dans l’installation unique ; leur accès est contrôlé par l’état **Administrateur verrouillé / déverrouillé** ;
+- la protection candidat ne doit plus dépendre d’une édition installée.
+
+### SEB-IA
+
+SEB-IA reste intégrée dans l’installation unique. Elle n’est accessible que dans le contexte Administrateur / Bilan.
+
+La possibilité future d’intégrer une IA locale plus puissante reste définie par la section 52 et concerne uniquement le Bilan / la synthèse.
+
+### Règle anti-régression
+
+Un garde automatique doit empêcher la réintroduction accidentelle :
+
+- du choix Candidat/Admin dans l’installateur ;
+- de capacités désactivées en fonction d’une édition installée ;
+- d’un verrou candidat conditionné par un marqueur d’installation plutôt que par l’état runtime de la session Administrateur.
+
+Cette architecture devient la référence pour la suite de KALONÉO / SEB EvalPro.
