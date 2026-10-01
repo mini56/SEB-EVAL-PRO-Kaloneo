@@ -322,6 +322,12 @@ window.sebKaltestPilot=Object.freeze({
   abandon,
   showPage,
   reset,
+  setBilanComment(comment){
+    state.bilanComment=String(comment||'');
+    if(state.bilan) state.bilan.comment=state.bilanComment;
+    saveState();
+    return state.bilanComment;
+  },
   ready(){return Boolean(testDefinition&&bilanCatalog);}
 });
 
