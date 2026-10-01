@@ -38,12 +38,12 @@ async function reset(win) {
   await sleep(60);
 }
 
-async function fillIdentity(win, ss6) {
+async function fillIdentity(win, ss7) {
   const payload = JSON.stringify({
     nom:'XX',
     prenom:'YY',
     naissance:'1966-04-17',
-    ss6:ss6,
+    ss7:ss7,
     lieu:'Lorient',
     groupe:'7',
     dateEvaluation:'2026-10-01'
@@ -114,11 +114,11 @@ app.whenReady().then(async () => {
       "({page:document.querySelector('.page.visible')?.id,message:document.getElementById('identity-status').textContent})",
       true
     );
-    if (invalidIdentity.page !== 'page-identification' || !/6 premiers chiffres/.test(invalidIdentity.message)) {
-      throw new Error('Le contrôle des 6 chiffres de sécurité sociale ne bloque pas correctement.');
+    if (invalidIdentity.page !== 'page-identification' || !/7 premiers chiffres/.test(invalidIdentity.message)) {
+      throw new Error('Le contrôle des 7 chiffres de sécurité sociale ne bloque pas correctement.');
     }
 
-    await fillIdentity(win, '166012');
+    await fillIdentity(win, '1660123');
     await goToExercise(win);
     await fillAnswers(win, {1:'1020',2:'1250'});
 
@@ -189,7 +189,7 @@ app.whenReady().then(async () => {
 
     console.log('KALTEST_PILOT_FUNCTIONAL_SMOKE: OK');
     console.log('PILOT_ROUTE=Identification -> Introduction -> KALTEST -> Final');
-    console.log('PILOT_IDENTITY_SS6=OK');
+    console.log('PILOT_IDENTITY_SS7=OK');
     console.log('PILOT_DYNAMIC_RENDER=5 questions');
     console.log('PILOT_RESUME_AFTER_RELOAD=OK');
     console.log('PILOT_ABANDON_EVALUATED=2/5 -> III');
