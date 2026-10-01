@@ -431,13 +431,15 @@ Dans la construction des pages de test :
 
 ### Icône Scénario validée
 
-L’icône **Scénario** retenue est :
+L’icône **Scénario** retenue est le visuel réellement validé dans le comparatif :
 
-- personnage + ordinateur + engrenage ;
+- **Proposition 1 — personnage bleu + mallette orange** ;
 - fond transparent ;
 - couleurs bleu / orange de la charte ;
 - sans texte ;
 - lisible à la taille d’affichage de référence d’environ **45 px**.
+
+Le fichier source commun est conservé sous le nom historique `imageqcm/scenario.png` afin que les pages existantes récupèrent automatiquement ce visuel sans multiplication des références.
 
 Pour **Consignes**, la règle retrouvée est de conserver l’icône existante de SEB EvalPro ; aucun nouveau visuel détaillé n’a été validé dans la discussion récupérée.
 
