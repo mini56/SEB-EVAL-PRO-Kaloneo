@@ -943,3 +943,51 @@ Il enregistre :
 - les règles responsive actuellement utilisées.
 
 Une modification CSS qui change le rendu ne doit pas être classée comme simple nettoyage. Elle doit être réévaluée comme une modification fonctionnelle/visuelle.
+
+---
+
+## 39. Formats `.kaltest` et `.kalparcours`
+
+**Statut : VALIDÉ**
+
+Les deux formats ont des rôles distincts.
+
+### `.kaltest`
+
+Paquet autonome décrivant un test construit et validé par KALONÉO.
+
+Il comprend ou référence de façon autonome les éléments nécessaires au test, notamment :
+
+- version du format KALTEST ;
+- version du Builder ;
+- version minimale de SEB EvalPro ;
+- identifiant du test ;
+- version du test ;
+- fonctions requises ;
+- ressources et médias locaux nécessaires.
+
+KALONÉO valide le paquet avant export. SEB EvalPro le **revalide à l’import** et le refuse en cas d’incompatibilité, de fonction inconnue ou d’incohérence.
+
+### `.kalparcours`
+
+Paquet autonome servant à transférer un parcours à l’identique entre plusieurs PC.
+
+Il doit embarquer :
+
+- la configuration du parcours ;
+- l’ordre exact des éléments ;
+- les réglages du parcours ;
+- les versions exactes des `.kaltest` utilisés ;
+- les tests nécessaires ;
+- les médias et ressources nécessaires ;
+- les informations / empreintes d’intégrité nécessaires au contrôle.
+
+Un `.kalparcours` :
+
+- ne contient pas de données candidat ;
+- n’altère jamais les candidats ni les résultats déjà présents ;
+- est revalidé par SEB EvalPro à l’import ;
+- est refusé s’il est incompatible ou incohérent ;
+- conserve les versions de tests nécessaires afin de reproduire exactement la session prévue.
+
+L’import/export en lot depuis dossier, disque ou clé USB reste sans mot de passe pour les tests et parcours.
