@@ -1,7 +1,7 @@
 {
   "name": "seb-evalpro",
   "version": "0.3.10",
-  "description": "SEB EvalPro - versions Candidat et Administrateur avec SEB-IA intégrée",
+  "description": "SEB EvalPro - un seul Setup, modes Candidat verrouillé et Administrateur",
   "main": "src/main.js",
   "author": "Sauvegarde 56",
   "license": "UNLICENSED",
