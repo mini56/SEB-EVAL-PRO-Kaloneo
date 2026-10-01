@@ -1,0 +1,176 @@
+name: Build Windows KALTEST Pilot 3 setup
+
+on:
+  push:
+    branches:
+      - dev-kaloneo-v2
+    paths:
+      - '.github/workflows/build-kaltest-pilot3-setup.yml'
+      - 'seb-evalpro/source/kaltest-pilot2.html'
+      - 'seb-evalpro/source/css/kaltest-pilot2.css'
+      - 'seb-evalpro/source/js/kaltest-pilot2-runtime.js'
+      - 'seb-evalpro/source/js/seb-floating-calculator.js'
+      - 'seb-evalpro/source/imageqcm/scenario.png'
+      - 'seb-evalpro/source/imageqcm/scenario.PNG'
+      - 'seb-evalpro/src/preload.js'
+      - 'seb-evalpro/src/replay-navigation-capture.js'
+      - 'seb-evalpro/src/kaltest-pilot3-main.js'
+      - 'seb-evalpro/build/kaltest-pilot3-builder.yml'
+      - 'seb-evalpro/scripts/kaltest-pilot2-functional-smoke-main.js'
+      - 'seb-evalpro/scripts/admin-bar-smoke-electron.js'
+      - 'seb-evalpro/scripts/kaltest-pilot3-regression-guard.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-release:
+    runs-on: windows-latest
+    timeout-minutes: 55
+
+    defaults:
+      run:
+        working-directory: seb-evalpro
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install SEB dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate KALTEST contract
+        working-directory: kaltest-contract
+        run: npm test
+
+      - name: JavaScript syntax checks
+        run: |
+          node --check source/js/kaltest-pilot2-runtime.js
+          node --check source/js/seb-floating-calculator.js
+          node --check src/preload.js
+          node --check src/replay-navigation-capture.js
+          node --check scripts/kaltest-pilot2-functional-smoke-main.js
+          node --check scripts/admin-bar-smoke-electron.js
+          node --check scripts/kaltest-pilot3-regression-guard.js
+
+      - name: Validate Pilot 3 regression contract
+        run: node scripts/kaltest-pilot3-regression-guard.js
+
+      - name: Generate Pilot 3 data
+        run: node scripts/build-kaltest-pilot2-data.js
+
+      - name: Prepare SEB web application
+        run: npm run prepare:web
+
+      - name: Revalidate Pilot 3 after web preparation
+        run: node scripts/kaltest-pilot3-regression-guard.js
+
+      - name: Run real Electron Pilot 3 KALTEST smoke
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stdout = Join-Path $env:RUNNER_TEMP 'pilot3-smoke-out.log'
+          $stderr = Join-Path $env:RUNNER_TEMP 'pilot3-smoke-err.log'
+          $electron = Join-Path (Get-Location) 'node_modules/.bin/electron.cmd'
+          $process = Start-Process -FilePath $electron -ArgumentList '--no-sandbox','scripts/kaltest-pilot2-functional-smoke-main.js' -PassThru -NoNewWindow -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          if (-not $process.WaitForExit(150000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            Get-Content $stdout -ErrorAction SilentlyContinue
+            Get-Content $stderr -ErrorAction SilentlyContinue
+            throw 'Timeout du smoke Electron PILOTE 3 après 150 secondes.'
+          }
+          Get-Content $stdout -ErrorAction SilentlyContinue
+          Get-Content $stderr -ErrorAction SilentlyContinue
+          if ($process.ExitCode -ne 0) {
+            throw "Smoke Electron PILOTE 3 en echec (code $($process.ExitCode))."
+          }
+
+      - name: Run contextual Admin bar Electron smoke
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stdout = Join-Path $env:RUNNER_TEMP 'pilot3-admin-out.log'
+          $stderr = Join-Path $env:RUNNER_TEMP 'pilot3-admin-err.log'
+          $electron = Join-Path (Get-Location) 'node_modules/.bin/electron.cmd'
+          $process = Start-Process -FilePath $electron -ArgumentList '--no-sandbox','scripts/admin-bar-smoke-electron.js' -PassThru -NoNewWindow -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          if (-not $process.WaitForExit(150000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            Get-Content $stdout -ErrorAction SilentlyContinue
+            Get-Content $stderr -ErrorAction SilentlyContinue
+            throw 'Timeout du smoke barre Admin PILOTE 3 après 150 secondes.'
+          }
+          Get-Content $stdout -ErrorAction SilentlyContinue
+          Get-Content $stderr -ErrorAction SilentlyContinue
+          if ($process.ExitCode -ne 0) {
+            throw "Smoke barre Admin PILOTE 3 en echec (code $($process.ExitCode))."
+          }
+
+      - name: Build isolated Windows Pilot 3 setup
+        run: npx electron-builder --win nsis --config build/kaltest-pilot3-builder.yml --publish never
+
+      - name: Verify Pilot 3 setup
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem -Path dist -Filter 'SEB-EvalPro-Kaloneo-PILOTE-3-0.0.3-Windows-Setup.exe' -File | Select-Object -First 1
+          if (-not $setup) {
+            throw 'Setup PILOTE 3 introuvable.'
+          }
+          $hash = (Get-FileHash -Algorithm SHA256 $setup.FullName).Hash.ToUpperInvariant()
+          "SETUP_PATH=$($setup.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "SETUP_NAME=$($setup.Name)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "SETUP_SHA256=$hash" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "PILOT3_SETUP=$($setup.Name)"
+          Write-Host "PILOT3_SHA256=$hash"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SEB-EvalPro-Kaloneo-PILOTE-3-0.0.3-Windows
+          path: seb-evalpro/dist/SEB-EvalPro-Kaloneo-PILOTE-3-0.0.3-Windows-Setup.exe
+          if-no-files-found: error
+
+      - name: Publish Pilot 3 release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = 'seb-kaloneo-pilot-003'
+          $title = 'SEB EvalPro Kalonéo — PILOTE #3'
+          if (gh release view $tag 2>$null) {
+            throw "La Release $tag existe deja. Utiliser un nouveau numero de pilote."
+          }
+          $notes = @"
+          PILOTE #3 Windows — corrections issues des tests réels du PILOTE #2.
+
+          Parcours inclus :
+          Identification
+          → Introduction
+          → 7 tests KALTEST migrés du Build #20
+          → Page finale Félicitations
+
+          Corrections principales testées :
+          - mise en page KALONÉO basée sur les proportions lisibles du Build #20
+          - Paronymes agrandi et lisible
+          - Genre / Nombre en deux vrais tableaux
+          - nouvelle icône Scénario validée sous le nom historique scenario.png
+          - calculatrice commune Build #20 et fermeture automatique au changement d'exercice
+          - suppression des exemples dans Réception / contrôle
+          - date candidat propagée aux écrans Administrateur
+          - pont KALTEST vers Résultats / Bilan historiques
+          - Replay différencié par étape et par exercice
+          - page finale Build #20 et fin automatique du parcours
+          - barre Admin contextuelle avec commandes réduites pendant un parcours actif
+          - boutons Admin contenus dans la barre et délai de repli conservé
+
+          Cette installation utilise un identifiant Windows et un dossier de données propres au PILOTE #3.
+
+          Fichier : $env:SETUP_NAME
+          SHA256 : $env:SETUP_SHA256
+          "@
+          gh release create $tag $env:SETUP_PATH --target dev-kaloneo-v2 --title $title --notes $notes
