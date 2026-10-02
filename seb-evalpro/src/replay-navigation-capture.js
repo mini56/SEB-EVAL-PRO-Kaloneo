@@ -211,4 +211,4 @@ function install() {
   }, true);
 }
 
-module.exports = { install, isNavigationControl };
+module.exports = { install, isNavigationControl, captureNow };
