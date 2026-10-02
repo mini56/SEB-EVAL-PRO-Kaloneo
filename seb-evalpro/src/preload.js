@@ -1074,9 +1074,9 @@ function injectAdminBar() {
     if (!button || !bar.contains(button)) return;
     const css = window.getComputedStyle(button);
     if (button.hidden || button.disabled || css.display === 'none' || css.visibility === 'hidden') return;
-    if (adminHelpButton !== button || document.getElementById('seb-evalpro-admin-help')?.hidden !== false) {
-      scheduleAdminHelp(button);
-    }
+    const tooltip = document.getElementById('seb-evalpro-admin-help');
+    if (adminHelpButton === button && (adminHelpShowTimer || (tooltip && tooltip.hidden === false))) return;
+    scheduleAdminHelp(button);
   };
   bar.addEventListener('mouseover', maybeScheduleAdminHelp);
   bar.addEventListener('mousemove', maybeScheduleAdminHelp);
