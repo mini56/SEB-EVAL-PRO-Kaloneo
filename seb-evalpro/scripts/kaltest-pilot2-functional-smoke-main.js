@@ -114,13 +114,15 @@ app.whenReady().then(async () => {
     console.log('PILOT2_SMOKE_STAGE=ready');
 
     const initial = await win.webContents.executeJavaScript(
-      "({page:document.querySelector('.pilot2-page.visible')?.id,tests:window.sebKaltestPilot2.data.tests.length,introImage:document.querySelector('#page-intro .pilot2-intro-cover img')?.getAttribute('src'),scenarioImage:document.querySelector('#page-exercise .kaltest-context img')?.getAttribute('src'),calculator:Boolean(document.getElementById('calc-container'))})",
+      "({page:document.querySelector('.pilot2-page.visible')?.id,tests:window.sebKaltestPilot2.data.tests.length,introVideo:Boolean(document.getElementById('pilot2-intro-video')),introLegacyImage:Boolean(document.querySelector('#page-intro .pilot2-intro-cover img')),introCalculatorGuide:Boolean(document.querySelector('#page-intro .pilot2-calculator-guide')),scenarioImage:document.querySelector('#page-exercise .kaltest-context img')?.getAttribute('src'),calculator:Boolean(document.getElementById('calc-container'))})",
       true
     );
 
     if (initial.page !== 'page-identification') throw new Error('Le parcours ne démarre pas par Identification.');
     if (initial.tests !== 7) throw new Error('Le PILOTE 2 doit contenir les 7 migrations KALTEST validées.');
-    if (initial.introImage !== 'imageqcm/image_cover.png') throw new Error('Image historique de la page Introduction absente.');
+    if (!initial.introVideo) throw new Error('Mini vidéo/animation d’introduction absente.');
+    if (initial.introLegacyImage) throw new Error('L’ancienne image de couverture est encore présente sur Introduction.');
+    if (initial.introCalculatorGuide) throw new Error('Le doublon de test calculatrice est encore présent sur Introduction.');
     if (initial.scenarioImage !== 'imageqcm/scenario.png') throw new Error('Icône Scénario historique absente.');
     if (!initial.calculator) throw new Error('Calculatrice flottante centrale absente.');
 
@@ -254,7 +256,7 @@ app.whenReady().then(async () => {
     }
 
     console.log('KALTEST_PILOT2_FUNCTIONAL_SMOKE: OK');
-    console.log('PILOT2_REAL_SEB_VISUALS=Introduction image + Scenario/Consigne icons');
+    console.log('PILOT2_REAL_SEB_VISUALS=Introduction video + Scenario/Consigne icons');
     console.log('PILOT2_DYNAMIC_TESTS=7');
     console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + supplemental fields + two tables + single choice');
     console.log('PILOT2_FLOATING_CALCULATOR=OK');
