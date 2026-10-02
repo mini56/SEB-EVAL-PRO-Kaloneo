@@ -113,7 +113,8 @@ app.whenReady().then(async () => {
       return {
         visible:getComputedStyle(calc).display!=='none',
         calc:{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height},
-        dock:{left:d.left,top:d.top,right:d.right,bottom:d.bottom,width:d.width,height:d.height}
+        dock:{left:d.left,top:d.top,right:d.right,bottom:d.bottom,width:d.width,height:d.height},
+        viewport:window.innerHeight
       };
     })()`, true);
     if (!calculator.visible) throw new Error('La calculatrice ne s’ouvre pas.');
@@ -126,7 +127,7 @@ app.whenReady().then(async () => {
     if (calculator.calc.left < calculator.dock.left - 45 || calculator.calc.right > calculator.dock.right + 20) {
       throw new Error('La calculatrice sort excessivement de sa zone dédiée : '+JSON.stringify(calculator));
     }
-    if (calculator.calc.bottom > window.innerHeight - 4) {
+    if (calculator.calc.bottom > calculator.viewport - 4) {
       throw new Error('La calculatrice est trop basse et sort de l’écran : '+JSON.stringify(calculator));
     }
 
