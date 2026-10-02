@@ -298,8 +298,8 @@ app.whenReady().then(async () => {
     // 7. Bilan : deux boutons Fermer, chacun sauvegarde et revient au candidat.
     workspaceLoad={
       ok:true,
-      candidateId:'SMOKE-BILAN',
-      candidate:{nom:'TEST',prenom:'BILAN',date:'02/10/2026'},
+      candidateId:'SMOKE-XY',
+      candidate:{nom:'XX',prenom:'YY',date:'02/10/2026'},
       state:{sessionStorage:{},localStorage:{},lastPage:'qcmv1.0.html',lastEvaluationPage:'qcmv1.0.html'}
     };
     await win.loadFile(path.join(web,'admin-bilan.html'));
@@ -318,8 +318,8 @@ app.whenReady().then(async () => {
 
     workspaceLoad={
       ok:true,
-      candidateId:'SMOKE-BILAN',
-      candidate:{nom:'TEST',prenom:'BILAN',date:'02/10/2026'},
+      candidateId:'SMOKE-XY',
+      candidate:{nom:'XX',prenom:'YY',date:'02/10/2026'},
       state:{sessionStorage:{},localStorage:{},lastPage:'qcmv1.0.html',lastEvaluationPage:'qcmv1.0.html'}
     };
     await win.loadFile(path.join(web,'admin-bilan.html'));
