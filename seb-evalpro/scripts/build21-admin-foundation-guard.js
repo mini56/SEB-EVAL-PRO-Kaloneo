@@ -9,8 +9,10 @@ const ROOT = path.resolve(__dirname, '..');
 function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8');
 }
-function sha256(rel) {
-  return crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, rel))).digest('hex');
+function gitBlobSha(rel) {
+  const data = fs.readFileSync(path.join(ROOT, rel));
+  const header = Buffer.from('blob ' + data.length + '\0', 'utf8');
+  return crypto.createHash('sha1').update(header).update(data).digest('hex');
 }
 function assert(condition, message) {
   if (!condition) {
@@ -30,18 +32,18 @@ function section(text, start, end) {
 // commit ff12d5a7a1f51a68d336cc165d1583876b373275
 
 const exactBuild21 = {
-  'src/candidate-catalog-main.js': '5ee9e13c77f36d89f7e17f15200763f44bfef2a28af1a7e1cd124109bdba60b6',
-  'src/replay-preload.js': '6ff79093a9cbb16891754f01f835f12cf7a17850889207b6fc4484722214b261',
-  'src/replay-main.js': 'e406e6f0a90d05407bea31561537c1d4fd5bd4c36b17479d788f87cd2d022215',
-  'src/bilan-history-preload.js': '2c3879ec6cc2e1a4533e5b355f897d81b89afc6f41eaa23b1f468e569db6c9d8',
-  'src/bilan-history-main.js': '289b9b784286600f7d92a77ef9263641a73d1b76b5cba0b757b8885afca2202c',
-  'src/candidate-store-main.js': 'f897b4fa74a4c412a55cf3a7805e35f500d7e699cd981c649000cde9b16c10ed',
-  'src/candidate-data-crypto.js': '0420112986b6485a459f47c39815bd00f4c92ea569c3362828d2f3ed054db9fe',
-  'src/candidate-folder-utils.js': '9a5542afcd3ea6127960ebc3fb6c97af1da80de20d1fa48a3fb37c66915f55b7'
+  'src/candidate-catalog-main.js': '0b9573e5691a136b2a74b44ea2bfee796108fcb8',
+  'src/replay-preload.js': 'a26aba2415935793382d76857bdd2fe24454c7b7',
+  'src/replay-main.js': '004baf83051d805bdd47c3fe865d5ffd6175f38c',
+  'src/bilan-history-preload.js': '7f53efab6addbf19a1cb8b42aff5233ff4db5416',
+  'src/bilan-history-main.js': '2e5f549fa0623c64029eb0e6f29cb6af5a9c6848',
+  'src/candidate-store-main.js': '48e47a9047b4cd303c8b80956665808cbb674165',
+  'src/candidate-data-crypto.js': '7344aee00420552443543fd03ac33f85dc987fdb',
+  'src/candidate-folder-utils.js': 'bd3c06186a83384552416d5a1f9126f036935c2f'
 };
 
 for (const [rel, expected] of Object.entries(exactBuild21)) {
-  assert(sha256(rel) === expected, rel + ' ne correspond plus au module de référence Build #21.');
+  assert(gitBlobSha(rel) === expected, rel + ' ne correspond plus au module de référence Build #21.');
 }
 
 const preload = read('src/preload.js');
