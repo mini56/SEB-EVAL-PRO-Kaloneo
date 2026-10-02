@@ -170,7 +170,7 @@
 
   function skipButton(button) {
     return !!button.closest(
-      '#toolbar,.toolbar-row2,.ql-toolbar,#calc-container,' +
+      '#toolbar,.toolbar-row2,.ql-toolbar,#calc-container,#page-identification,' +
       '#page4 .fraction-title,#page4 .items-wrapper'
     );
   }
