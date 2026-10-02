@@ -243,6 +243,37 @@ app.whenReady().then(async () => {
       return;
     }
 
+    // 4b. Quitter ne doit plus inventer un parcours candidat lorsqu'il n'y en a aucun.
+    await win.webContents.executeJavaScript("document.getElementById('seb-evalpro-quit-application').click();true");
+    await wait(100);
+    const quitWithoutActive = await win.webContents.executeJavaScript(
+      "String(document.querySelector('#seb-evalpro-quit-application-dialog .seb-session-close-text')?.textContent||'').trim()"
+    );
+    if (!/Aucun parcours candidat n.est en cours/.test(quitWithoutActive)) {
+      die('Quitter annonce encore un faux parcours actif', { quitWithoutActive });
+      return;
+    }
+    await win.webContents.executeJavaScript("document.getElementById('seb-quit-application-cancel').click();true");
+    await wait(60);
+
+    activeCandidate = { candidateId:'SMOKE', displayName:'Candidat test', status:'EN_COURS' };
+    await win.webContents.executeJavaScript("window.dispatchEvent(new Event('pageshow'));true");
+    await wait(250);
+    await win.webContents.executeJavaScript("document.getElementById('seb-evalpro-quit-application').click();true");
+    await wait(100);
+    const quitWithActive = await win.webContents.executeJavaScript(
+      "String(document.querySelector('#seb-evalpro-quit-application-dialog .seb-session-close-text')?.textContent||'').trim()"
+    );
+    if (!/parcours candidat en cours sera sauvegardé/i.test(quitWithActive)) {
+      die('Quitter ne reconnaît plus un vrai parcours actif', { quitWithActive });
+      return;
+    }
+    await win.webContents.executeJavaScript("document.getElementById('seb-quit-application-cancel').click();true");
+    await wait(60);
+    activeCandidate = null;
+    await win.webContents.executeJavaScript("window.dispatchEvent(new Event('pageshow'));true");
+    await wait(180);
+
     // 5. Écran SEB EvalPro depuis une vraie page Admin.
     await win.loadFile(path.join(web,'admin-candidats.html'));
     await wait(700);
