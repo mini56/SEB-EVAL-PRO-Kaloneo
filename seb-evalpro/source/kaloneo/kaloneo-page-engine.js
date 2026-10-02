@@ -361,6 +361,97 @@
     return wrap;
   }
 
+
+  function renderTextBlock(block){
+    const wrap=el('div','k-content-text'+(block.role==='closing'?' k-content-closing':''));
+    if(block.align) wrap.style.textAlign=block.align;
+    if(block.title) wrap.append(el('h2','',block.title));
+    for(const paragraph of block.paragraphs||[]) wrap.append(el('p','',paragraph));
+    return wrap;
+  }
+
+  function renderImageMessage(block){
+    const wrap=el('div','k-image-message');
+    const img=el('img');
+    img.src=block.image||'';
+    img.alt=block.alt||'';
+    wrap.append(img,el('p','',block.text||''));
+    return wrap;
+  }
+
+  function renderFactoryArrival(block, sceneIndex){
+    const card=el('section','k-card k-animation-card');
+    const heading=el('div','k-animation-heading');
+    heading.append(el('span','k-animation-symbol','▶'));
+    const headingText=el('div');
+    headingText.append(el('strong','',block.title||'Animation'));
+    if(block.help) headingText.append(el('p','',block.help));
+    heading.append(headingText);
+    card.append(heading);
+
+    const scene=el('div','k-factory-scene');
+    scene.setAttribute('role','img');
+    scene.setAttribute('aria-label',block.ariaLabel||'Animation');
+    scene.append(el('div','k-factory-sky'));
+    scene.append(el('div','k-factory-tree left'));
+    scene.append(el('div','k-factory-tree right'));
+
+    const factory=el('div','k-factory-building');
+    factory.append(el('div','k-factory-wing'));
+    factory.append(el('div','k-factory-sign','KALONÉO'));
+    const door=el('div','k-factory-door'); door.append(el('span')); factory.append(door);
+    scene.append(factory);
+    scene.append(el('div','k-factory-gate left'));
+    scene.append(el('div','k-factory-gate right'));
+    scene.append(el('div','k-factory-path'));
+    scene.append(el('div','k-factory-road'));
+    scene.append(el('div','k-factory-road-line a'));
+    scene.append(el('div','k-factory-road-line b'));
+    scene.append(el('div','k-factory-road-line c'));
+
+    const person=el('div','k-factory-person');
+    ['head','body','backpack','arm left','arm right','leg left','leg right'].forEach(cls=>{
+      person.append(el('span','k-person-'+cls.replace(' ',' k-person-')));
+    });
+    scene.append(person);
+    scene.append(el('div','k-factory-end',block.finalMessage||'Bienvenue'));
+    card.append(scene);
+
+    const duration=Math.max(1000,Number(block.durationMs)||7000);
+    const storageKey='kaloneo_scene_played_'+(DEF.id||'page')+'_'+sceneIndex;
+    function finish(){
+      scene.classList.remove('playing');
+      scene.classList.add('finished');
+      scene.dataset.playState='finished';
+    }
+    function play(){
+      if(scene.dataset.playState) return;
+      let played=false;
+      try{played=sessionStorage.getItem(storageKey)==='1'}catch(_){}
+      if(block.playMode==='once' && played){finish();return}
+      try{if(block.playMode==='once')sessionStorage.setItem(storageKey,'1')}catch(_){}
+      scene.classList.add('playing');
+      scene.dataset.playState='playing';
+      setTimeout(finish,duration);
+    }
+    requestAnimationFrame(play);
+    return card;
+  }
+
+  function renderContentStack(section){
+    const wrap=el('section','k-content-stack');
+    if(section.maxWidth) wrap.style.maxWidth=section.maxWidth+'px';
+    let sceneIndex=0;
+    for(const block of section.blocks||[]){
+      if(block.type==='text') wrap.append(renderTextBlock(block));
+      else if(block.type==='image-message') wrap.append(renderImageMessage(block));
+      else if(block.type==='animated-scene' && block.scene==='factory-arrival'){
+        wrap.append(renderFactoryArrival(block,sceneIndex++));
+      }
+    }
+    return wrap;
+  }
+
   function renderNavigation(nav){
     const foot=el('footer','k-footer');
     if(nav?.next){
@@ -374,13 +465,16 @@
   function render(){
     applyTypography(DEF);
     root.innerHTML='';
-    const page=el('div','k-page');
+    const hasHeader=!!DEF.header;
+    const isContentPage=(DEF.sections||[]).some(section=>section.type==='content-stack');
+    const page=el('div','k-page'+(isContentPage?' k-page-content':''));
     page.dataset.kaloneoGenerated='1';
     page.dataset.kaloneoPageId=DEF.id||'';
-    page.append(renderHeader(DEF.header||{}));
+    if(hasHeader) page.append(renderHeader(DEF.header));
     for(const section of DEF.sections||[]){
       if(section.type==='form-grid') page.append(renderFormGrid(section));
       else if(section.type==='practice-grid') page.append(renderPractice(section));
+      else if(section.type==='content-stack') page.append(renderContentStack(section));
     }
     page.append(renderNavigation(DEF.navigation||{}));
     root.append(page);
