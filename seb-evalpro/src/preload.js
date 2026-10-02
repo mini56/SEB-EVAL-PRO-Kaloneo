@@ -307,15 +307,15 @@ function createSessionCloseDialog() {
     const backdrop = document.createElement('div');
     backdrop.id = 'seb-evalpro-session-close-dialog';
     backdrop.innerHTML = `
-      <div class="seb-session-close-card" role="dialog" aria-modal="true" aria-label="Fermer la session active active">
-        <div class="seb-session-close-title">Fermer la session active active ?</div>
+      <div class="seb-session-close-card" role="dialog" aria-modal="true" aria-label="Fermer la session active">
+        <div class="seb-session-close-title">Fermer la session active ?</div>
         <div class="seb-session-close-text">
-          SEB EvalPro va sauvegarder les données, finaliser le Replay, terminer définitivement le parcours candidat en cours, puis quitter.
+          SEB EvalPro va sauvegarder les données, finaliser le Replay et terminer définitivement le parcours candidat en cours. Le programme restera ouvert dans l’espace Administrateur.
         </div>
         <div class="seb-session-close-warning">Le parcours en cours ne pourra plus être repris. Son dossier et ses données restent conservés pour le bilan et l’export.</div>
         <div class="seb-session-close-actions">
           <button type="button" id="seb-session-close-cancel">Annuler</button>
-          <button type="button" id="seb-session-close-ok" class="danger">Fermer la session active active</button>
+          <button type="button" id="seb-session-close-ok" class="danger">Fermer la session active</button>
         </div>
       </div>`;
 
@@ -787,7 +787,7 @@ function injectAdminBar() {
     <button id="seb-evalpro-import-candidates" type="button" hidden>Importer dossiers</button>
     <button id="seb-evalpro-finish-candidate" type="button" hidden>Terminer le parcours du candidat</button>
     <button id="seb-evalpro-quit-application" type="button" hidden>Quitter</button>
-    <button id="seb-evalpro-close-session" type="button" hidden>Fermer la session active active</button>
+    <button id="seb-evalpro-close-session" type="button" hidden>Fermer la session active</button>
     <button id="seb-evalpro-admin" type="button">Administrateur</button>`;
 
   const hotzone = document.createElement('div');
@@ -1359,7 +1359,7 @@ function injectAdminBar() {
       return;
     }
 
-    // Fermer la session active active termine le parcours candidat mais ne ferme jamais SEB EvalPro.
+    // Fermer la session active termine le parcours candidat mais ne ferme jamais SEB EvalPro.
     adminNavigationLeaving = true;
     await ipcRenderer.invoke('admin:open-candidate-browser').catch(() => false);
   });
