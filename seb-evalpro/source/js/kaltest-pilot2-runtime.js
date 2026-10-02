@@ -659,7 +659,10 @@
         savedAt: Date.now()
       }));
     } else if (test.id === 'texte_a_trous_stage_logistique') {
-      responses.pageTexteTrous = questions.map(question => String(testState.answers?.[question.id] ?? ''));
+      responses.pageTexteTrous = questions.map(question => ({
+        user: String(testState.answers?.[question.id] ?? ''),
+        correct: String(Array.isArray(question.acceptedAnswers) && question.acceptedAnswers.length ? question.acceptedAnswers[0] : '')
+      }));
       scores.pageTexteTrous = Number(result.score) || 0;
     } else if (test.id === 'conversions_atelier_expedition') {
       copyRange('page6_q', 'page6_q', 1, true, true);
@@ -679,6 +682,7 @@
         const answer = String(testState.answers?.[question.id] ?? '');
         const detail = result.details?.[question.id] || {};
         return {
+          paronyme: question.prompt,
           mot: question.prompt,
           reponseUtilisateur: answer || '(non repondu)',
           bonnesReponses: Array.isArray(question.acceptedAnswers) ? question.acceptedAnswers : [],
@@ -778,7 +782,15 @@
     }
   }
 
-  function finishCurrentTest() {
+  async function captureReplayPage() {
+    try {
+      if (window.sebEvalPro?.captureReplay) {
+        await window.sebEvalPro.captureReplay();
+      }
+    } catch (_) {}
+  }
+
+  async function finishCurrentTest() {
     const test = currentTest();
     const testState = currentTestState();
     const status = document.getElementById('exercise-status');
@@ -800,6 +812,7 @@
       scoreMax:testState.result.scoreMax
     });
 
+    await captureReplayPage();
     advance();
   }
 
@@ -820,7 +833,7 @@
     showPhase('exercise');
   }
 
-  function onAbandon(record) {
+  async function onAbandon(record) {
     const test = currentTest();
     const testState = currentTestState();
     if (!test || !testState) return;
@@ -837,6 +850,7 @@
       scoreMax:testState.result.scoreMax
     });
 
+    await captureReplayPage();
     advance();
   }
 
