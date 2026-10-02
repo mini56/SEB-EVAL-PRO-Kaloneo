@@ -1957,7 +1957,7 @@ La barre Administrateur comportera un bouton unique :
 
 Ce bouton ne réalise directement aucune opération d'import, d'export, de création ou de modification.
 
-Il ouvre uniquement une **page Administrateur dédiée à la gestion des tests et des parcours KALONÉO**, sur le même principe que la page ouverte par « Ouvrir un candidat ».
+Il ouvre uniquement une **page Administrateur dédiée à la gestion des tests et des parcours KALONÉO**, sur le même principe que la page ouverte par « Lister les candidats ».
 
 ### Contenu initial de la page
 
@@ -1994,3 +1994,85 @@ Texte de référence :
 La barre Admin reste une barre d'accès et de navigation.
 
 Les fonctions détaillées de gestion des tests et des parcours restent regroupées dans leur page dédiée afin de ne pas surcharger la barre principale.
+
+
+---
+
+## 58. Barre Administrateur — règles consolidées après test PILOTE #5
+
+**Statut : VALIDÉ — décision fonctionnelle du 2 octobre 2026**
+
+Cette section précise les règles de la barre Administrateur après le test réel du PILOTE #5 et remplace les formulations antérieures lorsqu'elles sont contradictoires.
+
+### État verrouillé
+
+Avant déverrouillage :
+
+- **seul le bouton Administrateur doit être visible** lorsque la barre est appelée ;
+- tous les autres boutons restent réellement masqués, y compris au niveau CSS ;
+- aucun bouton masqué ne doit réapparaître à cause d'une règle de style.
+
+### Lisibilité et géométrie
+
+- hauteur de la barre : **44 px** ;
+- hauteur des boutons : **36 px** ;
+- texte des boutons : **15 px** ;
+- réduire le padding plutôt que d'agrandir les boutons ;
+- aucun chevauchement ni débordement.
+
+### Commandes globales retirées
+
+Les commandes suivantes ne font plus partie de la barre Admin générale :
+
+- **Bilan** ;
+- **Retour au candidat** ;
+- l'ancien **Terminer le parcours du candidat** en doublon.
+
+Le Bilan reste accessible depuis le dossier du candidat.
+
+### Liste des candidats
+
+Le bouton général devient :
+
+**Lister les candidats**
+
+Il ouvre la liste des dossiers candidats enregistrés afin d'accéder ensuite à la fiche, aux Résultats, au Replay et au Bilan du candidat.
+
+### Bilan
+
+La page Bilan dispose de deux boutons internes **Fermer** :
+
+- un en haut ;
+- un en bas.
+
+Les deux commandes :
+
+1. sauvegardent le bilan ;
+2. ferment proprement le contexte Bilan ;
+3. reviennent au dossier du candidat concerné.
+
+### Écran SEB EvalPro
+
+Le bouton **Afficher l’écran d’accueil** est présent dans la barre Administrateur déverrouillée.
+
+Il permet d'afficher temporairement l'écran SEB EvalPro pour masquer les informations actuellement visibles, y compris depuis une page Administrateur.
+
+### Bulles d'aide
+
+Tout bouton réellement visible dans la barre Administrateur doit disposer d'une bulle d'aide.
+
+Règles :
+
+- apparition après un court survol ;
+- durée d'affichage de quelques secondes ;
+- texte décrivant l'action réelle du bouton ;
+- fonctionnement identique pour les boutons injectés dynamiquement et les boutons natifs de la barre.
+
+### Tests / Parcours
+
+La règle de la section 57 reste applicable :
+
+- bouton **Tests / Parcours** ;
+- page dédiée ;
+- page initialement vide ;
+- seul bouton interne : **Fermer**.
