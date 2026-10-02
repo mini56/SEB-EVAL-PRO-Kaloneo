@@ -111,17 +111,28 @@
   }
 
   function installDrag(scene,obj,target,status,success){
-    let active=false,pid=null,dx=0,dy=0,origin=null;
+    let active=false,pid=null,dx=0,dy=0,origin=null,placed=false;
     const toScene=r=>{const q=scene.getBoundingClientRect();return {left:r.left-q.left,top:r.top-q.top}};
-    function snap(){
+
+    function snapNow(){
       const sr=scene.getBoundingClientRect(),er=obj.getBoundingClientRect(),tr=target.getBoundingClientRect();
       obj.style.left=(tr.left-sr.left+(tr.width-er.width)/2)+'px';
       obj.style.top=(tr.top-sr.top+(tr.height-er.height)/2)+'px';
       obj.style.right='auto';obj.style.bottom='auto';
       status.textContent=success;status.classList.add('ok');
     }
+
+    function snap(){
+      placed=true;
+      snapNow();
+      requestAnimationFrame(()=>{ if(placed) snapNow(); });
+      setTimeout(()=>{ if(placed) snapNow(); },80);
+    }
+
     obj.addEventListener('pointerdown',ev=>{
       if(ev.button!==undefined&&ev.button!==0)return;
+      placed=false;
+      status.classList.remove('ok');
       const r=obj.getBoundingClientRect();
       origin=toScene(r);dx=ev.clientX-r.left;dy=ev.clientY-r.top;
       obj.style.left=origin.left+'px';obj.style.top=origin.top+'px';obj.style.right='auto';obj.style.bottom='auto';
@@ -145,7 +156,14 @@
     obj.addEventListener('keydown',ev=>{
       if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();snap()}
     });
-    return {snap};
+
+    if(typeof ResizeObserver!=='undefined'){
+      const observer=new ResizeObserver(()=>{ if(placed) requestAnimationFrame(snapNow); });
+      observer.observe(scene);
+    }
+    window.addEventListener('resize',()=>{ if(placed) requestAnimationFrame(snapNow); });
+
+    return {snap,get placed(){return placed;}};
   }
 
   function renderDragPlacement(block){
