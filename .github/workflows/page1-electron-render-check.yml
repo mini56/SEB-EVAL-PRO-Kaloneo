@@ -1,0 +1,54 @@
+name: Render Electron Page 1 check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - pilot10-page1-readability
+    paths:
+      - 'seb-evalpro/source/kaltest-pilot2.html'
+      - 'seb-evalpro/source/css/kaltest-page1-validated.css'
+      - 'seb-evalpro/source/js/seb-ui-runtime.js'
+      - 'seb-evalpro/scripts/pilot10-page1-render-main.js'
+      - '.github/workflows/page1-electron-render-check.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: seb-evalpro
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Generate Pilot data
+        run: node scripts/build-kaltest-pilot2-data.js
+
+      - name: Prepare web app
+        run: npm run prepare:web
+
+      - name: Capture actual Electron render at zoom 0.85
+        run: xvfb-run -a npx electron --no-sandbox scripts/pilot10-page1-render-main.js
+
+      - name: Commit render captures
+        working-directory: .
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/render-check/electron-page1-*-1366x768-zoom085.png
+          git diff --cached --quiet || git commit -m "Render integrated Page 1 in Electron at zoom 0.85"
+          git push origin HEAD:pilot10-page1-readability
