@@ -1150,3 +1150,339 @@ body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context {
   .pilot2-tool-heading p { font-size: 12.5px; }
   .pilot2-mouse-scene { min-height: 175px; }
 }
+
+
+/* PILOTE 8 — corrections visuelles et animation d’introduction */
+
+/* Les trois cartes de droite remontent légèrement et gardent leur contenu bien visible. */
+.pilot2-onboarding-side{
+  transform:translateY(-6px);
+}
+.pilot2-onboarding-side .pilot2-tool-card{
+  justify-content:flex-start;
+  overflow:visible;
+  padding-top:11px;
+}
+.pilot2-onboarding-side .pilot2-tool-heading{
+  padding-top:1px;
+}
+.pilot2-onboarding-side .pilot2-step-badge{
+  margin-top:0;
+  position:relative;
+  z-index:2;
+}
+
+/* Chronomètre : codes couleur validés. */
+.pilot2-chrono-start{
+  --seb-button-color:var(--seb-green,#198754)!important;
+  color:#fff!important;
+  border-color:#198754!important;
+  background:linear-gradient(180deg,#28a866 0%,#198754 100%)!important;
+}
+.pilot2-chrono-stop{
+  --seb-button-color:var(--seb-red,#C62828)!important;
+  color:#fff!important;
+  border-color:#C62828!important;
+  background:linear-gradient(180deg,#df4444 0%,#C62828 100%)!important;
+}
+.pilot2-chrono-stop:disabled{
+  color:#7d8a91!important;
+  border-color:#b7c2c8!important;
+  background:#eef2f4!important;
+}
+
+/* Même bouton calculatrice que dans les exercices réels. */
+.pilot2-calculator-test-card .seb-btn-calculator{
+  min-height:38px;
+  padding:7px 18px;
+  font-size:15px;
+}
+
+/* Introduction : plus de seconde démonstration calculatrice ni image fixe. */
+#page-intro{
+  max-width:1180px;
+  gap:7px;
+}
+#page-intro .pilot2-intro-avatar{
+  margin:5px 0 7px;
+}
+#page-intro .pilot2-intro-video-card{
+  width:min(900px,86vw);
+  min-height:0;
+  flex:1 1 auto;
+  margin:7px auto 3px;
+  padding:10px 12px 12px;
+  display:flex;
+  flex-direction:column;
+}
+.pilot2-intro-video-heading{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex:0 0 auto;
+  margin-bottom:7px;
+  color:var(--seb-blue-100,#004E70);
+}
+.pilot2-intro-video-heading strong{
+  font-size:18px;
+}
+.pilot2-intro-video-heading p{
+  margin:1px 0 0;
+  font-size:13px;
+  color:#5D6B75;
+}
+.pilot2-video-symbol{
+  width:34px;
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 34px;
+  border-radius:9px;
+  background:var(--seb-blue-100,#004E70);
+  color:#fff;
+  font-size:15px;
+  box-shadow:0 2px 5px rgba(0,0,0,.16);
+}
+
+.pilot2-intro-video{
+  position:relative;
+  min-height:0;
+  flex:1 1 auto;
+  overflow:hidden;
+  border:1px solid rgba(0,78,112,.24);
+  border-radius:11px;
+  background:linear-gradient(to bottom,#dceffa 0 55%,#7cae66 55% 67%,#697177 67% 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 3px 10px rgba(0,0,0,.10);
+  isolation:isolate;
+}
+.pilot2-video-sky{
+  position:absolute;inset:0 0 45% 0;
+  background:linear-gradient(#dff2fd,#cfeaf8);
+  z-index:0;
+}
+.pilot2-video-tree{
+  position:absolute;
+  width:76px;height:92px;
+  top:24%;
+  z-index:1;
+}
+.pilot2-video-tree::before{
+  content:"";
+  position:absolute;
+  left:31px;top:38px;
+  width:13px;height:54px;
+  background:#7b613f;
+}
+.pilot2-video-tree::after{
+  content:"";
+  position:absolute;
+  left:5px;top:0;
+  width:66px;height:64px;
+  border-radius:48% 52% 50% 50%;
+  background:#4f9450;
+  box-shadow:-18px 18px 0 -5px #5b9f57,18px 17px 0 -5px #5b9f57;
+}
+.pilot2-tree-left{left:4%}
+.pilot2-tree-right{right:4%}
+
+.pilot2-video-factory{
+  position:absolute;
+  left:31%;
+  top:21%;
+  width:58%;
+  height:47%;
+  background:repeating-linear-gradient(90deg,#dde2e5 0 15px,#cfd6da 15px 17px);
+  border:2px solid #9aa8b0;
+  z-index:2;
+}
+.pilot2-video-factory-wing{
+  position:absolute;
+  left:-18%;
+  top:16%;
+  width:29%;
+  height:84%;
+  background:repeating-linear-gradient(90deg,#d4dadd 0 15px,#c7cfd3 15px 17px);
+  border:2px solid #9aa8b0;
+}
+.pilot2-video-sign{
+  position:absolute;
+  left:50%;
+  top:13%;
+  transform:translateX(-50%);
+  min-width:180px;
+  padding:7px 15px;
+  background:var(--seb-blue-100,#004E70);
+  color:#fff;
+  font-size:25px;
+  font-weight:800;
+  letter-spacing:.8px;
+  text-align:center;
+}
+.pilot2-video-door{
+  position:absolute;
+  left:49%;
+  bottom:0;
+  width:112px;
+  height:48%;
+  transform:translateX(-50%);
+  border:2px solid #527e93;
+  background:#a9cede;
+  overflow:hidden;
+}
+.pilot2-video-door span{
+  position:absolute;
+  top:0;bottom:0;left:50%;
+  width:2px;
+  background:#527e93;
+}
+
+.pilot2-video-gate{
+  position:absolute;
+  bottom:22%;
+  width:112px;
+  height:34%;
+  z-index:4;
+  background:repeating-linear-gradient(90deg,#314953 0 7px,transparent 7px 17px);
+  border-left:18px solid #314953;
+  border-right:18px solid #314953;
+}
+.gate-left{left:8%}
+.gate-right{right:5%}
+
+.pilot2-video-road{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  height:35%;
+  background:#626a70;
+  z-index:1;
+}
+.pilot2-video-path{
+  position:absolute;
+  z-index:2;
+  left:43%;
+  bottom:-7%;
+  width:18%;
+  height:66%;
+  background:linear-gradient(90deg,#c8cccf 0 18%,#e6e8e9 18% 82%,#c8cccf 82% 100%);
+  clip-path:polygon(35% 0,65% 0,100% 100%,0 100%);
+}
+.pilot2-video-road-line{
+  position:absolute;
+  bottom:12%;
+  height:4px;
+  width:12%;
+  border-radius:3px;
+  background:#f5efd4;
+  z-index:2;
+}
+.pilot2-video-road-line.line-a{left:8%}
+.pilot2-video-road-line.line-b{left:25%}
+.pilot2-video-road-line.line-c{right:8%}
+
+.pilot2-video-person{
+  position:absolute;
+  left:45%;
+  top:72%;
+  width:54px;
+  height:94px;
+  transform-origin:50% 100%;
+  z-index:6;
+  opacity:0;
+}
+.pilot2-video-person span{position:absolute;display:block}
+.pilot2-person-head{
+  width:26px;height:26px;
+  left:14px;top:0;
+  border-radius:50%;
+  background:#d9a575;
+  box-shadow:inset 0 7px 0 #2d2927;
+}
+.pilot2-person-body{
+  left:11px;top:25px;
+  width:32px;height:39px;
+  border-radius:8px 8px 5px 5px;
+  background:#2f708e;
+}
+.pilot2-person-backpack{
+  left:3px;top:29px;
+  width:16px;height:31px;
+  border-radius:6px;
+  background:#293a42;
+}
+.pilot2-person-arm{
+  top:31px;
+  width:8px;height:34px;
+  border-radius:4px;
+  background:#356f8a;
+  transform-origin:50% 5px;
+}
+.pilot2-person-arm.arm-left{left:6px}
+.pilot2-person-arm.arm-right{right:5px}
+.pilot2-person-leg{
+  top:61px;
+  width:9px;height:32px;
+  border-radius:4px;
+  background:#203f5a;
+  transform-origin:50% 2px;
+}
+.pilot2-person-leg.leg-left{left:14px}
+.pilot2-person-leg.leg-right{right:13px}
+
+.pilot2-intro-video.seb-video-playing .pilot2-video-person{
+  animation:sebPilot8WalkToFactory 7s cubic-bezier(.33,.02,.28,1) 1 forwards;
+}
+.pilot2-intro-video.seb-video-playing .pilot2-person-arm.arm-left,
+.pilot2-intro-video.seb-video-playing .pilot2-person-leg.leg-right{
+  animation:sebPilot8GaitA .48s ease-in-out 12 alternate;
+}
+.pilot2-intro-video.seb-video-playing .pilot2-person-arm.arm-right,
+.pilot2-intro-video.seb-video-playing .pilot2-person-leg.leg-left{
+  animation:sebPilot8GaitB .48s ease-in-out 12 alternate;
+}
+@keyframes sebPilot8WalkToFactory{
+  0%{left:45%;top:72%;transform:scale(1.05);opacity:1}
+  12%{opacity:1}
+  78%{left:52%;top:49%;transform:scale(.58);opacity:1}
+  92%{left:52%;top:43%;transform:scale(.42);opacity:1}
+  100%{left:52%;top:41%;transform:scale(.36);opacity:0}
+}
+@keyframes sebPilot8GaitA{from{transform:rotate(18deg)}to{transform:rotate(-18deg)}}
+@keyframes sebPilot8GaitB{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
+
+.pilot2-video-end-message{
+  position:absolute;
+  left:50%;
+  bottom:8%;
+  transform:translate(-50%,12px);
+  min-width:210px;
+  padding:8px 16px;
+  border:1px solid rgba(249,178,51,.8);
+  border-radius:11px;
+  background:rgba(255,255,255,.94);
+  color:var(--seb-blue-100,#004E70);
+  font-size:21px;
+  font-weight:700;
+  text-align:center;
+  opacity:0;
+  z-index:8;
+}
+.pilot2-intro-video.seb-video-finished .pilot2-video-end-message{
+  animation:sebPilot8Welcome .38s ease-out forwards;
+}
+@keyframes sebPilot8Welcome{
+  to{opacity:1;transform:translate(-50%,0)}
+}
+
+#page-intro .pilot2-intro-bottom{
+  margin:2px 0;
+}
+#page-intro .pilot2-actions{
+  margin-top:2px;
+}
+
+@media (max-height:760px){
+  .pilot2-onboarding-side{transform:translateY(-4px)}
+  #page-intro .pilot2-intro-video-card{margin-top:4px;padding:7px 9px 9px}
+  .pilot2-intro-video-heading{margin-bottom:4px}
+}
