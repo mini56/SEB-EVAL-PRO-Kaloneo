@@ -1,5 +1,5 @@
 name: Build Windows KALTEST Pilot 4 setup
-# rerun after Build21 guard normalization
+# rerun after Build21 guard CRLF normalization
 
 on:
   workflow_dispatch:
