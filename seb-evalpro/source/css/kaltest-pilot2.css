@@ -1186,9 +1186,10 @@ body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context {
   background:linear-gradient(180deg,#df4444 0%,#C62828 100%)!important;
 }
 .pilot2-chrono-stop:disabled{
-  color:#7d8a91!important;
-  border-color:#b7c2c8!important;
-  background:#eef2f4!important;
+  color:#fff!important;
+  border-color:#C62828!important;
+  background:linear-gradient(180deg,#df4444 0%,#C62828 100%)!important;
+  opacity:.55!important;
 }
 
 /* Même bouton calculatrice que dans les exercices réels. */
