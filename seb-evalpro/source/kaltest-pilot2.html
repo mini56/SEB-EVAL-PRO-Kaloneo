@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SEB EvalPro — PILOTE 2 KALTEST</title>
+<title>SEB EvalPro — PILOTE KALTEST</title>
 <link rel="stylesheet" href="css/seb-design-system.css">
 <link rel="stylesheet" href="css/seb-floating-calculator.css">
 <link rel="stylesheet" href="css/kaltest-pilot2.css">
@@ -27,12 +27,12 @@
     <header class="pilot2-header">
       <div>
         <h1>Évaluation des savoirs fondamentaux – Parcours d'intégration</h1>
-        <p class="pilot2-subtitle">Une évaluation progressive et contextualisée des compétences nécessaires en milieu professionnel.</p>
+        <p class="pilot2-subtitle">Renseignez vos informations puis vérifiez tranquillement la prise en main du matériel avant de commencer.</p>
       </div>
       <img class="pilot2-brand" src="branding/seb-eval-pro-installer.png" alt="SEB EvalPro - Sauvegarde 56">
     </header>
 
-    <div class="pilot2-card">
+    <div class="pilot2-card pilot2-identity-card">
       <h2>Informations du candidat</h2>
       <form id="pilot2-identification-form">
         <div class="pilot2-form-grid">
@@ -71,15 +71,83 @@
         </div>
       </form>
       <div id="identity-status" class="pilot2-status" aria-live="polite"></div>
-      <div class="pilot2-actions">
-        <button id="identity-next" class="seb-action-btn seb-btn-nav" type="button">Suivant</button>
+    </div>
+
+    <section class="pilot2-onboarding pilot2-card" aria-labelledby="pilot2-onboarding-title">
+      <div class="pilot2-onboarding-title-row">
+        <div>
+          <h2 id="pilot2-onboarding-title">Prise en main avant de commencer</h2>
+          <p>Ces essais ne sont pas notés. Ils servent uniquement à vérifier la souris, le chronomètre, la calculatrice et le son.</p>
+        </div>
       </div>
+
+      <div class="pilot2-onboarding-grid">
+        <article class="pilot2-tool-card pilot2-mouse-card">
+          <div class="pilot2-tool-heading"><span class="pilot2-step-badge pilot2-step-orange">1</span><div><h3>Test de la souris</h3><p>Déplacez la maison dans l’emplacement libre puis placez la voiture sur le parking.</p></div></div>
+          <div id="pilot2-mouse-scene" class="pilot2-mouse-scene" aria-label="Zone de test de la souris">
+            <div class="pilot2-grass"></div>
+            <div class="pilot2-road"><span></span><span></span><span></span></div>
+            <div class="pilot2-parking">
+              <div class="pilot2-parking-line line-one"></div>
+              <div class="pilot2-parking-line line-two"></div>
+              <div id="pilot2-car-target" class="pilot2-drop-target pilot2-car-target" aria-label="Place de parking"></div>
+            </div>
+
+            <div class="pilot2-house pilot2-house-static house-left" aria-hidden="true"><span class="roof"></span><span class="wall"><span class="door"></span></span></div>
+            <div id="pilot2-house-target" class="pilot2-drop-target pilot2-house-target" aria-label="Emplacement libre pour la maison"></div>
+            <div class="pilot2-house pilot2-house-static house-right" aria-hidden="true"><span class="roof"></span><span class="wall"><span class="door"></span></span></div>
+
+            <div id="pilot2-drag-house" class="pilot2-drag-object pilot2-house pilot2-house-draggable" role="button" tabindex="0" aria-label="Maison à déplacer"><span class="roof"></span><span class="wall"><span class="door"></span></span></div>
+            <div id="pilot2-drag-car" class="pilot2-drag-object pilot2-car" role="button" tabindex="0" aria-label="Voiture à déplacer"><span class="car-window"></span></div>
+          </div>
+          <div class="pilot2-mouse-statuses">
+            <span id="pilot2-house-status" class="pilot2-mini-status">Maison à placer</span>
+            <span id="pilot2-car-status" class="pilot2-mini-status">Voiture à placer</span>
+          </div>
+        </article>
+
+        <div class="pilot2-onboarding-side">
+          <article class="pilot2-tool-card pilot2-chrono-card">
+            <div class="pilot2-tool-heading"><span class="pilot2-step-badge pilot2-step-blue">2</span><div><h3>Test du chronomètre</h3><p>Lancez puis arrêtez le chronomètre.</p></div></div>
+            <div id="pilot2-chrono-display" class="pilot2-chrono-display"><span id="pilot2-chrono-min">00</span>:<span id="pilot2-chrono-sec">00</span></div>
+            <div class="pilot2-chrono-buttons">
+              <button id="pilot2-chrono-start" class="seb-action-btn pilot2-chrono-start" type="button">Démarrer le chronomètre</button>
+              <button id="pilot2-chrono-stop" class="seb-action-btn pilot2-chrono-stop" type="button" disabled>Arrêter le chronomètre</button>
+            </div>
+            <div id="pilot2-chrono-status" class="pilot2-tool-status" aria-live="polite"></div>
+          </article>
+
+          <article class="pilot2-tool-card pilot2-calculator-test-card">
+            <div class="pilot2-tool-heading"><span class="pilot2-step-badge pilot2-step-orange">3</span><div><h3>Test de la calculatrice</h3><p>Cliquez sur Ouvrir pour essayer la calculatrice.</p></div></div>
+            <button id="pilot2-calculator-test-open" data-seb-action="open-calculator" class="seb-action-btn seb-btn-calculator" type="button">Ouvrir</button>
+            <div id="pilot2-calculator-status" class="pilot2-tool-status" aria-live="polite"></div>
+          </article>
+
+          <article class="pilot2-tool-card pilot2-audio-card">
+            <div class="pilot2-tool-heading"><span class="pilot2-step-badge pilot2-step-green">4</span><div><h3>Test audio</h3><p>Cliquez pour vérifier que vous entendez bien le son.</p></div></div>
+            <div class="pilot2-audio-controls">
+              <button id="pilot2-audio-play" class="seb-action-btn seb-btn-tool" type="button">▶ Écouter le son</button>
+              <label class="pilot2-audio-confirm"><input id="pilot2-audio-heard" type="checkbox"> Son entendu</label>
+            </div>
+            <div id="pilot2-audio-status" class="pilot2-tool-status" aria-live="polite"></div>
+          </article>
+        </div>
+
+        <aside id="pilot2-calculator-dock" class="pilot2-calculator-dock" aria-hidden="true">
+          <strong>Calculatrice</strong>
+          <span>Elle s’ouvrira dans cette zone pour ne pas masquer les consignes.</span>
+        </aside>
+      </div>
+    </section>
+
+    <div class="pilot2-actions pilot2-identification-actions">
+      <button id="identity-next" class="seb-action-btn seb-btn-nav" type="button">Suivant</button>
     </div>
   </section>
 
   <section id="page-intro" class="pilot2-page">
     <h2>Le contexte :</h2>
-    <p style="font-size:18px;margin:0 0 6px">
+    <p class="pilot2-intro-context">
       Vous débutez un stage dans une usine de fabrication. Vous allez passer par plusieurs situations professionnelles avec des missions simulées, un peu comme un parcours d'essai.
       Chacune correspond à un exercice. L'objectif est d'évaluer vos compétences pratiques, logiques et rédactionnelles dans un contexte proche du travail réel.
     </p>
@@ -100,7 +168,7 @@
     <div class="pilot2-intro-cover">
       <img src="imageqcm/image_cover.png" alt="Image de couverture">
     </div>
-    <p style="font-size:18px;text-align:center;margin:5px 0">Bonne découverte et bon parcours !</p>
+    <p class="pilot2-intro-bottom">Bonne découverte et bon parcours !</p>
     <div class="pilot2-actions">
       <button id="intro-next" class="seb-action-btn seb-btn-nav" type="button">Commencez l'évaluation</button>
     </div>
@@ -154,6 +222,7 @@
 
 <script src="js/kaltest-pilot2-data.js"></script>
 <script src="js/seb-floating-calculator.js"></script>
+<script src="js/kaltest-pilot2-onboarding.js"></script>
 <script src="js/kaltest-pilot2-runtime.js"></script>
 <script src="js/seb-in-app-alert.js" id="seb-evalpro-in-app-alert-script"></script>
 <script src="js/seb-ui-runtime.js" id="seb-ui-runtime-loader"></script>
