@@ -63,7 +63,7 @@ app.whenReady().then(async () => {
       return {
         title:rect(title),titleH:rect(titleH),titleP:rect(titleP),
         mouse:rect(mouse),side:rect(side),chrono:rect(chrono),calcCard:rect(calcCard),audio:rect(audio),dock:rect(dock),
-        titleSameLine:Math.abs(titleH.top-titleP.top)<12 && titleP.left>titleH.right+8,
+        titleSameLine:(()=>{const h=titleH.getBoundingClientRect(),p=titleP.getBoundingClientRect();return Math.abs((h.top+h.bottom)/2-(p.top+p.bottom)/2)<12 && p.left>h.right+6;})(),
         overflow,
         start:{text:ss.color,border:ss.borderColor,bg:ss.backgroundImage},
         stop:{text:ts.color,border:ts.borderColor,bg:ts.backgroundImage,opacity:ts.opacity},
