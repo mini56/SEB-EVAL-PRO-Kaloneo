@@ -1959,20 +1959,17 @@ Ce bouton ne réalise directement aucune opération d'import, d'export, de créa
 
 Il ouvre uniquement une **page Administrateur dédiée à la gestion des tests et des parcours KALONÉO**, sur le même principe que la page ouverte par « Ouvrir un candidat ».
 
-### Contenu de la page
+### Contenu initial de la page
 
-À ce stade, le contenu fonctionnel de cette page n'est pas encore figé.
+Pour la première implémentation, cette page doit rester **volontairement vide**.
 
-Les futures fonctions pourront être définies ultérieurement dans cette page, par exemple :
-- gestion des tests ;
-- gestion des parcours ;
-- import ;
-- export ;
-- création ;
-- ouverture ;
-- duplication ;
-- suppression ;
-- autres fonctions KALONÉO validées plus tard.
+Elle contient uniquement :
+- le titre **Tests / Parcours** ;
+- un bouton **Fermer** permettant de revenir à l'espace Administrateur précédent.
+
+Aucun bouton d'import, d'export, de création, d'ouverture, de duplication ou de suppression ne doit encore être ajouté.
+
+Les fonctions futures seront définies et ajoutées ultérieurement, directement dans cette page, après validation.
 
 Aucune de ces fonctions ne doit être ajoutée directement dans la barre Admin.
 
