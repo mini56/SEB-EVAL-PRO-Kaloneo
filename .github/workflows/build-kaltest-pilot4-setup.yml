@@ -1,5 +1,5 @@
 name: Build Windows KALTEST Pilot 4 setup
-# rerun after Build21 guard CRLF normalization
+# rerun after Admin smoke legacy-button cleanup
 
 on:
   workflow_dispatch:
