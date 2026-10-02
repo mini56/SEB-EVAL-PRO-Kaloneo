@@ -1,0 +1,661 @@
+/*
+ * PAGE 1 KALONÉO — RÉFÉRENCE VALIDÉE
+ * Validation utilisateur : 2026-10-02
+ * Cible : rendu candidat 1366×768.
+ * Cette feuille ne s'applique qu'à la page d'identification/prise en main.
+ * Ne pas modifier sans demande explicite.
+ */
+
+body:has(#page-identification.visible) #pilot2-shell{
+  padding:9px 18px 8px;
+}
+
+#page-identification{
+  gap:6px;
+}
+
+/* ===== En-tête validé ===== */
+#page-identification .pilot2-header{
+  min-height:54px;
+  align-items:center;
+  gap:24px;
+}
+
+#page-identification .pilot2-header h1{
+  margin:0;
+  color:var(--seb-blue-100,#004E70);
+  font-family:var(--seb-font-light,"Calibri Light",Calibri,"Segoe UI",Arial,sans-serif);
+  font-size:var(--seb-type-page-title,28px);
+  font-weight:300;
+  line-height:1.02;
+}
+
+#page-identification .pilot2-subtitle{
+  margin:3px 0 0;
+  color:#43515A;
+  font-size:var(--seb-type-body,17px);
+  line-height:1.15;
+}
+
+#page-identification .pilot2-brand-text{
+  flex:0 0 auto;
+  text-align:right;
+  line-height:1;
+}
+
+#page-identification .pilot2-brand-text strong{
+  display:inline-block;
+  padding:0 3px 3px;
+  border-bottom:4px solid var(--seb-orange-100,#F9B233);
+  color:var(--seb-blue-100,#004E70);
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:.6px;
+}
+
+#page-identification .pilot2-brand-text span{
+  display:block;
+  margin-top:5px;
+  color:#65717A;
+  font-size:var(--seb-type-secondary,15px);
+}
+
+/* ===== Informations candidat ===== */
+#page-identification .pilot2-card{
+  margin-top:0;
+}
+
+#page-identification .pilot2-identity-card{
+  flex:0 0 auto;
+  padding:7px 16px 8px;
+}
+
+#page-identification .pilot2-identity-card h2{
+  margin:0;
+  color:var(--seb-blue-100,#004E70);
+  font-family:var(--seb-font-light,"Calibri Light",Calibri,"Segoe UI",Arial,sans-serif);
+  font-size:var(--seb-type-section-title,22px);
+  font-weight:300;
+  line-height:1.05;
+}
+
+#page-identification .pilot2-form-grid{
+  margin-top:5px;
+  grid-template-columns:1fr 1fr;
+  gap:5px 34px;
+}
+
+#page-identification .pilot2-field{
+  display:grid;
+  grid-template-columns:190px minmax(220px,380px);
+  align-items:center;
+  justify-content:start;
+  gap:10px;
+  min-width:0;
+}
+
+#page-identification .pilot2-field label{
+  color:var(--seb-blue-100,#004E70);
+  font-size:var(--seb-type-control,16px);
+  font-weight:700;
+  line-height:1.05;
+}
+
+#page-identification .pilot2-field input{
+  width:100%;
+  min-height:32px;
+  height:32px;
+  padding:4px 8px;
+  border:1px solid #7F8B92;
+  border-radius:5px;
+  background:#FFF;
+  color:#1E252A;
+  font-size:var(--seb-type-field,17px);
+}
+
+#page-identification .pilot2-readonly{
+  background:#EEF1F3 !important;
+  color:#68747B;
+}
+
+#page-identification #identity-status{
+  min-height:0;
+  height:0;
+  margin:0;
+  overflow:visible;
+  font-size:var(--seb-type-secondary,15px);
+}
+
+/* ===== Prise en main ===== */
+#page-identification .pilot2-onboarding{
+  min-height:0;
+  flex:1 1 auto;
+  margin-top:0;
+  padding:6px 10px 8px;
+  display:grid;
+  grid-template-rows:31px minmax(0,1fr);
+  overflow:hidden;
+  border-color:rgba(249,178,51,.60);
+  background:linear-gradient(135deg,#FFFAF1,#FFF);
+}
+
+#page-identification .pilot2-onboarding-title-row{
+  min-height:31px;
+  height:auto;
+  margin:0;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:24px;
+}
+
+#page-identification .pilot2-onboarding-title-row h2{
+  margin:0;
+  white-space:nowrap;
+  color:var(--seb-blue-100,#004E70);
+  font-family:var(--seb-font-light,"Calibri Light",Calibri,"Segoe UI",Arial,sans-serif);
+  font-size:var(--seb-type-section-title,22px);
+  font-weight:300;
+  line-height:1.05;
+}
+
+#page-identification .pilot2-onboarding-title-row p{
+  margin:0;
+  color:#56636C;
+  font-size:var(--seb-type-secondary,15px);
+  line-height:1.10;
+}
+
+#page-identification .pilot2-onboarding-grid{
+  min-height:0;
+  height:auto;
+  margin-top:4px;
+  display:grid;
+  grid-template-columns:minmax(520px,1.45fr) minmax(430px,1.12fr) 280px;
+  gap:10px;
+  align-items:stretch;
+}
+
+#page-identification .pilot2-tool-card{
+  min-height:0;
+  padding:7px 10px;
+  overflow:hidden;
+  border:1px solid rgba(0,78,112,.20);
+  border-radius:11px;
+  background:#FFF;
+  box-shadow:0 2px 7px rgba(0,0,0,.07);
+}
+
+#page-identification .pilot2-tool-heading{
+  min-height:0;
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+}
+
+#page-identification .pilot2-step-badge{
+  width:32px;
+  height:32px;
+  flex:0 0 32px;
+  margin:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  color:#FFF;
+  font-size:17px;
+  font-weight:800;
+  line-height:1;
+  box-shadow:0 2px 5px rgba(0,0,0,.14);
+}
+
+#page-identification .pilot2-step-orange{
+  background:var(--seb-orange-100,#F9B233);
+  color:#5D3B00;
+}
+#page-identification .pilot2-step-blue{background:var(--seb-blue-100,#004E70)}
+#page-identification .pilot2-step-green{background:var(--seb-green,#198754)}
+
+#page-identification .pilot2-tool-heading h3{
+  margin:0;
+  color:var(--seb-blue-100,#004E70);
+  font-size:var(--seb-type-block-title,18px);
+  line-height:1.05;
+}
+
+#page-identification .pilot2-tool-heading p{
+  margin:3px 0 0;
+  color:#46545D;
+  font-size:var(--seb-type-secondary,15px);
+  line-height:1.12;
+}
+
+/* ===== Souris ===== */
+#page-identification .pilot2-mouse-card{
+  padding:8px 10px;
+  display:flex;
+  flex-direction:column;
+}
+
+#page-identification .pilot2-mouse-scene{
+  position:relative;
+  min-height:0;
+  flex:1 1 auto;
+  margin-top:5px;
+  overflow:hidden;
+  border:1px solid #B7C8D0;
+  border-radius:9px;
+  background:linear-gradient(to bottom,#DFF3FF 0 34%,#86C970 34% 60%,#626B72 60% 100%);
+  user-select:none;
+  touch-action:none;
+}
+
+#page-identification .pilot2-grass{
+  position:absolute;
+  left:0;
+  right:0;
+  top:34%;
+  height:26%;
+  background:linear-gradient(#91CF76,#72B15B);
+}
+
+#page-identification .pilot2-road{
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:64%;
+  height:40%;
+  border-top:5px solid #F6F6F2;
+  background:#646D73;
+}
+
+#page-identification .pilot2-road span{
+  top:47%;
+  height:4px;
+  border-radius:4px;
+  background:#FFF1BD;
+}
+#page-identification .pilot2-road span:nth-child(1){left:7%;width:18%}
+#page-identification .pilot2-road span:nth-child(2){left:39%;width:18%}
+#page-identification .pilot2-road span:nth-child(3){left:71%;width:18%}
+
+#page-identification .pilot2-parking{
+  position:absolute;
+  right:0;
+  bottom:0;
+  width:36%;
+  height:64%;
+  border-left:5px solid #F6F6F2;
+  background:#747C82;
+}
+
+#page-identification .pilot2-parking-line{
+  position:absolute;
+  top:8%;
+  bottom:8%;
+  width:4px;
+  background:#FFF;
+}
+#page-identification .pilot2-parking-line.line-one{left:15%}
+#page-identification .pilot2-parking-line.line-two{left:56%}
+
+#page-identification .pilot2-drop-target{
+  position:absolute;
+  z-index:4;
+  border:3px dashed var(--seb-orange-100,#F9B233);
+  border-radius:9px;
+  background:rgba(255,255,255,.17);
+  box-shadow:none;
+}
+
+#page-identification .pilot2-house-target{
+  left:25%;
+  top:16%;
+  width:90px;
+  height:88px;
+}
+
+#page-identification .pilot2-car-target{
+  right:7%;
+  bottom:11%;
+  width:105px;
+  height:66px;
+  border-color:#FFF;
+  background:#747C82;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.20);
+}
+
+#page-identification .pilot2-house{
+  position:absolute;
+  width:82px;
+  height:84px;
+}
+
+#page-identification .pilot2-house svg,
+#page-identification .pilot2-car svg{
+  display:block;
+  width:100%;
+  height:100%;
+}
+
+#page-identification .house-left{left:7%;top:17%}
+#page-identification .house-right{left:43%;top:17%}
+#page-identification .pilot2-house-draggable{left:10%;bottom:2%}
+
+#page-identification .pilot2-car{
+  position:absolute;
+  width:95px;
+  height:55px;
+  right:27%;
+  bottom:8%;
+  border:0;
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+}
+
+#page-identification .pilot2-car::before,
+#page-identification .pilot2-car::after{
+  display:none;
+}
+
+#page-identification .pilot2-drag-object{
+  z-index:10;
+  cursor:grab;
+  filter:drop-shadow(0 5px 4px rgba(0,0,0,.18));
+  touch-action:none;
+}
+#page-identification .pilot2-drag-object:active{cursor:grabbing}
+
+#page-identification .pilot2-mouse-statuses{
+  min-height:27px;
+  padding-top:4px;
+  display:flex;
+  justify-content:center;
+  gap:9px;
+}
+
+#page-identification .pilot2-mini-status{
+  padding:3px 10px;
+  border:1px solid transparent;
+  border-radius:14px;
+  background:#EEF2F4;
+  color:#5C6870;
+  font-size:var(--seb-type-secondary,15px);
+  font-weight:700;
+  line-height:1.05;
+}
+
+#page-identification .pilot2-mini-status.ok{
+  border-color:#9FD0B3;
+  background:#E9F7EF;
+  color:#167A4A;
+}
+
+/* ===== Colonne outils ===== */
+#page-identification .pilot2-onboarding-side{
+  min-height:0;
+  display:grid;
+  grid-template-rows:1.22fr .89fr .89fr;
+  gap:7px;
+  transform:none;
+}
+
+#page-identification .pilot2-onboarding-side .pilot2-tool-card{
+  padding:7px 10px;
+  justify-content:flex-start;
+}
+
+#page-identification .pilot2-chrono-card{background:linear-gradient(145deg,#FFF,#F6FBFF)}
+#page-identification .pilot2-calculator-test-card{background:linear-gradient(145deg,#FFF,#FFF9EF)}
+#page-identification .pilot2-audio-card{background:linear-gradient(145deg,#FFF,#F4FBF6)}
+
+#page-identification .pilot2-chrono-display{
+  width:142px;
+  min-width:142px;
+  margin:4px auto;
+  padding:2px 12px;
+  border:1px solid #C7D6DD;
+  border-radius:9px;
+  background:#FFF;
+  color:var(--seb-blue-100,#004E70);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.08);
+  text-align:center;
+  font-size:30px;
+  font-weight:800;
+  line-height:1.05;
+  font-variant-numeric:tabular-nums;
+}
+
+#page-identification .pilot2-chrono-buttons{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:nowrap;
+}
+
+#page-identification .pilot2-onboarding-side .seb-action-btn{
+  min-height:36px !important;
+  padding:5px 11px !important;
+  border-radius:10px;
+  font-size:var(--seb-type-control,16px) !important;
+  line-height:1.1 !important;
+}
+
+#page-identification #pilot2-chrono-start{
+  --seb-button-color:var(--seb-blue-100,#004E70) !important;
+  border-color:var(--seb-blue-100,#004E70) !important;
+  color:var(--seb-green,#198754) !important;
+  background:linear-gradient(#FFF,#F4F7FA) !important;
+  opacity:1 !important;
+}
+
+#page-identification #pilot2-chrono-stop{
+  --seb-button-color:var(--seb-blue-100,#004E70) !important;
+  border-color:var(--seb-blue-100,#004E70) !important;
+  color:var(--seb-red,#C62828) !important;
+  background:linear-gradient(#FFF,#F4F7FA) !important;
+  opacity:1 !important;
+}
+
+#page-identification .pilot2-tool-status{
+  min-height:17px;
+  height:auto;
+  margin-top:3px;
+  color:#167A4A;
+  text-align:center;
+  font-size:var(--seb-type-secondary,15px);
+  font-weight:700;
+  line-height:1.05;
+}
+
+#page-identification .pilot2-calculator-test-card .seb-btn-calculator{
+  display:block;
+  align-self:center;
+  min-height:36px !important;
+  margin:5px auto 0;
+  padding:5px 11px !important;
+  border-color:var(--seb-orange-100,#F9B233) !important;
+  color:#BC7000 !important;
+}
+
+#page-identification .pilot2-audio-controls{
+  margin-top:5px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+#page-identification .pilot2-audio-confirm{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:#31414B;
+  font-size:var(--seb-type-control,16px);
+  font-weight:700;
+}
+#page-identification .pilot2-audio-confirm input{
+  width:18px;
+  height:18px;
+  accent-color:var(--seb-green,#198754);
+}
+
+/* ===== Zone calculatrice ===== */
+#page-identification .pilot2-calculator-dock{
+  min-height:0;
+  position:relative;
+  align-self:stretch;
+  overflow:hidden;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  gap:5px;
+  border:1px dashed rgba(249,178,51,.80);
+  border-radius:12px;
+  background:linear-gradient(145deg,#FFF8E7,#FFFDF9);
+  color:#8A5A0B;
+  text-align:center;
+  font-size:var(--seb-type-secondary,15px);
+  line-height:1.18;
+}
+
+#page-identification .pilot2-calculator-dock strong{
+  margin-bottom:0;
+  color:#A45F00;
+  font-size:var(--seb-type-block-title,18px);
+}
+
+#page-identification .pilot2-calculator-dock span{
+  max-width:245px;
+  color:#8A5A0B;
+  font-size:var(--seb-type-secondary,15px);
+  line-height:1.18;
+}
+
+/* Vraie calculatrice SEB, uniquement sur la page 1. */
+body:has(#page-identification.visible) #calc-container{
+  width:264px !important;
+  padding:0 11px 8px !important;
+  border:2px solid #D98200 !important;
+  border-radius:15px !important;
+  background:linear-gradient(145deg,#FFD58A,#F9AD32 52%,#EE9418) !important;
+  box-shadow:0 10px 24px rgba(74,47,10,.25) !important;
+}
+
+body:has(#page-identification.visible) #calc-container .seb-calc-dragbar{
+  height:32px !important;
+  margin:0 -11px 6px !important;
+  padding:0 10px !important;
+  border-radius:12px 12px 0 0 !important;
+  border-bottom:0 !important;
+  background:linear-gradient(#F7B84B,#E99215) !important;
+  color:#5F3800 !important;
+  font-size:var(--seb-type-secondary,15px) !important;
+}
+
+body:has(#page-identification.visible) #calc-display{
+  width:100% !important;
+  height:42px !important;
+  margin:0 0 6px !important;
+  padding:5px 8px !important;
+  border:2px solid #C67A0B !important;
+  border-radius:8px !important;
+  background:#FFF8E9 !important;
+  color:#3D2B11 !important;
+  font-size:24px !important;
+  font-weight:800 !important;
+}
+
+body:has(#page-identification.visible) #keypad{
+  text-align:center;
+  line-height:0;
+}
+
+body:has(#page-identification.visible) #calc-container .calc-btn{
+  width:55px !important;
+  height:34px !important;
+  margin:2px !important;
+  padding:0 !important;
+  border:1px solid #CB7D0D !important;
+  border-radius:8px !important;
+  background:linear-gradient(#FFFAF0,#FFE8BF) !important;
+  color:#4F3510 !important;
+  box-shadow:0 2px 3px rgba(96,57,4,.14),inset 0 1px #FFF !important;
+  font-size:var(--seb-type-control,16px) !important;
+  font-weight:700 !important;
+  line-height:1 !important;
+}
+
+body:has(#page-identification.visible) #calc-container #clear{
+  width:34px !important;
+  margin-top:5px !important;
+}
+
+body:has(#page-identification.visible) #calc-container .calc-btn-fermez{
+  width:auto !important;
+  height:34px !important;
+  min-height:34px !important;
+  margin:5px 0 0 3px !important;
+  padding:0 9px !important;
+  border:1px solid var(--seb-red,#C62828) !important;
+  border-radius:8px !important;
+  background:linear-gradient(#FFF,#F7F8FA) !important;
+  color:var(--seb-red,#C62828) !important;
+  font-size:var(--seb-type-control,16px) !important;
+  font-weight:700 !important;
+  line-height:1 !important;
+}
+
+body:has(#page-identification.visible) #calc-container .seb-calc-brand{
+  margin-top:5px !important;
+  padding-top:4px !important;
+  border-top:1px solid rgba(133,75,0,.28) !important;
+  color:#A45E09 !important;
+  text-align:center !important;
+  font-size:var(--seb-type-secondary,15px) !important;
+  font-weight:800 !important;
+}
+
+/* ===== Bouton Suivant ===== */
+#page-identification .pilot2-identification-actions{
+  min-height:42px;
+  margin:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#page-identification .pilot2-identification-actions .seb-btn-nav{
+  min-width:120px;
+  min-height:42px;
+  padding:7px 13px;
+  border-color:var(--seb-green,#198754);
+  color:var(--seb-green,#198754);
+  font-size:var(--seb-type-control,16px);
+}
+
+/* Règle de lisibilité validée : aucun texte fonctionnel candidat sous 15 px. */
+#page-identification .pilot2-header,
+#page-identification .pilot2-card,
+#page-identification .pilot2-actions{
+  --seb-page1-min-text:15px;
+}
+
+@media (max-height:800px){
+  #page-identification .pilot2-header h1{font-size:26px}
+  #page-identification .pilot2-subtitle{font-size:16px}
+  #page-identification .pilot2-brand-text strong{font-size:20px}
+}
+
+@media (max-width:1180px){
+  #page-identification .pilot2-field{
+    grid-template-columns:165px minmax(190px,1fr);
+  }
+  #page-identification .pilot2-onboarding-grid{
+    grid-template-columns:minmax(450px,1.34fr) minmax(405px,1.08fr) 260px;
+  }
+}
