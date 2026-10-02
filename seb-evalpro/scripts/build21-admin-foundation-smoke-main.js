@@ -42,7 +42,7 @@ ipcMain.handle('state:save', (_event, payload) => {
   state = { ...state, ...(payload || {}) };
   return { ok:true, state };
 });
-ipcMain.handle('candidate:active', () => null);
+ipcMain.handle('candidate:active', () => ({ candidateId:'SMOKE', displayName:'Candidat test' }));
 ipcMain.handle('admin:status', () => adminUnlocked);
 ipcMain.handle('admin:verify', () => { adminUnlocked = true; return true; });
 ipcMain.handle('admin:verify-password', () => false);
@@ -99,11 +99,39 @@ app.whenReady().then(async () => {
     await win.loadFile(path.join(web, 'qcmv1.0.html'));
     await new Promise(r => setTimeout(r, 650));
 
-    const initial = await win.webContents.executeJavaScript("(()=>{ const visible=(id)=>{ const el=document.getElementById(id); if(!el)return false; const css=getComputedStyle(el); return !el.hidden && css.display!=='none' && css.visibility!=='hidden'; }; const bar=document.getElementById('seb-evalpro-topbar'); return { bar:!!bar, hotzone:!!document.getElementById('seb-evalpro-top-hotzone'), openCandidate:visible('seb-evalpro-open-candidate'), closeSession:visible('seb-evalpro-close-session'), quit:visible('seb-evalpro-quit-application'), bilan:visible('seb-evalpro-bilan'), replay:visible('seb-evalpro-replay'), results:visible('seb-evalpro-results'), adminText:String(document.getElementById('seb-evalpro-admin')?.textContent||'').trim(), initiallyOpen:!!bar && bar.classList.contains('seb-evalpro-visible') }; })()");
+    const initial = await win.webContents.executeJavaScript("(()=>{ const visible=(id)=>{ const el=document.getElementById(id); if(!el)return false; const css=getComputedStyle(el); return !el.hidden && css.display!=='none' && css.visibility!=='hidden'; }; const bar=document.getElementById('seb-evalpro-topbar'); const br=bar?.getBoundingClientRect(); const ids=['seb-evalpro-open-candidate','seb-evalpro-bilan','seb-evalpro-return','seb-evalpro-close-session','seb-evalpro-admin','seb-evalpro-export-candidates','seb-evalpro-import-candidates','seb-evalpro-finish-candidate','seb-evalpro-quit-application']; const buttons=ids.map(id=>{const el=document.getElementById(id); if(!el)return null; const r=el.getBoundingClientRect(); const css=getComputedStyle(el); return {id,hidden:el.hidden,text:String(el.textContent||'').trim(),top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height,color:css.color,borderColor:css.borderColor,display:css.display};}).filter(Boolean); return { bar:!!bar, barRect:br?{top:br.top,bottom:br.bottom,height:br.height}:null, hotzone:!!document.getElementById('seb-evalpro-top-hotzone'), openCandidate:visible('seb-evalpro-open-candidate'), closeSession:visible('seb-evalpro-close-session'), quit:visible('seb-evalpro-quit-application'), finishCandidate:visible('seb-evalpro-finish-candidate'), bilan:visible('seb-evalpro-bilan'), replay:visible('seb-evalpro-replay'), results:visible('seb-evalpro-results'), exportText:String(document.getElementById('seb-evalpro-export-candidates')?.textContent||'').trim(), importText:String(document.getElementById('seb-evalpro-import-candidates')?.textContent||'').trim(), privacyInBar:document.getElementById('seb-evalpro-privacy-toggle')?.parentElement===bar, adminText:String(document.getElementById('seb-evalpro-admin')?.textContent||'').trim(), initiallyOpen:!!bar && bar.classList.contains('seb-evalpro-visible'), buttons }; })()");
 
     if (!initial.bar || !initial.hotzone || !initial.openCandidate || !initial.closeSession || !initial.quit ||
-        initial.bilan || initial.replay || initial.results || initial.adminText !== 'Verrouiller') {
+        initial.finishCandidate || initial.bilan || initial.replay || initial.results || initial.adminText !== 'Verrouiller') {
       die('état Administrateur initial incorrect', initial);
+      return;
+    }
+    if (initial.exportText !== '↑ Exporter dossiers' || initial.importText !== '↓ Importer dossiers') {
+      die('flèches Export / Import incorrectes', initial);
+      return;
+    }
+    if (initial.privacyInBar) {
+      die('le bouton de confidentialité ne doit jamais être placé dans la barre Admin', initial);
+      return;
+    }
+    const visibleButtons = initial.buttons.filter(b => !b.hidden && b.display !== 'none');
+    if (visibleButtons.some(b => b.height > 36.5 || b.top < initial.barRect.top - 0.5 || b.bottom > initial.barRect.bottom + 0.5)) {
+      die('un bouton dépasse de la hauteur de la barre Admin', {bar:initial.barRect, buttons:visibleButtons});
+      return;
+    }
+    for (let i=0;i<visibleButtons.length;i++) {
+      for (let j=i+1;j<visibleButtons.length;j++) {
+        const a=visibleButtons[i], b=visibleButtons[j];
+        const overlap = Math.min(a.right,b.right)-Math.max(a.left,b.left);
+        if (overlap > 0.5) {
+          die('deux boutons de la barre Admin se chevauchent', {a,b});
+          return;
+        }
+      }
+    }
+    const quitStyle = initial.buttons.find(b => b.id === 'seb-evalpro-quit-application');
+    if (!quitStyle || quitStyle.color !== 'rgb(192, 0, 0)' || quitStyle.borderColor !== 'rgb(192, 0, 0)') {
+      die('Quitter doit être affiché en rouge', quitStyle || {});
       return;
     }
 
