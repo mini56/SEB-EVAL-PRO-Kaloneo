@@ -10,7 +10,8 @@ function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8');
 }
 function gitBlobSha(rel) {
-  const data = fs.readFileSync(path.join(ROOT, rel));
+  const text = fs.readFileSync(path.join(ROOT, rel), 'utf8').replace(/\r\n/g, '\n');
+  const data = Buffer.from(text, 'utf8');
   const header = Buffer.from('blob ' + data.length + '\0', 'utf8');
   return crypto.createHash('sha1').update(header).update(data).digest('hex');
 }
