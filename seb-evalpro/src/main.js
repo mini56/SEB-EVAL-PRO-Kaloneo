@@ -355,8 +355,12 @@ function isAdminCandidatePage(pageName) {
   return String(pageName || '').toLowerCase() === 'admin-candidats.html';
 }
 
+function isAdminTestsParcoursPage(pageName) {
+  return String(pageName || '').toLowerCase() === 'admin-tests-parcours.html';
+}
+
 function isAdminNavigationPage(pageName) {
-  return isAdminBilanPage(pageName) || isAdminCandidatePage(pageName);
+  return isAdminBilanPage(pageName) || isAdminCandidatePage(pageName) || isAdminTestsParcoursPage(pageName);
 }
 
 function existingWebPage(pageName) {
@@ -964,6 +968,24 @@ ipcMain.handle('admin:open-candidate-browser', (_event, candidateId) => {
 
 ipcMain.handle('admin:return-candidate-browser', (_event, candidateId) => {
   return loadAdminCandidateBrowser(candidateId);
+});
+
+function loadAdminTestsParcours() {
+  if (!mainWindow || !adminSessionUnlocked) return false;
+  if (getCandidateStore().getActiveCandidate()) return false;
+  adminCandidateResultsMode = false;
+  const target = path.join(__dirname, '..', 'app', 'web', 'admin-tests-parcours.html');
+  if (!fs.existsSync(target)) return false;
+  mainWindow.loadFile(target);
+  return true;
+}
+
+ipcMain.handle('admin:open-tests-parcours', () => {
+  return loadAdminTestsParcours();
+});
+
+ipcMain.handle('admin:close-tests-parcours', () => {
+  return loadAdminCandidateBrowser();
 });
 
 ipcMain.handle('admin:open-bilan', () => {
