@@ -1487,3 +1487,322 @@ body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context {
   #page-intro .pilot2-intro-video-card{margin-top:4px;padding:7px 9px 9px}
   .pilot2-intro-video-heading{margin-bottom:4px}
 }
+
+
+/* PILOTE 9 — correction ciblée de la page 1 après test réel */
+
+/* Le texte d'aide vient sur la même ligne que le titre pour récupérer de la hauteur utile. */
+#page-identification .pilot2-onboarding{
+  padding:8px 12px 10px;
+}
+#page-identification .pilot2-onboarding-title-row{
+  min-height:31px;
+  margin-bottom:3px;
+  display:grid;
+  grid-template-columns:auto minmax(360px,1fr);
+  align-items:center;
+  column-gap:24px;
+}
+#page-identification .pilot2-onboarding-title-row h2{
+  margin:0;
+  white-space:nowrap;
+  font-size:22px;
+}
+#page-identification .pilot2-onboarding-title-row p{
+  margin:0;
+  justify-self:start;
+  font-size:14px;
+  line-height:1.15;
+  color:#52616b;
+}
+
+/* Plus de surface verticale pour les outils : aucun texte ne doit être rogné. */
+#page-identification .pilot2-onboarding-grid{
+  height:calc(100% - 34px);
+  grid-template-columns:minmax(520px,1.48fr) minmax(420px,1.05fr) 306px;
+  gap:11px;
+  align-items:stretch;
+}
+#page-identification .pilot2-onboarding-side{
+  transform:none;
+  align-self:stretch;
+  grid-template-rows:minmax(112px,1.18fr) minmax(94px,.96fr) minmax(100px,1fr);
+  gap:10px;
+  padding-top:0;
+}
+#page-identification .pilot2-onboarding-side .pilot2-tool-card{
+  min-height:0;
+  overflow:visible;
+  padding:10px 13px;
+  justify-content:flex-start;
+}
+#page-identification .pilot2-onboarding-side .pilot2-tool-heading{
+  flex:0 0 auto;
+  min-height:36px;
+  align-items:flex-start;
+}
+#page-identification .pilot2-onboarding-side .pilot2-tool-heading h3{
+  font-size:18px;
+}
+#page-identification .pilot2-onboarding-side .pilot2-tool-heading p{
+  margin-top:2px;
+  font-size:13.5px;
+  line-height:1.18;
+}
+#page-identification .pilot2-onboarding-side .pilot2-step-badge{
+  margin-top:1px;
+  flex:0 0 31px;
+  width:31px;
+  height:31px;
+  line-height:31px;
+  overflow:visible;
+}
+#page-identification .pilot2-chrono-display{
+  margin:5px auto 6px;
+  min-width:138px;
+  padding:3px 14px;
+  font-size:31px;
+}
+#page-identification .pilot2-chrono-buttons{
+  gap:8px;
+  flex-wrap:nowrap;
+}
+#page-identification .pilot2-chrono-buttons .seb-action-btn{
+  min-height:38px!important;
+  padding:7px 12px!important;
+  font-size:14px!important;
+}
+#page-identification .pilot2-calculator-test-card .seb-btn-calculator{
+  align-self:center;
+  min-height:40px!important;
+  margin-top:7px;
+  padding:8px 20px!important;
+  font-size:15px!important;
+}
+#page-identification .pilot2-audio-controls{
+  margin-top:7px;
+  gap:14px;
+  flex-wrap:nowrap;
+}
+#page-identification .pilot2-audio-controls .seb-action-btn{
+  min-height:38px!important;
+  padding:7px 14px!important;
+  font-size:14px!important;
+}
+#page-identification .pilot2-audio-confirm{
+  font-size:13.5px;
+}
+#page-identification .pilot2-tool-status{
+  min-height:16px;
+  margin-top:4px;
+  line-height:1.15;
+}
+
+/* Chronomètre : style KALONÉO inchangé, seule la couleur du texte distingue les actions. */
+#page-identification #pilot2-chrono-start.pilot2-chrono-start{
+  --seb-button-color:#004E70!important;
+  color:#198754!important;
+  border-color:#004E70!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
+  box-shadow:0 4px 10px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.98)!important;
+}
+#page-identification #pilot2-chrono-stop.pilot2-chrono-stop{
+  --seb-button-color:#004E70!important;
+  color:#C62828!important;
+  border-color:#004E70!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
+  box-shadow:0 4px 10px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.98)!important;
+}
+#page-identification #pilot2-chrono-stop.pilot2-chrono-stop:disabled{
+  color:#C62828!important;
+  border-color:#004E70!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
+  opacity:.58!important;
+}
+
+/* Colonne calculatrice plus grande et alignée en haut des autres outils. */
+#page-identification .pilot2-calculator-dock{
+  min-height:0;
+  align-self:stretch;
+  justify-content:flex-start;
+  padding:10px 10px 8px;
+  gap:4px;
+}
+#page-identification .pilot2-calculator-dock strong{
+  font-size:16px;
+}
+#page-identification .pilot2-calculator-dock span{
+  max-width:260px;
+  font-size:13px;
+  line-height:1.16;
+}
+
+/* La calculatrice de prise en main est légèrement agrandie, sans modifier celle des exercices. */
+body:has(#page-identification.visible) #calc-container{
+  width:276px!important;
+  padding:0 14px 13px!important;
+}
+body:has(#page-identification.visible) #calc-container .seb-calc-dragbar{
+  margin-left:-14px!important;
+  margin-right:-14px!important;
+}
+body:has(#page-identification.visible) #calc-display{
+  width:244px!important;
+  height:52px!important;
+  font-size:25px!important;
+}
+body:has(#page-identification.visible) #calc-container .calc-btn{
+  width:50px!important;
+  height:43px!important;
+  margin:4px!important;
+  font-size:18px!important;
+}
+
+/* Décor souris un peu plus soigné sans modifier le fonctionnement glisser-déposer. */
+#page-identification .pilot2-mouse-scene{
+  min-height:220px;
+  background:linear-gradient(to bottom,#d9f1ff 0 34%,#8ccc72 34% 61%,#646d73 61% 100%);
+}
+#page-identification .pilot2-grass{
+  background:
+    radial-gradient(circle at 12% 22%,rgba(255,255,255,.28) 0 2px,transparent 3px),
+    radial-gradient(circle at 72% 36%,rgba(255,255,255,.22) 0 2px,transparent 3px),
+    linear-gradient(#90cf75,#70ae59);
+}
+#page-identification .pilot2-house{
+  width:78px;
+  height:78px;
+}
+#page-identification .pilot2-house .roof{
+  left:5px;
+  top:0;
+  width:68px;
+  height:31px;
+  background:linear-gradient(135deg,#f28a45,#d95d2f);
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.18));
+}
+#page-identification .pilot2-house .roof::after{
+  content:"";
+  position:absolute;
+  right:12px;
+  top:5px;
+  width:8px;
+  height:15px;
+  border:1px solid rgba(82,52,32,.25);
+  background:#9a6948;
+  clip-path:polygon(0 0,100% 0,100% 100%,0 100%);
+}
+#page-identification .pilot2-house .wall{
+  left:12px;
+  top:28px;
+  width:54px;
+  height:47px;
+  border:2px solid #d0b178;
+  border-radius:3px;
+  background:linear-gradient(180deg,#fff8dc,#f3e1b9);
+  box-shadow:0 3px 6px rgba(0,0,0,.16);
+}
+#page-identification .pilot2-house .wall::before{
+  content:"";
+  position:absolute;
+  left:7px;
+  top:9px;
+  width:13px;
+  height:13px;
+  border:2px solid #4b88a3;
+  background:linear-gradient(135deg,#dff6ff 0 47%,#9ed5ec 48% 100%);
+  box-shadow:19px 0 0 -2px #dff6ff,19px 0 0 0 #4b88a3;
+}
+#page-identification .pilot2-house .door{
+  left:21px;
+  width:13px;
+  height:25px;
+  border:1px solid rgba(0,0,0,.14);
+  border-radius:2px 2px 0 0;
+  background:linear-gradient(180deg,#2f91b6,#226f91);
+}
+#page-identification .house-right .roof{
+  background:linear-gradient(135deg,#567fa2,#315a7f);
+}
+#page-identification .pilot2-house-target{
+  width:84px;
+  height:82px;
+}
+#page-identification .pilot2-car{
+  width:86px;
+  height:35px;
+  border-radius:18px 22px 9px 9px;
+  background:linear-gradient(180deg,#5cb5f0 0 20%,#247fc7 21% 70%,#1766aa 71% 100%);
+  border:2px solid #0d5e9d;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.12),0 3px 7px rgba(0,0,0,.18);
+}
+#page-identification .pilot2-car-window{
+  left:22px;
+  top:-13px;
+  width:42px;
+  height:19px;
+  border:2px solid #0d5e9d;
+  border-radius:13px 13px 3px 3px;
+  background:linear-gradient(135deg,#d8f4ff 0 48%,#8ac9e5 49% 100%);
+}
+#page-identification .pilot2-car-window::after{
+  content:"";
+  position:absolute;
+  left:19px;
+  top:0;
+  width:2px;
+  height:100%;
+  background:#0d5e9d;
+}
+#page-identification .pilot2-car::before,
+#page-identification .pilot2-car::after{
+  bottom:-9px;
+  width:18px;
+  height:18px;
+  border:4px solid #202830;
+  background:radial-gradient(circle,#b7c2c8 0 38%,#e9eef1 40% 100%);
+}
+#page-identification .pilot2-car-target{
+  width:96px;
+  height:61px;
+}
+
+/* Conserver les objets dans des zones cohérentes après leur léger agrandissement. */
+#page-identification .house-left{left:7%;top:18%}
+#page-identification .house-right{left:43%;top:18%}
+#page-identification .pilot2-house-target{left:24.5%;top:17%}
+#page-identification .pilot2-house-draggable{left:9%;bottom:3%}
+#page-identification .pilot2-car{right:27%;bottom:8%}
+
+/* À 1366×768 et résolutions voisines, on privilégie toujours le texte complet. */
+@media (max-height:800px){
+  #page-identification .pilot2-onboarding-title-row{
+    min-height:29px;
+    margin-bottom:2px;
+  }
+  #page-identification .pilot2-onboarding-grid{
+    height:calc(100% - 31px);
+  }
+  #page-identification .pilot2-onboarding-side{
+    grid-template-rows:minmax(108px,1.18fr) minmax(90px,.96fr) minmax(96px,1fr);
+    gap:8px;
+  }
+  #page-identification .pilot2-onboarding-side .pilot2-tool-card{
+    padding:8px 11px;
+  }
+  #page-identification .pilot2-tool-heading p{
+    font-size:13px;
+  }
+  #page-identification .pilot2-mouse-scene{
+    min-height:195px;
+  }
+}
+@media (max-width:1280px){
+  #page-identification .pilot2-onboarding-grid{
+    grid-template-columns:minmax(490px,1.4fr) minmax(390px,1fr) 286px;
+  }
+  #page-identification .pilot2-onboarding-title-row{
+    grid-template-columns:auto 1fr;
+    column-gap:16px;
+  }
+}
