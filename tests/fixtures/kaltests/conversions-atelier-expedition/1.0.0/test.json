@@ -1,0 +1,307 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "questionnaire.table",
+    "questionnaire.supplemental-fields",
+    "layout.split",
+    "calculator.host",
+    "bilan.bindings"
+  ],
+  "id": "conversions_atelier_expedition",
+  "version": "1.0.0",
+  "title": "Conversions en atelier d'expédition",
+  "category": "mathematiques",
+  "description": "Effectuer des conversions de poids, volumes et dimensions et indiquer l'opération effectuée.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "qcmv1.0.html#page6",
+    "sourceScript": "source/js/qcm-page6.js",
+    "legacyParcoursId": "qcm-6"
+  },
+  "calculator": {
+    "compatible": true,
+    "defaultEnabled": true
+  },
+  "scenario": "Vous travaillez dans un atelier d'expédition. Avant l'envoi des commandes, vous devez vérifier les poids, volumes et dimensions des produits.",
+  "instruction": "Notez vos réponses, les unités et l'opération effectuée dans le tableau. Seules les dix réponses numériques sont notées ; les unités et opérations sont conservées mais non notées.",
+  "presentation": {
+    "layout": {
+      "type": "split",
+      "ratio": "50/50",
+      "blocks": [
+        {
+          "id": "enonces"
+        },
+        {
+          "id": "tableau_reponses"
+        }
+      ]
+    },
+    "responseTable": {
+      "headers": [
+        "N°",
+        "Réponses",
+        "Unités",
+        "Opérations effectuées"
+      ],
+      "roundedInstitutionalStyle": true
+    }
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "conversion_kg_g",
+      "prompt": "Un sac de farine pèse 2,3 kg. Convertissez ce poids en grammes.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "2300"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": [],
+      "supplementalFields": [
+        {
+          "id": "operation",
+          "label": "Opération effectuée — question 1",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    },
+    {
+      "id": "conversion_l_ml",
+      "prompt": "Un bidon contient 7,5 litres d'huile. Convertissez ce volume en millilitres.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "7500"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": [],
+      "supplementalFields": [
+        {
+          "id": "operation",
+          "label": "Opération effectuée — question 2",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    },
+    {
+      "id": "conversion_cm_m",
+      "prompt": "Une planche mesure 250 cm. Convertissez cette mesure en mètres.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "2.5"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": [],
+      "supplementalFields": [
+        {
+          "id": "operation",
+          "label": "Opération effectuée — question 3",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    },
+    {
+      "id": "conversion_kg_g_2",
+      "prompt": "Une caisse de boulons pèse 8,4 kg. Convertissez cette mesure en grammes.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "8400"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": [],
+      "supplementalFields": [
+        {
+          "id": "operation",
+          "label": "Opération effectuée — question 4",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    },
+    {
+      "id": "conversion_m3_l",
+      "prompt": "Un réservoir contient 3,2 m3 d'eau. Convertissez ce volume en litres.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "3200"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": [],
+      "supplementalFields": [
+        {
+          "id": "operation",
+          "label": "Opération effectuée — question 5",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    },
+    {
+      "id": "conversion_m_cm",
+      "prompt": "Un tuyau mesure 4,5 m. Convertissez cette longueur en centimètres.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "450"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": [],
+      "supplementalFields": [
+        {
+          "id": "operation",
+          "label": "Opération effectuée — question 6",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    },
+    {
+      "id": "conversion_l_ml_2",
+      "prompt": "Un pot de peinture contient 0,75 litre. Convertissez ce volume en millilitres.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "750"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": [],
+      "supplementalFields": [
+        {
+          "id": "operation",
+          "label": "Opération effectuée — question 7",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    },
+    {
+      "id": "conversion_g_kg",
+      "prompt": "Un colis pèse 5600 g. Convertissez ce poids en kilogrammes.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "5.6"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": [],
+      "supplementalFields": [
+        {
+          "id": "operation",
+          "label": "Opération effectuée — question 8",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    },
+    {
+      "id": "pourcentage_volume",
+      "prompt": "Un bidon d'huile de 2,5 litres est rempli à 50 %. Combien de millilitres contient-il ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "1250"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": [],
+      "supplementalFields": [
+        {
+          "id": "operation",
+          "label": "Opération effectuée — question 9",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    },
+    {
+      "id": "decoupe_longueur",
+      "prompt": "Une planche de 3,2 m doit être coupée en morceaux de 80 cm. Combien de morceaux peut-on obtenir ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "4"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": [],
+      "supplementalFields": [
+        {
+          "id": "operation",
+          "label": "Opération effectuée — question 10",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.savoirs_fondamentaux.mathematiques.resoudre_problemes",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ]
+}

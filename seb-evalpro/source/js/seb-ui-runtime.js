@@ -88,13 +88,15 @@
     style.id = 'seb-evalpro-unified-buttons-style';
     style.textContent = `
       .seb-action-btn{
+        --seb-button-color:#004E70;
         min-height:42px!important;
-        padding:0 18px!important;
-        border:0!important;
-        border-radius:8px!important;
-        color:#fff!important;
-        font-family:Arial,sans-serif!important;
-        font-size:15px!important;
+        padding:10px 20px!important;
+        border:1.5px solid var(--seb-button-color)!important;
+        border-radius:10px!important;
+        color:var(--seb-button-color)!important;
+        background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
+        font-family:Calibri,"Segoe UI",Arial,sans-serif!important;
+        font-size:16px!important;
         font-weight:700!important;
         line-height:1.15!important;
         display:inline-flex!important;
@@ -104,17 +106,24 @@
         box-sizing:border-box!important;
         cursor:pointer!important;
         text-decoration:none!important;
-        box-shadow:0 2px 5px rgba(0,0,0,.18)!important;
-        transition:filter .15s ease,transform .08s ease!important;
+        box-shadow:0 4px 10px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.98)!important;
+        transition:transform .15s ease,box-shadow .15s ease,background .15s ease!important;
         vertical-align:middle!important;
       }
-      .seb-action-btn:hover{filter:brightness(.92)!important}
-      .seb-action-btn:active{transform:translateY(1px)!important}
-      .seb-action-btn:disabled{opacity:.5!important;cursor:not-allowed!important;filter:none!important;transform:none!important}
-      .seb-btn-nav{background:#1a73e8!important}
-      .seb-btn-confirm{background:#198754!important}
-      .seb-btn-tool{background:#e67e22!important}
-      .seb-btn-danger{background:#c62828!important}
+      .seb-action-btn:hover:not(:disabled){
+        transform:translateY(-1px)!important;
+        background:linear-gradient(180deg,#fff 0%,rgba(240,244,249,.92) 100%)!important;
+        box-shadow:0 7px 16px rgba(0,0,0,.16),inset 0 1px 0 #fff!important;
+      }
+      .seb-action-btn:active:not(:disabled){
+        transform:translateY(1px)!important;
+        box-shadow:0 2px 5px rgba(0,0,0,.14),inset 0 1px 2px rgba(0,0,0,.06)!important;
+      }
+      .seb-action-btn:disabled{opacity:.45!important;cursor:default!important;transform:none!important}
+      .seb-btn-nav{--seb-button-color:#198754}
+      .seb-btn-confirm,.seb-btn-tool,.seb-btn-functional{--seb-button-color:#004E70}
+      .seb-btn-calculator{--seb-button-color:#F9B233}
+      .seb-btn-danger{--seb-button-color:#C62828}
       #seb-evalpro-abandon-fixed{
         position:fixed!important;
         left:16px!important;
@@ -132,7 +141,7 @@
         justify-content:center;
         padding:20px;
         box-sizing:border-box;
-        font-family:Arial,sans-serif;
+        font-family:Calibri,"Segoe UI",Arial,sans-serif;
       }
       #seb-evalpro-abandon-box{
         width:min(560px,94vw);
@@ -148,8 +157,8 @@
       #seb-evalpro-abandon-box .seb-abandon-help{margin:0 0 12px;font-size:14px;line-height:1.4}
       #seb-evalpro-abandon-box .seb-abandon-choice{display:flex;align-items:flex-start;gap:10px;padding:8px 4px;font-size:15px}
       #seb-evalpro-abandon-box .seb-abandon-choice input{margin-top:2px;transform:scale(1.15)}
-      #seb-evalpro-abandon-comment{width:100%;min-height:78px;margin-top:10px;padding:8px;border:1px solid #aaa;border-radius:7px;box-sizing:border-box;font:14px Arial,sans-serif;resize:vertical}
-      .seb-abandon-admin{margin-top:14px;padding:11px;border:1px solid #d7dce5;border-radius:7px;background:#f7f9fc}.seb-abandon-admin label{display:block;font-weight:700;color:#1a3a5f;margin-bottom:6px}.seb-abandon-admin small{display:block;color:#666;margin-top:5px}.seb-abandon-admin input{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #999;border-radius:5px;font:16px Arial,sans-serif}
+      #seb-evalpro-abandon-comment{width:100%;min-height:78px;margin-top:10px;padding:8px;border:1px solid #aaa;border-radius:7px;box-sizing:border-box;font:14px Calibri,"Segoe UI",Arial,sans-serif;resize:vertical}
+      .seb-abandon-admin{margin-top:14px;padding:11px;border:1px solid #d7dce5;border-radius:7px;background:#f7f9fc}.seb-abandon-admin label{display:block;font-weight:700;color:#1a3a5f;margin-bottom:6px}.seb-abandon-admin small{display:block;color:#666;margin-top:5px}.seb-abandon-admin input{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #999;border-radius:5px;font:16px Calibri,"Segoe UI",Arial,sans-serif}
       #seb-evalpro-abandon-error{min-height:19px;margin-top:6px;color:#c62828;font-size:13px;font-weight:700}
       #seb-evalpro-abandon-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
       .seb-admin-abandon-section td{background:#f7c8c8!important;color:#7c1111!important;font-weight:700!important}
@@ -161,18 +170,17 @@
 
   function skipButton(button) {
     return !!button.closest(
-      '#toolbar,.toolbar-row2,.ql-toolbar,#calc-container,#seb-evalpro-topbar,' +
-      '#seb-evalpro-admin-dialog,#seb-evalpro-session-close-dialog,#seb-evalpro-abandon-layer,' +
+      '#toolbar,.toolbar-row2,.ql-toolbar,#calc-container,' +
       '#page4 .fraction-title,#page4 .items-wrapper'
     );
   }
 
   function buttonKind(label) {
     const value = label.toLowerCase();
-    if (/abandon|supprim|réinitial|reinitial|remise à zéro|remise a zero|fermer cette session/.test(value)) return 'danger';
-    if (/valider|vérifier|verifier|démarrer|demarrer|envoyer|compléter automatiquement|completer automatiquement/.test(value)) return 'confirm';
-    if (/calculatrice|enregistrer|exporter|imprimer|stop|arrêter|arreter|ouvrir/.test(value)) return 'tool';
-    return 'nav';
+    if (/abandon|supprim|effacer|réinitial|reinitial|remise à zéro|remise a zero|annuler|fermer|quitter/.test(value)) return 'danger';
+    if (/calculatrice/.test(value)) return 'calculator';
+    if (/^suivant|^précédent|^precedent|^retour|^page suivante|^étape suivante|^etape suivante|^continuer|^commencer|^terminez?|^terminer/.test(value)) return 'nav';
+    return 'functional';
   }
 
   function iconizedLabel(label) {
@@ -203,7 +211,7 @@
     const label = stripActionIcon(raw);
     const kind = buttonKind(label);
     const desiredKind = 'seb-btn-' + kind;
-    for (const cls of ['seb-btn-nav', 'seb-btn-confirm', 'seb-btn-tool', 'seb-btn-danger']) {
+    for (const cls of ['seb-btn-nav', 'seb-btn-confirm', 'seb-btn-tool', 'seb-btn-functional', 'seb-btn-calculator', 'seb-btn-danger']) {
       if (cls !== desiredKind && button.classList.contains(cls)) button.classList.remove(cls);
     }
     if (!button.classList.contains('seb-action-btn')) button.classList.add('seb-action-btn');
@@ -237,6 +245,20 @@
 
   function currentExerciseContext() {
     const file = pageName();
+
+    if (document.body?.dataset?.sebKaltestExercise === '1') {
+      const label = cleanText(document.body.dataset.sebKaltestLabel) || headingLabel(document.body, 'Exercice KALTEST');
+      const testId = cleanText(document.body.dataset.sebKaltestId) || 'kaltest';
+      return {
+        file,
+        qcmPage: '',
+        scope: document.body,
+        label,
+        key: file + '#kaltest:' + testId,
+        dynamicKaltest: true
+      };
+    }
+
     if (file === 'qcmv1.0.html') {
       const scope = visibleQcmPage();
       if (!scope || !scope.id || !QCM_EXERCISE_IDS.has(scope.id)) return null;
@@ -339,7 +361,7 @@
     }
   }
 
-  function saveAbandon(context, reasons, comment) {
+  function saveAbandon(context, reasons, comment, nonEvaluated = false) {
     const now = new Date();
     const record = {
       key: context.key,
@@ -348,6 +370,7 @@
       exercice: context.label,
       raisons: reasons.slice(),
       commentaire: String(comment || '').trim(),
+      nonEvaluated: Boolean(nonEvaluated),
       horodatage: now.toLocaleString('fr-FR'),
       iso: now.toISOString()
     };
@@ -406,7 +429,12 @@
     return false;
   }
 
-  function advanceAfterAbandon(context) {
+  function advanceAfterAbandon(context, record) {
+    if (context.dynamicKaltest && window.sebKaltestHost && typeof window.sebKaltestHost.onAbandon === 'function') {
+      window.sebKaltestHost.onAbandon(record || null);
+      return;
+    }
+
     if (context.file === 'qcmv1.0.html') {
       if (!invokeQcmNext(context)) {
         window.alert('L’abandon a bien été enregistré. Utilisez le bouton Suivant pour poursuivre.');
@@ -430,15 +458,16 @@
         <h2>Abandonner l’exercice</h2>
         <div class="seb-abandon-exercise"></div>
         <p class="seb-abandon-help">Indiquez la ou les raisons de votre abandon. Au moins une proposition doit être cochée. L’abandon doit ensuite être validé par un administrateur.</p>
-        <label class="seb-abandon-choice"><input type="checkbox" value="Je ne comprends pas la consigne"><span>Je ne comprends pas la consigne.</span></label>
-        <label class="seb-abandon-choice"><input type="checkbox" value="L’exercice est trop difficile"><span>L’exercice est trop difficile.</span></label>
-        <label class="seb-abandon-choice"><input type="checkbox" value="Fatigue, gêne ou douleur"><span>Je ressens de la fatigue, une gêne ou une douleur.</span></label>
-        <label class="seb-abandon-choice"><input type="checkbox" value="Autre raison" data-other="1"><span>Autre raison.</span></label>
+        <label class="seb-abandon-choice"><input type="checkbox" data-abandon-reason="1" value="Je ne comprends pas la consigne"><span>Je ne comprends pas la consigne.</span></label>
+        <label class="seb-abandon-choice"><input type="checkbox" data-abandon-reason="1" value="L’exercice est trop difficile"><span>L’exercice est trop difficile.</span></label>
+        <label class="seb-abandon-choice"><input type="checkbox" data-abandon-reason="1" value="Fatigue, gêne ou douleur"><span>Je ressens de la fatigue, une gêne ou une douleur.</span></label>
+        <label class="seb-abandon-choice"><input type="checkbox" data-abandon-reason="1" value="Autre raison" data-other="1"><span>Autre raison.</span></label>
         <textarea id="seb-evalpro-abandon-comment" placeholder="Précisez si nécessaire. Si vous cochez « Autre raison », indiquez ici la raison."></textarea>
+        <label class="seb-abandon-choice seb-abandon-ne-choice"><input type="checkbox" id="seb-evalpro-abandon-ne" data-abandon-ne="1"><span><strong>Exercice non évalué dans le bilan</strong><br><small>Les points obtenus et le barème de cet exercice seront exclus des calculs du bilan.</small></span></label>
         <div class="seb-abandon-admin"><label for="seb-evalpro-abandon-admin-password">Validation administrateur</label><input id="seb-evalpro-abandon-admin-password" type="password" autocomplete="off" placeholder="Mot de passe administrateur"><small>L’administrateur doit valider l’abandon avant de poursuivre.</small></div>
         <div id="seb-evalpro-abandon-error" aria-live="polite"></div>
         <div id="seb-evalpro-abandon-actions">
-          <button type="button" id="seb-evalpro-abandon-cancel" class="seb-action-btn seb-btn-nav">✕ Annuler</button>
+          <button type="button" id="seb-evalpro-abandon-cancel" class="seb-action-btn seb-btn-danger">✕ Annuler</button>
           <button type="button" id="seb-evalpro-abandon-confirm" class="seb-action-btn seb-btn-danger">⏹ Confirmer l’abandon</button>
         </div>
       </div>`;
@@ -452,7 +481,8 @@
 
     layer.querySelector('#seb-evalpro-abandon-cancel').addEventListener('click', close);
     layer.querySelector('#seb-evalpro-abandon-confirm').addEventListener('click', async function () {
-      const checked = Array.from(layer.querySelectorAll('input[type="checkbox"]:checked'));
+      const checked = Array.from(layer.querySelectorAll('input[data-abandon-reason="1"]:checked'));
+      const nonEvaluated = !!layer.querySelector('#seb-evalpro-abandon-ne')?.checked;
       if (checked.length === 0) {
         error.textContent = 'Cochez au moins une raison avant de confirmer.';
         return;
@@ -494,9 +524,9 @@
           if (window.sebEvalPro && typeof window.sebEvalPro.save === 'function') window.sebEvalPro.save();
         } catch (_) {}
       }
-      saveAbandon(context, reasons, comment.value);
+      const record = saveAbandon(context, reasons, comment.value, nonEvaluated);
       close();
-      setTimeout(function () { advanceAfterAbandon(context); }, 40);
+      setTimeout(function () { advanceAfterAbandon(context, record); }, 40);
     });
 
     layer.addEventListener('keydown', function (event) {

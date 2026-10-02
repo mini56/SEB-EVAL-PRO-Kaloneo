@@ -48,7 +48,7 @@ function assertCleanHtml(directory, label) {
 for (const required of ['qcmv1.0.html','bilan.html','dictee.html']) {
   if (!fs.existsSync(path.join(sourceDir,required))) fail('source obligatoire absente: ' + required);
 }
-for (const required of ['admin-bilan.html','admin-candidats.html']) {
+for (const required of ['admin-bilan.html','admin-candidats.html','admin-tests-parcours.html']) {
   if (!fs.existsSync(path.join(overridesDir,required))) fail('override obligatoire absent: ' + required);
 }
 

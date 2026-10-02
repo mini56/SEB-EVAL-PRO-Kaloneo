@@ -32,7 +32,9 @@ function visibleQcmPage() {
 
 function pageDescriptor() {
   const file = pageName();
-  if (file.toLowerCase() === 'qcmv1.0.html') {
+  const lower = file.toLowerCase();
+
+  if (lower === 'qcmv1.0.html') {
     const page = visibleQcmPage();
     if (page && page.id) {
       const heading = page.querySelector('h1,h2,h3,.titre,.title');
@@ -40,6 +42,20 @@ function pageDescriptor() {
       return { pageKey: `${file}#${page.id}`, title: title || page.id };
     }
   }
+
+  if (lower === 'kaltest-pilot2.html') {
+    const visible = document.querySelector('.pilot2-page.visible');
+    const phase = visible && visible.id ? visible.id.replace(/^page-/, '') : 'page';
+    const testId = String(document.body?.dataset?.sebKaltestId || '').trim();
+    const testLabel = String(document.body?.dataset?.sebKaltestLabel || '').trim();
+    if (phase === 'exercise' && testId) {
+      return { pageKey: `${file}#test:${testId}`, title: testLabel || testId };
+    }
+    const heading = visible?.querySelector('h1,h2,h3,.titre,.title');
+    const title = heading ? String(heading.textContent || '').replace(/\s+/g, ' ').trim() : phase;
+    return { pageKey: `${file}#${phase}`, title: title || phase };
+  }
+
   return { pageKey: file, title: String(document.title || file).trim() || file };
 }
 
@@ -189,4 +205,4 @@ function install() {
   }, true);
 }
 
-module.exports = { install, isNavigationControl };
+module.exports = { install, isNavigationControl, captureNow };

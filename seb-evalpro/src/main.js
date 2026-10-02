@@ -19,6 +19,7 @@ const MIN_SPLASH_MS = 1400;
 const DESIGN_WIDTH = 1600;
 const DESIGN_HEIGHT = 900;
 const MIN_ZOOM_FACTOR = 0.60;
+const KALTEST_PILOT2_MODE = process.env.SEB_KALTEST_PILOT2 === '1';
 let mainWindow = null;
 let splashWindow = null;
 let splashStartedAt = 0;
@@ -108,8 +109,12 @@ function stopCandidateKeyGuard() {
 }
 
 function startCandidateKeyGuard() {
-  // Le verrou clavier natif est strictement réservé à l'installation Candidat.
-  if (editionCapabilities.edition !== 'candidate') {
+  // SEB_UNIFIED_SETUP : le verrou dépend désormais du mode d'exécution,
+  // jamais d'une édition choisie à l'installation.
+  // Pendant les tests réels, la touche Windows reste volontairement disponible
+  // comme porte de secours. Mettre TEMP_ALLOW_WINDOWS_RECOVERY à false activera
+  // le verrou natif sur toute installation tant que l'Admin reste verrouillé.
+  if (TEMP_ALLOW_WINDOWS_RECOVERY) {
     stopCandidateKeyGuard();
     return;
   }
@@ -261,12 +266,13 @@ function installDownloadRouting() {
 }
 
 function defaultState() {
+  const initialPage = KALTEST_PILOT2_MODE ? 'kaltest-pilot2.html' : 'qcmv1.0.html';
   return {
     version: STATE_VERSION,
     sessionStorage: {},
     localStorage: {},
-    lastPage: 'qcmv1.0.html',
-    lastEvaluationPage: 'qcmv1.0.html',
+    lastPage: initialPage,
+    lastEvaluationPage: initialPage,
     updatedAt: null
   };
 }
@@ -349,8 +355,12 @@ function isAdminCandidatePage(pageName) {
   return String(pageName || '').toLowerCase() === 'admin-candidats.html';
 }
 
+function isAdminTestsParcoursPage(pageName) {
+  return String(pageName || '').toLowerCase() === 'admin-tests-parcours.html';
+}
+
 function isAdminNavigationPage(pageName) {
-  return isAdminBilanPage(pageName) || isAdminCandidatePage(pageName);
+  return isAdminBilanPage(pageName) || isAdminCandidatePage(pageName) || isAdminTestsParcoursPage(pageName);
 }
 
 function existingWebPage(pageName) {
@@ -958,6 +968,24 @@ ipcMain.handle('admin:open-candidate-browser', (_event, candidateId) => {
 
 ipcMain.handle('admin:return-candidate-browser', (_event, candidateId) => {
   return loadAdminCandidateBrowser(candidateId);
+});
+
+function loadAdminTestsParcours() {
+  if (!mainWindow || !adminSessionUnlocked) return false;
+  if (getCandidateStore().getActiveCandidate()) return false;
+  adminCandidateResultsMode = false;
+  const target = path.join(__dirname, '..', 'app', 'web', 'admin-tests-parcours.html');
+  if (!fs.existsSync(target)) return false;
+  mainWindow.loadFile(target);
+  return true;
+}
+
+ipcMain.handle('admin:open-tests-parcours', () => {
+  return loadAdminTestsParcours();
+});
+
+ipcMain.handle('admin:close-tests-parcours', () => {
+  return loadAdminCandidateBrowser();
 });
 
 ipcMain.handle('admin:open-bilan', () => {

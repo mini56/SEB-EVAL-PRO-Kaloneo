@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEB EvalPro — PILOTE 2 KALTEST</title>
+<link rel="stylesheet" href="css/seb-design-system.css">
+<link rel="stylesheet" href="css/seb-floating-calculator.css">
+<link rel="stylesheet" href="css/kaltest-pilot2.css">
+<link rel="stylesheet" href="css/seb-in-app-alert.css" id="seb-evalpro-in-app-alert-css">
+</head>
+<body>
+<div id="calc-container" style="display:none;">
+  <div id="calc-display">0</div>
+  <div id="keypad">
+    <button class="calc-btn" type="button">7</button><button class="calc-btn" type="button">8</button><button class="calc-btn" type="button">9</button><button class="calc-btn" type="button">/</button><br>
+    <button class="calc-btn" type="button">4</button><button class="calc-btn" type="button">5</button><button class="calc-btn" type="button">6</button><button class="calc-btn" type="button">x</button><br>
+    <button class="calc-btn" type="button">1</button><button class="calc-btn" type="button">2</button><button class="calc-btn" type="button">3</button><button class="calc-btn" type="button">-</button><br>
+    <button class="calc-btn" type="button">0</button><button class="calc-btn" type="button">.</button><button class="calc-btn" type="button">=</button><button class="calc-btn" type="button">+</button><br>
+    <button class="calc-btn" id="clear" type="button">C</button>
+    <button class="calc-btn-fermez" id="close" type="button">Fermer</button>
+  </div>
+</div>
+
+<main id="pilot2-shell">
+  <section id="page-identification" class="pilot2-page visible">
+    <header class="pilot2-header">
+      <div>
+        <h1>Évaluation des savoirs fondamentaux – Parcours d'intégration</h1>
+        <p class="pilot2-subtitle">Une évaluation progressive et contextualisée des compétences nécessaires en milieu professionnel.</p>
+      </div>
+      <img class="pilot2-brand" src="branding/seb-eval-pro-installer.png" alt="SEB EvalPro - Sauvegarde 56">
+    </header>
+
+    <div class="pilot2-card">
+      <h2>Informations du candidat</h2>
+      <form id="pilot2-identification-form">
+        <div class="pilot2-form-grid">
+          <div class="pilot2-field">
+            <label for="nom">Nom *</label>
+            <input class="step" id="nom" name="nom" autocomplete="family-name" required>
+          </div>
+          <div class="pilot2-field">
+            <label for="prenom">Prénom *</label>
+            <input class="step" id="prenom" name="prenom" autocomplete="given-name" required>
+          </div>
+          <div class="pilot2-field">
+            <label for="naissance">Date de naissance *</label>
+            <input class="step" id="naissance" name="naissance" type="date" required>
+          </div>
+          <div class="pilot2-field">
+            <label for="ss7">7 premiers chiffres du n° de sécurité sociale *</label>
+            <input class="step" id="ss7" name="ss7" inputmode="numeric" maxlength="7" autocomplete="off" required>
+          </div>
+          <div class="pilot2-field">
+            <label for="lieu">Ville *</label>
+            <input class="step" id="lieu" name="lieu" required>
+          </div>
+          <div class="pilot2-field">
+            <label for="groupe">Groupe *</label>
+            <input class="step" id="groupe" name="groupe" required>
+          </div>
+          <div class="pilot2-field">
+            <label for="dateEvaluation">Date de l’évaluation *</label>
+            <input class="step" id="dateEvaluation" name="dateEvaluation" type="date" required>
+          </div>
+          <div class="pilot2-field">
+            <label for="parcours">Parcours</label>
+            <input class="pilot2-readonly" id="parcours" name="parcours" readonly>
+          </div>
+        </div>
+      </form>
+      <div id="identity-status" class="pilot2-status" aria-live="polite"></div>
+      <div class="pilot2-actions">
+        <button id="identity-next" class="seb-action-btn seb-btn-nav" type="button">Suivant</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="page-intro" class="pilot2-page">
+    <h2>Le contexte :</h2>
+    <p style="font-size:18px;margin:0 0 6px">
+      Vous débutez un stage dans une usine de fabrication. Vous allez passer par plusieurs situations professionnelles avec des missions simulées, un peu comme un parcours d'essai.
+      Chacune correspond à un exercice. L'objectif est d'évaluer vos compétences pratiques, logiques et rédactionnelles dans un contexte proche du travail réel.
+    </p>
+    <div class="pilot2-intro-avatar">
+      <img src="imageqcm/avatar_transparant.png" alt="Avatar">
+      <p>Bienvenue dans ce parcours ! Suivez les instructions attentivement.</p>
+    </div>
+
+    <div class="pilot2-calculator-guide pilot2-card">
+      <p><strong>Pour les opérations numériques simples, vous pouvez utiliser la calculatrice intégrée.</strong></p>
+      <div class="pilot2-guide-line">
+        <span>Un bouton permet de l'ouvrir depuis les exercices où elle est autorisée.</span>
+        <button data-seb-action="open-calculator" class="seb-action-btn seb-btn-calculator" type="button">Ouvrir la calculatrice</button>
+      </div>
+      <p>Vous pouvez l'essayer maintenant. Pour la fermer, utilisez le bouton <strong>Fermer</strong> disponible dans la calculatrice.</p>
+    </div>
+
+    <div class="pilot2-intro-cover">
+      <img src="imageqcm/image_cover.png" alt="Image de couverture">
+    </div>
+    <p style="font-size:18px;text-align:center;margin:5px 0">Bonne découverte et bon parcours !</p>
+    <div class="pilot2-actions">
+      <button id="intro-next" class="seb-action-btn seb-btn-nav" type="button">Commencez l'évaluation</button>
+    </div>
+  </section>
+
+  <section id="page-exercise" class="pilot2-page">
+    <div class="kaltest-heading">
+      <h2 id="kaltest-title"></h2>
+      <div id="kaltest-progress" class="kaltest-progress"></div>
+    </div>
+
+    <div class="kaltest-context-row">
+      <div class="kaltest-context pilot2-card">
+        <img src="imageqcm/scenario.png" alt="Scénario">
+        <div><strong>Scénario :</strong><p id="kaltest-scenario"></p></div>
+      </div>
+      <div class="kaltest-context pilot2-card">
+        <img src="imageqcm/avatar_transparant.png" alt="Consigne">
+        <div><strong>Consigne :</strong><p id="kaltest-instruction"></p></div>
+      </div>
+    </div>
+
+    <div id="kaltest-content" class="pilot2-card"></div>
+
+    <div class="kaltest-footer">
+      <div class="pilot2-actions">
+        <button id="kaltest-calculator" data-seb-action="open-calculator" class="seb-action-btn seb-btn-calculator" type="button">Ouvrir la calculatrice</button>
+        <button id="kaltest-next" class="seb-action-btn seb-btn-nav" type="button">Suivant</button>
+      </div>
+      <div id="exercise-status" class="pilot2-status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="page-final" class="pilot2-page">
+    <div class="pilot2-card">
+      <div class="pilot2-final-title">
+        <img src="imageqcm/avatar_transparant.png" alt="Avatar">
+        <h2>Félicitations pour votre parcours !</h2>
+      </div>
+      <p>
+        Vous avez mené à bien cette étape et nous tenons à vous féliciter pour votre engagement et votre persévérance.
+        Nous espérons que cette expérience vous a permis de découvrir de nouvelles compétences, de mieux comprendre le monde de l’entreprise et,
+        surtout, de prendre plaisir à ce parcours.
+      </p>
+      <p>
+        Nous vous souhaitons le meilleur pour la suite de vos projets et espérons que cette étape aura été enrichissante et motivante pour vous.
+      </p>
+    </div>
+  </section>
+</main>
+
+<script src="js/kaltest-pilot2-data.js"></script>
+<script src="js/seb-floating-calculator.js"></script>
+<script src="js/kaltest-pilot2-runtime.js"></script>
+<script src="js/seb-in-app-alert.js" id="seb-evalpro-in-app-alert-script"></script>
+<script src="js/seb-ui-runtime.js" id="seb-ui-runtime-loader"></script>
+</body>
+</html>

@@ -18,28 +18,35 @@
       "page": "2",
       "role": "test",
       "status": "contract-fixture-ready",
-      "targetTestId": "calculs_commandes_atelier"
+      "targetTestId": "calculs_commandes_atelier",
+      "fixturePath": "tests/fixtures/kaltests/calculs-commandes-atelier/1.0.0/test.json"
     },
     {
       "id": "qcm-2_1",
       "file": "qcmv1.0.html",
       "page": "2_1",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "calculs_poids_volumes",
+      "fixturePath": "tests/fixtures/kaltests/calculs-poids-volumes/1.0.0/test.json"
     },
     {
       "id": "qcm-3",
       "file": "qcmv1.0.html",
       "page": "3",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "horaires_reception_controle",
+      "fixturePath": "tests/fixtures/kaltests/horaires-reception-controle/1.0.0/test.json"
     },
     {
       "id": "qcm-texte-trous",
       "file": "qcmv1.0.html",
       "page": "pageTexteTrous",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "texte_a_trous_stage_logistique",
+      "fixturePath": "tests/fixtures/kaltests/texte-a-trous-stage-logistique/1.0.0/test.json"
     },
     {
       "id": "qcm-4",
@@ -67,7 +74,9 @@
       "file": "qcmv1.0.html",
       "page": "6",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "conversions_atelier_expedition",
+      "fixturePath": "tests/fixtures/kaltests/conversions-atelier-expedition/1.0.0/test.json"
     },
     {
       "id": "autoeval1",
@@ -103,7 +112,9 @@
       "id": "genrenombres",
       "file": "genrenombres.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "genre_nombre",
+      "fixturePath": "tests/fixtures/kaltests/genre-nombre/1.0.0/test.json"
     },
     {
       "id": "dictee",
@@ -139,7 +150,9 @@
       "id": "paronymes",
       "file": "paronymes.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "paronymes_rapport",
+      "fixturePath": "tests/fixtures/kaltests/paronymes-rapport/1.0.0/test.json"
     },
     {
       "id": "carre",

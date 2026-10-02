@@ -1,0 +1,84 @@
+name: Build 21 Admin foundation
+
+on:
+  push:
+    branches:
+      - dev-kaloneo-v2
+      - main
+    paths:
+      - 'seb-evalpro/src/preload.js'
+      - 'seb-evalpro/src/session-close.js'
+      - 'seb-evalpro/src/candidate-catalog-preload.js'
+      - 'seb-evalpro/src/main.js'
+      - 'seb-evalpro/scripts/build21-admin-foundation-guard.js'
+      - 'seb-evalpro/scripts/build21-admin-foundation-smoke-main.js'
+      - 'seb-evalpro/scripts/prepare-web.js'
+      - 'seb-evalpro/overrides/admin-tests-parcours.html'
+      - 'seb-evalpro/source/js/admin-tests-parcours.js'
+      - 'seb-evalpro/overrides/admin-bilan.html'
+      - 'seb-evalpro/source/js/admin-bilan-close.js'
+      - 'seb-evalpro/package.json'
+      - '.github/workflows/build21-admin-foundation.yml'
+  pull_request:
+    paths:
+      - 'seb-evalpro/src/preload.js'
+      - 'seb-evalpro/src/session-close.js'
+      - 'seb-evalpro/src/candidate-catalog-preload.js'
+      - 'seb-evalpro/src/main.js'
+      - 'seb-evalpro/scripts/build21-admin-foundation-guard.js'
+      - 'seb-evalpro/scripts/build21-admin-foundation-smoke-main.js'
+      - 'seb-evalpro/scripts/prepare-web.js'
+      - 'seb-evalpro/overrides/admin-tests-parcours.html'
+      - 'seb-evalpro/source/js/admin-tests-parcours.js'
+      - 'seb-evalpro/overrides/admin-bilan.html'
+      - 'seb-evalpro/source/js/admin-bilan-close.js'
+      - 'seb-evalpro/package.json'
+      - '.github/workflows/build21-admin-foundation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  admin-foundation:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: seb-evalpro
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Verify Build 21 Admin foundation
+        run: npm run test:admin-foundation
+
+      - name: Prepare web
+        run: npm run prepare:web
+
+      - name: Run focused Electron Admin smoke
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stdout = Join-Path $env:RUNNER_TEMP 'admin-foundation-out.log'
+          $stderr = Join-Path $env:RUNNER_TEMP 'admin-foundation-err.log'
+          $electron = Join-Path (Get-Location) 'node_modules/.bin/electron.cmd'
+          $process = Start-Process -FilePath $electron -ArgumentList '--no-sandbox','scripts/build21-admin-foundation-smoke-main.js' -PassThru -NoNewWindow -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          if (-not $process.WaitForExit(45000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            Get-Content $stdout -ErrorAction SilentlyContinue
+            Get-Content $stderr -ErrorAction SilentlyContinue
+            throw 'Timeout du smoke Admin Build #21.'
+          }
+          Get-Content $stdout -ErrorAction SilentlyContinue
+          Get-Content $stderr -ErrorAction SilentlyContinue
+          if ($process.ExitCode -ne 0) {
+            throw "Smoke Admin Build #21 en échec (code $($process.ExitCode))."
+          }

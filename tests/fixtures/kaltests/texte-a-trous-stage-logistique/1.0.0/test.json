@@ -1,0 +1,374 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "questionnaire.table",
+    "questionnaire.inline-gaps",
+    "layout.single",
+    "bilan.bindings"
+  ],
+  "id": "texte_a_trous_stage_logistique",
+  "version": "1.0.0",
+  "title": "Texte à trous — Stage en logistique",
+  "category": "francais",
+  "description": "Compléter un texte professionnel en réalisant si nécessaire les accords sujet/verbe et genre/nombre.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "qcmv1.0.html#pageTexteTrous",
+    "sourceScript": "source/js/qcm-texte-trous.js",
+    "legacyParcoursId": "qcm-texte-trous"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "Votre stage dans l'entreprise est à mi-parcours. Vous allez échanger avec votre conseiller sur vos compétences acquises jusqu'à présent et sur vos qualités. Vous rédigez un court texte pour vous y préparer.",
+  "instruction": "Complétez le texte avec la liste de mots proposée. Dans certains cas, réalisez les accords sujet/verbe et genre/nombre.",
+  "presentation": {
+    "layout": "single-block",
+    "wordBank": [
+      "conseiller",
+      "organiser",
+      "pouvoir",
+      "préparateur de commandes",
+      "colis",
+      "logistique",
+      "stage",
+      "conseil",
+      "expédition",
+      "tâche",
+      "professionnel",
+      "penser",
+      "être",
+      "qualité",
+      "client"
+    ],
+    "inlineFlow": [
+      {
+        "type": "text",
+        "text": "Dans le cadre d'une reconversion "
+      },
+      {
+        "type": "question",
+        "questionId": "professionnelle"
+      },
+      {
+        "type": "text",
+        "text": ", j'ai souhaité vérifier que le métier d'agent logistique me conviendrait. Vous m'avez proposé un stage pour un poste de "
+      },
+      {
+        "type": "question",
+        "questionId": "preparateur_commandes"
+      },
+      {
+        "type": "text",
+        "text": ". J'"
+      },
+      {
+        "type": "question",
+        "questionId": "ai_pu"
+      },
+      {
+        "type": "text",
+        "text": " travailler en équipe et découvrir le "
+      },
+      {
+        "type": "question",
+        "questionId": "stage"
+      },
+      {
+        "type": "text",
+        "text": " en entrepôt et le rapport aux "
+      },
+      {
+        "type": "question",
+        "questionId": "clients"
+      },
+      {
+        "type": "text",
+        "text": ". J'ai réalisé des "
+      },
+      {
+        "type": "question",
+        "questionId": "taches"
+      },
+      {
+        "type": "text",
+        "text": " variées et mes collègues m'ont "
+      },
+      {
+        "type": "question",
+        "questionId": "conseille"
+      },
+      {
+        "type": "text",
+        "text": " en cas de besoin. Je "
+      },
+      {
+        "type": "question",
+        "questionId": "pense"
+      },
+      {
+        "type": "text",
+        "text": " que pour travailler dans le domaine de la "
+      },
+      {
+        "type": "question",
+        "questionId": "logistique"
+      },
+      {
+        "type": "text",
+        "text": ", il est important d'avoir une bonne organisation et une bonne condition physique, car ce poste demande de manipuler et préparer des "
+      },
+      {
+        "type": "question",
+        "questionId": "colis"
+      },
+      {
+        "type": "text",
+        "text": ". Pour moi, les "
+      },
+      {
+        "type": "question",
+        "questionId": "qualites"
+      },
+      {
+        "type": "text",
+        "text": " indispensables pour ce métier "
+      },
+      {
+        "type": "question",
+        "questionId": "sont"
+      },
+      {
+        "type": "text",
+        "text": " de respecter les délais, de garder le calme en toutes circonstances et d'"
+      },
+      {
+        "type": "question",
+        "questionId": "organiser"
+      },
+      {
+        "type": "text",
+        "text": " les commandes avec soin. Je pense continuer à faire des "
+      },
+      {
+        "type": "question",
+        "questionId": "stages"
+      },
+      {
+        "type": "text",
+        "text": " avant de commencer une formation dans le secteur de l'"
+      },
+      {
+        "type": "question",
+        "questionId": "expedition"
+      },
+      {
+        "type": "text",
+        "text": "."
+      }
+    ]
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "professionnelle",
+      "prompt": "Champ 1 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "professionnelle"
+      ],
+      "points": 1
+    },
+    {
+      "id": "preparateur_commandes",
+      "prompt": "Champ 2 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "préparateur de commandes"
+      ],
+      "points": 1
+    },
+    {
+      "id": "ai_pu",
+      "prompt": "Champ 3 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "ai pu"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stage",
+      "prompt": "Champ 4 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "stage"
+      ],
+      "points": 1
+    },
+    {
+      "id": "clients",
+      "prompt": "Champ 5 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "clients"
+      ],
+      "points": 1
+    },
+    {
+      "id": "taches",
+      "prompt": "Champ 6 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "tâches"
+      ],
+      "points": 1
+    },
+    {
+      "id": "conseille",
+      "prompt": "Champ 7 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "conseillé"
+      ],
+      "points": 1
+    },
+    {
+      "id": "pense",
+      "prompt": "Champ 8 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "pense"
+      ],
+      "points": 1
+    },
+    {
+      "id": "logistique",
+      "prompt": "Champ 9 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "logistique"
+      ],
+      "points": 1
+    },
+    {
+      "id": "colis",
+      "prompt": "Champ 10 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "colis"
+      ],
+      "points": 1
+    },
+    {
+      "id": "qualites",
+      "prompt": "Champ 11 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "qualités"
+      ],
+      "points": 1
+    },
+    {
+      "id": "sont",
+      "prompt": "Champ 12 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "sont"
+      ],
+      "points": 1
+    },
+    {
+      "id": "organiser",
+      "prompt": "Champ 13 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "organiser"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stages",
+      "prompt": "Champ 14 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "stages"
+      ],
+      "points": 1
+    },
+    {
+      "id": "expedition",
+      "prompt": "Champ 15 du texte à trous",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "expédition"
+      ],
+      "points": 1
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.savoirs_fondamentaux.expression_ecrite.maitrise",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ]
+}

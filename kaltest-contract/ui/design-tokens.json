@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "fonts": {
+    "main": "Calibri",
+    "light": "Calibri Light",
+    "fallback": [
+      "Segoe UI",
+      "Arial",
+      "sans-serif"
+    ]
+  },
+  "colors": {
+    "blue": {
+      "25": "#C1C9D6",
+      "50": "#8398B0",
+      "65": "#5D7E9B",
+      "80": "#356787",
+      "100": "#004E70"
+    },
+    "orange": {
+      "25": "#FFECD2",
+      "50": "#FED9A2",
+      "65": "#FDCE84",
+      "80": "#FBC263",
+      "100": "#F9B233"
+    },
+    "green": "#198754",
+    "red": "#C62828"
+  },
+  "background": "linear-gradient(to bottom, #ffffff, #ebeef5)",
+  "buttons": {
+    "heightPx": 42,
+    "radiusPx": 10,
+    "borderPx": 1.5,
+    "roles": {
+      "danger": "red",
+      "navigation": "green",
+      "calculator": "orange.100",
+      "functional": "blue.100"
+    }
+  },
+  "layout": {
+    "splitRatios": [
+      "50/50",
+      "40/60",
+      "60/40"
+    ],
+    "maxNestedBlockDepth": 1,
+    "imagePolicy": {
+      "neverUpscale": true,
+      "preserveAspectRatio": true,
+      "fit": "contain",
+      "shrinkToAvailableSpace": true
+    }
+  }
+}

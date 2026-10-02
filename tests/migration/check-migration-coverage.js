@@ -27,9 +27,37 @@ if (extra.length) throw new Error('Étapes inconnues dans la matrice : ' + extra
 if (duplicates.length) throw new Error('Étapes dupliquées dans la matrice : ' + [...new Set(duplicates)].join(', '));
 
 const migrated = (matrix.steps || []).filter(step => step.status === 'contract-fixture-ready');
-if (migrated.length !== 1 || migrated[0].id !== 'qcm-2') {
-  throw new Error('La première migration attendue doit être qcm-2 uniquement à ce stade.');
+const migratedIds = migrated.map(step => step.id);
+const expectedMigrated = [
+  'qcm-2',
+  'qcm-2_1',
+  'qcm-3',
+  'qcm-texte-trous',
+  'qcm-6',
+  'genrenombres',
+  'paronymes'
+];
+if (JSON.stringify(migratedIds) !== JSON.stringify(expectedMigrated)) {
+  throw new Error(
+    'Migrations contractuelles attendues : ' + expectedMigrated.join(', ') +
+    ' ; trouvé : ' + migratedIds.join(', ')
+  );
+}
+
+for (const step of migrated) {
+  if (!step.targetTestId) throw new Error('targetTestId manquant pour ' + step.id);
+  if (!step.fixturePath) throw new Error('fixturePath manquant pour ' + step.id);
+  const fixture = path.join(root, step.fixturePath);
+  if (!fs.existsSync(fixture)) throw new Error('Fixture KALTEST absente pour ' + step.id + ' : ' + fixture);
+
+  const fixtureJson = JSON.parse(fs.readFileSync(fixture, 'utf8'));
+  if (fixtureJson.id !== step.targetTestId) {
+    throw new Error(
+      'Fixture KALTEST incohérente pour ' + step.id +
+      ' : id attendu ' + step.targetTestId + ', trouvé ' + fixtureJson.id
+    );
+  }
 }
 
 console.log('LEGACY_PARCOURS_BUILD20_COVERAGE: OK — 24/24 étapes suivies');
-console.log('FIRST_MIGRATED_CONTRACT: qcm-2 -> calculs_commandes_atelier');
+console.log('MIGRATED_CONTRACTS: ' + migrated.map(step => step.id + ' -> ' + step.targetTestId).join(' | '));

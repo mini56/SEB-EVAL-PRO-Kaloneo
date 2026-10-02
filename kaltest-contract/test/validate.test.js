@@ -13,6 +13,20 @@ const {
   resolveLevel
 } = require('../src/validate');
 
+const {
+  DEFAULT_SUPPORTED_FEATURES,
+  checkSebCompatibility,
+  validateMediaDescriptor,
+  validateTransitionDefinition,
+  validatePackageSize
+} = require('../src/compatibility');
+
+const {
+  parseDurationFr,
+  evaluateQuestion,
+  evaluateTest
+} = require('../src/evaluate-questionnaire');
+
 function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.resolve(__dirname, relativePath), 'utf8'));
 }
@@ -43,6 +57,139 @@ assert.deepStrictEqual(
   migratedSimpleTest.questions.map(question => question.acceptedAnswers[0]),
   ['1020', '1250', '60', '525', '8']
 );
+
+const migratedSecondMathTest = readJson('../../tests/fixtures/kaltests/calculs-poids-volumes/1.0.0/test.json');
+assert.deepStrictEqual(
+  validateTestDefinition(migratedSecondMathTest, catalog.definitions),
+  { ok: true, errors: [] }
+);
+assert.deepStrictEqual(
+  migratedSecondMathTest.questions.map(question => question.acceptedAnswers[0]),
+  ['10', '75', '12', '24', '165']
+);
+
+const migratedTableTest = readJson('../../tests/fixtures/kaltests/genre-nombre/1.0.0/test.json');
+assert.deepStrictEqual(
+  validateTestDefinition(migratedTableTest, catalog.definitions),
+  { ok: true, errors: [] }
+);
+assert.strictEqual(migratedTableTest.questions.length, 20);
+assert.strictEqual(migratedTableTest.presentation.layout.ratio, '50/50');
+
+const migratedHoraires = readJson('../../tests/fixtures/kaltests/horaires-reception-controle/1.0.0/test.json');
+assert.deepStrictEqual(
+  validateTestDefinition(migratedHoraires, catalog.definitions),
+  { ok: true, errors: [] }
+);
+assert.strictEqual(migratedHoraires.questions.length, 14);
+assert.strictEqual(parseDurationFr('9h15'), 555);
+assert.strictEqual(parseDurationFr('9 heures 15 min'), 555);
+assert.strictEqual(parseDurationFr('1 heure 03 minutes'), 63);
+assert.strictEqual(evaluateQuestion(migratedHoraires.questions[0], '9:15'), true);
+assert.strictEqual(evaluateQuestion(migratedHoraires.questions[12], '31 min'), true);
+const horairesAnswers = Object.fromEntries(
+  migratedHoraires.questions.map(question => [question.id, question.acceptedMinutes + ' min'])
+);
+const horairesPerfect = evaluateTest(migratedHoraires, horairesAnswers);
+assert.strictEqual(horairesPerfect.score, 14);
+assert.strictEqual(horairesPerfect.scoreMax, 14);
+
+const migratedInlineText = readJson('../../tests/fixtures/kaltests/texte-a-trous-stage-logistique/1.0.0/test.json');
+assert.deepStrictEqual(
+  validateTestDefinition(migratedInlineText, catalog.definitions),
+  { ok: true, errors: [] }
+);
+assert.strictEqual(migratedInlineText.questions.length, 15);
+const inlinePerfect = evaluateTest(
+  migratedInlineText,
+  Object.fromEntries(migratedInlineText.questions.map(question => [question.id, question.acceptedAnswers[0]]))
+);
+assert.strictEqual(inlinePerfect.score, 15);
+assert.strictEqual(inlinePerfect.scoreMax, 15);
+assert.ok(migratedInlineText.presentation.inlineFlow.some(item => item.type === 'question'));
+
+const migratedConversions = readJson('../../tests/fixtures/kaltests/conversions-atelier-expedition/1.0.0/test.json');
+assert.deepStrictEqual(
+  validateTestDefinition(migratedConversions, catalog.definitions),
+  { ok: true, errors: [] }
+);
+assert.strictEqual(migratedConversions.questions.length, 10);
+assert.ok(migratedConversions.questions.every(question =>
+  Array.isArray(question.supplementalFields) &&
+  question.supplementalFields.length === 1 &&
+  question.supplementalFields[0].scored === false
+));
+const conversionPerfect = evaluateTest(
+  migratedConversions,
+  Object.fromEntries(migratedConversions.questions.map(question => [question.id, question.acceptedAnswers[0].replace('.', ',')]))
+);
+assert.strictEqual(conversionPerfect.score, 10);
+assert.strictEqual(conversionPerfect.scoreMax, 10);
+
+const migratedParonymes = readJson('../../tests/fixtures/kaltests/paronymes-rapport/1.0.0/test.json');
+assert.deepStrictEqual(
+  validateTestDefinition(migratedParonymes, catalog.definitions),
+  { ok: true, errors: [] }
+);
+assert.strictEqual(migratedParonymes.questions.length, 20);
+const paronymesPerfect = evaluateTest(
+  migratedParonymes,
+  Object.fromEntries(migratedParonymes.questions.map(question => [question.id, question.acceptedAnswers[0]]))
+);
+assert.strictEqual(paronymesPerfect.score, 20);
+assert.strictEqual(paronymesPerfect.scoreMax, 20);
+assert.strictEqual(migratedParonymes.questions[0].acceptedAnswers[0], 'Pitié');
+
+const transitionFixture = readJson('../../tests/fixtures/transitions/observation-video/1.0.0/transition.json');
+assert.deepStrictEqual(
+  validateTransitionDefinition(transitionFixture),
+  { ok: true, errors: [], warnings: [] }
+);
+
+const currentCompatibility = checkSebCompatibility(migratedTableTest, {
+  sebVersion: '0.1.0-dev',
+  supportedKaltestFormats: [1],
+  supportedFeatures: DEFAULT_SUPPORTED_FEATURES
+});
+assert.deepStrictEqual(currentCompatibility, { ok: true, errors: [] });
+
+const futureFeature = JSON.parse(JSON.stringify(migratedTableTest));
+futureFeature.features.push('future.feature.not-supported');
+const futureCompatibility = checkSebCompatibility(futureFeature, {
+  sebVersion: '0.1.0-dev',
+  supportedKaltestFormats: [1],
+  supportedFeatures: DEFAULT_SUPPORTED_FEATURES
+});
+assert.strictEqual(futureCompatibility.ok, false);
+assert.ok(futureCompatibility.errors.some(error => error.message.includes('fonction KALTEST inconnue')));
+
+const tooOldSeb = checkSebCompatibility(migratedSecondMathTest, {
+  sebVersion: '0.0.9',
+  supportedKaltestFormats: [1],
+  supportedFeatures: DEFAULT_SUPPORTED_FEATURES
+});
+assert.strictEqual(tooOldSeb.ok, false);
+assert.ok(tooOldSeb.errors.some(error => error.message.includes('minimum requis')));
+
+const remoteMedia = validateMediaDescriptor({
+  kind: 'video',
+  path: 'https://example.invalid/video.webm',
+  sizeBytes: 1024,
+  container: 'webm',
+  videoCodec: 'vp9',
+  audioCodec: 'opus'
+});
+assert.strictEqual(remoteMedia.ok, false);
+assert.ok(remoteMedia.errors.some(error => error.message.includes('fichier local embarqué')));
+
+const oversizedPackage = validatePackageSize((1024 * 1024 * 1024) + 1);
+assert.strictEqual(oversizedPackage.ok, false);
+
+const tooDeepTransition = JSON.parse(JSON.stringify(transitionFixture));
+tooDeepTransition.presentation.layout.blocks[0].blocks[0].blocks = [{ id: 'forbidden-depth' }];
+const tooDeepResult = validateTransitionDefinition(tooDeepTransition);
+assert.strictEqual(tooDeepResult.ok, false);
+assert.ok(tooDeepResult.errors.some(error => error.message.includes('un seul niveau de sous-blocs')));
 
 const mathLine = lineById.get('bilan.savoirs_fondamentaux.mathematiques.comprendre_enonce_consigne');
 assert.ok(mathLine);
@@ -117,6 +264,15 @@ assert.deepStrictEqual(
 
 console.log('BILAN_CATALOG_BUILD20: OK — 10 définitions / 17 lignes');
 console.log('KALTEST_FIRST_SIMPLE_MIGRATION: OK — calculs_commandes_atelier 1.0.0');
+console.log('KALTEST_SECOND_SIMPLE_MIGRATION: OK — calculs_poids_volumes 1.0.0');
+console.log('KALTEST_TABLE_MIGRATION: OK — genre_nombre 1.0.0');
+console.log('KALTEST_DURATION_MIGRATION: OK — horaires_reception_controle 1.0.0');
+console.log('KALTEST_INLINE_GAPS_MIGRATION: OK — texte_a_trous_stage_logistique 1.0.0');
+console.log('KALTEST_SUPPLEMENTAL_FIELDS_MIGRATION: OK — conversions_atelier_expedition 1.0.0');
+console.log('KALTEST_SINGLE_CHOICE_TABLE_MIGRATION: OK — paronymes_rapport 1.0.0');
+console.log('KALTEST_SHARED_EVALUATOR: OK');
+console.log('KALTEST_TRANSITION_MEDIA_CONTRACT: OK');
+console.log('KALTEST_SEB_COMPATIBILITY_GATE: OK');
 console.log('MULTI_TEST_AGGREGATION: OK — sommes score / score_max');
 console.log('DYNAMIC_BILAN_FIELDS: OK');
 console.log('ABANDON_WITH_POINTS: OK');

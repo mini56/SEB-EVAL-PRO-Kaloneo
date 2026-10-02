@@ -1,0 +1,40 @@
+{
+  "kind": "transition",
+  "id": "observation_video",
+  "version": "1.0.0",
+  "title": "Observation vidéo",
+  "mode": "automatic",
+  "advanceOn": "media-ended",
+  "presentation": {
+    "layout": {
+      "type": "split",
+      "ratio": "40/60",
+      "blocks": [
+        {
+          "id": "instructions",
+          "blocks": [
+            {
+              "id": "intro_text"
+            },
+            {
+              "id": "reminder_text"
+            }
+          ]
+        },
+        {
+          "id": "video"
+        }
+      ]
+    }
+  },
+  "media": [
+    {
+      "kind": "video",
+      "path": "media/observation.webm",
+      "sizeBytes": 10485760,
+      "container": "webm",
+      "videoCodec": "vp9",
+      "audioCodec": "opus"
+    }
+  ]
+}

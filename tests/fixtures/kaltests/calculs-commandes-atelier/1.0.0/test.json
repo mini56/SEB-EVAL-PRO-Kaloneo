@@ -132,5 +132,12 @@
         "score_max": "score_max"
       }
     }
+  ],
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "layout.single",
+    "calculator.host",
+    "bilan.bindings"
   ]
 }

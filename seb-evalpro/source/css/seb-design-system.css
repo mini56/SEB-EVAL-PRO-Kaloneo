@@ -1,0 +1,174 @@
+:root {
+  --seb-blue-100: #004E70;
+  --seb-blue-80: #356787;
+  --seb-blue-65: #5D7E9B;
+  --seb-blue-50: #8398B0;
+  --seb-blue-25: #C1C9D6;
+
+  --seb-orange-100: #F9B233;
+  --seb-orange-80: #FBC263;
+  --seb-orange-65: #FDCE84;
+  --seb-orange-50: #FED9A2;
+  --seb-orange-25: #FFECD2;
+
+  --seb-green: #198754;
+  --seb-red: #C62828;
+
+  --seb-font-main: "Calibri", "Segoe UI", Arial, sans-serif;
+  --seb-font-light: "Calibri Light", "Calibri", "Segoe UI", Arial, sans-serif;
+
+  --seb-page-background: linear-gradient(to bottom, #ffffff, #ebeef5);
+  --seb-card-radius: 12px;
+  --seb-card-shadow: 0 4px 14px rgba(0, 0, 0, .15);
+  --seb-control-radius: 10px;
+}
+
+html,
+body {
+  font-family: var(--seb-font-main);
+}
+
+body {
+  background: var(--seb-page-background);
+}
+
+h1,
+h2,
+.seb-page-title,
+.seb-section-title {
+  font-family: var(--seb-font-light);
+  font-weight: 300;
+}
+
+.seb-card {
+  background: rgba(255, 255, 255, .88);
+  border-radius: var(--seb-card-radius);
+  box-shadow: var(--seb-card-shadow);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.seb-action-btn {
+  --seb-button-color: var(--seb-blue-100);
+
+  min-height: 42px;
+  padding: 10px 20px;
+  border: 1.5px solid var(--seb-button-color);
+  border-radius: var(--seb-control-radius);
+  color: var(--seb-button-color);
+  background: linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(245,248,252,.84) 100%);
+  box-shadow:
+    0 4px 10px rgba(0,0,0,.12),
+    inset 0 1px 0 rgba(255,255,255,.98);
+  font-family: var(--seb-font-main);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.15;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-sizing: border-box;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease,
+    background .15s ease;
+}
+
+.seb-action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, #fff 0%, rgba(240,244,249,.92) 100%);
+  box-shadow:
+    0 7px 16px rgba(0,0,0,.16),
+    inset 0 1px 0 #fff;
+}
+
+.seb-action-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow:
+    0 2px 5px rgba(0,0,0,.14),
+    inset 0 1px 2px rgba(0,0,0,.06);
+}
+
+.seb-action-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--seb-button-color) 35%, transparent);
+  outline-offset: 3px;
+}
+
+.seb-action-btn:disabled {
+  opacity: .45;
+  cursor: default;
+  transform: none;
+}
+
+.seb-btn-functional,
+.seb-btn-confirm,
+.seb-btn-tool {
+  --seb-button-color: var(--seb-blue-100);
+}
+
+.seb-btn-nav {
+  --seb-button-color: var(--seb-green);
+}
+
+.seb-btn-calculator {
+  --seb-button-color: var(--seb-orange-100);
+}
+
+.seb-btn-danger {
+  --seb-button-color: var(--seb-red);
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+  font-family: var(--seb-font-main);
+  border: 1px solid var(--seb-blue-50);
+  border-radius: 8px;
+  background: #fff;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--seb-blue-100);
+  box-shadow: 0 0 0 3px rgba(0, 78, 112, .12);
+}
+
+.seb-media-image,
+.seb-media-video {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: var(--seb-media-available-height, 100%);
+  object-fit: contain;
+}
+
+.seb-media-image {
+  object-fit: contain;
+}
+
+.seb-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--seb-blue-50);
+  border-radius: 10px;
+}
+
+.seb-table thead th {
+  background: var(--seb-blue-100);
+  color: #fff;
+}
+
+.seb-table .seb-table-secondary {
+  background: var(--seb-blue-25);
+}
