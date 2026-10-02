@@ -261,17 +261,19 @@ function createPasswordDialog() {
   });
 }
 
-function createApplicationQuitDialog() {
+function createApplicationQuitDialog(activeCandidate) {
   return new Promise((resolve) => {
+    const hasActiveCandidate = Boolean(activeCandidate);
+    const message = hasActiveCandidate
+      ? 'Le parcours candidat en cours sera sauvegardé et restera actif. Au prochain démarrage, SEB EvalPro reprendra exactement sur la page du candidat en cours.'
+      : 'Aucun parcours candidat n’est en cours. SEB EvalPro va se fermer.';
+
     const backdrop = document.createElement('div');
     backdrop.id = 'seb-evalpro-quit-application-dialog';
     backdrop.innerHTML = `
       <div class="seb-session-close-card" role="dialog" aria-modal="true" aria-label="Quitter SEB EvalPro">
         <div class="seb-session-close-title">Quitter SEB EvalPro ?</div>
-        <div class="seb-session-close-text">
-          Le parcours candidat en cours sera sauvegardé et restera actif.
-          Au prochain démarrage, SEB EvalPro reprendra exactement sur la page du candidat en cours.
-        </div>
+        <div class="seb-session-close-text">${message}</div>
         <div class="seb-session-close-actions">
           <button type="button" id="seb-quit-application-cancel">Annuler</button>
           <button type="button" id="seb-quit-application-ok">Quitter</button>
@@ -304,7 +306,6 @@ function createApplicationQuitDialog() {
     backdrop.querySelector('#seb-quit-application-cancel').focus();
   });
 }
-
 
 function createSessionCloseDialog() {
   return new Promise((resolve) => {
@@ -1450,7 +1451,8 @@ function injectAdminBar() {
 
   quitApplicationButton.addEventListener('click', async () => {
     showBar();
-    const confirmed = await createApplicationQuitDialog();
+    const active = await ipcRenderer.invoke('candidate:active').catch(() => null);
+    const confirmed = await createApplicationQuitDialog(active);
     if (!confirmed) {
       scheduleHideBar();
       return;
@@ -1458,17 +1460,20 @@ function injectAdminBar() {
 
     await ipcRenderer.invoke('ai:cancel-current').catch(() => false);
 
-    // Sauvegarde synchrone de la page et du parcours courant avant de quitter.
-    // Aucun appel à candidate:complete-active ici : la session reste EN_COURS.
-    const saved = saveNow(true);
-    if (saved && saved.ok === false) {
-      await showTransferMessage(
-        'Fermeture impossible',
-        'La sauvegarde du parcours en cours n’a pas pu être confirmée. SEB EvalPro reste ouvert afin de ne perdre aucune donnée.',
-        true
-      );
-      scheduleHideBar();
-      return;
+    // Sauvegarde synchrone uniquement s'il existe un vrai parcours candidat actif.
+    // Une page d'identification vide ne doit jamais créer artificiellement une session.
+    // Aucun appel à candidate:complete-active ici : un parcours actif reste EN_COURS.
+    if (active) {
+      const saved = saveNow(true);
+      if (saved && saved.ok === false) {
+        await showTransferMessage(
+          'Fermeture impossible',
+          'La sauvegarde du parcours en cours n’a pas pu être confirmée. SEB EvalPro reste ouvert afin de ne perdre aucune donnée.',
+          true
+        );
+        scheduleHideBar();
+        return;
+      }
     }
 
     closingSession = true;
