@@ -17,6 +17,16 @@
   --seb-font-main: "Calibri", "Segoe UI", Arial, sans-serif;
   --seb-font-light: "Calibri Light", "Calibri", "Segoe UI", Arial, sans-serif;
 
+  /* Hiérarchie typographique KALONÉO — parcours candidat.
+     Règle : aucun texte fonctionnel candidat sous 15 px. */
+  --seb-type-page-title: 28px;
+  --seb-type-section-title: 22px;
+  --seb-type-block-title: 18px;
+  --seb-type-body: 17px;
+  --seb-type-control: 16px;
+  --seb-type-secondary: 15px;
+  --seb-type-field: 17px;
+
   --seb-page-background: linear-gradient(to bottom, #ffffff, #ebeef5);
   --seb-card-radius: 12px;
   --seb-card-shadow: 0 4px 14px rgba(0, 0, 0, .15);
