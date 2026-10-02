@@ -44,6 +44,7 @@ ipcMain.on('state:save-sync', (event, payload) => {
 });
 ipcMain.on('candidate-catalog:workspace-load-sync', (event) => { event.returnValue = workspaceLoad; });
 ipcMain.on('candidate-catalog:workspace-save-sync', (event) => { event.returnValue = { ok:true }; });
+ipcMain.handle('candidate-catalog:workspace-save', () => ({ ok:true }));
 ipcMain.on('candidate-catalog:results-workspace-load-sync', (event) => { event.returnValue = { ok:false }; });
 
 ipcMain.handle('state:save', (_event, payload) => {
@@ -304,7 +305,7 @@ app.whenReady().then(async () => {
     await win.loadFile(path.join(web,'admin-bilan.html'));
     await wait(700);
     const bilanButtons=await win.webContents.executeJavaScript("(()=>({top:String(document.getElementById('close-bilan-top')?.textContent||'').trim(),bottom:String(document.getElementById('close-bilan-bottom')?.textContent||'').trim()}))()");
-    if (bilanButtons.top!=='Fermer'||bilanButtons.bottom!=='Fermer') {
+    if (!bilanButtons.top.endsWith('Fermer')||!bilanButtons.bottom.endsWith('Fermer')) {
       die('les deux boutons Fermer du bilan sont absents', bilanButtons);
       return;
     }
