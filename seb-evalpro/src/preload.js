@@ -1728,10 +1728,41 @@ window.addEventListener('beforeunload', () => {
   if (!closingSession && !adminNavigationLeaving && !isAdminCandidatesPage() && !isAdminTestsParcoursPage()) saveNow(true);
 });
 
+async function closeAdminBilanPage() {
+  if (!adminCandidateWorkspace || !isAdminBilanPage()) {
+    return { ok:false, error:'Aucun bilan candidat actif.' };
+  }
+
+  const candidateId = String(adminCandidateWorkspace.candidateId || '');
+  const saved = saveNow(true);
+  if (saved && saved.ok === false) {
+    return { ok:false, error:saved.error || 'Le bilan candidat n’a pas pu être sauvegardé.' };
+  }
+
+  await ipcRenderer.invoke('ai:cancel-current').catch(() => false);
+  adminNavigationLeaving = true;
+
+  const ended = await ipcRenderer.invoke('candidate-catalog:end-bilan').catch(() => false);
+  if (!ended) {
+    adminNavigationLeaving = false;
+    return { ok:false, error:'Le bilan n’a pas pu être fermé.' };
+  }
+
+  await ipcRenderer.invoke('candidate:set-admin-export-context', '').catch(() => false);
+  adminCandidateWorkspace = null;
+  const returned = await ipcRenderer.invoke('admin:return-candidate-browser', candidateId).catch(() => false);
+  if (!returned) {
+    adminNavigationLeaving = false;
+    return { ok:false, error:'Le retour au dossier candidat a échoué.' };
+  }
+  return { ok:true };
+}
+
 contextBridge.exposeInMainWorld('sebEvalPro', {
   save: () => saveNow(false),
   captureReplay: () => replayNavigationCapture.captureNow('kaltest-explicit'),
   closeTestsParcours: () => ipcRenderer.invoke('admin:close-tests-parcours'),
+  closeAdminBilan: () => closeAdminBilanPage(),
   verifyAdminPassword: (password) => ipcRenderer.invoke('admin:verify-password', password),
   sebIaStatus: () => ipcRenderer.invoke('ai:status')
 });
