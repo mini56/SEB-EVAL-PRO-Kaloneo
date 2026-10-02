@@ -1552,6 +1552,7 @@ window.addEventListener('beforeunload', () => {
 
 contextBridge.exposeInMainWorld('sebEvalPro', {
   save: () => saveNow(false),
+  captureReplay: () => replayNavigationCapture.captureNow('kaltest-explicit'),
   verifyAdminPassword: (password) => ipcRenderer.invoke('admin:verify-password', password),
   sebIaStatus: () => ipcRenderer.invoke('ai:status')
 });
