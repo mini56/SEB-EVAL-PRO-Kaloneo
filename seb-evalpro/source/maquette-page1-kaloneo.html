@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEB EvalPro KALONÉO — Maquette Page 1</title>
+<style>
+:root{
+  --blue:#004E70;
+  --blue-soft:#356787;
+  --orange:#F9B233;
+  --green:#198754;
+  --red:#C62828;
+  --ink:#24313A;
+  --muted:#59666F;
+  --line:#C8D7DF;
+  --panel:#FFFFFF;
+  --bg1:#FFFFFF;
+  --bg2:#EBEEF5;
+
+  /* ÉCHELLE TYPOGRAPHIQUE KALONÉO — PARCOURS CANDIDAT */
+  --type-page-title:28px;
+  --type-section-title:22px;
+  --type-block-title:18px;
+  --type-body:17px;
+  --type-control:16px;
+  --type-secondary:15px;
+  --type-field:17px;
+}
+*{box-sizing:border-box}
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+  overflow:hidden;
+  font-family:Calibri,"Segoe UI",Arial,sans-serif;
+  color:var(--ink);
+  background:linear-gradient(to bottom,var(--bg1),var(--bg2));
+}
+button,input{font:inherit}
+
+.page{
+  width:100vw;
+  height:100vh;
+  padding:12px 18px 10px;
+  display:grid;
+  grid-template-rows:auto auto minmax(0,1fr) auto;
+  gap:8px;
+}
+.topbar{
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+}
+.topbar h1{
+  margin:0;
+  color:var(--blue);
+  font-family:"Calibri Light",Calibri,"Segoe UI",Arial,sans-serif;
+  font-size:var(--type-page-title);
+  font-weight:300;
+  line-height:1.05;
+}
+.topbar p{
+  margin:3px 0 0;
+  font-size:var(--type-body);
+  color:#42515B;
+}
+.brand{
+  flex:0 0 auto;
+  text-align:right;
+  line-height:1;
+}
+.brand strong{
+  display:inline-block;
+  color:var(--blue);
+  font-size:22px;
+  letter-spacing:.6px;
+  border-bottom:4px solid var(--orange);
+  padding:2px 4px 4px;
+}
+.brand span{
+  display:block;
+  margin-top:5px;
+  color:#6A747B;
+  font-size:var(--type-secondary);
+}
+
+.card{
+  background:rgba(255,255,255,.94);
+  border:1px solid rgba(0,78,112,.22);
+  border-radius:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,.12);
+}
+.identity{
+  padding:8px 16px 9px;
+}
+.identity h2,
+.onboarding-title h2{
+  margin:0;
+  color:var(--blue);
+  font-family:"Calibri Light",Calibri,"Segoe UI",Arial,sans-serif;
+  font-size:var(--type-section-title);
+  font-weight:300;
+  line-height:1.05;
+}
+.identity-grid{
+  margin-top:6px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px 36px;
+}
+.field{
+  display:grid;
+  grid-template-columns:190px minmax(220px,380px);
+  align-items:center;
+  justify-content:start;
+  gap:10px;
+}
+.field label{
+  color:var(--blue);
+  font-size:var(--type-control);
+  line-height:1.08;
+  font-weight:700;
+}
+.field input{
+  width:100%;
+  height:34px;
+  padding:5px 9px;
+  border:1px solid #7F8A92;
+  border-radius:4px;
+  background:#fff;
+  color:#1E252A;
+  font-size:var(--type-field);
+}
+.field input[readonly]{
+  background:#EEF1F3;
+  color:#657179;
+}
+
+.onboarding{
+  min-height:0;
+  padding:8px 11px 9px;
+  border-color:rgba(249,178,51,.56);
+  background:linear-gradient(135deg,rgba(255,250,242,.96),rgba(255,255,255,.96));
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+}
+.onboarding-title{
+  min-height:34px;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:26px;
+}
+.onboarding-title p{
+  margin:0;
+  color:var(--muted);
+  font-size:var(--type-secondary);
+  line-height:1.18;
+}
+.workspace{
+  min-height:0;
+  margin-top:6px;
+  display:grid;
+  grid-template-columns:minmax(500px,1.58fr) minmax(385px,1.05fr) 294px;
+  gap:11px;
+}
+
+.tool-card{
+  min-height:0;
+  border:1px solid rgba(0,78,112,.22);
+  border-radius:11px;
+  background:#fff;
+  box-shadow:0 2px 7px rgba(0,0,0,.07);
+}
+.tool-head{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+}
+.badge{
+  width:32px;
+  height:32px;
+  flex:0 0 32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  color:#fff;
+  font-size:17px;
+  font-weight:800;
+  line-height:1;
+  box-shadow:0 2px 5px rgba(0,0,0,.14);
+}
+.badge.orange{background:var(--orange);color:#5A3900}
+.badge.blue{background:var(--blue)}
+.badge.green{background:var(--green)}
+.tool-head h3{
+  margin:0;
+  color:var(--blue);
+  font-size:var(--type-block-title);
+  line-height:1.05;
+}
+.tool-head p{
+  margin:3px 0 0;
+  color:#45545D;
+  font-size:var(--type-secondary);
+  line-height:1.16;
+}
+
+.mouse-card{
+  padding:9px 10px 8px;
+  display:flex;
+  flex-direction:column;
+}
+.mouse-scene{
+  position:relative;
+  min-height:0;
+  flex:1 1 auto;
+  margin-top:6px;
+  overflow:hidden;
+  border:1px solid #B7C9D2;
+  border-radius:10px;
+  background:linear-gradient(to bottom,#DDF3FF 0 34%,#88CB73 34% 60%,#626B72 60% 100%);
+  touch-action:none;
+  user-select:none;
+}
+.mouse-scene:before{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:34%;height:26%;
+  background:
+    radial-gradient(circle at 12% 25%,rgba(255,255,255,.25) 0 2px,transparent 3px),
+    radial-gradient(circle at 67% 42%,rgba(255,255,255,.22) 0 2px,transparent 3px),
+    linear-gradient(#91D079,#72B15D);
+}
+.road{
+  position:absolute;
+  left:0;
+  right:36%;
+  bottom:0;
+  height:40%;
+  background:#646D73;
+  border-top:5px solid #F5F5F1;
+}
+.road:after{
+  content:"";
+  position:absolute;
+  left:7%;right:7%;top:47%;
+  height:4px;
+  border-radius:4px;
+  background:repeating-linear-gradient(90deg,#FFF4C7 0 68px,transparent 68px 124px);
+}
+.parking{
+  position:absolute;
+  right:0;bottom:0;
+  width:36%;
+  height:64%;
+  background:#747C82;
+  border-left:5px solid #F5F5F1;
+}
+.parking:before,.parking:after{
+  content:"";
+  position:absolute;
+  top:8%;bottom:8%;
+  width:4px;
+  background:#F5F5F1;
+}
+.parking:before{left:16%}
+.parking:after{left:56%}
+.drop{
+  position:absolute;
+  z-index:4;
+  border:3px dashed var(--orange);
+  border-radius:9px;
+  background:rgba(255,255,255,.18);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.28);
+}
+.house-target{left:25%;top:16%;width:88px;height:86px}
+.car-target{right:7%;bottom:11%;width:104px;height:66px;border-color:#fff}
+
+.house{
+  position:absolute;
+  z-index:3;
+  width:82px;
+  height:84px;
+}
+.house svg,.car svg{display:block;width:100%;height:100%}
+.house-left{left:7%;top:17%}
+.house-right{left:43%;top:17%}
+.drag-house{left:10%;bottom:2%}
+.car{
+  position:absolute;
+  z-index:10;
+  width:94px;
+  height:54px;
+  right:27%;
+  bottom:8%;
+}
+.draggable{
+  cursor:grab;
+  z-index:10;
+  filter:drop-shadow(0 5px 4px rgba(0,0,0,.18));
+  touch-action:none;
+}
+.draggable:active{cursor:grabbing}
+
+.mouse-statuses{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  min-height:28px;
+  padding-top:5px;
+}
+.mini-status{
+  padding:3px 10px;
+  border-radius:14px;
+  border:1px solid transparent;
+  background:#EEF2F4;
+  color:#59676F;
+  font-size:var(--type-secondary);
+  font-weight:700;
+  line-height:1.05;
+}
+.mini-status.ok{
+  background:#EAF7EF;
+  border-color:#9FD2B5;
+  color:#167A4A;
+}
+
+.side{
+  min-height:0;
+  display:grid;
+  grid-template-rows:1.18fr .9fr .92fr;
+  gap:9px;
+}
+.side .tool-card{
+  padding:8px 11px;
+  overflow:visible;
+}
+.chrono-card{background:linear-gradient(145deg,#fff,#F6FBFF)}
+.calc-card{background:linear-gradient(145deg,#fff,#FFF9EF)}
+.audio-card{background:linear-gradient(145deg,#fff,#F4FBF6)}
+.chrono-display{
+  width:142px;
+  margin:4px auto 5px;
+  padding:2px 12px;
+  border:1px solid #C7D7DF;
+  border-radius:9px;
+  background:#fff;
+  color:var(--blue);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.08);
+  text-align:center;
+  font-size:30px;
+  line-height:1.1;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+.btn-row{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+}
+.k-btn{
+  min-height:40px;
+  padding:7px 14px;
+  border:1.5px solid var(--blue);
+  border-radius:10px;
+  background:linear-gradient(180deg,#fff 0%,#F4F7FA 100%);
+  color:var(--blue);
+  box-shadow:0 4px 10px rgba(0,0,0,.12),inset 0 1px 0 #fff;
+  font-size:var(--type-control);
+  font-weight:700;
+  line-height:1.1;
+  cursor:pointer;
+}
+.k-btn:hover{transform:translateY(-1px);box-shadow:0 7px 15px rgba(0,0,0,.15),inset 0 1px 0 #fff}
+.k-btn.green{color:var(--green)}
+.k-btn.red{color:var(--red)}
+.k-btn.orange{border-color:var(--orange);color:#C47400}
+.k-btn.blue{border-color:var(--blue);color:var(--blue)}
+.k-btn:disabled{opacity:.55;cursor:default;transform:none}
+.status{
+  min-height:18px;
+  margin-top:4px;
+  color:#167A4A;
+  text-align:center;
+  font-size:var(--type-secondary);
+  line-height:1.1;
+  font-weight:700;
+}
+.calc-card .k-btn{display:block;margin:7px auto 0}
+.audio-actions{
+  margin-top:7px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.audio-actions label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:#31414B;
+  font-size:var(--type-control);
+  font-weight:700;
+}
+.audio-actions input{width:18px;height:18px;accent-color:var(--green)}
+
+.calc-dock{
+  min-height:0;
+  position:relative;
+  overflow:hidden;
+  border:1px dashed rgba(249,178,51,.75);
+  border-radius:12px;
+  background:linear-gradient(145deg,#FFF8E7,#FFFDF9);
+}
+.calc-placeholder{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:12px 14px;
+  color:#8A5A0B;
+  text-align:center;
+  font-size:var(--type-secondary);
+  line-height:1.18;
+}
+.calc-placeholder strong{
+  margin-bottom:5px;
+  color:#A45F00;
+  font-size:var(--type-block-title);
+}
+.calculator{
+  display:none;
+  position:absolute;
+  inset:6px;
+  padding:0 12px 9px;
+  border:2px solid #D98200;
+  border-radius:15px;
+  background:linear-gradient(145deg,#FFD58A 0%,#F9AD32 52%,#EE9418 100%);
+  box-shadow:0 12px 28px rgba(74,47,10,.27);
+}
+.calculator.open{display:block}
+.calc-head{
+  height:34px;
+  margin:0 -12px 7px;
+  padding:0 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-radius:12px 12px 0 0;
+  border-bottom:1px solid rgba(139,82,0,.42);
+  background:linear-gradient(#F7B84B,#E99215);
+  color:#5F3800;
+  font-size:var(--type-secondary);
+  font-weight:700;
+}
+.calc-display{
+  height:44px;
+  margin-bottom:7px;
+  padding:6px 9px;
+  border:2px solid #C67A0B;
+  border-radius:8px;
+  background:#FFF8E9;
+  color:#3D2B11;
+  font-size:24px;
+  font-weight:800;
+  text-align:right;
+}
+.calc-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:5px;
+}
+.calc-grid button,.calc-bottom button{
+  height:35px;
+  border:1px solid #CB7D0D;
+  border-radius:8px;
+  background:linear-gradient(#FFFAF0,#FFE8BF);
+  color:#4F3510;
+  box-shadow:0 2px 3px rgba(96,57,4,.14),inset 0 1px #fff;
+  font-size:var(--type-control);
+  font-weight:700;
+}
+.calc-bottom{
+  margin-top:6px;
+  display:flex;
+  justify-content:center;
+  gap:7px;
+}
+.calc-bottom .close{
+  border-color:var(--red);
+  color:var(--red);
+  background:linear-gradient(#fff,#F7F8FA);
+}
+.calc-brand{
+  margin-top:6px;
+  padding-top:5px;
+  border-top:1px solid rgba(133,75,0,.28);
+  color:#A45E09;
+  text-align:center;
+  font-size:var(--type-secondary);
+  font-weight:800;
+}
+
+.bottom{
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.next{
+  min-width:120px;
+  min-height:42px;
+  border-color:var(--green);
+  color:var(--green);
+  font-size:var(--type-control);
+}
+
+/* 1366 x 768 : conserver la lisibilité sans descendre sous 15 px. */
+@media (max-height:800px){
+  .page{padding-top:8px;gap:6px}
+  .topbar{min-height:52px}
+  .topbar h1{font-size:26px}
+  .topbar p{font-size:16px}
+  .brand strong{font-size:20px}
+  .identity{padding-top:7px;padding-bottom:7px}
+  .identity-grid{gap-top:5px}
+  .field input{height:32px}
+  .onboarding{padding-top:6px}
+  .workspace{margin-top:5px}
+  .side{gap:7px}
+  .side .tool-card{padding:7px 10px}
+  .chrono-display{margin:3px auto 4px}
+  .k-btn{min-height:37px;padding:6px 12px}
+  .mouse-statuses{padding-top:4px}
+}
+@media (max-width:1180px){
+  .field{grid-template-columns:165px minmax(190px,1fr)}
+  .workspace{grid-template-columns:minmax(450px,1.45fr) minmax(360px,1fr) 270px}
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="topbar">
+    <div>
+      <h1>Évaluation des savoirs fondamentaux – Parcours d'intégration</h1>
+      <p>Renseignez vos informations puis vérifiez tranquillement la prise en main du matériel avant de commencer.</p>
+    </div>
+    <div class="brand" aria-label="KALONÉO">
+      <strong>KALONÉO</strong>
+      <span>Au cœur d’un nouvel élan</span>
+    </div>
+  </header>
+
+  <section class="identity card">
+    <h2>Informations du candidat</h2>
+    <div class="identity-grid">
+      <div class="field"><label for="nom">Nom *</label><input id="nom"></div>
+      <div class="field"><label for="prenom">Prénom *</label><input id="prenom"></div>
+      <div class="field"><label for="naissance">Date de naissance *</label><input id="naissance" type="date"></div>
+      <div class="field"><label for="ss7">7 premiers chiffres du n° de sécurité sociale *</label><input id="ss7" maxlength="7"></div>
+      <div class="field"><label for="ville">Ville *</label><input id="ville"></div>
+      <div class="field"><label for="groupe">Groupe *</label><input id="groupe"></div>
+      <div class="field"><label for="date">Date de l’évaluation *</label><input id="date" type="date"></div>
+      <div class="field"><label for="parcours">Parcours</label><input id="parcours" value="Parcours usine — pilote" readonly></div>
+    </div>
+  </section>
+
+  <section class="onboarding card">
+    <div class="onboarding-title">
+      <h2>Prise en main avant de commencer</h2>
+      <p>Ces essais ne sont pas notés. Ils servent uniquement à vérifier la souris, le chronomètre, la calculatrice et le son.</p>
+    </div>
+
+    <div class="workspace">
+      <article class="tool-card mouse-card">
+        <div class="tool-head">
+          <span class="badge orange">1</span>
+          <div>
+            <h3>Test de la souris</h3>
+            <p>Déplacez la maison dans l’emplacement libre puis placez la voiture sur le parking.</p>
+          </div>
+        </div>
+
+        <div id="scene" class="mouse-scene">
+          <div class="road"></div>
+          <div class="parking"></div>
+
+          <div class="house house-left">
+            <svg viewBox="0 0 82 84" aria-hidden="true">
+              <polygon points="5,32 41,2 77,32" fill="#E56A31"/>
+              <rect x="12" y="30" width="58" height="49" rx="3" fill="#FFF2C9" stroke="#D0B178" stroke-width="2"/>
+              <rect x="20" y="41" width="14" height="14" fill="#CFF1FF" stroke="#4B88A3" stroke-width="2"/>
+              <rect x="48" y="41" width="14" height="14" fill="#CFF1FF" stroke="#4B88A3" stroke-width="2"/>
+              <rect x="35" y="54" width="14" height="25" rx="2" fill="#2F8CAF"/>
+              <rect x="59" y="11" width="8" height="17" fill="#9A6948"/>
+            </svg>
+          </div>
+
+          <div id="houseTarget" class="drop house-target"></div>
+
+          <div class="house house-right">
+            <svg viewBox="0 0 82 84" aria-hidden="true">
+              <polygon points="5,32 41,2 77,32" fill="#406D91"/>
+              <rect x="12" y="30" width="58" height="49" rx="3" fill="#F9E9C2" stroke="#C6AA75" stroke-width="2"/>
+              <rect x="20" y="41" width="14" height="14" fill="#DDF5FF" stroke="#4B88A3" stroke-width="2"/>
+              <rect x="48" y="41" width="14" height="14" fill="#DDF5FF" stroke="#4B88A3" stroke-width="2"/>
+              <rect x="35" y="54" width="14" height="25" rx="2" fill="#2F8CAF"/>
+              <rect x="59" y="11" width="8" height="17" fill="#876044"/>
+            </svg>
+          </div>
+
+          <div id="dragHouse" class="house drag-house draggable" tabindex="0" aria-label="Maison à déplacer">
+            <svg viewBox="0 0 82 84" aria-hidden="true">
+              <polygon points="5,32 41,2 77,32" fill="#F28A45"/>
+              <rect x="12" y="30" width="58" height="49" rx="3" fill="#FFF7D7" stroke="#D0B178" stroke-width="2"/>
+              <rect x="20" y="41" width="14" height="14" fill="#DDF6FF" stroke="#4B88A3" stroke-width="2"/>
+              <rect x="48" y="41" width="14" height="14" fill="#DDF6FF" stroke="#4B88A3" stroke-width="2"/>
+              <rect x="35" y="54" width="14" height="25" rx="2" fill="#277FA4"/>
+              <rect x="59" y="11" width="8" height="17" fill="#96664A"/>
+            </svg>
+          </div>
+
+          <div id="carTarget" class="drop car-target"></div>
+
+          <div id="dragCar" class="car draggable" tabindex="0" aria-label="Voiture à déplacer">
+            <svg viewBox="0 0 94 54" aria-hidden="true">
+              <path d="M10 29 L23 15 Q26 11 31 11 H61 Q67 11 71 16 L80 29 H86 Q91 29 91 34 V42 H4 V34 Q4 29 10 29Z" fill="#2E8DD0" stroke="#0D5E9D" stroke-width="2"/>
+              <path d="M27 15 H43 V28 H18Z" fill="#CBEFFF" stroke="#0D5E9D" stroke-width="1.5"/>
+              <path d="M47 15 H61 Q65 15 68 19 L73 28 H47Z" fill="#A9DCF2" stroke="#0D5E9D" stroke-width="1.5"/>
+              <rect x="8" y="31" width="77" height="7" rx="3" fill="#56A9DF" opacity=".75"/>
+              <circle cx="22" cy="43" r="9" fill="#202830"/>
+              <circle cx="22" cy="43" r="4" fill="#C4D0D6"/>
+              <circle cx="72" cy="43" r="9" fill="#202830"/>
+              <circle cx="72" cy="43" r="4" fill="#C4D0D6"/>
+              <rect x="87" y="33" width="4" height="5" rx="1" fill="#FFE26F"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="mouse-statuses">
+          <span id="houseStatus" class="mini-status">Maison à placer</span>
+          <span id="carStatus" class="mini-status">Voiture à placer</span>
+        </div>
+      </article>
+
+      <section class="side">
+        <article class="tool-card chrono-card">
+          <div class="tool-head">
+            <span class="badge blue">2</span>
+            <div>
+              <h3>Test du chronomètre</h3>
+              <p>Lancez puis arrêtez le chronomètre.</p>
+            </div>
+          </div>
+          <div id="chrono" class="chrono-display">00:00</div>
+          <div class="btn-row">
+            <button id="startChrono" class="k-btn green" type="button">Démarrer le chronomètre</button>
+            <button id="stopChrono" class="k-btn red" type="button" disabled>Arrêter le chronomètre</button>
+          </div>
+          <div id="chronoStatus" class="status"></div>
+        </article>
+
+        <article class="tool-card calc-card">
+          <div class="tool-head">
+            <span class="badge orange">3</span>
+            <div>
+              <h3>Test de la calculatrice</h3>
+              <p>Ouvrez la calculatrice comme pendant les exercices.</p>
+            </div>
+          </div>
+          <button id="openCalc" class="k-btn orange" type="button">Ouvrir la calculatrice</button>
+          <div id="calcStatus" class="status"></div>
+        </article>
+
+        <article class="tool-card audio-card">
+          <div class="tool-head">
+            <span class="badge green">4</span>
+            <div>
+              <h3>Test audio</h3>
+              <p>Cliquez pour vérifier que vous entendez bien le son.</p>
+            </div>
+          </div>
+          <div class="audio-actions">
+            <button id="playAudio" class="k-btn blue" type="button">▶ Écouter le son</button>
+            <label><input id="heard" type="checkbox"> Son entendu</label>
+          </div>
+          <div id="audioStatus" class="status"></div>
+        </article>
+      </section>
+
+      <aside class="calc-dock">
+        <div id="calcPlaceholder" class="calc-placeholder">
+          <strong>Calculatrice</strong>
+          <span>Elle s’ouvre ici pour ne jamais masquer les consignes.</span>
+        </div>
+
+        <div id="calculator" class="calculator" aria-label="Calculatrice">
+          <div class="calc-head"><span>Calculatrice</span><span>•••</span></div>
+          <div id="calcDisplay" class="calc-display">0</div>
+          <div class="calc-grid">
+            <button>7</button><button>8</button><button>9</button><button>/</button>
+            <button>4</button><button>5</button><button>6</button><button>x</button>
+            <button>1</button><button>2</button><button>3</button><button>-</button>
+            <button>0</button><button>.</button><button>=</button><button>+</button>
+          </div>
+          <div class="calc-bottom">
+            <button id="clearCalc">C</button>
+            <button id="closeCalc" class="close">Fermer</button>
+          </div>
+          <div class="calc-brand">Sauvegarde 56</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <footer class="bottom">
+    <button class="k-btn next" type="button">Suivant</button>
+  </footer>
+</main>
+
+<script>
+(function(){
+  const scene=document.getElementById('scene');
+
+  function makeDrag(id,targetId,statusId,successText){
+    const el=document.getElementById(id);
+    const target=document.getElementById(targetId);
+    const status=document.getElementById(statusId);
+    let dragging=false,pointerId=null,offsetX=0,offsetY=0,origin=null;
+
+    function rectToScene(rect){
+      const s=scene.getBoundingClientRect();
+      return {left:rect.left-s.left,top:rect.top-s.top};
+    }
+    function snap(){
+      const s=scene.getBoundingClientRect();
+      const e=el.getBoundingClientRect();
+      const t=target.getBoundingClientRect();
+      const left=t.left-s.left+(t.width-e.width)/2;
+      const top=t.top-s.top+(t.height-e.height)/2;
+      el.style.left=Math.round(left)+'px';
+      el.style.top=Math.round(top)+'px';
+      el.style.right='auto';
+      el.style.bottom='auto';
+      status.textContent=successText+' ✓';
+      status.classList.add('ok');
+    }
+    function inside(){
+      const e=el.getBoundingClientRect(),t=target.getBoundingClientRect();
+      const cx=e.left+e.width/2,cy=e.top+e.height/2;
+      return cx>=t.left-12&&cx<=t.right+12&&cy>=t.top-12&&cy<=t.bottom+12;
+    }
+    el.addEventListener('pointerdown',ev=>{
+      if(ev.button!==undefined&&ev.button!==0)return;
+      const e=el.getBoundingClientRect();
+      origin=rectToScene(e);
+      offsetX=ev.clientX-e.left;
+      offsetY=ev.clientY-e.top;
+      const p=origin;
+      el.style.left=p.left+'px';el.style.top=p.top+'px';el.style.right='auto';el.style.bottom='auto';
+      dragging=true;pointerId=ev.pointerId;
+      try{el.setPointerCapture(pointerId)}catch(_){}
+      ev.preventDefault();
+    });
+    el.addEventListener('pointermove',ev=>{
+      if(!dragging||ev.pointerId!==pointerId)return;
+      const s=scene.getBoundingClientRect(),e=el.getBoundingClientRect();
+      const left=Math.min(Math.max(0,ev.clientX-s.left-offsetX),s.width-e.width);
+      const top=Math.min(Math.max(0,ev.clientY-s.top-offsetY),s.height-e.height);
+      el.style.left=left+'px';el.style.top=top+'px';
+    });
+    function finish(ev){
+      if(!dragging)return;
+      if(ev&&ev.pointerId!==pointerId)return;
+      dragging=false;
+      try{el.releasePointerCapture(pointerId)}catch(_){}
+      if(inside())snap();
+      else if(origin){el.style.left=origin.left+'px';el.style.top=origin.top+'px'}
+    }
+    el.addEventListener('pointerup',finish);
+    el.addEventListener('pointercancel',finish);
+    el.addEventListener('keydown',ev=>{
+      if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();snap()}
+    });
+  }
+  makeDrag('dragHouse','houseTarget','houseStatus','Maison bien placée');
+  makeDrag('dragCar','carTarget','carStatus','Voiture bien placée');
+
+  let chronoTimer=null,startAt=0;
+  const chrono=document.getElementById('chrono');
+  const startBtn=document.getElementById('startChrono');
+  const stopBtn=document.getElementById('stopChrono');
+  const chronoStatus=document.getElementById('chronoStatus');
+  function renderChrono(){
+    const s=Math.floor((Date.now()-startAt)/1000);
+    chrono.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  }
+  startBtn.onclick=()=>{
+    if(chronoTimer)return;
+    startAt=Date.now();renderChrono();
+    chronoTimer=setInterval(renderChrono,250);
+    startBtn.disabled=true;stopBtn.disabled=false;
+    chronoStatus.textContent='Chronomètre en cours…';
+  };
+  stopBtn.onclick=()=>{
+    if(!chronoTimer)return;
+    renderChrono();clearInterval(chronoTimer);chronoTimer=null;
+    startBtn.disabled=false;stopBtn.disabled=true;
+    chronoStatus.textContent='Chronomètre testé ✓';
+  };
+
+  const calculator=document.getElementById('calculator');
+  const placeholder=document.getElementById('calcPlaceholder');
+  const calcStatus=document.getElementById('calcStatus');
+  const display=document.getElementById('calcDisplay');
+  let expr='';
+  document.getElementById('openCalc').onclick=()=>{
+    calculator.classList.add('open');
+    placeholder.style.display='none';
+    calcStatus.textContent='Calculatrice ouverte ✓';
+  };
+  document.getElementById('closeCalc').onclick=()=>{
+    calculator.classList.remove('open');
+    placeholder.style.display='flex';
+    expr='';display.textContent='0';
+  };
+  document.getElementById('clearCalc').onclick=()=>{expr='';display.textContent='0'};
+  document.querySelectorAll('.calc-grid button').forEach(btn=>{
+    btn.onclick=()=>{
+      const v=btn.textContent.trim();
+      if(v==='='){
+        try{
+          const safe=expr.replace(/x/g,'*');
+          if(!/^[0-9+\-*/.() ]+$/.test(safe))throw new Error();
+          const result=Function('"use strict";return ('+safe+')')();
+          display.textContent=Number.isFinite(result)?String(result):'ERR';
+          expr=Number.isFinite(result)?String(result):'';
+        }catch(_){display.textContent='ERR';expr=''}
+        return;
+      }
+      expr+=v;
+      display.textContent=expr||'0';
+    }
+  });
+
+  const audioStatus=document.getElementById('audioStatus');
+  document.getElementById('playAudio').onclick=()=>{
+    try{
+      const C=window.AudioContext||window.webkitAudioContext;
+      const ctx=new C(),osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.frequency.value=523.25;
+      gain.gain.setValueAtTime(.0001,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.18,ctx.currentTime+.02);
+      gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.45);
+      osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.48);
+      osc.onended=()=>ctx.close();
+      audioStatus.textContent='Son joué. Cochez « Son entendu » si vous l’avez entendu.';
+    }catch(_){audioStatus.textContent='Le son de test n’a pas pu être joué.'}
+  };
+  document.getElementById('heard').onchange=ev=>{
+    audioStatus.textContent=ev.target.checked?'Son entendu ✓':'';
+  };
+})();
+</script>
+</body>
+</html>
