@@ -1,0 +1,49 @@
+name: Publish Page 1 preview
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - pilot10-page1-readability
+    paths:
+      - 'seb-evalpro/source/maquette-page1-kaloneo.html'
+      - '.github/workflows/page1-preview-pages.yml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: page1-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Page 1 preview
+        shell: bash
+        run: |
+          mkdir -p _site
+          cp seb-evalpro/source/maquette-page1-kaloneo.html _site/index.html
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy Page 1 preview
+        id: deployment
+        uses: actions/deploy-pages@v4
