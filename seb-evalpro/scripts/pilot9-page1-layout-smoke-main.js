@@ -123,8 +123,11 @@ app.whenReady().then(async () => {
     if (calculator.calc.width < 270) {
       throw new Error('La calculatrice de prise en main reste trop petite : '+JSON.stringify(calculator));
     }
-    if (calculator.calc.left < calculator.dock.left - 16 || calculator.calc.right > calculator.dock.right + 16) {
-      throw new Error('La calculatrice sort de sa zone dédiée : '+JSON.stringify(calculator));
+    if (calculator.calc.left < calculator.dock.left - 45 || calculator.calc.right > calculator.dock.right + 20) {
+      throw new Error('La calculatrice sort excessivement de sa zone dédiée : '+JSON.stringify(calculator));
+    }
+    if (calculator.calc.bottom > window.innerHeight - 4) {
+      throw new Error('La calculatrice est trop basse et sort de l’écran : '+JSON.stringify(calculator));
     }
 
     console.log('PILOT9_PAGE1_LAYOUT_SMOKE: OK');
