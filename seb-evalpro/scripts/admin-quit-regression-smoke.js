@@ -83,6 +83,11 @@ try {
   assert(!quitIpc.includes('clearStorageData'), 'Quitter ne doit pas effacer le stockage de session.');
   assert(!quitIpc.includes('setAdminUnlocked(false)'), 'Quitter ne doit pas basculer vers le chemin de clôture de session.');
 
+  const closeIpc = sessionClose.slice(closeIpcStart);
+  assert(!closeIpc.includes('app.quit()'), 'Fermer la session active ne doit jamais fermer SEB EvalPro.');
+  assert(!closeIpc.includes('setAdminUnlocked(false)'), 'Fermer la session active doit conserver le mode Administrateur pour revenir aux dossiers candidats.');
+  assert(preload.includes("ipcRenderer.invoke('admin:open-candidate-browser')"), 'Après fermeture de session, SEB EvalPro doit revenir à l’espace candidats.');
+
   assert(main.includes("mainWindow.loadFile(existingWebPage(state.lastEvaluationPage || state.lastPage));"), 'Le démarrage doit reprendre la dernière page enregistrée.');
 
   console.log('ADMIN_QUIT_PRESERVES_ACTIVE_CANDIDATE: OK');
