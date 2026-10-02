@@ -128,7 +128,7 @@ function handleSaveResult(result) {
 function saveNow(sync = false) {
   if (candidateJourneyCompleted) return sync ? { ok:true, completed:true } : Promise.resolve({ ok:true, completed:true });
   if (closingSession || adminNavigationLeaving) return null;
-  if (isAdminCandidatesPage()) {
+  if (isAdminCandidatesPage() || isAdminTestsParcoursPage()) {
     const adminResult = { ok:true, adminNavigation:true };
     return sync ? adminResult : Promise.resolve(adminResult);
   }
@@ -1099,6 +1099,11 @@ function injectAdminBar() {
         candidateBadge.hidden = false;
         return;
       }
+      if (isAdminTestsParcoursPage()) {
+        candidateBadge.textContent = 'Gestion Tests / Parcours';
+        candidateBadge.hidden = false;
+        return;
+      }
       const active = await ipcRenderer.invoke('candidate:active');
       if (active && active.displayName) {
         candidateBadge.textContent = `Dossier candidat : ${active.displayName}`;
@@ -1548,7 +1553,7 @@ function injectAdminBar() {
 }
 
 try {
-  if (isAdminCandidatesPage()) {
+  if (isAdminCandidatesPage() || isAdminTestsParcoursPage()) {
     restoredState = { sessionStorage:{}, localStorage:{} };
     try { window.sessionStorage.clear(); } catch (_) {}
     try { window.localStorage.clear(); } catch (_) {}
@@ -1670,7 +1675,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (adminCandidateResultsWorkspace) {
     showReadOnlyCandidateResults();
   } else {
-    if (!isAdminBilanPage()) {
+    if (!isAdminBilanPage() && !isAdminTestsParcoursPage()) {
       document.addEventListener('input', scheduleSave, true);
       document.addEventListener('change', scheduleSave, true);
       document.addEventListener('click', scheduleSave, true);
@@ -1678,7 +1683,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 
     const finalPage = document.getElementById('pageFinale') || document.getElementById('page-final');
-    if (finalPage && !isAdminCandidatesPage() && !isAdminBilanPage()) {
+    if (finalPage && !isAdminCandidatesPage() && !isAdminBilanPage() && !isAdminTestsParcoursPage()) {
       const observer = new MutationObserver(() => { completeCandidateFromFinalPage(); });
       observer.observe(finalPage, { attributes:true, attributeFilter:['class','style'] });
       setTimeout(() => { completeCandidateFromFinalPage(); }, 0);
