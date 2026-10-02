@@ -12,6 +12,9 @@ on:
       - 'seb-evalpro/src/main.js'
       - 'seb-evalpro/scripts/build21-admin-foundation-guard.js'
       - 'seb-evalpro/scripts/build21-admin-foundation-smoke-main.js'
+      - 'seb-evalpro/scripts/prepare-web.js'
+      - 'seb-evalpro/overrides/admin-tests-parcours.html'
+      - 'seb-evalpro/source/js/admin-tests-parcours.js'
       - 'seb-evalpro/package.json'
       - '.github/workflows/build21-admin-foundation.yml'
   pull_request:
@@ -22,6 +25,9 @@ on:
       - 'seb-evalpro/src/main.js'
       - 'seb-evalpro/scripts/build21-admin-foundation-guard.js'
       - 'seb-evalpro/scripts/build21-admin-foundation-smoke-main.js'
+      - 'seb-evalpro/scripts/prepare-web.js'
+      - 'seb-evalpro/overrides/admin-tests-parcours.html'
+      - 'seb-evalpro/source/js/admin-tests-parcours.js'
       - 'seb-evalpro/package.json'
       - '.github/workflows/build21-admin-foundation.yml'
 
