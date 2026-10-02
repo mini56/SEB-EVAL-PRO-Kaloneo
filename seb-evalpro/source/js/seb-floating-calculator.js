@@ -219,7 +219,9 @@
 
     if (dockVisible) {
       left = Math.round(dockRect.left + (dockRect.width - width) / 2);
-      top = Math.round(dockRect.top + Math.max(6, (dockRect.height - height) / 2));
+      // Sur la prise en main, on privilégie l'alignement en haut : le candidat
+      // voit immédiatement toute la calculatrice sans qu'elle paraisse trop basse.
+      top = Math.round(dockRect.top + 6);
     } else {
       // Sur Introduction et pendant les exercices, la calculatrice s'ouvre
       // volontairement à l'extrême droite pour ne plus masquer les consignes.
@@ -228,6 +230,23 @@
     }
 
     setPosition(left, top);
+
+    // Electron peut appliquer un facteur de zoom au contenu. Dans ce cas, une
+    // coordonnée CSS calculée depuis getBoundingClientRect peut être légèrement
+    // décalée à l'écran. On corrige visuellement une fois après le placement.
+    if (dockVisible) {
+      requestAnimationFrame(() => {
+        const actual = container.getBoundingClientRect();
+        const freshDock = dock.getBoundingClientRect();
+        const wantedLeft = freshDock.left + (freshDock.width - actual.width) / 2;
+        const wantedTop = freshDock.top + 6;
+        const currentLeft = Number.parseFloat(container.style.left) || actual.left;
+        const currentTop = Number.parseFloat(container.style.top) || actual.top;
+        const correctedLeft = currentLeft + (wantedLeft - actual.left);
+        const correctedTop = currentTop + (wantedTop - actual.top);
+        setPosition(correctedLeft, correctedTop);
+      });
+    }
   }
 
   let dragging = false;
