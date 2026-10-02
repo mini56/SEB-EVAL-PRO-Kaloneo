@@ -66,7 +66,10 @@ try {
   assert(preload.includes('>Quitter</button>'), 'Le bouton doit afficher Quitter.');
   assert(preload.includes('>Fermer la session active</button>'), 'Le bouton destructif doit afficher Fermer la session active.');
   assert(preload.includes("ipcRenderer.invoke('admin:quit-application')"), 'Quitter doit utiliser son IPC séparé.');
-  assert(preload.includes("const saved = saveNow(true);"), 'Quitter doit sauvegarder avant fermeture.');
+  assert(preload.includes("const active = await ipcRenderer.invoke('candidate:active').catch(() => null);"), 'Quitter doit vérifier s’il existe réellement un parcours actif.');
+  assert(preload.includes("createApplicationQuitDialog(active)"), 'Le dialogue Quitter doit recevoir l’état réel du candidat actif.');
+  assert(preload.includes("Aucun parcours candidat n’est en cours. SEB EvalPro va se fermer."), 'Le dialogue sans parcours actif doit être explicite.');
+  assert(preload.includes("if (active) {\n      const saved = saveNow(true);"), 'Quitter ne doit sauvegarder le parcours que s’il existe réellement.');
   assert(preload.includes('Aucun appel à candidate:complete-active ici'), 'La séparation fonctionnelle Quitter / clôture doit être documentée.');
 
   const quitHandlerStart = preload.indexOf("quitApplicationButton.addEventListener('click'");
@@ -75,6 +78,10 @@ try {
   const quitHandler = preload.slice(quitHandlerStart, closeHandlerStart);
   assert(!quitHandler.includes("ipcRenderer.invoke('candidate:complete-active'"), 'Quitter ne doit jamais appeler la clôture du parcours actif.');
   assert(!quitHandler.includes('ensureFinalArchive'), 'Quitter ne doit pas finaliser le Replay.');
+  const activeGuard = quitHandler.indexOf('if (active) {');
+  const saveCall = quitHandler.indexOf('saveNow(true)');
+  assert(activeGuard >= 0 && saveCall > activeGuard, 'Une page sans candidat actif ne doit pas être sauvegardée comme parcours.');
+  assert(quitHandler.includes('createApplicationQuitDialog(active)'), 'Le texte de Quitter doit dépendre du parcours réellement actif.');
 
   assert(sessionClose.includes("ipcMain.handle('admin:quit-application'"), 'Le moteur doit exposer une fermeture non destructive.');
   const quitIpcStart = sessionClose.indexOf("ipcMain.handle('admin:quit-application'");
