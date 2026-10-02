@@ -168,6 +168,9 @@
   window.openCalculator = function () {
     container.style.display = 'block';
     reset();
+    // Position immédiate : fonctionne aussi dans les fenêtres Electron masquées
+    // utilisées par les tests. Un second placement au prochain rendu affine la mesure.
+    placeInitial();
     requestAnimationFrame(placeInitial);
   };
 
