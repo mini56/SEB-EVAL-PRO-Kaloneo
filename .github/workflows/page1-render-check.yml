@@ -1,0 +1,38 @@
+name: Render Page 1 check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - pilot10-page1-readability
+    paths:
+      - 'seb-evalpro/source/maquette-page1-kaloneo.html'
+      - '.github/workflows/page1-render-check.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pilot10-page1-readability
+
+      - name: Render 1366x768 screenshot
+        shell: bash
+        run: |
+          mkdir -p docs/render-check
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          echo "Using $CHROME"
+          "$CHROME"             --headless=new             --no-sandbox             --disable-gpu             --hide-scrollbars             --window-size=1366,768             --screenshot=docs/render-check/page1-1366x768.png             "file://$GITHUB_WORKSPACE/seb-evalpro/source/maquette-page1-kaloneo.html"
+
+      - name: Commit render check
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/render-check/page1-1366x768.png
+          git diff --cached --quiet || git commit -m "Render Page 1 at 1366x768"
+          git push origin HEAD:pilot10-page1-readability
