@@ -219,14 +219,14 @@ function createPasswordDialog() {
 
     const style = document.createElement('style');
     style.textContent = `
-      #seb-evalpro-admin-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.38);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+      #seb-evalpro-admin-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.38);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
       #seb-evalpro-admin-dialog .seb-admin-card{width:360px;background:#fff;border:1px solid #bbb;border-radius:8px;padding:20px;box-shadow:0 10px 35px rgba(0,0,0,.28);box-sizing:border-box}
       #seb-evalpro-admin-dialog .seb-admin-title{font-size:20px;font-weight:700;color:#0070c0;margin-bottom:16px}
       #seb-evalpro-admin-dialog .seb-admin-label{display:block;font-size:14px;margin-bottom:6px;color:#222}
       #seb-evalpro-admin-dialog .seb-admin-input{width:100%;font-size:18px;padding:8px 10px;border:1px solid #999;border-radius:4px;box-sizing:border-box}
       #seb-evalpro-admin-dialog .seb-admin-error{min-height:20px;color:#c00000;font-size:13px;margin-top:6px}
       #seb-evalpro-admin-dialog .seb-admin-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
-      #seb-evalpro-admin-dialog button{font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;padding:8px 14px;border:1px solid #999;border-radius:4px;background:#f2f2f2;cursor:pointer}
+      #seb-evalpro-admin-dialog button{font-family:Arial,sans-serif;font-size:14px;padding:8px 14px;border:1px solid #999;border-radius:4px;background:#f2f2f2;cursor:pointer}
       #seb-evalpro-admin-dialog button.primary{background:#0070c0;color:#fff;border-color:#0070c0}
     `;
     backdrop.appendChild(style);
@@ -276,12 +276,12 @@ function createApplicationQuitDialog() {
 
     const style = document.createElement('style');
     style.textContent = `
-      #seb-evalpro-quit-application-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+      #seb-evalpro-quit-application-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
       #seb-evalpro-quit-application-dialog .seb-session-close-card{width:460px;max-width:calc(100vw - 40px);background:#fff;border:1px solid #aaa;border-radius:8px;padding:20px;box-shadow:0 10px 35px rgba(0,0,0,.3);box-sizing:border-box}
       #seb-evalpro-quit-application-dialog .seb-session-close-title{font-size:20px;font-weight:700;color:#0070c0;margin-bottom:12px}
       #seb-evalpro-quit-application-dialog .seb-session-close-text{font-size:14px;line-height:1.45;color:#222}
       #seb-evalpro-quit-application-dialog .seb-session-close-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-      #seb-evalpro-quit-application-dialog button{font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;padding:8px 14px;border:2px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
+      #seb-evalpro-quit-application-dialog button{font-family:Arial,sans-serif;font-size:14px;padding:8px 14px;border:2px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
     `;
     backdrop.appendChild(style);
     document.body.appendChild(backdrop);
@@ -307,27 +307,27 @@ function createSessionCloseDialog() {
     const backdrop = document.createElement('div');
     backdrop.id = 'seb-evalpro-session-close-dialog';
     backdrop.innerHTML = `
-      <div class="seb-session-close-card" role="dialog" aria-modal="true" aria-label="Fermer la session active">
-        <div class="seb-session-close-title">Fermer la session active ?</div>
+      <div class="seb-session-close-card" role="dialog" aria-modal="true" aria-label="Fermer la session active active">
+        <div class="seb-session-close-title">Fermer la session active active ?</div>
         <div class="seb-session-close-text">
           SEB EvalPro va sauvegarder les données, finaliser le Replay, terminer définitivement le parcours candidat en cours, puis quitter.
         </div>
         <div class="seb-session-close-warning">Le parcours en cours ne pourra plus être repris. Son dossier et ses données restent conservés pour le bilan et l’export.</div>
         <div class="seb-session-close-actions">
           <button type="button" id="seb-session-close-cancel">Annuler</button>
-          <button type="button" id="seb-session-close-ok" class="danger">Fermer la session active</button>
+          <button type="button" id="seb-session-close-ok" class="danger">Fermer la session active active</button>
         </div>
       </div>`;
 
     const style = document.createElement('style');
     style.textContent = `
-      #seb-evalpro-session-close-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+      #seb-evalpro-session-close-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
       #seb-evalpro-session-close-dialog .seb-session-close-card{width:430px;max-width:calc(100vw - 40px);background:#fff;border:1px solid #aaa;border-radius:8px;padding:20px;box-shadow:0 10px 35px rgba(0,0,0,.3);box-sizing:border-box}
       #seb-evalpro-session-close-dialog .seb-session-close-title{font-size:20px;font-weight:700;color:#c00000;margin-bottom:12px}
       #seb-evalpro-session-close-dialog .seb-session-close-text{font-size:14px;line-height:1.45;color:#222}
       #seb-evalpro-session-close-dialog .seb-session-close-warning{font-size:13px;font-weight:700;color:#c00000;margin-top:10px}
       #seb-evalpro-session-close-dialog .seb-session-close-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-      #seb-evalpro-session-close-dialog button{font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;padding:8px 14px;border:1px solid #999;border-radius:4px;background:#f2f2f2;cursor:pointer}
+      #seb-evalpro-session-close-dialog button{font-family:Arial,sans-serif;font-size:14px;padding:8px 14px;border:1px solid #999;border-radius:4px;background:#f2f2f2;cursor:pointer}
       #seb-evalpro-session-close-dialog button.danger{background:#c00000;color:#fff;border-color:#c00000}
     `;
     backdrop.appendChild(style);
@@ -368,12 +368,12 @@ function createCandidateFinishDialog() {
 
     const style = document.createElement('style');
     style.textContent = `
-      #seb-evalpro-finish-candidate-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+      #seb-evalpro-finish-candidate-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
       #seb-evalpro-finish-candidate-dialog .seb-session-close-card{width:460px;max-width:calc(100vw - 40px);background:#fff;border:1px solid #aaa;border-radius:8px;padding:20px;box-shadow:0 10px 35px rgba(0,0,0,.3);box-sizing:border-box}
       #seb-evalpro-finish-candidate-dialog .seb-session-close-title{font-size:20px;font-weight:700;color:#c00000;margin-bottom:12px}
       #seb-evalpro-finish-candidate-dialog .seb-session-close-text{font-size:14px;line-height:1.45;color:#222}
       #seb-evalpro-finish-candidate-dialog .seb-session-close-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-      #seb-evalpro-finish-candidate-dialog button{font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;padding:8px 14px;border:1px solid #999;border-radius:4px;background:#f2f2f2;cursor:pointer}
+      #seb-evalpro-finish-candidate-dialog button{font-family:Arial,sans-serif;font-size:14px;padding:8px 14px;border:1px solid #999;border-radius:4px;background:#f2f2f2;cursor:pointer}
       #seb-evalpro-finish-candidate-dialog button.danger{background:#c00000;color:#fff;border-color:#c00000}
     `;
     backdrop.appendChild(style);
@@ -425,13 +425,13 @@ function createExportCandidateFinishDialog(activeCandidate) {
 
     const style = document.createElement('style');
     style.textContent = `
-      #seb-evalpro-export-finish-candidate-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+      #seb-evalpro-export-finish-candidate-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
       #seb-evalpro-export-finish-candidate-dialog .seb-session-close-card{width:500px;max-width:calc(100vw - 40px);background:#fff;border:1px solid #aaa;border-radius:8px;padding:20px;box-shadow:0 10px 35px rgba(0,0,0,.3);box-sizing:border-box}
       #seb-evalpro-export-finish-candidate-dialog .seb-session-close-title{font-size:20px;font-weight:700;color:#c00000;margin-bottom:12px}
       #seb-evalpro-export-finish-candidate-dialog .seb-session-close-text{font-size:14px;line-height:1.45;color:#222}
       #seb-evalpro-export-finish-candidate-dialog .seb-session-close-warning{font-size:13px;font-weight:700;color:#c00000;margin-top:10px}
       #seb-evalpro-export-finish-candidate-dialog .seb-session-close-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-      #seb-evalpro-export-finish-candidate-dialog button{font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;padding:8px 14px;border:1px solid #999;border-radius:4px;background:#f2f2f2;cursor:pointer}
+      #seb-evalpro-export-finish-candidate-dialog button{font-family:Arial,sans-serif;font-size:14px;padding:8px 14px;border:1px solid #999;border-radius:4px;background:#f2f2f2;cursor:pointer}
       #seb-evalpro-export-finish-candidate-dialog button.danger{background:#c00000;color:#fff;border-color:#c00000}
     `;
     backdrop.appendChild(style);
@@ -472,12 +472,12 @@ function createExportDestinationModeDialog() {
 
     const style = document.createElement('style');
     style.textContent = `
-      #seb-evalpro-export-destination-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+      #seb-evalpro-export-destination-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
       #seb-evalpro-export-destination-dialog .seb-transfer-card{width:520px;max-width:calc(100vw - 40px);background:#fff;border:1px solid #aaa;border-radius:8px;padding:20px;box-shadow:0 10px 35px rgba(0,0,0,.3);box-sizing:border-box}
       #seb-evalpro-export-destination-dialog .seb-transfer-title{font-size:20px;font-weight:700;color:#0070c0;margin-bottom:10px}
       #seb-evalpro-export-destination-dialog .seb-transfer-text{font-size:14px;line-height:1.45;color:#222;margin-bottom:16px}
       #seb-evalpro-export-destination-dialog .seb-transfer-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
-      #seb-evalpro-export-destination-dialog button{font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;padding:9px 14px;border:2px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
+      #seb-evalpro-export-destination-dialog button{font-family:Arial,sans-serif;font-size:14px;padding:9px 14px;border:2px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
       #seb-evalpro-export-destination-dialog #seb-export-create{background:#0070c0;color:#fff}
     `;
     backdrop.appendChild(style);
@@ -517,7 +517,7 @@ function createTransferNameDialog() {
 
     const style = document.createElement('style');
     style.textContent = `
-      #seb-evalpro-transfer-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+      #seb-evalpro-transfer-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
       #seb-evalpro-transfer-dialog .seb-transfer-card{width:470px;max-width:calc(100vw - 40px);background:#fff;border:1px solid #aaa;border-radius:8px;padding:20px;box-shadow:0 10px 35px rgba(0,0,0,.3);box-sizing:border-box}
       #seb-evalpro-transfer-dialog .seb-transfer-title{font-size:20px;font-weight:700;color:#0070c0;margin-bottom:10px}
       #seb-evalpro-transfer-dialog .seb-transfer-text{font-size:14px;line-height:1.45;color:#222;margin-bottom:14px}
@@ -525,7 +525,7 @@ function createTransferNameDialog() {
       #seb-evalpro-transfer-dialog .seb-transfer-input{width:100%;font-size:17px;padding:9px 10px;border:1px solid #999;border-radius:4px;box-sizing:border-box}
       #seb-evalpro-transfer-dialog .seb-transfer-error{min-height:20px;color:#c00000;font-size:13px;margin-top:6px}
       #seb-evalpro-transfer-dialog .seb-transfer-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
-      #seb-evalpro-transfer-dialog button{font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;padding:8px 14px;border:2px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
+      #seb-evalpro-transfer-dialog button{font-family:Arial,sans-serif;font-size:14px;padding:8px 14px;border:2px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
     `;
     backdrop.appendChild(style);
     document.body.appendChild(backdrop);
@@ -583,13 +583,13 @@ function createTransferPasswordDialog(mode) {
 
     const style = document.createElement('style');
     style.textContent = `
-      #seb-evalpro-transfer-password-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+      #seb-evalpro-transfer-password-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
       #seb-evalpro-transfer-password-dialog .seb-transfer-password-card{width:470px;max-width:calc(100vw - 40px);background:#fff;border:1px solid #aaa;border-radius:8px;padding:20px;box-shadow:0 10px 35px rgba(0,0,0,.3);box-sizing:border-box}
       #seb-evalpro-transfer-password-dialog .seb-transfer-password-title{font-size:20px;font-weight:700;color:#0070c0;margin-bottom:8px}
       #seb-evalpro-transfer-password-dialog .seb-transfer-password-text{font-size:14px;line-height:1.45;color:#333;margin-bottom:14px}
       #seb-evalpro-transfer-password-dialog label{display:block;font-size:14px;font-weight:700;color:#222;margin:10px 0 5px}
       #seb-evalpro-transfer-password-dialog input{width:100%;font-size:18px;padding:8px 10px;border:1px solid #999;border-radius:4px;box-sizing:border-box;background:#fff;color:#111;caret-color:#111;pointer-events:auto}
-      #seb-evalpro-transfer-password-dialog button{font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;padding:8px 14px;border:2px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
+      #seb-evalpro-transfer-password-dialog button{font-family:Arial,sans-serif;font-size:14px;padding:8px 14px;border:2px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
       #seb-evalpro-transfer-password-dialog button.show-password{margin-top:10px;padding:5px 10px;font-size:13px}
       #seb-evalpro-transfer-password-dialog button.primary{background:#0070c0;color:#fff}
       #seb-evalpro-transfer-password-dialog .seb-transfer-password-error{min-height:20px;color:#c00000;font-size:13px;margin-top:7px}
@@ -674,12 +674,12 @@ function showTransferMessage(title, message, isError = false) {
 
     const style = document.createElement('style');
     style.textContent = `
-      #seb-evalpro-transfer-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+      #seb-evalpro-transfer-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
       #seb-evalpro-transfer-dialog .seb-transfer-card{width:520px;max-width:calc(100vw - 40px);background:#fff;border:1px solid #aaa;border-radius:8px;padding:20px;box-shadow:0 10px 35px rgba(0,0,0,.3);box-sizing:border-box}
       #seb-evalpro-transfer-dialog .seb-transfer-title{font-size:20px;font-weight:700;color:#0070c0;margin-bottom:12px}
       #seb-evalpro-transfer-dialog .seb-transfer-message{font-size:14px;line-height:1.5;color:#222;white-space:pre-wrap;overflow-wrap:anywhere}
       #seb-evalpro-transfer-dialog .seb-transfer-actions{display:flex;justify-content:flex-end;margin-top:18px}
-      #seb-evalpro-transfer-dialog button{font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;padding:8px 18px;border:2px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
+      #seb-evalpro-transfer-dialog button{font-family:Arial,sans-serif;font-size:14px;padding:8px 18px;border:2px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
     `;
     backdrop.appendChild(style);
     const titleNode = backdrop.querySelector('.seb-transfer-title');
@@ -720,7 +720,7 @@ function showTransferProgress(mode = 'export') {
 
   const style = document.createElement('style');
   style.textContent = `
-    #seb-evalpro-transfer-progress{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+    #seb-evalpro-transfer-progress{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
     #seb-evalpro-transfer-progress .seb-transfer-progress-card{width:520px;max-width:calc(100vw - 40px);background:#fff;border:1px solid #aaa;border-radius:8px;padding:22px;box-shadow:0 10px 35px rgba(0,0,0,.3);box-sizing:border-box;text-align:center}
     #seb-evalpro-transfer-progress .seb-transfer-progress-brand{display:block;max-width:270px;max-height:120px;width:auto;height:auto;object-fit:contain;margin:0 auto 16px}
     #seb-evalpro-transfer-progress .seb-transfer-progress-title{font-size:20px;font-weight:700;color:#0070c0;margin-bottom:8px}
@@ -746,28 +746,29 @@ function showTransferProgress(mode = 'export') {
 function sebSyncAdminBarState() {
   const bar = document.getElementById('seb-evalpro-topbar');
   if (!bar) return;
-
-  const buttons = Array.from(bar.querySelectorAll('button'));
-  const candidateBadge = document.getElementById('seb-evalpro-candidate-badge');
-
-  if (!adminUnlocked) {
-    buttons.forEach((button) => { button.hidden = button.id !== 'seb-evalpro-admin'; });
-    const adminButton = document.getElementById('seb-evalpro-admin');
-    if (adminButton) adminButton.textContent = 'Administrateur';
-    if (candidateBadge) candidateBadge.hidden = true;
-    return;
-  }
-
-  if (typeof bar.__sebUpdateButtons === 'function') {
-    bar.__sebUpdateButtons();
-    return;
-  }
-
   const adminButton = document.getElementById('seb-evalpro-admin');
+  const bilanButton = document.getElementById('seb-evalpro-bilan');
+  const returnButton = document.getElementById('seb-evalpro-return');
+  const exportCandidatesButton = document.getElementById('seb-evalpro-export-candidates');
+  const importCandidatesButton = document.getElementById('seb-evalpro-import-candidates');
+  const closeSessionButton = document.getElementById('seb-evalpro-close-session');
+  const quitApplicationButton = document.getElementById('seb-evalpro-quit-application');
+  const onBilan = isAdminBilanPage();
+  const onCandidateResults = !!adminCandidateResultsWorkspace;
+  const onAdminDetail = onBilan || onCandidateResults;
   if (adminButton) {
     adminButton.hidden = false;
-    adminButton.textContent = 'Verrouiller';
+    adminButton.textContent = adminUnlocked ? 'Verrouiller' : 'Administrateur';
   }
+  if (bilanButton) bilanButton.hidden = true;
+  if (returnButton) {
+    returnButton.hidden = !adminUnlocked || !onAdminDetail;
+    returnButton.textContent = 'Retour au candidat';
+  }
+  if (exportCandidatesButton) exportCandidatesButton.hidden = !adminUnlocked;
+  if (importCandidatesButton) importCandidatesButton.hidden = !adminUnlocked;
+  if (closeSessionButton) closeSessionButton.hidden = !adminUnlocked;
+  if (quitApplicationButton) quitApplicationButton.hidden = !adminUnlocked;
 }
 
 function injectAdminBar() {
@@ -781,13 +782,12 @@ function injectAdminBar() {
     <div id="seb-evalpro-candidate-badge" class="seb-evalpro-candidate-badge" hidden></div>
     <div class="seb-evalpro-spacer"></div>
     <button id="seb-evalpro-return" type="button" hidden>Retour à l'évaluation</button>
-    <button id="seb-evalpro-open-candidate" type="button" hidden>Ouvrir un candidat</button>
     <button id="seb-evalpro-bilan" type="button" hidden>Bilan</button>
     <button id="seb-evalpro-export-candidates" type="button" hidden>Exporter dossiers</button>
     <button id="seb-evalpro-import-candidates" type="button" hidden>Importer dossiers</button>
     <button id="seb-evalpro-finish-candidate" type="button" hidden>Terminer le parcours du candidat</button>
     <button id="seb-evalpro-quit-application" type="button" hidden>Quitter</button>
-    <button id="seb-evalpro-close-session" type="button" hidden>Fermer la session active</button>
+    <button id="seb-evalpro-close-session" type="button" hidden>Fermer la session active active</button>
     <button id="seb-evalpro-admin" type="button">Administrateur</button>`;
 
   const hotzone = document.createElement('div');
@@ -800,19 +800,19 @@ function injectAdminBar() {
     html{box-sizing:border-box}
     body{padding-top:0 !important;box-sizing:border-box}
     #seb-evalpro-top-hotzone{position:fixed;top:0;left:0;right:0;height:${HOTZONE_HEIGHT}px;z-index:2147483645;background:transparent}
-    #seb-evalpro-topbar{position:fixed;top:0;left:0;right:0;height:${BAR_HEIGHT}px;z-index:2147483646;display:flex;align-items:center;gap:8px;padding:0 12px;box-sizing:border-box;overflow:hidden;background:#004E70;color:#fff;font-family:Calibri,"Segoe UI",Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.25);transform:translateY(-100%);transition:transform .16s ease;will-change:transform}
+    #seb-evalpro-topbar{position:fixed;top:0;left:0;right:0;height:${BAR_HEIGHT}px;z-index:2147483646;display:flex;align-items:center;gap:8px;padding:0 12px;box-sizing:border-box;background:#0070c0;color:#fff;font-family:Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.25);transform:translateY(-100%);transition:transform .16s ease;will-change:transform}
     #seb-evalpro-topbar.seb-evalpro-visible{transform:translateY(0)}
     #seb-evalpro-topbar .seb-evalpro-name{font-size:18px;font-weight:700;white-space:nowrap}
     #seb-evalpro-topbar .seb-evalpro-build{font-size:12px;font-weight:700;white-space:nowrap;opacity:.9;padding:3px 7px;border:1px solid rgba(255,255,255,.55);border-radius:10px}
     #seb-evalpro-topbar .seb-evalpro-candidate-badge{font-size:13px;font-weight:700;white-space:nowrap;padding:5px 9px;border:1px solid rgba(255,255,255,.55);border-radius:4px;background:rgba(255,255,255,.14)}
     #seb-evalpro-topbar .seb-evalpro-spacer{flex:1}
-    #seb-evalpro-topbar button{height:32px;max-height:32px;min-height:0!important;font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:14px;font-weight:400;padding:4px 11px!important;border:1px solid rgba(255,255,255,.75);border-radius:7px;background:#fff;color:#0070c0;cursor:pointer;box-sizing:border-box}
+    #seb-evalpro-topbar button{font-family:Arial,sans-serif;font-size:14px;font-weight:400;padding:6px 12px;border:1px solid rgba(255,255,255,.75);border-radius:4px;background:#fff;color:#0070c0;cursor:pointer}
     #seb-evalpro-topbar button:hover{background:#f2f2f2}
     #seb-evalpro-topbar #seb-evalpro-finish-candidate{background:#fff4e5;color:#8a4b00;border-color:#fff}
     #seb-evalpro-topbar #seb-evalpro-quit-application{background:#fff;color:#0070c0;border-color:#fff}
     #seb-evalpro-topbar #seb-evalpro-close-session{background:#c00000;color:#fff;border-color:#fff}
     #seb-evalpro-topbar #seb-evalpro-close-session:hover{background:#a00000}
-    /* SEB_ADMIN_BUTTON_POLISH — charte Crystal commune */
+    /* SEB_ADMIN_BUTTON_POLISH */
     #seb-evalpro-topbar button,
     #seb-evalpro-admin-dialog button,
     #seb-evalpro-session-close-dialog button,
@@ -822,16 +822,24 @@ function injectAdminBar() {
     #seb-replay-viewer button,
     #seb-bilan-history-chooser button,
     #seb-bilan-history-editor button{
-      --seb-shell-button-color:#004E70;
-      background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(245,248,252,.90))!important;
-      color:var(--seb-shell-button-color)!important;
-      border:1.5px solid var(--seb-shell-button-color)!important;
-      border-radius:9px!important;
-      box-shadow:0 3px 8px rgba(0,0,0,.14),inset 0 1px 0 #fff!important;
-      font-family:Calibri,"Segoe UI",Arial,sans-serif!important;
-      font-weight:700!important;
-      cursor:pointer;
-      transition:transform .14s ease,box-shadow .14s ease,background .14s ease
+      background:#fff!important;color:#0070c0!important;border:2px solid #0070c0!important;border-radius:6px!important;
+      box-shadow:0 2px 5px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.95)!important;
+      font-weight:700!important;cursor:pointer;transition:background .12s ease,box-shadow .12s ease,transform .12s ease
+    }
+    /* La barre Admin reste volontairement plus légère que les boutons de dialogue. */
+    #seb-evalpro-topbar button{font-weight:400!important}
+    /* Fenêtres Export / Import : même style léger que la barre Admin. */
+    #seb-evalpro-export-destination-dialog button,
+    #seb-evalpro-transfer-password-dialog button,
+    #seb-evalpro-transfer-dialog button{
+      font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;
+      padding:6px 12px!important;border:1px solid #0070c0!important;border-radius:4px!important;
+      background:#fff!important;color:#0070c0!important;box-shadow:none!important;transform:none!important;
+    }
+    #seb-evalpro-export-destination-dialog button:hover,
+    #seb-evalpro-transfer-password-dialog button:hover,
+    #seb-evalpro-transfer-dialog button:hover{
+      background:#f2f2f2!important;box-shadow:none!important;transform:none!important;
     }
     #seb-evalpro-topbar button:hover,
     #seb-evalpro-admin-dialog button:hover,
@@ -842,17 +850,8 @@ function injectAdminBar() {
     #seb-replay-viewer button:hover,
     #seb-bilan-history-chooser button:hover,
     #seb-bilan-history-editor button:hover{
-      transform:translateY(-1px)!important;
-      background:linear-gradient(180deg,#fff,#eef3f7)!important;
-      box-shadow:0 5px 11px rgba(0,0,0,.18),inset 0 1px 0 #fff!important
+      background:#f5f9fd!important;box-shadow:0 3px 7px rgba(0,0,0,.22),inset 0 1px 0 #fff!important;transform:translateY(-1px)
     }
-    #seb-evalpro-topbar #seb-evalpro-return{--seb-shell-button-color:#198754}
-    #seb-evalpro-topbar #seb-evalpro-quit-application,
-    #seb-evalpro-topbar #seb-evalpro-close-session,
-    #seb-evalpro-session-close-dialog button.danger,
-    #seb-bilan-history-chooser button.danger,
-    #seb-bilan-history-editor button.danger,
-    #seb-evalpro-admin-dialog #seb-admin-cancel{--seb-shell-button-color:#C62828}
     #seb-evalpro-topbar button:active,
     #seb-evalpro-admin-dialog button:active,
     #seb-evalpro-session-close-dialog button:active,
@@ -861,10 +860,17 @@ function injectAdminBar() {
     #seb-replay-chooser button:active,
     #seb-replay-viewer button:active,
     #seb-bilan-history-chooser button:active,
-    #seb-bilan-history-editor button:active{
-      transform:translateY(1px)!important;
-      box-shadow:0 2px 5px rgba(0,0,0,.14),inset 0 1px 2px rgba(0,0,0,.06)!important
+    #seb-bilan-history-editor button:active{transform:translateY(0);box-shadow:inset 0 1px 3px rgba(0,0,0,.20)!important}
+    #seb-evalpro-topbar #seb-evalpro-close-session,
+    #seb-evalpro-session-close-dialog button.danger,
+    #seb-bilan-history-chooser button.danger,
+    #seb-bilan-history-editor button.danger{
+      background:#fff!important;color:#c00000!important;border-color:#c00000!important
     }
+    #seb-evalpro-topbar #seb-evalpro-close-session:hover,
+    #seb-evalpro-session-close-dialog button.danger:hover,
+    #seb-bilan-history-chooser button.danger:hover,
+    #seb-bilan-history-editor button.danger:hover{background:#fff4f4!important}
     #seb-evalpro-topbar button:disabled,
     #seb-evalpro-admin-dialog button:disabled,
     #seb-evalpro-session-close-dialog button:disabled,
@@ -873,9 +879,7 @@ function injectAdminBar() {
     #seb-replay-chooser button:disabled,
     #seb-replay-viewer button:disabled,
     #seb-bilan-history-chooser button:disabled,
-    #seb-bilan-history-editor button:disabled{
-      opacity:.48!important;transform:none!important;cursor:default!important
-    }
+    #seb-bilan-history-editor button:disabled{opacity:.48!important;transform:none!important;cursor:default!important}
 
   `;
   document.head.appendChild(style);
@@ -886,7 +890,6 @@ function injectAdminBar() {
   const candidateBadge = bar.querySelector('#seb-evalpro-candidate-badge');
   const bilanButton = bar.querySelector('#seb-evalpro-bilan');
   const returnButton = bar.querySelector('#seb-evalpro-return');
-  const openCandidateButton = bar.querySelector('#seb-evalpro-open-candidate');
   const exportCandidatesButton = bar.querySelector('#seb-evalpro-export-candidates');
   const importCandidatesButton = bar.querySelector('#seb-evalpro-import-candidates');
   const finishCandidateButton = bar.querySelector('#seb-evalpro-finish-candidate');
@@ -909,10 +912,7 @@ function injectAdminBar() {
 
   const scheduleHideBar = () => {
     clearTimeout(barHideTimer);
-    const leaveStartedAt = Date.now();
     barHideTimer = setTimeout(() => {
-      const elapsed = Date.now() - leaveStartedAt;
-      if (elapsed < BAR_HIDE_DELAY) return;
       if (!bar.matches(':hover') && !hotzone.matches(':hover')) hideBar();
     }, BAR_HIDE_DELAY);
   };
@@ -965,49 +965,26 @@ function injectAdminBar() {
     }
   };
 
-  let adminBarRefreshGeneration = 0;
-
   const updateAdminButtons = () => {
-    const refreshGeneration = ++adminBarRefreshGeneration;
     const onBilan = isAdminBilanPage();
     const onCandidateResults = !!adminCandidateResultsWorkspace;
     const onAdminDetail = (!!adminCandidateWorkspace && onBilan) || onCandidateResults;
-
-    if (!adminUnlocked) {
-      [returnButton,openCandidateButton,bilanButton,exportCandidatesButton,importCandidatesButton,finishCandidateButton,quitApplicationButton,closeSessionButton]
-        .forEach((button) => { if (button) button.hidden = true; });
-      adminButton.hidden = false;
-      adminButton.textContent = 'Administrateur';
-      candidateBadge.hidden = true;
-      return;
-    }
-
-    adminButton.hidden = false;
-    adminButton.textContent = 'Verrouiller';
     bilanButton.hidden = true;
-    closeSessionButton.hidden = true;
-    quitApplicationButton.hidden = false;
-    returnButton.hidden = !onAdminDetail;
+    returnButton.hidden = !adminUnlocked || !onAdminDetail;
     returnButton.textContent = 'Retour au candidat';
-
-    ipcRenderer.invoke('candidate:active').then((active) => {
-      if (refreshGeneration !== adminBarRefreshGeneration) return;
-      const hasActiveJourney = !!active;
-      finishCandidateButton.hidden = !hasActiveJourney;
-      openCandidateButton.hidden = hasActiveJourney || isAdminCandidatesPage() || onAdminDetail;
-      exportCandidatesButton.hidden = hasActiveJourney || !editionCapabilities.canExport || onAdminDetail;
-      importCandidatesButton.hidden = hasActiveJourney || !editionCapabilities.canImport || onAdminDetail;
-      refreshCandidateBadge();
-    }).catch(() => {
-      if (refreshGeneration !== adminBarRefreshGeneration) return;
-      finishCandidateButton.hidden = true;
-      openCandidateButton.hidden = isAdminCandidatesPage() || onAdminDetail;
-      exportCandidatesButton.hidden = !editionCapabilities.canExport || onAdminDetail;
-      importCandidatesButton.hidden = !editionCapabilities.canImport || onAdminDetail;
-      refreshCandidateBadge();
-    });
+    exportCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canExport;
+    importCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canImport;
+    finishCandidateButton.hidden = true;
+    closeSessionButton.hidden = !adminUnlocked;
+    quitApplicationButton.hidden = !adminUnlocked;
+    adminButton.textContent = adminUnlocked ? 'Verrouiller' : 'Administrateur';
+    refreshCandidateBadge();
+    if (adminUnlocked) {
+      ipcRenderer.invoke('candidate:active').then((active) => {
+        finishCandidateButton.hidden = !active;
+      }).catch(() => { finishCandidateButton.hidden = true; });
+    }
   };
-  bar.__sebUpdateButtons = updateAdminButtons;
 
   adminButton.addEventListener('click', async () => {
     showBar();
@@ -1055,29 +1032,13 @@ function injectAdminBar() {
       }
       adminUnlocked = true;
       updateAdminButtons();
-      const active = await ipcRenderer.invoke('candidate:active').catch(() => null);
-      if (!active) {
-        adminNavigationLeaving = true;
-        await ipcRenderer.invoke('admin:open-candidate-browser').catch(() => false);
-        return;
-      }
-      // Parcours actif : rester sur la page courante et ne proposer que
-      // Terminer le parcours / Quitter / Verrouiller.
-      showBar();
+      // Après déverrouillage, quitter immédiatement l'écran du parcours :
+      // l'Administrateur arrive toujours sur l'écran neutre Espace administrateur.
+      adminNavigationLeaving = true;
+      await ipcRenderer.invoke('admin:open-candidate-browser').catch(() => false);
       return;
     }
     scheduleHideBar();
-  });
-
-  openCandidateButton.addEventListener('click', async () => {
-    showBar();
-    const active = await ipcRenderer.invoke('candidate:active').catch(() => null);
-    if (active) {
-      updateAdminButtons();
-      return;
-    }
-    adminNavigationLeaving = true;
-    await ipcRenderer.invoke('admin:open-candidate-browser').catch(() => false);
   });
 
   bilanButton.addEventListener('click', () => {
@@ -1274,7 +1235,6 @@ function injectAdminBar() {
       'Le parcours candidat est maintenant terminé. Il ne pourra plus être repris et son dossier est désormais exportable.'
     );
     refreshCandidateBadge();
-    updateAdminButtons();
     scheduleHideBar();
   });
 
@@ -1386,14 +1346,22 @@ function injectAdminBar() {
 
     const closed = await ipcRenderer.invoke('admin:close-session').catch(() => false);
     if (!closed) {
+      closingSession = false;
+      candidateJourneyCompleted = false;
       await showTransferMessage(
         'Fermeture impossible',
         active
-          ? 'Le parcours candidat est terminé, mais SEB EvalPro n’a pas pu quitter automatiquement.'
-          : 'SEB EvalPro n’a pas pu quitter automatiquement.',
+          ? 'Le parcours candidat est terminé, mais la session n’a pas pu revenir à l’espace Administrateur.'
+          : 'La session n’a pas pu revenir à l’espace Administrateur.',
         true
       );
+      scheduleHideBar();
+      return;
     }
+
+    // Fermer la session active active termine le parcours candidat mais ne ferme jamais SEB EvalPro.
+    adminNavigationLeaving = true;
+    await ipcRenderer.invoke('admin:open-candidate-browser').catch(() => false);
   });
 
   updateAdminButtons();
@@ -1613,7 +1581,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
     style.textContent =
       '#seb-evalpro-privacy-toggle{position:fixed!important;right:18px!important;bottom:18px!important;z-index:2147483643!important;margin:0!important;padding:10px 15px!important;border:0!important;border-radius:8px!important;background:#0070c0!important;color:#fff!important;font:700 14px Arial,sans-serif!important;box-shadow:0 3px 12px rgba(0,0,0,.24)!important;cursor:pointer!important}' +
       '#seb-evalpro-privacy-toggle:hover{background:#005c9e!important}' +
-      '#seb-evalpro-privacy-layer{position:fixed;inset:0;background:#fff;display:none;align-items:center;justify-content:center;overflow:hidden;font-family:Calibri,"Segoe UI",Arial,sans-serif}' +
+      '#seb-evalpro-privacy-layer{position:fixed;inset:0;background:#fff;display:none;align-items:center;justify-content:center;overflow:hidden;font-family:Arial,sans-serif}' +
       '#seb-evalpro-privacy-layer img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;user-select:none;-webkit-user-drag:none}' +
       '#seb-evalpro-privacy-hide{position:absolute!important;left:50%!important;bottom:24px!important;transform:translateX(-50%)!important;margin:0!important;padding:11px 20px!important;border:0!important;border-radius:8px!important;background:#0070c0!important;color:#fff!important;font:700 15px Arial,sans-serif!important;box-shadow:0 3px 12px rgba(0,0,0,.25)!important;cursor:pointer!important}' +
       '#seb-evalpro-final-privacy-wrap{display:flex!important;justify-content:center!important;margin:22px 0 12px!important}' +
