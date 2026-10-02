@@ -67,6 +67,14 @@ assert(preload.includes("#seb-evalpro-topbar #seb-evalpro-quit-application,"), '
 assert(preload.includes("height:36px!important"), 'hauteur compacte des boutons Admin absente.');
 assert(preload.includes("overflow:hidden;background:#0070c0"), 'barre Admin ne masque pas les débordements.');
 assert(!preload.includes("if (button.parentElement !== bar) bar.appendChild(button);"), 'bouton de confidentialité encore injecté dans la barre Admin.');
+assert(preload.includes('id="seb-evalpro-tests-parcours"'), 'bouton Tests / Parcours absent de la barre Admin.');
+assert(preload.includes("ipcRenderer.invoke('admin:open-tests-parcours')"), 'navigation Tests / Parcours non câblée.');
+assert(preload.includes("closeTestsParcours: () => ipcRenderer.invoke('admin:close-tests-parcours')"), 'retour Tests / Parcours non exposé.');
+assert(preload.includes('const ADMIN_HELP_DELAY_MS = 650;'), 'temporisation des bulles d’aide absente.');
+assert(preload.includes('const ADMIN_HELP_VISIBLE_MS = 2800;'), 'durée des bulles d’aide absente.');
+assert(preload.includes("Ouvre la page de gestion des tests et des parcours KALONÉO."), 'aide Tests / Parcours absente.');
+assert(preload.includes("Ferme SEB EvalPro. Un parcours encore actif est sauvegardé pour pouvoir être repris."), 'aide Quitter absente.');
+assert(preload.includes("Termine définitivement le parcours candidat en cours et revient à l’espace Administrateur."), 'aide Fermer la session active absente.');
 
 const sessionClose = read('src/session-close.js');
 const closeSection = section(sessionClose, "ipcMain.handle('admin:close-session'", "});");
@@ -84,5 +92,15 @@ assert(main.includes("ipcMain.handle('admin:open-candidate-browser'"), 'IPC Ouvr
 assert(main.includes("ipcMain.handle('admin:return-candidate-browser'"), 'IPC retour candidat absent.');
 assert(main.includes("ipcMain.handle('admin:open-bilan'"), 'IPC Bilan absent.');
 assert(main.includes("ipcMain.handle('admin:open-candidate-results'"), 'IPC Résultats absent.');
+assert(main.includes("ipcMain.handle('admin:open-tests-parcours'"), 'IPC Tests / Parcours absent.');
+assert(main.includes("ipcMain.handle('admin:close-tests-parcours'"), 'IPC Fermer Tests / Parcours absent.');
+assert(main.includes("admin-tests-parcours.html"), 'page Tests / Parcours non référencée par le main.');
+
+const testsPage = read('overrides/admin-tests-parcours.html');
+const testsScript = read('source/js/admin-tests-parcours.js');
+assert((testsPage.match(/<button\b/gi) || []).length === 1, 'la page Tests / Parcours doit contenir un seul bouton.');
+assert(testsPage.includes('id="close-tests-parcours"') && testsPage.includes('>Fermer</button>'), 'bouton Fermer de Tests / Parcours absent.');
+assert(!/Importer|Exporter|Créer|Dupliquer|Supprimer/i.test(testsPage), 'la page Tests / Parcours contient déjà des fonctions non validées.');
+assert(testsScript.includes('closeTestsParcours'), 'action Fermer de Tests / Parcours non câblée.');
 
 console.log('BUILD21_ADMIN_FOUNDATION: OK');
