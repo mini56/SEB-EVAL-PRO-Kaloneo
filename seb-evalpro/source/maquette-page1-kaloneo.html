@@ -338,7 +338,7 @@ button,input{font:inherit}
 }
 .side .tool-card{
   padding:8px 11px;
-  overflow:visible;
+  overflow:hidden;
 }
 .chrono-card{background:linear-gradient(145deg,#fff,#F6FBFF)}
 .calc-card{background:linear-gradient(145deg,#fff,#FFF9EF)}
@@ -381,15 +381,18 @@ button,input{font:inherit}
 .k-btn.red{color:var(--red)}
 .k-btn.orange{border-color:var(--orange);color:#C47400}
 .k-btn.blue{border-color:var(--blue);color:var(--blue)}
-.k-btn:disabled{opacity:.55;cursor:default;transform:none}
+.k-btn:disabled{opacity:1;cursor:default;transform:none}
+.k-btn.green:disabled{color:var(--green)}
+.k-btn.red:disabled{color:var(--red)}
 .status{
   min-height:18px;
-  margin-top:4px;
+  margin-top:5px;
   color:#167A4A;
   text-align:center;
   font-size:var(--type-secondary);
   line-height:1.1;
   font-weight:700;
+  flex:0 0 auto;
 }
 .calc-card .k-btn{display:block;margin:7px auto 0}
 .audio-actions{
@@ -535,7 +538,7 @@ button,input{font:inherit}
   .field input{height:32px}
   .onboarding{padding-top:6px}
   .workspace{margin-top:5px}
-  .side{gap:7px}
+  .side{grid-template-rows:1.38fr .81fr .81fr;gap:7px}
   .side .tool-card{padding:7px 10px}
   .chrono-display{margin:3px auto 4px}
   .k-btn{min-height:37px;padding:6px 12px}
