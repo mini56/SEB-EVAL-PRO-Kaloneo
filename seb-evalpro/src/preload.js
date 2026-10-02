@@ -1826,8 +1826,8 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
     const style = document.createElement('style');
     style.id = 'seb-evalpro-privacy-style';
     style.textContent =
-      '#seb-evalpro-privacy-toggle{position:fixed!important;right:18px!important;bottom:18px!important;z-index:2147483643!important;margin:0!important;padding:10px 15px!important;border:0!important;border-radius:8px!important;background:#0070c0!important;color:#fff!important;font:700 14px Arial,sans-serif!important;box-shadow:0 3px 12px rgba(0,0,0,.24)!important;cursor:pointer!important}' +
-      '#seb-evalpro-privacy-toggle:hover{background:#005c9e!important}' +
+      '#seb-evalpro-privacy-toggle{position:fixed!important;right:18px!important;bottom:18px!important;z-index:2147483643!important;margin:0!important;padding:10px 17px!important;border:1.5px solid #004E70!important;border-radius:10px!important;background:linear-gradient(180deg,#fff 0%,#f5f8fc 100%)!important;color:#004E70!important;font:700 15px Calibri,\"Segoe UI\",Arial,sans-serif!important;box-shadow:0 4px 10px rgba(0,0,0,.14),inset 0 1px 0 #fff!important;cursor:pointer!important}' +
+      '#seb-evalpro-privacy-toggle:hover{background:linear-gradient(180deg,#fff 0%,#eef4f8 100%)!important;transform:translateY(-1px)!important;box-shadow:0 7px 15px rgba(0,0,0,.17),inset 0 1px 0 #fff!important}' +
       '#seb-evalpro-privacy-layer{position:fixed;inset:0;background:#fff;display:none;align-items:center;justify-content:center;overflow:hidden;font-family:Arial,sans-serif}' +
       '#seb-evalpro-privacy-layer img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;user-select:none;-webkit-user-drag:none}' +
       '#seb-evalpro-privacy-hide{position:absolute!important;left:50%!important;bottom:24px!important;transform:translateX(-50%)!important;margin:0!important;padding:11px 20px!important;border:0!important;border-radius:8px!important;background:#0070c0!important;color:#fff!important;font:700 15px Arial,sans-serif!important;box-shadow:0 3px 12px rgba(0,0,0,.25)!important;cursor:pointer!important}' +
@@ -1848,7 +1848,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
     button = document.createElement('button');
     button.id = 'seb-evalpro-privacy-toggle';
     button.type = 'button';
-    button.textContent = 'Afficher l’écran d’accueil';
+    button.textContent = '⌂ Afficher l’écran d’accueil';
     button.addEventListener('click', function(){
       savePrivacyMode(MODE_TEMP);
     });
