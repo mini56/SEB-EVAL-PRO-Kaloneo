@@ -869,7 +869,7 @@ function injectAdminBar() {
     #seb-evalpro-topbar #seb-evalpro-bilan,
     #seb-evalpro-topbar #seb-evalpro-return,
     #seb-evalpro-topbar #seb-evalpro-finish-candidate{display:none!important}
-    /* Les groupes hérités Build #21 restent compacts sans modifier leurs modules de référence. */
+    /* Les groupes hérités restent compacts sans modifier leurs modules de référence. */
     #seb-evalpro-topbar .seb-admin-left-actions,
     #seb-evalpro-topbar .seb-admin-right-actions{gap:4px!important;margin-left:4px!important;padding-left:6px!important}
     #seb-evalpro-topbar button:hover{background:#f5f9fd!important;box-shadow:0 2px 5px rgba(0,0,0,.18),inset 0 1px 0 #fff!important;transform:none!important}
