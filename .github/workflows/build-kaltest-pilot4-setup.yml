@@ -1,5 +1,5 @@
 name: Build Windows KALTEST Pilot 4 setup
-# focused Build21 Admin foundation smoke
+# Generate KALTEST data before prepare:web
 
 on:
   workflow_dispatch:
@@ -36,6 +36,9 @@ jobs:
       - name: Verify Build 21 Admin foundation
         run: npm run test:admin-foundation
 
+      - name: Generate Pilot 4 data
+        run: node scripts/build-kaltest-pilot2-data.js
+
       - name: Prepare SEB web application
         run: npm run prepare:web
 
@@ -62,9 +65,6 @@ jobs:
           Get-Content $stdout -ErrorAction SilentlyContinue
           Get-Content $stderr -ErrorAction SilentlyContinue
           if ($process.ExitCode -ne 0) { throw "Smoke Admin PILOTE 4 en echec (code $($process.ExitCode))." }
-
-      - name: Generate Pilot 4 data
-        run: node scripts/build-kaltest-pilot2-data.js
 
       - name: Run real Electron KALTEST smoke
         shell: pwsh
