@@ -1930,3 +1930,29 @@ body:has(#page-identification.visible) #calc-container .calc-btn{
   min-height:38px;
   margin-top:0;
 }
+
+
+/* PILOTE 9 — calculatrice de prise en main : plus large mais moins haute pour tenir entière. */
+body:has(#page-identification.visible) #calc-container .seb-calc-dragbar{
+  height:36px!important;
+  margin-bottom:8px!important;
+}
+body:has(#page-identification.visible) #calc-display{
+  height:48px!important;
+  margin-bottom:8px!important;
+}
+body:has(#page-identification.visible) #calc-container .calc-btn{
+  width:50px!important;
+  height:38px!important;
+  margin:3px!important;
+  font-size:17px!important;
+}
+body:has(#page-identification.visible) #calc-container .calc-btn-fermez{
+  height:36px!important;
+  margin-top:6px!important;
+}
+body:has(#page-identification.visible) #calc-container .seb-calc-brand{
+  margin-top:7px!important;
+  padding-top:6px!important;
+  font-size:11.5px!important;
+}
