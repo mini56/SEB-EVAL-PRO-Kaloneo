@@ -174,7 +174,7 @@ app.whenReady().then(async () => {
     }))()`, true);
     if (!intro.visible || !intro.button) throw new Error('La page Introduction n’est plus accessible.');
 
-    await win.webContents.executeJavaScript("document.querySelector('#page-intro [data-seb-action="open-calculator"]').click();true", true);
+    await win.webContents.executeJavaScript(`document.querySelector('#page-intro [data-seb-action="open-calculator"]').click();true`, true);
     await wait(120);
     const introCalc = await win.webContents.executeJavaScript(`(()=>{
       const calc=document.getElementById('calc-container').getBoundingClientRect();
