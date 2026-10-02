@@ -334,8 +334,8 @@ function openCatalog(initialCandidateId = '') {
     const overlay = document.createElement('div');
     overlay.id = 'seb-candidate-catalog';
     overlay.innerHTML = `
-      <div class="seb-cc-card" role="dialog" aria-modal="true" aria-label="Ouvrir un candidat">
-        <div class="seb-cc-head"><div class="seb-cc-title">Ouvrir un candidat</div><div class="seb-cc-badge">DOSSIERS CANDIDATS</div></div>
+      <div class="seb-cc-card" role="dialog" aria-modal="true" aria-label="Liste des candidats">
+        <div class="seb-cc-head"><div class="seb-cc-title">Liste des candidats</div><div class="seb-cc-badge">DOSSIERS CANDIDATS</div></div>
         <div class="seb-cc-search-wrap"><input id="seb-cc-search" class="seb-cc-search" type="search" autocomplete="off" placeholder="Rechercher un nom, prénom, ville, groupe ou date…"></div>
         <div class="seb-cc-body"><div id="seb-cc-list">Chargement…</div></div>
         <div class="seb-cc-foot"><button type="button" id="seb-cc-close">Fermer</button></div>
@@ -420,7 +420,7 @@ function ensureButton() {
     button = document.createElement('button');
     button.id = 'seb-evalpro-open-candidate';
     button.type = 'button';
-    button.textContent = 'Ouvrir un candidat';
+    button.textContent = 'Lister les candidats';
     button.hidden = true;
     button.addEventListener('click', async () => {
       if (isCandidateAdminHost()) {
