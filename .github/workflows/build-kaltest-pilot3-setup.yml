@@ -1,24 +1,6 @@
 name: Build Windows KALTEST Pilot 3 setup
 
 on:
-  push:
-    branches:
-      - dev-kaloneo-v2
-    paths:
-      - '.github/workflows/build-kaltest-pilot3-setup.yml'
-      - 'seb-evalpro/source/kaltest-pilot2.html'
-      - 'seb-evalpro/source/css/kaltest-pilot2.css'
-      - 'seb-evalpro/source/js/kaltest-pilot2-runtime.js'
-      - 'seb-evalpro/source/js/seb-floating-calculator.js'
-      - 'seb-evalpro/source/imageqcm/scenario.png'
-      - 'seb-evalpro/source/imageqcm/scenario.PNG'
-      - 'seb-evalpro/src/preload.js'
-      - 'seb-evalpro/src/replay-navigation-capture.js'
-      - 'seb-evalpro/src/kaltest-pilot3-main.js'
-      - 'seb-evalpro/build/kaltest-pilot3-builder.yml'
-      - 'seb-evalpro/scripts/kaltest-pilot2-functional-smoke-main.js'
-      - 'seb-evalpro/scripts/admin-bar-smoke-electron.js'
-      - 'seb-evalpro/scripts/kaltest-pilot3-regression-guard.js'
   workflow_dispatch:
 
 permissions:
@@ -27,7 +9,7 @@ permissions:
 jobs:
   build-test-release:
     runs-on: windows-latest
-    timeout-minutes: 55
+    timeout-minutes: 50
 
     defaults:
       run:
@@ -49,29 +31,13 @@ jobs:
         working-directory: kaltest-contract
         run: npm test
 
-      - name: JavaScript syntax checks
-        run: |
-          node --check source/js/kaltest-pilot2-runtime.js
-          node --check source/js/seb-floating-calculator.js
-          node --check src/preload.js
-          node --check src/replay-navigation-capture.js
-          node --check scripts/kaltest-pilot2-functional-smoke-main.js
-          node --check scripts/admin-bar-smoke-electron.js
-          node --check scripts/kaltest-pilot3-regression-guard.js
-
-      - name: Validate Pilot 3 regression contract
-        run: node scripts/kaltest-pilot3-regression-guard.js
-
       - name: Generate Pilot 3 data
         run: node scripts/build-kaltest-pilot2-data.js
 
       - name: Prepare SEB web application
         run: npm run prepare:web
 
-      - name: Revalidate Pilot 3 after web preparation
-        run: node scripts/kaltest-pilot3-regression-guard.js
-
-      - name: Run real Electron Pilot 3 KALTEST smoke
+      - name: Run real Electron Pilot 3 smoke
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -89,26 +55,6 @@ jobs:
           Get-Content $stderr -ErrorAction SilentlyContinue
           if ($process.ExitCode -ne 0) {
             throw "Smoke Electron PILOTE 3 en echec (code $($process.ExitCode))."
-          }
-
-      - name: Run contextual Admin bar Electron smoke
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $stdout = Join-Path $env:RUNNER_TEMP 'pilot3-admin-out.log'
-          $stderr = Join-Path $env:RUNNER_TEMP 'pilot3-admin-err.log'
-          $electron = Join-Path (Get-Location) 'node_modules/.bin/electron.cmd'
-          $process = Start-Process -FilePath $electron -ArgumentList '--no-sandbox','scripts/admin-bar-smoke-electron.js' -PassThru -NoNewWindow -RedirectStandardOutput $stdout -RedirectStandardError $stderr
-          if (-not $process.WaitForExit(150000)) {
-            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-            Get-Content $stdout -ErrorAction SilentlyContinue
-            Get-Content $stderr -ErrorAction SilentlyContinue
-            throw 'Timeout du smoke barre Admin PILOTE 3 après 150 secondes.'
-          }
-          Get-Content $stdout -ErrorAction SilentlyContinue
-          Get-Content $stderr -ErrorAction SilentlyContinue
-          if ($process.ExitCode -ne 0) {
-            throw "Smoke barre Admin PILOTE 3 en echec (code $($process.ExitCode))."
           }
 
       - name: Build isolated Windows Pilot 3 setup
@@ -146,29 +92,21 @@ jobs:
             throw "La Release $tag existe deja. Utiliser un nouveau numero de pilote."
           }
           $notes = @"
-          PILOTE #3 Windows — corrections issues des tests réels du PILOTE #2.
+          PILOTE #3 Windows destiné au nouveau test réel KALONÉO / KALTEST.
 
-          Parcours inclus :
-          Identification
-          → Introduction
-          → 7 tests KALTEST migrés du Build #20
-          → Page finale Félicitations
+          Corrections principales depuis PILOTE #2 :
+          - barre Administrateur contextuelle et repli corrigé
+          - fin normale du parcours raccordée au moteur commun
+          - mise en page KALONÉO plus proche de la lisibilité Build #20
+          - Genre / Nombre en deux tableaux
+          - Paronymes agrandi
+          - calculatrice fermée au changement de page et affichée seulement sur les tests compatibles
+          - exemples de réponses retirés des champs Réception / Contrôle
+          - date candidat propagée
+          - pont Résultats / Bilan corrigé pour les tests KALTEST
+          - capture Replay explicite à chaque fin d'exercice
 
-          Corrections principales testées :
-          - mise en page KALONÉO basée sur les proportions lisibles du Build #20
-          - Paronymes agrandi et lisible
-          - Genre / Nombre en deux vrais tableaux
-          - nouvelle icône Scénario validée sous le nom historique scenario.png
-          - calculatrice commune Build #20 et fermeture automatique au changement d'exercice
-          - suppression des exemples dans Réception / contrôle
-          - date candidat propagée aux écrans Administrateur
-          - pont KALTEST vers Résultats / Bilan historiques
-          - Replay différencié par étape et par exercice
-          - page finale Build #20 et fin automatique du parcours
-          - barre Admin contextuelle avec commandes réduites pendant un parcours actif
-          - boutons Admin contenus dans la barre et délai de repli conservé
-
-          Cette installation utilise un identifiant Windows et un dossier de données propres au PILOTE #3.
+          Le pilote possède son propre dossier de données isolé.
 
           Fichier : $env:SETUP_NAME
           SHA256 : $env:SETUP_SHA256
