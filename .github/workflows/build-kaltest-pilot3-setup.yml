@@ -2,6 +2,11 @@ name: Build Windows KALTEST Pilot 3 setup
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - dev-kaloneo-v2
+    paths:
+      - '.github/workflows/build-kaltest-pilot3-setup.yml'
 
 permissions:
   contents: write
