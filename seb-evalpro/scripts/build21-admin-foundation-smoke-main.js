@@ -16,7 +16,10 @@ let state = {
   lastEvaluationPage:'qcmv1.0.html'
 };
 let adminUnlocked = true;
+let activeCandidate = { candidateId:'SMOKE', displayName:'Candidat test' };
 let openCandidateCalls = 0;
+let openTestsParcoursCalls = 0;
+let closeTestsParcoursCalls = 0;
 
 ipcMain.on('app:edition-sync', (event) => {
   event.returnValue = {
@@ -42,13 +45,15 @@ ipcMain.handle('state:save', (_event, payload) => {
   state = { ...state, ...(payload || {}) };
   return { ok:true, state };
 });
-ipcMain.handle('candidate:active', () => ({ candidateId:'SMOKE', displayName:'Candidat test' }));
+ipcMain.handle('candidate:active', () => activeCandidate);
 ipcMain.handle('admin:status', () => adminUnlocked);
 ipcMain.handle('admin:verify', () => { adminUnlocked = true; return true; });
 ipcMain.handle('admin:verify-password', () => false);
 ipcMain.handle('admin:lock', () => { adminUnlocked = false; return true; });
 ipcMain.handle('admin:open-candidate-browser', () => { openCandidateCalls += 1; return true; });
 ipcMain.handle('admin:return-candidate-browser', () => true);
+ipcMain.handle('admin:open-tests-parcours', () => { openTestsParcoursCalls += 1; return true; });
+ipcMain.handle('admin:close-tests-parcours', () => { closeTestsParcoursCalls += 1; return true; });
 ipcMain.handle('admin:open-bilan', () => true);
 ipcMain.handle('admin:open-candidate-results', () => true);
 ipcMain.handle('admin:return-evaluation', () => true);
@@ -72,7 +77,7 @@ app.whenReady().then(async () => {
   const root = path.join(__dirname, '..');
   const preload = path.join(root, 'src', 'preload.js');
   const web = path.join(root, 'app', 'web');
-  for (const required of ['qcmv1.0.html','admin-candidats.html','admin-bilan.html']) {
+  for (const required of ['qcmv1.0.html','admin-candidats.html','admin-bilan.html','admin-tests-parcours.html']) {
     if (!fs.existsSync(path.join(web, required))) {
       die('fichier web généré absent: ' + required);
       return;
@@ -99,10 +104,10 @@ app.whenReady().then(async () => {
     await win.loadFile(path.join(web, 'qcmv1.0.html'));
     await new Promise(r => setTimeout(r, 650));
 
-    const initial = await win.webContents.executeJavaScript("(()=>{ const visible=(id)=>{ const el=document.getElementById(id); if(!el)return false; const css=getComputedStyle(el); return !el.hidden && css.display!=='none' && css.visibility!=='hidden'; }; const bar=document.getElementById('seb-evalpro-topbar'); const br=bar?.getBoundingClientRect(); const ids=['seb-evalpro-open-candidate','seb-evalpro-bilan','seb-evalpro-return','seb-evalpro-close-session','seb-evalpro-admin','seb-evalpro-export-candidates','seb-evalpro-import-candidates','seb-evalpro-finish-candidate','seb-evalpro-quit-application']; const buttons=ids.map(id=>{const el=document.getElementById(id); if(!el)return null; const r=el.getBoundingClientRect(); const css=getComputedStyle(el); return {id,hidden:el.hidden,text:String(el.textContent||'').trim(),top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height,color:css.color,borderColor:css.borderColor,display:css.display};}).filter(Boolean); return { bar:!!bar, barRect:br?{top:br.top,bottom:br.bottom,height:br.height}:null, hotzone:!!document.getElementById('seb-evalpro-top-hotzone'), openCandidate:visible('seb-evalpro-open-candidate'), closeSession:visible('seb-evalpro-close-session'), quit:visible('seb-evalpro-quit-application'), finishCandidate:visible('seb-evalpro-finish-candidate'), bilan:visible('seb-evalpro-bilan'), replay:visible('seb-evalpro-replay'), results:visible('seb-evalpro-results'), exportText:String(document.getElementById('seb-evalpro-export-candidates')?.textContent||'').trim(), importText:String(document.getElementById('seb-evalpro-import-candidates')?.textContent||'').trim(), privacyInBar:document.getElementById('seb-evalpro-privacy-toggle')?.parentElement===bar, adminText:String(document.getElementById('seb-evalpro-admin')?.textContent||'').trim(), initiallyOpen:!!bar && bar.classList.contains('seb-evalpro-visible'), buttons }; })()");
+    const initial = await win.webContents.executeJavaScript("(()=>{ const visible=(id)=>{ const el=document.getElementById(id); if(!el)return false; const css=getComputedStyle(el); return !el.hidden && css.display!=='none' && css.visibility!=='hidden'; }; const bar=document.getElementById('seb-evalpro-topbar'); const br=bar?.getBoundingClientRect(); const ids=['seb-evalpro-open-candidate','seb-evalpro-bilan','seb-evalpro-return','seb-evalpro-close-session','seb-evalpro-admin','seb-evalpro-export-candidates','seb-evalpro-import-candidates','seb-evalpro-tests-parcours','seb-evalpro-finish-candidate','seb-evalpro-quit-application']; const buttons=ids.map(id=>{const el=document.getElementById(id); if(!el)return null; const r=el.getBoundingClientRect(); const css=getComputedStyle(el); return {id,hidden:el.hidden,text:String(el.textContent||'').trim(),top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height,color:css.color,borderColor:css.borderColor,display:css.display};}).filter(Boolean); return { bar:!!bar, barRect:br?{top:br.top,bottom:br.bottom,height:br.height}:null, hotzone:!!document.getElementById('seb-evalpro-top-hotzone'), openCandidate:visible('seb-evalpro-open-candidate'), closeSession:visible('seb-evalpro-close-session'), quit:visible('seb-evalpro-quit-application'), testsParcours:visible('seb-evalpro-tests-parcours'), finishCandidate:visible('seb-evalpro-finish-candidate'), bilan:visible('seb-evalpro-bilan'), replay:visible('seb-evalpro-replay'), results:visible('seb-evalpro-results'), exportText:String(document.getElementById('seb-evalpro-export-candidates')?.textContent||'').trim(), importText:String(document.getElementById('seb-evalpro-import-candidates')?.textContent||'').trim(), privacyInBar:document.getElementById('seb-evalpro-privacy-toggle')?.parentElement===bar, adminText:String(document.getElementById('seb-evalpro-admin')?.textContent||'').trim(), initiallyOpen:!!bar && bar.classList.contains('seb-evalpro-visible'), buttons }; })()");
 
     if (!initial.bar || !initial.hotzone || !initial.openCandidate || !initial.closeSession || !initial.quit ||
-        initial.finishCandidate || initial.bilan || initial.replay || initial.results || initial.adminText !== 'Verrouiller') {
+        initial.testsParcours || initial.finishCandidate || initial.bilan || initial.replay || initial.results || initial.adminText !== 'Verrouiller') {
       die('état Administrateur initial incorrect', initial);
       return;
     }
@@ -142,6 +147,49 @@ app.whenReady().then(async () => {
       return;
     }
 
+    // Sans parcours actif, Tests / Parcours devient disponible et Fermer la session disparaît.
+    activeCandidate = null;
+    await win.webContents.executeJavaScript("window.dispatchEvent(new Event('pageshow')); true");
+    await new Promise(r => setTimeout(r, 260));
+    const noActive = await win.webContents.executeJavaScript("(()=>{ const visible=(id)=>{const el=document.getElementById(id);if(!el)return false;const css=getComputedStyle(el);return !el.hidden&&css.display!=='none'&&css.visibility!=='hidden';}; return {tests:visible('seb-evalpro-tests-parcours'),closeSession:visible('seb-evalpro-close-session')};})()");
+    if (!noActive.tests || noActive.closeSession) {
+      die('visibilité contextuelle Tests / Parcours incorrecte', noActive);
+      return;
+    }
+
+    // Bulle d'aide de type Word sur Tests / Parcours.
+    await win.webContents.executeJavaScript("(()=>{const bar=document.getElementById('seb-evalpro-topbar');const hot=document.getElementById('seb-evalpro-top-hotzone');hot.dispatchEvent(new MouseEvent('mouseenter',{bubbles:true}));bar.classList.add('seb-evalpro-visible');const b=document.getElementById('seb-evalpro-tests-parcours');b.dispatchEvent(new MouseEvent('mouseover',{bubbles:true}));return true;})()");
+    await new Promise(r => setTimeout(r, 760));
+    const help = await win.webContents.executeJavaScript("(()=>{const t=document.getElementById('seb-evalpro-admin-help');return {exists:!!t,hidden:t?t.hidden:true,text:t?String(t.textContent||'').trim():''};})()");
+    if (!help.exists || help.hidden || help.text !== 'Ouvre la page de gestion des tests et des parcours KALONÉO.') {
+      die('bulle d’aide Tests / Parcours incorrecte', help);
+      return;
+    }
+    await win.webContents.executeJavaScript("document.getElementById('seb-evalpro-topbar').dispatchEvent(new MouseEvent('click',{bubbles:true})); true");
+
+    // Le bouton ouvre bien la page dédiée.
+    await win.webContents.executeJavaScript("document.getElementById('seb-evalpro-tests-parcours').click(); true");
+    await new Promise(r => setTimeout(r, 120));
+    if (openTestsParcoursCalls !== 1) {
+      die('Tests / Parcours ne déclenche pas sa navigation Admin', { openTestsParcoursCalls });
+      return;
+    }
+
+    // Vérification de la vraie page vide et de son unique bouton Fermer.
+    await win.loadFile(path.join(web, 'admin-tests-parcours.html'));
+    await new Promise(r => setTimeout(r, 600));
+    const testsPage = await win.webContents.executeJavaScript("(()=>{const main=document.querySelector('main');const buttons=main?[...main.querySelectorAll('button')]:[];return {title:String(main?.querySelector('h1')?.textContent||'').trim(),buttonCount:buttons.length,closeText:String(document.getElementById('close-tests-parcours')?.textContent||'').trim()};})()");
+    if (testsPage.title !== 'Tests / Parcours' || testsPage.buttonCount !== 1 || testsPage.closeText !== 'Fermer') {
+      die('page Tests / Parcours non conforme', testsPage);
+      return;
+    }
+    await win.webContents.executeJavaScript("document.getElementById('close-tests-parcours').click(); true");
+    await new Promise(r => setTimeout(r, 120));
+    if (closeTestsParcoursCalls !== 1) {
+      die('Fermer de Tests / Parcours ne déclenche pas le retour Admin', { closeTestsParcoursCalls });
+      return;
+    }
+
     await win.webContents.executeJavaScript("(()=>{ const bar=document.getElementById('seb-evalpro-topbar'); const hot=document.getElementById('seb-evalpro-top-hotzone'); bar.dispatchEvent(new MouseEvent('mouseenter',{bubbles:true})); hot.dispatchEvent(new MouseEvent('mouseenter',{bubbles:true})); return bar.classList.contains('seb-evalpro-visible'); })()");
     await win.webContents.executeJavaScript("(()=>{ const bar=document.getElementById('seb-evalpro-topbar'); const hot=document.getElementById('seb-evalpro-top-hotzone'); bar.dispatchEvent(new MouseEvent('mouseleave',{bubbles:true})); hot.dispatchEvent(new MouseEvent('mouseleave',{bubbles:true})); return true; })()");
 
@@ -174,7 +222,7 @@ app.whenReady().then(async () => {
     }
 
     console.log('BUILD21_ADMIN_ELECTRON_SMOKE: OK');
-    console.log(JSON.stringify({initial, delay:{stillOpen,closedAfterDelay}, locked}));
+    console.log(JSON.stringify({initial, noActive, help, testsPage, openTestsParcoursCalls, closeTestsParcoursCalls, delay:{stillOpen,closedAfterDelay}, locked}));
 
     clearTimeout(timeout);
     win.destroy();
