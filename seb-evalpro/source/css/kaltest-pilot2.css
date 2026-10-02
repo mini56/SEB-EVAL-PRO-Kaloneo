@@ -1806,3 +1806,127 @@ body:has(#page-identification.visible) #calc-container .calc-btn{
     column-gap:16px;
   }
 }
+
+
+/* PILOTE 9 — ajustement géométrique réel 1366×768 après smoke #1 */
+#page-identification{
+  gap:5px;
+}
+#page-identification .pilot2-header{
+  min-height:56px;
+}
+#page-identification .pilot2-header h1{
+  font-size:26px;
+  margin-bottom:1px;
+}
+#page-identification .pilot2-subtitle{
+  font-size:16px;
+}
+#page-identification .pilot2-brand{
+  height:52px;
+}
+#page-identification .pilot2-identity-card{
+  padding:7px 16px 8px;
+}
+#page-identification .pilot2-identity-card h2{
+  margin-bottom:4px;
+  font-size:22px;
+}
+#page-identification .pilot2-form-grid{
+  row-gap:4px;
+}
+#page-identification .pilot2-field input{
+  min-height:31px;
+  height:31px;
+  padding:4px 8px;
+}
+#page-identification .pilot2-status{
+  min-height:8px;
+  height:8px;
+  margin-top:0;
+  line-height:8px;
+}
+#page-identification .pilot2-onboarding{
+  margin-top:4px;
+  padding-top:5px;
+}
+#page-identification .pilot2-onboarding-title-row{
+  min-height:27px;
+  height:27px;
+  margin-bottom:2px;
+}
+#page-identification .pilot2-onboarding-title-row h2{
+  font-size:21px;
+}
+#page-identification .pilot2-onboarding-title-row p{
+  font-size:13.5px;
+}
+#page-identification .pilot2-onboarding-grid{
+  height:calc(100% - 29px);
+}
+#page-identification .pilot2-onboarding-side{
+  grid-template-rows:minmax(136px,1.28fr) minmax(103px,.95fr) minmax(105px,.98fr);
+  gap:7px;
+}
+#page-identification .pilot2-onboarding-side .pilot2-tool-card{
+  padding:7px 10px;
+}
+#page-identification .pilot2-onboarding-side .pilot2-tool-heading{
+  min-height:32px;
+}
+#page-identification .pilot2-onboarding-side .pilot2-tool-heading h3{
+  font-size:17px;
+  line-height:1.05;
+}
+#page-identification .pilot2-onboarding-side .pilot2-tool-heading p{
+  margin-top:1px;
+  font-size:12.8px;
+  line-height:1.12;
+}
+#page-identification .pilot2-onboarding-side .pilot2-step-badge{
+  width:29px;
+  height:29px;
+  flex-basis:29px;
+  font-size:15px;
+}
+#page-identification .pilot2-chrono-display{
+  min-width:126px;
+  margin:2px auto 3px;
+  padding:1px 10px;
+  font-size:27px;
+  line-height:1.12;
+}
+#page-identification .pilot2-chrono-buttons .seb-action-btn{
+  min-height:35px!important;
+  padding:5px 10px!important;
+  font-size:13.5px!important;
+  line-height:1.05!important;
+}
+#page-identification .pilot2-calculator-test-card .seb-btn-calculator{
+  min-height:36px!important;
+  margin-top:4px;
+  padding:6px 16px!important;
+  font-size:14px!important;
+}
+#page-identification .pilot2-audio-controls{
+  margin-top:4px;
+}
+#page-identification .pilot2-audio-controls .seb-action-btn{
+  min-height:35px!important;
+  padding:5px 12px!important;
+  font-size:13.5px!important;
+}
+#page-identification .pilot2-tool-status{
+  min-height:13px;
+  height:13px;
+  margin-top:2px;
+  font-size:12px;
+  line-height:13px;
+}
+#page-identification .pilot2-mouse-scene{
+  min-height:205px;
+}
+#page-identification .pilot2-identification-actions{
+  min-height:38px;
+  margin-top:0;
+}
