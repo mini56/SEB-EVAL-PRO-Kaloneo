@@ -585,3 +585,568 @@ body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context {
   .pilot2-form-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .kaltest-simple-layout { grid-template-columns: 1fr 1fr; }
 }
+
+
+/* PILOTE 7 — page candidat accueillante et prise en main KALONÉO */
+
+/* La page d'identification utilise désormais deux colonnes lisibles et des champs
+   volontairement moins larges. Les exercices KALTEST ci-dessus restent inchangés. */
+#page-identification {
+  gap: 9px;
+}
+
+#page-identification .pilot2-header {
+  min-height: 70px;
+  align-items: center;
+}
+
+#page-identification .pilot2-brand {
+  height: 60px;
+}
+
+#page-identification .pilot2-identity-card {
+  margin-top: 0;
+  padding: 11px 18px 12px;
+  flex: 0 0 auto;
+}
+
+#page-identification .pilot2-identity-card h2 {
+  margin: 0 0 8px;
+  font-size: 23px;
+}
+
+#page-identification .pilot2-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 34px;
+  row-gap: 7px;
+}
+
+#page-identification .pilot2-field {
+  display: grid;
+  grid-template-columns: minmax(150px, 205px) minmax(210px, 390px);
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+#page-identification .pilot2-field label {
+  line-height: 1.12;
+}
+
+#page-identification .pilot2-field input {
+  width: min(100%, 390px);
+  min-height: 34px;
+  height: 34px;
+  padding: 5px 9px;
+  font-size: 15.5px;
+}
+
+#page-identification .pilot2-status {
+  min-height: 15px;
+  margin-top: 2px;
+  font-size: 13px;
+}
+
+.pilot2-onboarding {
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 10px 12px 11px;
+  background: linear-gradient(135deg, rgba(255,250,242,.94), rgba(255,255,255,.92));
+  border-color: rgba(249,178,51,.34);
+  overflow: hidden;
+}
+
+.pilot2-onboarding-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 7px;
+}
+
+.pilot2-onboarding-title-row h2 {
+  margin: 0 0 2px;
+  color: #B96700;
+  font-family: var(--seb-font-light, "Calibri Light", Calibri, sans-serif);
+  font-size: 22px;
+  font-weight: 300;
+}
+
+.pilot2-onboarding-title-row p {
+  margin: 0;
+  color: #52616b;
+  font-size: 14.5px;
+}
+
+.pilot2-onboarding-grid {
+  min-height: 0;
+  height: calc(100% - 43px);
+  display: grid;
+  grid-template-columns: minmax(510px, 1.55fr) minmax(390px, .95fr) 278px;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.pilot2-tool-card {
+  min-height: 0;
+  border: 1px solid rgba(0,78,112,.20);
+  border-radius: 11px;
+  background: rgba(255,255,255,.88);
+  box-shadow: 0 2px 7px rgba(0,0,0,.08);
+  padding: 9px 11px;
+  overflow: hidden;
+}
+
+.pilot2-tool-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.pilot2-tool-heading h3 {
+  margin: 0;
+  color: var(--seb-blue-100, #004E70);
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.pilot2-tool-heading p {
+  margin: 2px 0 0;
+  color: #4d5961;
+  font-size: 13.5px;
+  line-height: 1.18;
+}
+
+.pilot2-step-badge {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0,0,0,.12);
+}
+
+.pilot2-step-orange { background: var(--seb-orange-100, #F9B233); color: #583800; }
+.pilot2-step-blue { background: var(--seb-blue-100, #004E70); }
+.pilot2-step-green { background: var(--seb-green, #198754); }
+
+.pilot2-mouse-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.pilot2-mouse-scene {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 205px;
+  margin-top: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(0,78,112,.18);
+  border-radius: 10px;
+  background: linear-gradient(to bottom, #dff3ff 0 35%, #82bf67 35% 62%, #636b72 62% 100%);
+  touch-action: none;
+  user-select: none;
+}
+
+.pilot2-grass {
+  position: absolute;
+  left: 0; right: 0; top: 33%; height: 30%;
+  background: linear-gradient(#8bc96f,#70b05a);
+}
+
+.pilot2-road {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 64%;
+  height: 38%;
+  background: #626a70;
+  border-top: 5px solid #f5f5f2;
+}
+
+.pilot2-road span {
+  position: absolute;
+  top: 49%;
+  width: 17%;
+  height: 4px;
+  background: #f7f2d2;
+  border-radius: 3px;
+}
+.pilot2-road span:nth-child(1){left:7%}
+.pilot2-road span:nth-child(2){left:39%}
+.pilot2-road span:nth-child(3){left:71%}
+
+.pilot2-parking {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 36%;
+  height: 63%;
+  background: #777f84;
+  border-left: 5px solid #f5f5f2;
+}
+
+.pilot2-parking-line {
+  position: absolute;
+  top: 9%;
+  bottom: 9%;
+  width: 4px;
+  background: #f5f5f2;
+}
+.pilot2-parking-line.line-one{left:12%}
+.pilot2-parking-line.line-two{left:52%}
+
+.pilot2-house {
+  position: absolute;
+  width: 70px;
+  height: 72px;
+}
+
+.pilot2-house .roof {
+  position: absolute;
+  left: 7px;
+  top: 0;
+  width: 56px;
+  height: 27px;
+  background: #e86e32;
+  clip-path: polygon(50% 0,100% 100%,0 100%);
+  filter: drop-shadow(0 2px 1px rgba(0,0,0,.12));
+}
+
+.pilot2-house .wall {
+  position: absolute;
+  left: 13px;
+  top: 25px;
+  width: 44px;
+  height: 43px;
+  border: 2px solid #d6b986;
+  border-radius: 2px;
+  background: #fff3d0;
+  box-shadow: 0 2px 5px rgba(0,0,0,.15);
+}
+
+.pilot2-house .door {
+  position: absolute;
+  left: 16px;
+  bottom: 0;
+  width: 12px;
+  height: 22px;
+  background: #2c86a8;
+}
+
+.pilot2-house-static { z-index: 2; }
+.house-left { left: 8%; top: 21%; }
+.house-right { left: 43%; top: 21%; }
+.house-right .roof { background: #365d82; }
+
+.pilot2-house-target {
+  left: 25.5%;
+  top: 19%;
+  width: 78px;
+  height: 77px;
+}
+
+.pilot2-car-target {
+  right: 7%;
+  bottom: 12%;
+  width: 88px;
+  height: 58px;
+}
+
+.pilot2-drop-target {
+  position: absolute;
+  z-index: 3;
+  border: 3px dashed rgba(249,178,51,.95);
+  border-radius: 8px;
+  background: rgba(255,255,255,.20);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
+}
+
+.pilot2-car-target {
+  border-color: rgba(255,255,255,.92);
+}
+
+.pilot2-drag-object {
+  z-index: 8;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  outline: none;
+  filter: drop-shadow(0 5px 4px rgba(0,0,0,.18));
+}
+
+.pilot2-drag-object:active { cursor: grabbing; }
+.pilot2-drag-object:focus-visible { outline: 3px solid var(--seb-orange-100, #F9B233); outline-offset: 3px; }
+
+.pilot2-house-draggable {
+  left: 10%;
+  bottom: 2%;
+}
+
+.pilot2-car {
+  position: absolute;
+  right: 28%;
+  bottom: 7%;
+  width: 78px;
+  height: 34px;
+  border-radius: 13px 18px 8px 8px;
+  background: #1f77d0;
+  border: 2px solid #0759a6;
+}
+
+.pilot2-car::before,
+.pilot2-car::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  width: 17px;
+  height: 17px;
+  border: 4px solid #202830;
+  border-radius: 50%;
+  background: #e5e8eb;
+}
+.pilot2-car::before{left:8px}
+.pilot2-car::after{right:8px}
+
+.pilot2-car-window {
+  position: absolute;
+  left: 22px;
+  top: -12px;
+  width: 36px;
+  height: 17px;
+  border: 2px solid #0759a6;
+  border-radius: 12px 12px 2px 2px;
+  background: #a9def6;
+}
+
+.pilot2-mouse-statuses {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  min-height: 25px;
+  padding-top: 5px;
+}
+
+.pilot2-mini-status {
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: #eef2f5;
+  color: #56636c;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.pilot2-mini-status.ok {
+  background: #e9f7ef;
+  color: #167a4a;
+  border: 1px solid rgba(25,135,84,.28);
+}
+
+.pilot2-onboarding-side {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 1.25fr .82fr .95fr;
+  gap: 8px;
+}
+
+.pilot2-chrono-card,
+.pilot2-calculator-test-card,
+.pilot2-audio-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pilot2-chrono-card { background: linear-gradient(145deg,#fff,#f5faff); }
+.pilot2-calculator-test-card { background: linear-gradient(145deg,#fff,#fff7e9); }
+.pilot2-audio-card { background: linear-gradient(145deg,#fff,#f1fbf5); }
+
+.pilot2-chrono-display {
+  align-self: center;
+  margin: 4px 0;
+  min-width: 126px;
+  padding: 2px 13px;
+  border: 1px solid rgba(0,78,112,.18);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--seb-blue-100, #004E70);
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.08);
+}
+
+.pilot2-chrono-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+}
+
+.pilot2-chrono-buttons .seb-action-btn {
+  min-height: 34px;
+  padding: 5px 9px;
+  font-size: 13.5px;
+}
+
+.pilot2-chrono-start {
+  --seb-button-color: var(--seb-green, #198754);
+  color: #fff !important;
+  border-color: #198754 !important;
+  background: #198754 !important;
+}
+
+.pilot2-chrono-stop {
+  --seb-button-color: var(--seb-orange-100, #F9B233);
+  color: #553500 !important;
+  border-color: #F9B233 !important;
+  background: #F9B233 !important;
+}
+
+.pilot2-tool-status {
+  min-height: 15px;
+  margin-top: 3px;
+  color: #167a4a;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.pilot2-calculator-test-card .seb-btn-calculator {
+  align-self: center;
+  min-height: 34px;
+  padding: 5px 18px;
+  font-size: 14px;
+}
+
+.pilot2-audio-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.pilot2-audio-controls .seb-action-btn {
+  min-height: 34px;
+  padding: 5px 11px;
+  font-size: 13.5px;
+}
+
+.pilot2-audio-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #31414b;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.pilot2-audio-confirm input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--seb-green, #198754);
+}
+
+.pilot2-calculator-dock {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px dashed rgba(249,178,51,.65);
+  border-radius: 12px;
+  background: rgba(255,244,222,.38);
+  color: #8a5a0b;
+  font-size: 13px;
+  line-height: 1.22;
+  text-align: center;
+  padding: 12px;
+}
+
+.pilot2-calculator-dock strong {
+  color: #9e5f00;
+  font-size: 15px;
+}
+
+.pilot2-identification-actions {
+  flex: 0 0 auto;
+  margin-top: 0;
+}
+
+.pilot2-identification-actions .seb-btn-nav {
+  min-height: 38px;
+  padding: 7px 22px;
+}
+
+/* Introduction : la couverture est réellement centrée dans l'espace disponible.
+   La calculatrice est positionnée à droite par seb-floating-calculator.js. */
+#page-intro {
+  max-width: 1180px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+#page-intro .pilot2-intro-context {
+  font-size: 17px;
+  margin: 0 0 4px;
+}
+
+#page-intro .pilot2-calculator-guide {
+  max-width: 770px;
+  margin: 10px 0 0 120px;
+}
+
+#page-intro .pilot2-intro-cover {
+  align-items: center;
+  padding: 12px 0;
+}
+
+#page-intro .pilot2-intro-cover img {
+  max-width: 300px;
+  max-height: min(285px, 33vh);
+}
+
+#page-intro .pilot2-intro-bottom {
+  font-size: 18px;
+  text-align: center;
+  margin: 3px 0;
+}
+
+@media (max-width: 1280px) {
+  .pilot2-onboarding-grid {
+    grid-template-columns: minmax(470px, 1.45fr) minmax(360px, 1fr) 245px;
+  }
+  #page-identification .pilot2-field {
+    grid-template-columns: minmax(135px, 180px) minmax(190px, 340px);
+  }
+}
+
+@media (max-width: 1050px) {
+  #page-identification .pilot2-form-grid { grid-template-columns: 1fr 1fr; }
+  #page-identification .pilot2-field {
+    grid-template-columns: minmax(125px, 170px) minmax(160px, 1fr);
+  }
+  .pilot2-onboarding-grid {
+    grid-template-columns: minmax(430px, 1.35fr) minmax(340px, 1fr);
+  }
+  .pilot2-calculator-dock { display: none; }
+}
+
+@media (max-height: 720px) {
+  #page-identification .pilot2-header { min-height: 58px; }
+  #page-identification .pilot2-brand { height: 50px; }
+  #page-identification .pilot2-identity-card { padding-top: 8px; padding-bottom: 8px; }
+  .pilot2-onboarding { padding-top: 7px; }
+  .pilot2-tool-heading p { font-size: 12.5px; }
+  .pilot2-mouse-scene { min-height: 175px; }
+}
