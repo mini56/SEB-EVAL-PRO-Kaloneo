@@ -201,12 +201,30 @@
   }
 
   function placeInitial() {
-    if (container.dataset.sebPositioned === '1') return;
     const rect = container.getBoundingClientRect();
-    const left = Math.round(window.innerWidth * .72 - (rect.width || 258) / 2);
-    const top = Math.round((window.innerHeight - (rect.height || 360)) / 2);
+    const width = rect.width || 258;
+    const height = rect.height || 360;
+    const dock = document.getElementById('pilot2-calculator-dock');
+    const dockRect = dock ? dock.getBoundingClientRect() : null;
+    const dockVisible = !!(dock && dockRect &&
+      getComputedStyle(dock).display !== 'none' &&
+      dockRect.width >= width - 12 &&
+      dockRect.height >= 150);
+
+    let left;
+    let top;
+
+    if (dockVisible) {
+      left = Math.round(dockRect.left + (dockRect.width - width) / 2);
+      top = Math.round(dockRect.top + Math.max(6, (dockRect.height - height) / 2));
+    } else {
+      // Sur Introduction et pendant les exercices, la calculatrice s'ouvre
+      // volontairement à l'extrême droite pour ne plus masquer les consignes.
+      left = Math.round(window.innerWidth - width - 24);
+      top = Math.round(Math.max(62, (window.innerHeight - height) / 2));
+    }
+
     setPosition(left, top);
-    container.dataset.sebPositioned = '1';
   }
 
   let dragging = false;
