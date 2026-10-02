@@ -1,0 +1,59 @@
+const fs = require('fs');
+const path = require('path');
+
+const root = path.resolve(__dirname, '..');
+
+function usage(){
+  console.error('Usage: node scripts/kaloneo-build-page.js <definition.js> <output.html>');
+  process.exit(2);
+}
+
+const definitionArg = process.argv[2];
+const outputArg = process.argv[3];
+if(!definitionArg || !outputArg) usage();
+
+const definitionPath = path.resolve(root, definitionArg);
+const outputPath = path.resolve(root, outputArg);
+const themePath = path.join(root,'source','kaloneo','kaloneo-theme.css');
+const enginePath = path.join(root,'source','kaloneo','kaloneo-page-engine.js');
+
+for(const file of [definitionPath,themePath,enginePath]){
+  if(!fs.existsSync(file)){
+    console.error('KALONÉO builder: fichier absent: '+file);
+    process.exit(3);
+  }
+}
+
+const definition = fs.readFileSync(definitionPath,'utf8');
+const theme = fs.readFileSync(themePath,'utf8');
+const engine = fs.readFileSync(enginePath,'utf8');
+
+const html = `<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KALONÉO — Page générée</title>
+<style>
+${theme}
+</style>
+</head>
+<body>
+<main id="kaloneo-page-root"></main>
+<script>
+${definition}
+</script>
+<script>
+${engine}
+</script>
+</body>
+</html>
+`;
+
+fs.mkdirSync(path.dirname(outputPath),{recursive:true});
+fs.writeFileSync(outputPath,html,'utf8');
+
+console.log('KALONÉO builder: page générée');
+console.log('DEFINITION='+path.relative(root,definitionPath));
+console.log('OUTPUT='+path.relative(root,outputPath));
+console.log('BYTES='+Buffer.byteLength(html,'utf8'));
