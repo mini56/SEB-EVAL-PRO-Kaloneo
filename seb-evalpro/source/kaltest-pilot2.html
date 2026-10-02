@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="css/seb-design-system.css">
 <link rel="stylesheet" href="css/seb-floating-calculator.css">
 <link rel="stylesheet" href="css/kaltest-pilot2.css">
+<link rel="stylesheet" href="css/kaltest-page1-validated.css">
 <link rel="stylesheet" href="css/seb-in-app-alert.css" id="seb-evalpro-in-app-alert-css">
 </head>
 <body>
@@ -29,7 +30,7 @@
         <h1>Évaluation des savoirs fondamentaux – Parcours d'intégration</h1>
         <p class="pilot2-subtitle">Renseignez vos informations puis vérifiez tranquillement la prise en main du matériel avant de commencer.</p>
       </div>
-      <img class="pilot2-brand" src="branding/seb-eval-pro-installer.png" alt="SEB EvalPro - Sauvegarde 56">
+      <div class="pilot2-brand-text" aria-label="KALONÉO"><strong>KALONÉO</strong><span>Au cœur d’un nouvel élan</span></div>
     </header>
 
     <div class="pilot2-card pilot2-identity-card">
@@ -91,12 +92,20 @@
               <div id="pilot2-car-target" class="pilot2-drop-target pilot2-car-target" aria-label="Place de parking"></div>
             </div>
 
-            <div class="pilot2-house pilot2-house-static house-left" aria-hidden="true"><span class="roof"></span><span class="wall"><span class="door"></span></span></div>
+            <div class="pilot2-house pilot2-house-static house-left" aria-hidden="true">
+              <svg viewBox="0 0 82 84"><polygon points="5,32 41,2 77,32" fill="#E56A31"/><rect x="12" y="30" width="58" height="49" rx="3" fill="#FFF2C9" stroke="#D0B178" stroke-width="2"/><rect x="20" y="41" width="14" height="14" fill="#CFF1FF" stroke="#4B88A3" stroke-width="2"/><rect x="48" y="41" width="14" height="14" fill="#CFF1FF" stroke="#4B88A3" stroke-width="2"/><rect x="35" y="54" width="14" height="25" rx="2" fill="#2F8CAF"/><rect x="59" y="11" width="8" height="17" fill="#9A6948"/></svg>
+            </div>
             <div id="pilot2-house-target" class="pilot2-drop-target pilot2-house-target" aria-label="Emplacement libre pour la maison"></div>
-            <div class="pilot2-house pilot2-house-static house-right" aria-hidden="true"><span class="roof"></span><span class="wall"><span class="door"></span></span></div>
+            <div class="pilot2-house pilot2-house-static house-right" aria-hidden="true">
+              <svg viewBox="0 0 82 84"><polygon points="5,32 41,2 77,32" fill="#406D91"/><rect x="12" y="30" width="58" height="49" rx="3" fill="#F9E9C2" stroke="#C6AA75" stroke-width="2"/><rect x="20" y="41" width="14" height="14" fill="#DDF5FF" stroke="#4B88A3" stroke-width="2"/><rect x="48" y="41" width="14" height="14" fill="#DDF5FF" stroke="#4B88A3" stroke-width="2"/><rect x="35" y="54" width="14" height="25" rx="2" fill="#2F8CAF"/></svg>
+            </div>
 
-            <div id="pilot2-drag-house" class="pilot2-drag-object pilot2-house pilot2-house-draggable" role="button" tabindex="0" aria-label="Maison à déplacer"><span class="roof"></span><span class="wall"><span class="door"></span></span></div>
-            <div id="pilot2-drag-car" class="pilot2-drag-object pilot2-car" role="button" tabindex="0" aria-label="Voiture à déplacer"><span class="car-window"></span></div>
+            <div id="pilot2-drag-house" class="pilot2-drag-object pilot2-house pilot2-house-draggable" role="button" tabindex="0" aria-label="Maison à déplacer">
+              <svg viewBox="0 0 82 84"><polygon points="5,32 41,2 77,32" fill="#F28A45"/><rect x="12" y="30" width="58" height="49" rx="3" fill="#FFF7D7" stroke="#D0B178" stroke-width="2"/><rect x="20" y="41" width="14" height="14" fill="#DDF6FF" stroke="#4B88A3" stroke-width="2"/><rect x="48" y="41" width="14" height="14" fill="#DDF6FF" stroke="#4B88A3" stroke-width="2"/><rect x="35" y="54" width="14" height="25" rx="2" fill="#277FA4"/><rect x="59" y="11" width="8" height="17" fill="#96664A"/></svg>
+            </div>
+            <div id="pilot2-drag-car" class="pilot2-drag-object pilot2-car" role="button" tabindex="0" aria-label="Voiture à déplacer">
+              <svg viewBox="0 0 94 54"><path d="M10 29 L23 15 Q26 11 31 11 H61 Q67 11 71 16 L80 29 H86 Q91 29 91 34 V42 H4 V34 Q4 29 10 29Z" fill="#2E8DD0" stroke="#0D5E9D" stroke-width="2"/><path d="M27 15 H43 V28 H18Z" fill="#CBEFFF" stroke="#0D5E9D" stroke-width="1.5"/><path d="M47 15 H61 Q65 15 68 19 L73 28 H47Z" fill="#A9DCF2" stroke="#0D5E9D" stroke-width="1.5"/><rect x="8" y="31" width="77" height="7" rx="3" fill="#56A9DF" opacity=".75"/><circle cx="22" cy="43" r="9" fill="#202830"/><circle cx="22" cy="43" r="4" fill="#C4D0D6"/><circle cx="72" cy="43" r="9" fill="#202830"/><circle cx="72" cy="43" r="4" fill="#C4D0D6"/></svg>
+            </div>
           </div>
           <div class="pilot2-mouse-statuses">
             <span id="pilot2-house-status" class="pilot2-mini-status">Maison à placer</span>
@@ -109,14 +118,14 @@
             <div class="pilot2-tool-heading"><span class="pilot2-step-badge pilot2-step-blue">2</span><div><h3>Test du chronomètre</h3><p>Lancez puis arrêtez le chronomètre.</p></div></div>
             <div id="pilot2-chrono-display" class="pilot2-chrono-display"><span id="pilot2-chrono-min">00</span>:<span id="pilot2-chrono-sec">00</span></div>
             <div class="pilot2-chrono-buttons">
-              <button id="pilot2-chrono-start" class="seb-action-btn pilot2-chrono-start" type="button">Démarrer le chronomètre</button>
-              <button id="pilot2-chrono-stop" class="seb-action-btn pilot2-chrono-stop" type="button" disabled>Arrêter le chronomètre</button>
+              <button id="pilot2-chrono-start" class="seb-action-btn pilot2-chrono-start" type="button">Démarrer</button>
+              <button id="pilot2-chrono-stop" class="seb-action-btn pilot2-chrono-stop" type="button" disabled>Arrêter</button>
             </div>
             <div id="pilot2-chrono-status" class="pilot2-tool-status" aria-live="polite"></div>
           </article>
 
           <article class="pilot2-tool-card pilot2-calculator-test-card">
-            <div class="pilot2-tool-heading"><span class="pilot2-step-badge pilot2-step-orange">3</span><div><h3>Test de la calculatrice</h3><p>Ouvrez la calculatrice comme vous le ferez pendant les exercices.</p></div></div>
+            <div class="pilot2-tool-heading"><span class="pilot2-step-badge pilot2-step-orange">3</span><div><h3>Test de la calculatrice</h3><p>Ouvrez la calculatrice comme pendant les exercices.</p></div></div>
             <button id="pilot2-calculator-test-open" data-seb-action="open-calculator" class="seb-action-btn seb-btn-calculator" type="button">Ouvrir la calculatrice</button>
             <div id="pilot2-calculator-status" class="pilot2-tool-status" aria-live="polite"></div>
           </article>
@@ -133,7 +142,7 @@
 
         <aside id="pilot2-calculator-dock" class="pilot2-calculator-dock" aria-hidden="true">
           <strong>Calculatrice</strong>
-          <span>Elle s’ouvrira dans cette zone pour ne pas masquer les consignes.</span>
+          <span>Elle s’ouvre ici pour ne jamais masquer les consignes.</span>
         </aside>
       </div>
     </section>
