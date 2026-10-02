@@ -24,6 +24,10 @@ jobs:
         with:
           ref: pilot10-page1-readability
 
+      - name: Generate Pilot data
+        working-directory: seb-evalpro
+        run: node scripts/build-kaltest-pilot2-data.js
+
       - name: Prepare program render states
         shell: bash
         run: |
