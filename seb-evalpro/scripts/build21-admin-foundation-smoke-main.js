@@ -139,6 +139,29 @@ app.whenReady().then(async () => {
       return;
     }
 
+    const privacyToggleStyle = await win.webContents.executeJavaScript(`(()=>{
+      const b=document.getElementById('seb-evalpro-privacy-toggle');
+      if(!b)return null;
+      const c=getComputedStyle(b),r=b.getBoundingClientRect();
+      return {
+        text:String(b.textContent||'').trim(),
+        color:c.color,
+        borderColor:c.borderColor,
+        borderRadius:c.borderRadius,
+        backgroundImage:c.backgroundImage,
+        height:r.height
+      };
+    })()`);
+    if (!privacyToggleStyle ||
+        !/Afficher l’écran d’accueil/.test(privacyToggleStyle.text) ||
+        privacyToggleStyle.color !== 'rgb(0, 78, 112)' ||
+        privacyToggleStyle.borderColor !== 'rgb(0, 78, 112)' ||
+        privacyToggleStyle.borderRadius !== '10px' ||
+        !/linear-gradient/.test(privacyToggleStyle.backgroundImage)) {
+      die('Afficher l’écran d’accueil n’utilise pas le style KALONÉO', privacyToggleStyle || {});
+      return;
+    }
+
     // 2. Déverrouillage par le vrai bouton et la vraie boîte de mot de passe.
     await win.webContents.executeJavaScript("document.getElementById('seb-evalpro-admin').click(); true");
     await wait(120);
