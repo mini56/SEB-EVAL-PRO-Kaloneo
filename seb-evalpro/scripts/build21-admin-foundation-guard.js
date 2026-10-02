@@ -65,9 +65,16 @@ assert(preload.includes("finishCandidateButton.hidden = true"), 'ancien bouton T
 assert(preload.includes("closeSessionButton.hidden = !active"), 'Fermer la session active n’est pas piloté par la présence d’un parcours actif.');
 assert(preload.includes("#seb-evalpro-topbar #seb-evalpro-quit-application,"), 'Quitter n’est pas inclus dans le style danger rouge.');
 assert(preload.includes("height:36px!important"), 'hauteur compacte des boutons Admin absente.');
+assert(preload.includes("font-size:15px!important"), 'texte de la barre Admin non remonté à 15 px.');
+assert(preload.includes("padding:1px 4px!important"), 'padding compact de la barre Admin absent.');
+assert(preload.includes("#seb-evalpro-topbar button[hidden]{display:none!important}"), 'les boutons masqués peuvent encore apparaître visuellement.');
+assert(preload.includes("#seb-evalpro-topbar #seb-evalpro-bilan,") && preload.includes("#seb-evalpro-topbar #seb-evalpro-return,") && preload.includes("#seb-evalpro-topbar #seb-evalpro-finish-candidate{display:none!important}"), 'Bilan / Retour / ancien Terminer ne sont pas verrouillés hors barre globale.');
 assert(preload.includes("overflow:hidden;background:#0070c0"), 'barre Admin ne masque pas les débordements.');
 assert(!preload.includes("if (button.parentElement !== bar) bar.appendChild(button);"), 'bouton de confidentialité encore injecté dans la barre Admin.');
 assert(preload.includes('id="seb-evalpro-tests-parcours"'), 'bouton Tests / Parcours absent de la barre Admin.');
+assert(preload.includes('id="seb-evalpro-show-privacy"'), 'bouton Afficher l’écran d’accueil absent de la barre Admin.');
+assert(preload.includes("window.dispatchEvent(new CustomEvent('seb-evalpro-show-privacy'))"), 'action écran d’accueil de la barre non câblée.');
+assert(preload.includes("window.addEventListener('seb-evalpro-show-privacy'"), 'écran de confidentialité ne reçoit pas la commande de la barre.');
 assert(preload.includes("ipcRenderer.invoke('admin:open-tests-parcours')"), 'navigation Tests / Parcours non câblée.');
 assert(preload.includes("closeTestsParcours: () => ipcRenderer.invoke('admin:close-tests-parcours')"), 'retour Tests / Parcours non exposé.');
 assert(preload.includes('const ADMIN_HELP_DELAY_MS = 650;'), 'temporisation des bulles d’aide absente.');
@@ -75,6 +82,9 @@ assert(preload.includes('const ADMIN_HELP_VISIBLE_MS = 2800;'), 'durée des bull
 assert(preload.includes("Ouvre la page de gestion des tests et des parcours KALONÉO."), 'aide Tests / Parcours absente.');
 assert(preload.includes("Ferme SEB EvalPro. Un parcours encore actif est sauvegardé pour pouvoir être repris."), 'aide Quitter absente.');
 assert(preload.includes("Termine définitivement le parcours candidat en cours et revient à l’espace Administrateur."), 'aide Fermer la session active absente.');
+assert(preload.includes("Affiche l’écran d’accueil SEB EvalPro afin de masquer temporairement les informations affichées."), 'aide écran SEB EvalPro absente.');
+assert(preload.includes("return label ? `Commande « ${label} ».` : '';"), 'repli d’aide pour tout bouton visible absent.');
+assert(preload.includes("closeAdminBilan: () => closeAdminBilanPage()"), 'action interne Fermer du bilan non exposée.');
 
 const sessionClose = read('src/session-close.js');
 const closeSection = section(sessionClose, "ipcMain.handle('admin:close-session'", "});");
@@ -83,7 +93,8 @@ assert(closeSection && !closeSection.includes('app.quit'), 'Fermer la session ac
 assert(quitSection && quitSection.includes('app.quit'), 'Quitter ne ferme plus le programme.');
 
 const catalog = read('src/candidate-catalog-preload.js');
-assert(catalog.includes("button.textContent = 'Ouvrir un candidat'"), 'bouton Ouvrir un candidat absent du catalogue stable.');
+assert(catalog.includes("button.textContent = 'Lister les candidats'"), 'bouton Lister les candidats absent du catalogue stable.');
+assert(catalog.includes('seb-cc-title">Liste des candidats'), 'titre Liste des candidats absent.');
 assert(catalog.includes("ipcRenderer.invoke('admin:open-candidate-browser')"), 'navigation vers le catalogue candidat absente.');
 
 const main = read('src/main.js');
@@ -102,5 +113,11 @@ assert((testsPage.match(/<button\b/gi) || []).length === 1, 'la page Tests / Par
 assert(testsPage.includes('id="close-tests-parcours"') && testsPage.includes('>Fermer</button>'), 'bouton Fermer de Tests / Parcours absent.');
 assert(!/Importer|Exporter|Créer|Dupliquer|Supprimer/i.test(testsPage), 'la page Tests / Parcours contient déjà des fonctions non validées.');
 assert(testsScript.includes('closeTestsParcours'), 'action Fermer de Tests / Parcours non câblée.');
+
+const bilanPage = read('overrides/admin-bilan.html');
+const bilanClose = read('source/js/admin-bilan-close.js');
+assert(bilanPage.includes('id="close-bilan-top"') && bilanPage.includes('id="close-bilan-bottom"'), 'les deux boutons Fermer du bilan sont absents.');
+assert(bilanPage.includes('js/admin-bilan-close.js'), 'script de fermeture du bilan non chargé.');
+assert(bilanClose.includes('closeAdminBilan'), 'les boutons Fermer du bilan ne sont pas câblés à la fermeture sécurisée.');
 
 console.log('BUILD21_ADMIN_FOUNDATION: OK');
