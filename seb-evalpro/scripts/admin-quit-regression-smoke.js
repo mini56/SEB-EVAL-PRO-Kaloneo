@@ -58,9 +58,9 @@ try {
   assert.strictEqual(restored.lastPage, 'dictee.html', 'La dernière page doit rester la Dictée.');
   assert.strictEqual(restored.lastEvaluationPage, 'dictee.html', 'La page de reprise doit rester la Dictée.');
 
-  const preload = fs.readFileSync(path.join(__dirname, '..', 'src', 'preload.js'), 'utf8');
-  const sessionClose = fs.readFileSync(path.join(__dirname, '..', 'src', 'session-close.js'), 'utf8');
-  const main = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8');
+  const preload = fs.readFileSync(path.join(__dirname, '..', 'src', 'preload.js'), 'utf8').replace(/\\r\\n/g, '\\n');
+  const sessionClose = fs.readFileSync(path.join(__dirname, '..', 'src', 'session-close.js'), 'utf8').replace(/\\r\\n/g, '\\n');
+  const main = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8').replace(/\\r\\n/g, '\\n');
 
   assert(preload.includes('id="seb-evalpro-quit-application"'), 'Le bouton Quitter doit être présent dans la barre Admin.');
   assert(preload.includes('>Quitter</button>'), 'Le bouton doit afficher Quitter.');
