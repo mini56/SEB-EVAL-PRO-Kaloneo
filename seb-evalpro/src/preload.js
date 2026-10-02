@@ -71,8 +71,12 @@ function isAdminCandidatesPage(page = pageName()) {
   return String(page || '').toLowerCase() === 'admin-candidats.html';
 }
 
+function isAdminTestsParcoursPage(page = pageName()) {
+  return String(page || '').toLowerCase() === 'admin-tests-parcours.html';
+}
+
 function isAdminNavigationPage(page = pageName()) {
-  return isAdminBilanPage(page) || isAdminCandidatesPage(page);
+  return isAdminBilanPage(page) || isAdminCandidatesPage(page) || isAdminTestsParcoursPage(page);
 }
 
 function buildSnapshot() {
@@ -751,6 +755,7 @@ function sebSyncAdminBarState() {
   const returnButton = document.getElementById('seb-evalpro-return');
   const exportCandidatesButton = document.getElementById('seb-evalpro-export-candidates');
   const importCandidatesButton = document.getElementById('seb-evalpro-import-candidates');
+  const testsParcoursButton = document.getElementById('seb-evalpro-tests-parcours');
   const closeSessionButton = document.getElementById('seb-evalpro-close-session');
   const quitApplicationButton = document.getElementById('seb-evalpro-quit-application');
   const onBilan = isAdminBilanPage();
@@ -772,6 +777,14 @@ function sebSyncAdminBarState() {
   if (importCandidatesButton) {
     importCandidatesButton.textContent = '↓ Importer dossiers';
     importCandidatesButton.hidden = !adminUnlocked;
+  }
+  if (testsParcoursButton) {
+    testsParcoursButton.hidden = true;
+    if (adminUnlocked && !onAdminDetail && !isAdminTestsParcoursPage()) {
+      ipcRenderer.invoke('candidate:active').then((active) => {
+        testsParcoursButton.hidden = !!active;
+      }).catch(() => { testsParcoursButton.hidden = true; });
+    }
   }
   const finishCandidateButton = document.getElementById('seb-evalpro-finish-candidate');
   if (finishCandidateButton) finishCandidateButton.hidden = true;
@@ -800,6 +813,7 @@ function injectAdminBar() {
     <button id="seb-evalpro-bilan" type="button" hidden>Bilan</button>
     <button id="seb-evalpro-export-candidates" type="button" hidden>↑ Exporter dossiers</button>
     <button id="seb-evalpro-import-candidates" type="button" hidden>↓ Importer dossiers</button>
+    <button id="seb-evalpro-tests-parcours" type="button" hidden>Tests / Parcours</button>
     <button id="seb-evalpro-finish-candidate" type="button" hidden>Terminer le parcours du candidat</button>
     <button id="seb-evalpro-quit-application" type="button" hidden>Quitter</button>
     <button id="seb-evalpro-close-session" type="button" hidden>Fermer la session active</button>
@@ -894,6 +908,13 @@ function injectAdminBar() {
     #seb-evalpro-session-close-dialog button.danger:hover,
     #seb-bilan-history-chooser button.danger:hover,
     #seb-bilan-history-editor button.danger:hover{background:#fff4f4!important}
+    #seb-evalpro-admin-help{
+      position:fixed;z-index:2147483647;max-width:330px;padding:9px 12px;box-sizing:border-box;
+      border:1px solid #7f9db9;border-radius:5px;background:#fff;color:#1f1f1f;
+      font:400 13px/1.35 Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.22);
+      pointer-events:none;text-align:left
+    }
+    #seb-evalpro-admin-help[hidden]{display:none!important}
     #seb-evalpro-topbar button:disabled,
     #seb-evalpro-admin-dialog button:disabled,
     #seb-evalpro-session-close-dialog button:disabled,
@@ -915,6 +936,7 @@ function injectAdminBar() {
   const returnButton = bar.querySelector('#seb-evalpro-return');
   const exportCandidatesButton = bar.querySelector('#seb-evalpro-export-candidates');
   const importCandidatesButton = bar.querySelector('#seb-evalpro-import-candidates');
+  const testsParcoursButton = bar.querySelector('#seb-evalpro-tests-parcours');
   const finishCandidateButton = bar.querySelector('#seb-evalpro-finish-candidate');
   const quitApplicationButton = bar.querySelector('#seb-evalpro-quit-application');
   const closeSessionButton = bar.querySelector('#seb-evalpro-close-session');
@@ -925,6 +947,8 @@ function injectAdminBar() {
   };
 
   const hideBar = () => {
+    const help = document.getElementById('seb-evalpro-admin-help');
+    if (help && !help.hidden) return;
     if (document.getElementById('seb-evalpro-admin-dialog')) return;
     if (document.getElementById('seb-evalpro-session-close-dialog')) return;
     if (document.getElementById('seb-evalpro-quit-application-dialog')) return;
@@ -947,6 +971,106 @@ function injectAdminBar() {
   document.addEventListener('mousemove', (event) => {
     if (event.clientY <= 2) showBar();
   }, true);
+
+  // Aide contextuelle commune de la barre Administrateur (type infobulle Word).
+  const ADMIN_HELP_DELAY_MS = 650;
+  const ADMIN_HELP_VISIBLE_MS = 2800;
+  let adminHelpShowTimer = null;
+  let adminHelpHideTimer = null;
+  let adminHelpButton = null;
+
+  const adminHelpText = (button) => {
+    if (!button) return '';
+    const id = String(button.id || '');
+    const help = {
+      'seb-evalpro-open-candidate': 'Ouvre la liste des candidats enregistrés pour consulter leurs résultats, Replay ou bilan.',
+      'seb-evalpro-bilan': 'Ouvre le bilan du candidat sélectionné.',
+      'seb-evalpro-return': 'Ferme cette consultation et revient au dossier candidat.',
+      'seb-evalpro-export-candidates': 'Copie les dossiers candidats vers une clé USB ou un dossier.',
+      'seb-evalpro-import-candidates': 'Importe dans SEB EvalPro des dossiers candidats provenant d’un autre poste.',
+      'seb-evalpro-tests-parcours': 'Ouvre la page de gestion des tests et des parcours KALONÉO.',
+      'seb-evalpro-close-session': 'Termine définitivement le parcours candidat en cours et revient à l’espace Administrateur.',
+      'seb-evalpro-quit-application': 'Ferme SEB EvalPro. Un parcours encore actif est sauvegardé pour pouvoir être repris.',
+      'seb-evalpro-replay': 'Ouvre le Replay du candidat sélectionné.',
+      'seb-evalpro-results': 'Ouvre les résultats du candidat sélectionné.'
+    };
+    if (id === 'seb-evalpro-admin') {
+      return String(button.textContent || '').trim() === 'Verrouiller'
+        ? 'Verrouille l’accès Administrateur et revient au mode candidat sécurisé.'
+        : 'Ouvre l’accès Administrateur protégé par mot de passe.';
+    }
+    return help[id] || '';
+  };
+
+  const ensureAdminHelp = () => {
+    let tooltip = document.getElementById('seb-evalpro-admin-help');
+    if (tooltip) return tooltip;
+    tooltip = document.createElement('div');
+    tooltip.id = 'seb-evalpro-admin-help';
+    tooltip.setAttribute('role', 'tooltip');
+    tooltip.hidden = true;
+    document.body.appendChild(tooltip);
+    return tooltip;
+  };
+
+  const hideAdminHelp = (reschedule = false) => {
+    clearTimeout(adminHelpShowTimer);
+    clearTimeout(adminHelpHideTimer);
+    adminHelpShowTimer = null;
+    adminHelpHideTimer = null;
+    adminHelpButton = null;
+    const tooltip = document.getElementById('seb-evalpro-admin-help');
+    if (tooltip) {
+      tooltip.hidden = true;
+      tooltip.textContent = '';
+    }
+    if (reschedule) scheduleHideBar();
+  };
+
+  const positionAdminHelp = (tooltip, button) => {
+    const rect = button.getBoundingClientRect();
+    tooltip.style.left = '8px';
+    tooltip.style.top = (Math.max(BAR_HEIGHT + 6, rect.bottom + 6)) + 'px';
+    tooltip.style.maxWidth = '330px';
+    const width = Math.min(330, Math.max(180, tooltip.getBoundingClientRect().width || 260));
+    const left = Math.max(8, Math.min(window.innerWidth - width - 8, rect.left + (rect.width / 2) - (width / 2)));
+    tooltip.style.left = Math.round(left) + 'px';
+  };
+
+  const scheduleAdminHelp = (button) => {
+    const message = adminHelpText(button);
+    if (!message || button.hidden || button.disabled) {
+      hideAdminHelp(false);
+      return;
+    }
+    if (adminHelpButton === button && document.getElementById('seb-evalpro-admin-help')?.hidden === false) return;
+    hideAdminHelp(false);
+    adminHelpButton = button;
+    adminHelpShowTimer = setTimeout(() => {
+      if (!adminHelpButton || adminHelpButton !== button || button.hidden || button.disabled) return;
+      const tooltip = ensureAdminHelp();
+      tooltip.textContent = message;
+      tooltip.hidden = false;
+      positionAdminHelp(tooltip, button);
+      adminHelpHideTimer = setTimeout(() => hideAdminHelp(true), ADMIN_HELP_VISIBLE_MS);
+    }, ADMIN_HELP_DELAY_MS);
+  };
+
+  bar.addEventListener('mouseover', (event) => {
+    const button = event.target && event.target.closest ? event.target.closest('button') : null;
+    if (button && bar.contains(button)) scheduleAdminHelp(button);
+  });
+  bar.addEventListener('mouseout', (event) => {
+    const button = event.target && event.target.closest ? event.target.closest('button') : null;
+    if (!button || !bar.contains(button)) return;
+    if (button.contains(event.relatedTarget)) return;
+    if (adminHelpButton === button && document.getElementById('seb-evalpro-admin-help')?.hidden !== false) {
+      clearTimeout(adminHelpShowTimer);
+      adminHelpShowTimer = null;
+      adminHelpButton = null;
+    }
+  });
+  bar.addEventListener('click', () => hideAdminHelp(false), true);
 
   const refreshCandidateBadge = async () => {
     if (!candidateBadge) return;
@@ -999,6 +1123,7 @@ function injectAdminBar() {
     importCandidatesButton.textContent = '↓ Importer dossiers';
     exportCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canExport;
     importCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canImport;
+    testsParcoursButton.hidden = true;
     // Une seule commande de fin de parcours : "Fermer la session active".
     // L'ancien bouton "Terminer le parcours du candidat" reste volontairement masqué.
     finishCandidateButton.hidden = true;
@@ -1009,9 +1134,11 @@ function injectAdminBar() {
     if (adminUnlocked) {
       ipcRenderer.invoke('candidate:active').then((active) => {
         closeSessionButton.hidden = !active;
+        testsParcoursButton.hidden = !!active || onAdminDetail || isAdminTestsParcoursPage();
         finishCandidateButton.hidden = true;
       }).catch(() => {
         closeSessionButton.hidden = true;
+        testsParcoursButton.hidden = true;
         finishCandidateButton.hidden = true;
       });
     }
@@ -1100,6 +1227,27 @@ function injectAdminBar() {
       await ipcRenderer.invoke('candidate:set-admin-export-context', '').catch(() => false);
       adminCandidateWorkspace = null;
       await ipcRenderer.invoke('admin:return-candidate-browser', candidateId);
+    }
+  });
+
+  testsParcoursButton.addEventListener('click', async () => {
+    showBar();
+    const active = await ipcRenderer.invoke('candidate:active').catch(() => null);
+    if (active) {
+      testsParcoursButton.hidden = true;
+      await showTransferMessage(
+        'Tests / Parcours',
+        'Cette page est disponible lorsqu’aucun parcours candidat n’est actif.'
+      );
+      scheduleHideBar();
+      return;
+    }
+    adminNavigationLeaving = true;
+    const opened = await ipcRenderer.invoke('admin:open-tests-parcours').catch(() => false);
+    if (!opened) {
+      adminNavigationLeaving = false;
+      await showTransferMessage('Tests / Parcours', 'La page Tests / Parcours n’a pas pu être ouverte.', true);
+      scheduleHideBar();
     }
   });
 
@@ -1546,12 +1694,13 @@ window.addEventListener('pageshow', async () => {
 });
 
 window.addEventListener('beforeunload', () => {
-  if (!closingSession && !adminNavigationLeaving && !isAdminCandidatesPage()) saveNow(true);
+  if (!closingSession && !adminNavigationLeaving && !isAdminCandidatesPage() && !isAdminTestsParcoursPage()) saveNow(true);
 });
 
 contextBridge.exposeInMainWorld('sebEvalPro', {
   save: () => saveNow(false),
   captureReplay: () => replayNavigationCapture.captureNow('kaltest-explicit'),
+  closeTestsParcours: () => ipcRenderer.invoke('admin:close-tests-parcours'),
   verifyAdminPassword: (password) => ipcRenderer.invoke('admin:verify-password', password),
   sebIaStatus: () => ipcRenderer.invoke('ai:status')
 });
@@ -1695,7 +1844,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   function refreshPrivacy(){
     if (!document.body) return;
 
-    const adminPage = isAdminBilanPage() || (typeof isAdminCandidatesPage === 'function' && isAdminCandidatesPage()) || !!adminCandidateResultsWorkspace;
+    const adminPage = isAdminBilanPage() || (typeof isAdminCandidatesPage === 'function' && isAdminCandidatesPage()) || (typeof isAdminTestsParcoursPage === 'function' && isAdminTestsParcoursPage()) || !!adminCandidateResultsWorkspace;
     const toggle = ensurePrivacyToggle();
     const layer = ensurePrivacyLayer();
     const hide = layer.querySelector('#seb-evalpro-privacy-hide');
