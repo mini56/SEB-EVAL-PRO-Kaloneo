@@ -48,8 +48,8 @@ app.whenReady().then(async () => {
         fields:document.querySelectorAll('#page-identification .pilot2-field').length,
         pageVisible:document.getElementById('page-identification').classList.contains('visible'),
         sideTop:side.top,mouseTop:mouse.top,chronoTop:chrono.top,badgeTop:badge.top,chronoTop2:chrono.top,
-        startBorder:sc.borderColor,startText:sc.color,
-        stopBorder:tc.borderColor,stopText:tc.color,stopOpacity:tc.opacity,
+        startBorder:sc.borderColor,startText:sc.color,startBg:sc.backgroundImage,
+        stopBorder:tc.borderColor,stopText:tc.color,stopBg:tc.backgroundImage,stopOpacity:tc.opacity,
         calcText:String(calcBtn.textContent||'').trim(),
         calcClass:calcBtn.className,
         bodyScroll:document.body.scrollHeight,bodyClient:document.body.clientHeight,
@@ -61,11 +61,11 @@ app.whenReady().then(async () => {
     if (!start.pageVisible || start.fields !== 8) throw new Error('Identification incomplète.');
     if (start.sideTop > start.mouseTop + 2) throw new Error('Les trois blocs de droite sont encore trop bas : ' + JSON.stringify(start));
     if (start.badgeTop < start.chronoTop2 - 1) throw new Error('Le badge 2 reste coupé en haut : ' + JSON.stringify(start));
-    if (start.startBorder !== 'rgb(25, 135, 84)' || start.startText !== 'rgb(255, 255, 255)') {
-      throw new Error('Démarrer le chronomètre n’est pas vert : ' + JSON.stringify(start));
+    if (start.startText !== 'rgb(25, 135, 84)' || start.startBorder !== 'rgb(0, 78, 112)' || !/linear-gradient/.test(start.startBg)) {
+      throw new Error('Démarrer doit garder le bouton KALONÉO avec seulement le texte vert : ' + JSON.stringify(start));
     }
-    if (start.stopBorder !== 'rgb(198, 40, 40)' || start.stopText !== 'rgb(255, 255, 255)') {
-      throw new Error('Arrêter le chronomètre n’est pas rouge : ' + JSON.stringify(start));
+    if (start.stopText !== 'rgb(198, 40, 40)' || start.stopBorder !== 'rgb(0, 78, 112)' || !/linear-gradient/.test(start.stopBg)) {
+      throw new Error('Arrêter doit garder le bouton KALONÉO avec seulement le texte rouge : ' + JSON.stringify(start));
     }
     if (!/Ouvrir la calculatrice/.test(start.calcText) ||
         !/seb-action-btn/.test(start.calcClass) || !/seb-btn-calculator/.test(start.calcClass)) {
@@ -131,8 +131,8 @@ app.whenReady().then(async () => {
 
     console.log('PILOT8_VISUAL_INTRO_SMOKE: OK');
     console.log('PILOT8_ONBOARDING_RIGHT_BLOCKS=RAISED');
-    console.log('PILOT8_CHRONO_START=GREEN');
-    console.log('PILOT8_CHRONO_STOP=RED');
+    console.log('PILOT8_CHRONO_START=KALONEO_GREEN_TEXT');
+    console.log('PILOT8_CHRONO_STOP=KALONEO_RED_TEXT');
     console.log('PILOT8_CALCULATOR_BUTTON=REAL_TEST_STYLE');
     console.log('PILOT8_INTRO_VIDEO=AUTOPLAY_ONCE');
     console.log('PILOT8_INTRO_LEGACY_IMAGE=REMOVED');
