@@ -765,9 +765,24 @@ function sebSyncAdminBarState() {
     returnButton.hidden = !adminUnlocked || !onAdminDetail;
     returnButton.textContent = 'Retour au candidat';
   }
-  if (exportCandidatesButton) exportCandidatesButton.hidden = !adminUnlocked;
-  if (importCandidatesButton) importCandidatesButton.hidden = !adminUnlocked;
-  if (closeSessionButton) closeSessionButton.hidden = !adminUnlocked;
+  if (exportCandidatesButton) {
+    exportCandidatesButton.textContent = '↑ Exporter dossiers';
+    exportCandidatesButton.hidden = !adminUnlocked;
+  }
+  if (importCandidatesButton) {
+    importCandidatesButton.textContent = '↓ Importer dossiers';
+    importCandidatesButton.hidden = !adminUnlocked;
+  }
+  const finishCandidateButton = document.getElementById('seb-evalpro-finish-candidate');
+  if (finishCandidateButton) finishCandidateButton.hidden = true;
+  if (closeSessionButton) {
+    closeSessionButton.hidden = true;
+    if (adminUnlocked) {
+      ipcRenderer.invoke('candidate:active').then((active) => {
+        closeSessionButton.hidden = !active;
+      }).catch(() => { closeSessionButton.hidden = true; });
+    }
+  }
   if (quitApplicationButton) quitApplicationButton.hidden = !adminUnlocked;
 }
 
@@ -783,8 +798,8 @@ function injectAdminBar() {
     <div class="seb-evalpro-spacer"></div>
     <button id="seb-evalpro-return" type="button" hidden>Retour à l'évaluation</button>
     <button id="seb-evalpro-bilan" type="button" hidden>Bilan</button>
-    <button id="seb-evalpro-export-candidates" type="button" hidden>Exporter dossiers</button>
-    <button id="seb-evalpro-import-candidates" type="button" hidden>Importer dossiers</button>
+    <button id="seb-evalpro-export-candidates" type="button" hidden>↑ Exporter dossiers</button>
+    <button id="seb-evalpro-import-candidates" type="button" hidden>↓ Importer dossiers</button>
     <button id="seb-evalpro-finish-candidate" type="button" hidden>Terminer le parcours du candidat</button>
     <button id="seb-evalpro-quit-application" type="button" hidden>Quitter</button>
     <button id="seb-evalpro-close-session" type="button" hidden>Fermer la session active</button>
@@ -800,13 +815,13 @@ function injectAdminBar() {
     html{box-sizing:border-box}
     body{padding-top:0 !important;box-sizing:border-box}
     #seb-evalpro-top-hotzone{position:fixed;top:0;left:0;right:0;height:${HOTZONE_HEIGHT}px;z-index:2147483645;background:transparent}
-    #seb-evalpro-topbar{position:fixed;top:0;left:0;right:0;height:${BAR_HEIGHT}px;z-index:2147483646;display:flex;align-items:center;gap:8px;padding:0 12px;box-sizing:border-box;background:#0070c0;color:#fff;font-family:Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.25);transform:translateY(-100%);transition:transform .16s ease;will-change:transform}
+    #seb-evalpro-topbar{position:fixed;top:0;left:0;right:0;height:${BAR_HEIGHT}px;z-index:2147483646;display:flex;align-items:center;gap:6px;padding:0 8px;box-sizing:border-box;overflow:hidden;background:#0070c0;color:#fff;font-family:Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.25);transform:translateY(-100%);transition:transform .16s ease;will-change:transform}
     #seb-evalpro-topbar.seb-evalpro-visible{transform:translateY(0)}
     #seb-evalpro-topbar .seb-evalpro-name{font-size:18px;font-weight:700;white-space:nowrap}
     #seb-evalpro-topbar .seb-evalpro-build{font-size:12px;font-weight:700;white-space:nowrap;opacity:.9;padding:3px 7px;border:1px solid rgba(255,255,255,.55);border-radius:10px}
     #seb-evalpro-topbar .seb-evalpro-candidate-badge{font-size:13px;font-weight:700;white-space:nowrap;padding:5px 9px;border:1px solid rgba(255,255,255,.55);border-radius:4px;background:rgba(255,255,255,.14)}
     #seb-evalpro-topbar .seb-evalpro-spacer{flex:1}
-    #seb-evalpro-topbar button{font-family:Arial,sans-serif;font-size:14px;font-weight:400;padding:6px 12px;border:1px solid rgba(255,255,255,.75);border-radius:4px;background:#fff;color:#0070c0;cursor:pointer}
+    #seb-evalpro-topbar button{font-family:Arial,sans-serif;font-size:13px;font-weight:400;line-height:1.05;height:36px;min-height:36px;max-height:36px;padding:2px 9px;margin:0;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;flex:0 1 auto;white-space:normal;text-align:center;overflow:hidden;border:1px solid rgba(255,255,255,.75);border-radius:4px;background:#fff;color:#0070c0;cursor:pointer}
     #seb-evalpro-topbar button:hover{background:#f2f2f2}
     #seb-evalpro-topbar #seb-evalpro-finish-candidate{background:#fff4e5;color:#8a4b00;border-color:#fff}
     #seb-evalpro-topbar #seb-evalpro-quit-application{background:#fff;color:#0070c0;border-color:#fff}
@@ -827,7 +842,15 @@ function injectAdminBar() {
       font-weight:700!important;cursor:pointer;transition:background .12s ease,box-shadow .12s ease,transform .12s ease
     }
     /* La barre Admin reste volontairement plus légère que les boutons de dialogue. */
-    #seb-evalpro-topbar button{font-weight:400!important}
+    #seb-evalpro-topbar button{
+      font-weight:400!important;font-size:13px!important;line-height:1.05!important;
+      height:36px!important;min-height:36px!important;max-height:36px!important;
+      padding:2px 9px!important;margin:0!important;box-sizing:border-box!important;
+      display:inline-flex!important;align-items:center!important;justify-content:center!important;
+      transform:none!important;white-space:normal!important;text-align:center!important;overflow:hidden!important
+    }
+    #seb-evalpro-topbar button:hover{background:#f5f9fd!important;box-shadow:0 2px 5px rgba(0,0,0,.18),inset 0 1px 0 #fff!important;transform:none!important}
+    #seb-evalpro-topbar button:active{transform:none!important;box-shadow:inset 0 1px 3px rgba(0,0,0,.20)!important}
     /* Fenêtres Export / Import : même style léger que la barre Admin. */
     #seb-evalpro-export-destination-dialog button,
     #seb-evalpro-transfer-password-dialog button,
@@ -841,7 +864,6 @@ function injectAdminBar() {
     #seb-evalpro-transfer-dialog button:hover{
       background:#f2f2f2!important;box-shadow:none!important;transform:none!important;
     }
-    #seb-evalpro-topbar button:hover,
     #seb-evalpro-admin-dialog button:hover,
     #seb-evalpro-session-close-dialog button:hover,
     #seb-evalpro-transfer-dialog button:hover,
@@ -852,7 +874,6 @@ function injectAdminBar() {
     #seb-bilan-history-editor button:hover{
       background:#f5f9fd!important;box-shadow:0 3px 7px rgba(0,0,0,.22),inset 0 1px 0 #fff!important;transform:translateY(-1px)
     }
-    #seb-evalpro-topbar button:active,
     #seb-evalpro-admin-dialog button:active,
     #seb-evalpro-session-close-dialog button:active,
     #seb-evalpro-transfer-dialog button:active,
@@ -862,12 +883,14 @@ function injectAdminBar() {
     #seb-bilan-history-chooser button:active,
     #seb-bilan-history-editor button:active{transform:translateY(0);box-shadow:inset 0 1px 3px rgba(0,0,0,.20)!important}
     #seb-evalpro-topbar #seb-evalpro-close-session,
+    #seb-evalpro-topbar #seb-evalpro-quit-application,
     #seb-evalpro-session-close-dialog button.danger,
     #seb-bilan-history-chooser button.danger,
     #seb-bilan-history-editor button.danger{
       background:#fff!important;color:#c00000!important;border-color:#c00000!important
     }
     #seb-evalpro-topbar #seb-evalpro-close-session:hover,
+    #seb-evalpro-topbar #seb-evalpro-quit-application:hover,
     #seb-evalpro-session-close-dialog button.danger:hover,
     #seb-bilan-history-chooser button.danger:hover,
     #seb-bilan-history-editor button.danger:hover{background:#fff4f4!important}
@@ -972,17 +995,25 @@ function injectAdminBar() {
     bilanButton.hidden = true;
     returnButton.hidden = !adminUnlocked || !onAdminDetail;
     returnButton.textContent = 'Retour au candidat';
+    exportCandidatesButton.textContent = '↑ Exporter dossiers';
+    importCandidatesButton.textContent = '↓ Importer dossiers';
     exportCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canExport;
     importCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canImport;
+    // Une seule commande de fin de parcours : "Fermer la session active".
+    // L'ancien bouton "Terminer le parcours du candidat" reste volontairement masqué.
     finishCandidateButton.hidden = true;
-    closeSessionButton.hidden = !adminUnlocked;
+    closeSessionButton.hidden = true;
     quitApplicationButton.hidden = !adminUnlocked;
     adminButton.textContent = adminUnlocked ? 'Verrouiller' : 'Administrateur';
     refreshCandidateBadge();
     if (adminUnlocked) {
       ipcRenderer.invoke('candidate:active').then((active) => {
-        finishCandidateButton.hidden = !active;
-      }).catch(() => { finishCandidateButton.hidden = true; });
+        closeSessionButton.hidden = !active;
+        finishCandidateButton.hidden = true;
+      }).catch(() => {
+        closeSessionButton.hidden = true;
+        finishCandidateButton.hidden = true;
+      });
     }
   };
 
@@ -1589,25 +1620,9 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
     (document.head || document.documentElement).appendChild(style);
   }
 
-  // SEB_ADMIN_HOME_PRIVACY_BUTTON_IN_BAR
+  // Le bouton de confidentialité appartient aux pages candidat, jamais à la barre Admin.
   function placePrivacyToggleForAdminHome(button){
     if (!button) return button;
-    const onAdminHome = typeof isAdminCandidatesPage === 'function' && isAdminCandidatesPage();
-    if (!onAdminHome) return button;
-    const bar = document.getElementById('seb-evalpro-topbar');
-    if (!bar) return button;
-    if (button.parentElement !== bar) bar.appendChild(button);
-    const centered = {
-      position:'absolute', left:'50%', right:'auto', bottom:'auto', top:'50%',
-      transform:'translate(-50%, -50%)', zIndex:'2147483647', margin:'0',
-      padding:'6px 12px', border:'2px solid #0070c0', borderRadius:'6px',
-      background:'#fff', color:'#0070c0', whiteSpace:'nowrap',
-      font:'700 14px Arial, sans-serif', boxShadow:'0 2px 5px rgba(0,0,0,.18)'
-    };
-    Object.entries(centered).forEach(([name, value]) => {
-      const cssName = name.replace(/[A-Z]/g, (letter) => '-' + letter.toLowerCase());
-      button.style.setProperty(cssName, value, 'important');
-    });
     return button;
   }
 
@@ -1680,7 +1695,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   function refreshPrivacy(){
     if (!document.body) return;
 
-    const adminPage = isAdminBilanPage();
+    const adminPage = isAdminBilanPage() || (typeof isAdminCandidatesPage === 'function' && isAdminCandidatesPage()) || !!adminCandidateResultsWorkspace;
     const toggle = ensurePrivacyToggle();
     const layer = ensurePrivacyLayer();
     const hide = layer.querySelector('#seb-evalpro-privacy-hide');
