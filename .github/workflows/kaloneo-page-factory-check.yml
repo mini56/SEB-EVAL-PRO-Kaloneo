@@ -1,0 +1,117 @@
+name: KALONÉO Page Factory check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - pilot10-page1-readability
+    paths:
+      - 'seb-evalpro/source/kaloneo/**'
+      - 'seb-evalpro/scripts/kaloneo-build-page.js'
+      - '.github/workflows/kaloneo-page-factory-check.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Generate Page 1 only through KALONÉO
+        working-directory: seb-evalpro
+        run: |
+          node scripts/kaloneo-build-page.js             source/kaloneo/definitions/page1-start.js             source/kaloneo/generated/page1-start.generated.html
+
+      - name: Verify generated architecture
+        working-directory: seb-evalpro
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='source/kaloneo/generated/page1-start.generated.html';
+          const html=fs.readFileSync(p,'utf8');
+          if(!html.includes('id="kaloneo-page-root"')) throw new Error('Racine KALONÉO absente');
+          if(!html.includes('window.KALONEO_PAGE_DEFINITION')) throw new Error('Définition non embarquée');
+          if(!html.includes('data.kaloneoGenerated')) throw new Error('Moteur KALONÉO non embarqué');
+          if(/<section[^>]+Informations du candidat/i.test(html)) throw new Error('Page écrite en dur détectée');
+          console.log('KALONEO_FACTORY_ARCHITECTURE: OK');
+          NODE
+
+      - name: Prepare interactive render states
+        shell: bash
+        run: |
+          mkdir -p .render docs/render-check
+          cp seb-evalpro/source/kaloneo/generated/page1-start.generated.html .render/initial.html
+          python - <<'PY'
+          from pathlib import Path
+          src=Path("seb-evalpro/source/kaloneo/generated/page1-start.generated.html").read_text(encoding="utf-8")
+
+          calc_script = """
+          <script>
+          window.addEventListener('load',()=>setTimeout(()=>{
+            const b=[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='Ouvrir la calculatrice');
+            if(b)b.click();
+          },120));
+          </script>
+          """
+          Path(".render/calc.html").write_text(src.replace("</body>",calc_script+"</body>"),encoding="utf-8")
+
+          done_script = """
+          <script>
+          window.addEventListener('load',()=>setTimeout(()=>{
+            window.KaloneoPageRuntime?.place('house');
+            window.KaloneoPageRuntime?.place('car');
+            const buttons=[...document.querySelectorAll('button')];
+            const start=buttons.find(x=>x.textContent.trim()==='Démarrer');
+            const stop=buttons.find(x=>x.textContent.trim()==='Arrêter');
+            if(start)start.click();
+            setTimeout(()=>{
+              if(stop)stop.click();
+              const calc=buttons.find(x=>x.textContent.trim()==='Ouvrir la calculatrice');
+              if(calc)calc.click();
+              window.KaloneoPageRuntime?.closeCalculator('main-calculator');
+              const cb=document.querySelector('.k-audio-controls input[type=checkbox]');
+              if(cb){cb.checked=true;cb.dispatchEvent(new Event('change',{bubbles:true}));}
+            },350);
+          },120));
+          </script>
+          """
+          Path(".render/completed.html").write_text(src.replace("</body>",done_script+"</body>"),encoding="utf-8")
+          PY
+
+      - name: Render generated Page 1 at 1366x768
+        shell: bash
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          for STATE in initial calc completed; do
+            "$CHROME"               --headless=new               --no-sandbox               --disable-gpu               --hide-scrollbars               --window-size=1366,768               --virtual-time-budget=900               --screenshot="docs/render-check/kaloneo-generated-page1-${STATE}-1366x768.png"               "file://$GITHUB_WORKSPACE/.render/${STATE}.html"
+          done
+
+      - name: Verify visible generated page
+        shell: bash
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --window-size=1366,768             --dump-dom "file://$GITHUB_WORKSPACE/.render/initial.html" > .render/dom.txt
+          grep -q 'data-kaloneo-generated="1"' .render/dom.txt
+          grep -q '>Démarrer<' .render/dom.txt
+          grep -q '>Arrêter<' .render/dom.txt
+          grep -q '>Ouvrir la calculatrice<' .render/dom.txt
+          echo 'KALONEO_GENERATED_RENDER: OK'
+
+      - name: Commit generated proof
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add seb-evalpro/source/kaloneo/generated/page1-start.generated.html
+          git add docs/render-check/kaloneo-generated-page1-*-1366x768.png
+          git diff --cached --quiet || git commit -m "Generate and render Page 1 with KALONÉO factory"
+          git push origin HEAD:pilot10-page1-readability
