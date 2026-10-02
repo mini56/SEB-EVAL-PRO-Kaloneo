@@ -1941,3 +1941,59 @@ La structure et les proportions du Build #20 servent de référence de compositi
 **KALONÉO fournit l'identité visuelle commune.**
 
 L'objectif est d'obtenir des exercices aussi lisibles et efficaces que dans le Build #20, mais avec une présentation homogène KALONÉO sur l'ensemble du parcours.
+
+
+---
+
+## 57. Accès Administrateur « Tests / Parcours »
+
+**Statut : VALIDÉ — décision fonctionnelle du 2 octobre 2026**
+
+La barre Administrateur comportera un bouton unique :
+
+**Tests / Parcours**
+
+### Rôle du bouton
+
+Ce bouton ne réalise directement aucune opération d'import, d'export, de création ou de modification.
+
+Il ouvre uniquement une **page Administrateur dédiée à la gestion des tests et des parcours KALONÉO**, sur le même principe que la page ouverte par « Ouvrir un candidat ».
+
+### Contenu de la page
+
+À ce stade, le contenu fonctionnel de cette page n'est pas encore figé.
+
+Les futures fonctions pourront être définies ultérieurement dans cette page, par exemple :
+- gestion des tests ;
+- gestion des parcours ;
+- import ;
+- export ;
+- création ;
+- ouverture ;
+- duplication ;
+- suppression ;
+- autres fonctions KALONÉO validées plus tard.
+
+Aucune de ces fonctions ne doit être ajoutée directement dans la barre Admin.
+
+### Affichage dans la barre
+
+Le bouton :
+- utilise le même style compact que les autres commandes Admin ;
+- respecte la hauteur maximale définie pour la barre ;
+- ne doit jamais provoquer de chevauchement ni de débordement ;
+- utilise le même système commun de bulle d'aide au survol ;
+- est destiné à être disponible en mode Administrateur lorsqu'aucun parcours candidat actif ne nécessite de commandes prioritaires.
+
+### Bulle d'aide
+
+Texte de référence :
+
+**Tests / Parcours**  
+« Ouvre la page de gestion des tests et des parcours KALONÉO. »
+
+### Principe
+
+La barre Admin reste une barre d'accès et de navigation.
+
+Les fonctions détaillées de gestion des tests et des parcours restent regroupées dans leur page dédiée afin de ne pas surcharger la barre principale.
