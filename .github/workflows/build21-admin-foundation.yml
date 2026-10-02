@@ -15,6 +15,8 @@ on:
       - 'seb-evalpro/scripts/prepare-web.js'
       - 'seb-evalpro/overrides/admin-tests-parcours.html'
       - 'seb-evalpro/source/js/admin-tests-parcours.js'
+      - 'seb-evalpro/overrides/admin-bilan.html'
+      - 'seb-evalpro/source/js/admin-bilan-close.js'
       - 'seb-evalpro/package.json'
       - '.github/workflows/build21-admin-foundation.yml'
   pull_request:
@@ -28,6 +30,8 @@ on:
       - 'seb-evalpro/scripts/prepare-web.js'
       - 'seb-evalpro/overrides/admin-tests-parcours.html'
       - 'seb-evalpro/source/js/admin-tests-parcours.js'
+      - 'seb-evalpro/overrides/admin-bilan.html'
+      - 'seb-evalpro/source/js/admin-bilan-close.js'
       - 'seb-evalpro/package.json'
       - '.github/workflows/build21-admin-foundation.yml'
 
