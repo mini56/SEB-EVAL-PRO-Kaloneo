@@ -59,6 +59,14 @@ assert(preload.includes("captureReplay: () => replayNavigationCapture.captureNow
 assert(!preload.includes('Fermer la session active active'), 'libellé de session dupliqué.');
 assert(!preload.includes('puis quitter.'), 'le dialogue Fermer la session active annonce encore une fermeture du programme.');
 assert(preload.includes("await ipcRenderer.invoke('admin:open-candidate-browser').catch(() => false);"), 'retour espace candidats après fermeture de session absent.');
+assert(preload.includes("↑ Exporter dossiers"), 'flèche montante Exporter absente.');
+assert(preload.includes("↓ Importer dossiers"), 'flèche descendante Importer absente.');
+assert(preload.includes("finishCandidateButton.hidden = true"), 'ancien bouton Terminer le parcours du candidat non verrouillé en masqué.');
+assert(preload.includes("closeSessionButton.hidden = !active"), 'Fermer la session active n’est pas piloté par la présence d’un parcours actif.');
+assert(preload.includes("#seb-evalpro-topbar #seb-evalpro-quit-application,"), 'Quitter n’est pas inclus dans le style danger rouge.');
+assert(preload.includes("height:36px!important"), 'hauteur compacte des boutons Admin absente.');
+assert(preload.includes("overflow:hidden;background:#0070c0"), 'barre Admin ne masque pas les débordements.');
+assert(!preload.includes("if (button.parentElement !== bar) bar.appendChild(button);"), 'bouton de confidentialité encore injecté dans la barre Admin.');
 
 const sessionClose = read('src/session-close.js');
 const closeSection = section(sessionClose, "ipcMain.handle('admin:close-session'", "});");
