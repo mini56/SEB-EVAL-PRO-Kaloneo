@@ -119,7 +119,7 @@ app.whenReady().then(async () => {
       throw new Error('Fin de lecture vidéo incorrecte : ' + JSON.stringify(finished));
     }
 
-    await win.webContents.executeJavaScript("window.sebKaltestPilot2.showPhase('identification',false);window.sebKaltestPilot2.showPhase('intro',false);true", true);
+    await win.webContents.executeJavaScript("(()=>{const intro=document.getElementById('page-intro');intro.classList.remove('visible');void intro.offsetWidth;intro.classList.add('visible');return true;})()", true);
     await wait(160);
     const replay = await win.webContents.executeJavaScript(`(()=>{
       const scene=document.getElementById('pilot2-intro-video');
