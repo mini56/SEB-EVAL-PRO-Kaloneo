@@ -1,5 +1,5 @@
 name: Build Windows KALTEST Pilot 4 setup
-# rerun after Admin smoke legacy-button cleanup
+# focused Build21 Admin foundation smoke
 
 on:
   workflow_dispatch:
@@ -52,7 +52,7 @@ jobs:
           $stdout = Join-Path $env:RUNNER_TEMP 'pilot4-admin-out.log'
           $stderr = Join-Path $env:RUNNER_TEMP 'pilot4-admin-err.log'
           $electron = Join-Path (Get-Location) 'node_modules/.bin/electron.cmd'
-          $process = Start-Process -FilePath $electron -ArgumentList '--no-sandbox','scripts/admin-bar-smoke-electron.js' -PassThru -NoNewWindow -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          $process = Start-Process -FilePath $electron -ArgumentList '--no-sandbox','scripts/build21-admin-foundation-smoke-main.js' -PassThru -NoNewWindow -RedirectStandardOutput $stdout -RedirectStandardError $stderr
           if (-not $process.WaitForExit(120000)) {
             Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
             Get-Content $stdout -ErrorAction SilentlyContinue
