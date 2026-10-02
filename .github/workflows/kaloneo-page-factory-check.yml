@@ -30,6 +30,12 @@ jobs:
         run: |
           node scripts/kaloneo-build-page.js             source/kaloneo/definitions/page1-start.js             source/kaloneo/generated/page1-start.generated.html
 
+      - name: Publish generated Page 1 to existing preview path
+        shell: bash
+        run: |
+          cp seb-evalpro/source/kaloneo/generated/page1-start.generated.html \
+             seb-evalpro/source/maquette-page1-kaloneo.html
+
       - name: Verify generated architecture
         working-directory: seb-evalpro
         shell: bash
@@ -112,6 +118,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add seb-evalpro/source/kaloneo/generated/page1-start.generated.html
+          git add seb-evalpro/source/maquette-page1-kaloneo.html
           git add docs/render-check/kaloneo-generated-page1-*-1366x768.png
           git diff --cached --quiet || git commit -m "Generate and render Page 1 with KALONÉO factory"
           git push origin HEAD:pilot10-page1-readability
