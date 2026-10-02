@@ -20,19 +20,54 @@ jobs:
         with:
           ref: pilot10-page1-readability
 
-      - name: Render 1366x768 screenshot
+      - name: Prepare render states
         shell: bash
         run: |
-          mkdir -p docs/render-check
+          mkdir -p docs/render-check .render
+          cp seb-evalpro/source/maquette-page1-kaloneo.html .render/initial.html
+          python - <<'PY'
+          from pathlib import Path
+          src=Path("seb-evalpro/source/maquette-page1-kaloneo.html").read_text(encoding="utf-8")
+
+          calc=src.replace(
+              '<div id="calcPlaceholder" class="calc-placeholder">',
+              '<div id="calcPlaceholder" class="calc-placeholder" style="display:none">'
+          ).replace(
+              '<div id="calculator" class="calculator" aria-label="Calculatrice">',
+              '<div id="calculator" class="calculator open" aria-label="Calculatrice">'
+          ).replace(
+              '<div id="calcStatus" class="status"></div>',
+              '<div id="calcStatus" class="status">Calculatrice ouverte ✓</div>'
+          )
+          Path(".render/calc-open.html").write_text(calc,encoding="utf-8")
+
+          done=src.replace(
+              '<div id="chronoStatus" class="status"></div>',
+              '<div id="chronoStatus" class="status">Chronomètre testé ✓</div>'
+          ).replace(
+              '<div id="calcStatus" class="status"></div>',
+              '<div id="calcStatus" class="status">Calculatrice ouverte ✓</div>'
+          ).replace(
+              '<div id="audioStatus" class="status"></div>',
+              '<div id="audioStatus" class="status">Son entendu ✓</div>'
+          )
+          Path(".render/completed.html").write_text(done,encoding="utf-8")
+          PY
+
+      - name: Render 1366x768 screenshots
+        shell: bash
+        run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           echo "Using $CHROME"
-          "$CHROME"             --headless=new             --no-sandbox             --disable-gpu             --hide-scrollbars             --window-size=1366,768             --screenshot=docs/render-check/page1-1366x768.png             "file://$GITHUB_WORKSPACE/seb-evalpro/source/maquette-page1-kaloneo.html"
+          for STATE in initial calc-open completed; do
+            "$CHROME"               --headless=new               --no-sandbox               --disable-gpu               --hide-scrollbars               --window-size=1366,768               --screenshot="docs/render-check/page1-${STATE}-1366x768.png"               "file://$GITHUB_WORKSPACE/.render/${STATE}.html"
+          done
 
-      - name: Commit render check
+      - name: Commit render checks
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/render-check/page1-1366x768.png
-          git diff --cached --quiet || git commit -m "Render Page 1 at 1366x768"
+          git add docs/render-check/page1-*-1366x768.png
+          git diff --cached --quiet || git commit -m "Render Page 1 states at 1366x768"
           git push origin HEAD:pilot10-page1-readability
