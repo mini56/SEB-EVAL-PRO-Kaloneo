@@ -1173,19 +1173,19 @@ body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context {
 }
 
 /* Chronomètre : codes couleur validés. */
-.pilot2-chrono-start{
+#page-identification #pilot2-chrono-start.pilot2-chrono-start{
   --seb-button-color:var(--seb-green,#198754)!important;
   color:#fff!important;
   border-color:#198754!important;
   background:linear-gradient(180deg,#28a866 0%,#198754 100%)!important;
 }
-.pilot2-chrono-stop{
+#page-identification #pilot2-chrono-stop.pilot2-chrono-stop{
   --seb-button-color:var(--seb-red,#C62828)!important;
   color:#fff!important;
   border-color:#C62828!important;
   background:linear-gradient(180deg,#df4444 0%,#C62828 100%)!important;
 }
-.pilot2-chrono-stop:disabled{
+#page-identification #pilot2-chrono-stop.pilot2-chrono-stop:disabled{
   color:#fff!important;
   border-color:#C62828!important;
   background:linear-gradient(180deg,#df4444 0%,#C62828 100%)!important;
