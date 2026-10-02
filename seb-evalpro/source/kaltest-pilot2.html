@@ -118,8 +118,8 @@
           </article>
 
           <article class="pilot2-tool-card pilot2-calculator-test-card">
-            <div class="pilot2-tool-heading"><span class="pilot2-step-badge pilot2-step-orange">3</span><div><h3>Test de la calculatrice</h3><p>Cliquez sur Ouvrir pour essayer la calculatrice.</p></div></div>
-            <button id="pilot2-calculator-test-open" data-seb-action="open-calculator" class="seb-action-btn seb-btn-calculator" type="button">Ouvrir</button>
+            <div class="pilot2-tool-heading"><span class="pilot2-step-badge pilot2-step-orange">3</span><div><h3>Test de la calculatrice</h3><p>Ouvrez la calculatrice comme vous le ferez pendant les exercices.</p></div></div>
+            <button id="pilot2-calculator-test-open" data-seb-action="open-calculator" class="seb-action-btn seb-btn-calculator" type="button">Ouvrir la calculatrice</button>
             <div id="pilot2-calculator-status" class="pilot2-tool-status" aria-live="polite"></div>
           </article>
 
@@ -156,18 +156,43 @@
       <p>Bienvenue dans ce parcours ! Suivez les instructions attentivement.</p>
     </div>
 
-    <div class="pilot2-calculator-guide pilot2-card">
-      <p><strong>Pour les opérations numériques simples, vous pouvez utiliser la calculatrice intégrée.</strong></p>
-      <div class="pilot2-guide-line">
-        <span>Un bouton permet de l'ouvrir depuis les exercices où elle est autorisée.</span>
-        <button data-seb-action="open-calculator" class="seb-action-btn seb-btn-calculator" type="button">Ouvrir la calculatrice</button>
+    <div class="pilot2-intro-video-card pilot2-card">
+      <div class="pilot2-intro-video-heading">
+        <span class="pilot2-video-symbol" aria-hidden="true">▶</span>
+        <div>
+          <strong>Votre arrivée dans l’entreprise</strong>
+          <p>La courte animation démarre automatiquement une seule fois.</p>
+        </div>
       </div>
-      <p>Vous pouvez l'essayer maintenant. Pour la fermer, utilisez le bouton <strong>Fermer</strong> disponible dans la calculatrice.</p>
+      <div id="pilot2-intro-video" class="pilot2-intro-video" role="img" aria-label="Animation d’une personne qui arrive à l’usine puis entre dans le bâtiment">
+        <div class="pilot2-video-sky"></div>
+        <div class="pilot2-video-tree pilot2-tree-left"></div>
+        <div class="pilot2-video-tree pilot2-tree-right"></div>
+        <div class="pilot2-video-factory">
+          <div class="pilot2-video-factory-wing"></div>
+          <div class="pilot2-video-sign">KALONÉO</div>
+          <div class="pilot2-video-door"><span></span></div>
+        </div>
+        <div class="pilot2-video-gate gate-left"></div>
+        <div class="pilot2-video-gate gate-right"></div>
+        <div class="pilot2-video-path"></div>
+        <div class="pilot2-video-road"></div>
+        <div class="pilot2-video-road-line line-a"></div>
+        <div class="pilot2-video-road-line line-b"></div>
+        <div class="pilot2-video-road-line line-c"></div>
+        <div class="pilot2-video-person" aria-hidden="true">
+          <span class="pilot2-person-head"></span>
+          <span class="pilot2-person-body"></span>
+          <span class="pilot2-person-backpack"></span>
+          <span class="pilot2-person-arm arm-left"></span>
+          <span class="pilot2-person-arm arm-right"></span>
+          <span class="pilot2-person-leg leg-left"></span>
+          <span class="pilot2-person-leg leg-right"></span>
+        </div>
+        <div class="pilot2-video-end-message">Bienvenue</div>
+      </div>
     </div>
 
-    <div class="pilot2-intro-cover">
-      <img src="imageqcm/image_cover.png" alt="Image de couverture">
-    </div>
     <p class="pilot2-intro-bottom">Bonne découverte et bon parcours !</p>
     <div class="pilot2-actions">
       <button id="intro-next" class="seb-action-btn seb-btn-nav" type="button">Commencez l'évaluation</button>
@@ -223,6 +248,7 @@
 <script src="js/kaltest-pilot2-data.js"></script>
 <script src="js/seb-floating-calculator.js"></script>
 <script src="js/kaltest-pilot2-onboarding.js"></script>
+<script src="js/kaltest-pilot2-intro-video.js"></script>
 <script src="js/kaltest-pilot2-runtime.js"></script>
 <script src="js/seb-in-app-alert.js" id="seb-evalpro-in-app-alert-script"></script>
 <script src="js/seb-ui-runtime.js" id="seb-ui-runtime-loader"></script>
