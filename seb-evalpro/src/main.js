@@ -20,6 +20,7 @@ const DESIGN_WIDTH = 1600;
 const DESIGN_HEIGHT = 900;
 const MIN_ZOOM_FACTOR = 0.60;
 const KALTEST_PILOT2_MODE = process.env.SEB_KALTEST_PILOT2 === '1';
+const KALTEST_FULL_PARCOURS_MODE = process.env.SEB_KALTEST_FULL_PARCOURS === '1';
 let mainWindow = null;
 let splashWindow = null;
 let splashStartedAt = 0;
@@ -541,6 +542,16 @@ function finishStartup() {
   }, delay + 180);
 }
 
+function loadEvaluationFile(target) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  const base = path.basename(String(target || '')).toLowerCase();
+  if (KALTEST_PILOT2_MODE && KALTEST_FULL_PARCOURS_MODE && base === 'kaltest-pilot2.html') {
+    mainWindow.loadFile(target, { query:{ fullParcours:'1' } });
+    return;
+  }
+  mainWindow.loadFile(target);
+}
+
 function createWindow() {
   Menu.setApplicationMenu(null);
   setSplashProgress(28, 'Lecture de la sauvegarde…');
@@ -569,7 +580,7 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false);
   installDownloadRouting();
   setSplashProgress(48, 'Chargement du parcours…');
-  mainWindow.loadFile(existingWebPage(state.lastEvaluationPage || state.lastPage));
+  loadEvaluationFile(existingWebPage(state.lastEvaluationPage || state.lastPage));
 
   mainWindow.webContents.on('did-finish-load', () => {
     applyAdminWindowMode(adminSessionUnlocked);
@@ -832,7 +843,7 @@ ipcMain.handle('admin:lock', () => {
     const target = existingWebPage(state.lastEvaluationPage || 'qcmv1.0.html');
     setTimeout(() => {
       if (!mainWindow || mainWindow.isDestroyed() || adminSessionUnlocked) return;
-      mainWindow.loadFile(target);
+      loadEvaluationFile(target);
     }, 90);
   }
   return true;
