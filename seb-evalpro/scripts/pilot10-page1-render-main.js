@@ -52,8 +52,9 @@ app.whenReady().then(async()=>{
     `,true);
     if(chronoStyles.startBorder!=='rgb(25, 135, 84)') throw new Error('Démarrer n’est pas vert dans Electron: '+JSON.stringify(chronoStyles));
     if(chronoStyles.stopBorder!=='rgb(198, 40, 40)') throw new Error('Arrêter n’est pas rouge dans Electron: '+JSON.stringify(chronoStyles));
-    if(chronoStyles.startColor!=='rgb(255, 255, 255)' || chronoStyles.stopColor!=='rgb(255, 255, 255)') throw new Error('Texte chrono non blanc: '+JSON.stringify(chronoStyles));
-    if(chronoStyles.startBackground==='none' || chronoStyles.stopBackground==='none') throw new Error('Fond plein chrono absent: '+JSON.stringify(chronoStyles));
+    if(chronoStyles.startColor!=='rgb(25, 135, 84)') throw new Error('Texte Démarrer non vert: '+JSON.stringify(chronoStyles));
+    if(chronoStyles.stopColor!=='rgb(198, 40, 40)') throw new Error('Texte Arrêter non rouge: '+JSON.stringify(chronoStyles));
+    if(chronoStyles.startBackground==='none' || chronoStyles.stopBackground==='none') throw new Error('Fond Crystal clair du chrono absent: '+JSON.stringify(chronoStyles));
     await shot(win,'electron-page1-initial-1366x768-zoom085.png');
 
     await win.webContents.executeJavaScript("document.getElementById('pilot2-calculator-test-open').click();true", true);

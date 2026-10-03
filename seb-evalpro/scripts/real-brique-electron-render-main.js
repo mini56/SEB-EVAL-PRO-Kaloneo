@@ -48,16 +48,17 @@ app.whenReady().then(async()=>{
           stopBackground:stop.backgroundImage,
           startClass:document.getElementById('startBtn')?.className||'',
           stopClass:document.getElementById('stopBtn')?.className||'',
-          solidRules:[...document.styleSheets].flatMap(sheet=>{
-            try{return [...sheet.cssRules].map(rule=>rule.selectorText||'');}catch(_){return [];}
-          }).filter(selector=>selector.includes('seb-btn-solid'))
+          consigneFont:getComputedStyle(document.querySelector('.kaloneo-consigne h2')).fontFamily,
+          consigneWeight:getComputedStyle(document.querySelector('.kaloneo-consigne h2')).fontWeight
         };
       })()
     `,true);
     if(chronoStyles.startBorder!=='rgb(25, 135, 84)') throw new Error('Démarrer LEGO n’est pas vert dans Electron: '+JSON.stringify(chronoStyles));
     if(chronoStyles.stopBorder!=='rgb(198, 40, 40)') throw new Error('Arrêter LEGO n’est pas rouge dans Electron: '+JSON.stringify(chronoStyles));
-    if(chronoStyles.startColor!=='rgb(255, 255, 255)' || chronoStyles.stopColor!=='rgb(255, 255, 255)') throw new Error('Texte chrono LEGO non blanc: '+JSON.stringify(chronoStyles));
-    if(chronoStyles.startBackground==='none' || chronoStyles.stopBackground==='none') throw new Error('Fond plein chrono LEGO absent: '+JSON.stringify(chronoStyles));
+    if(chronoStyles.startColor!=='rgb(25, 135, 84)') throw new Error('Texte Démarrer LEGO non vert: '+JSON.stringify(chronoStyles));
+    if(chronoStyles.stopColor!=='rgb(198, 40, 40)') throw new Error('Texte Arrêter LEGO non rouge: '+JSON.stringify(chronoStyles));
+    if(chronoStyles.startBackground==='none' || chronoStyles.stopBackground==='none') throw new Error('Fond Crystal clair chrono LEGO absent: '+JSON.stringify(chronoStyles));
+    if(!/Calibri/i.test(chronoStyles.consigneFont) || chronoStyles.consigneWeight!=='700') throw new Error('Police Consignes LEGO incorrecte: '+JSON.stringify(chronoStyles));
     await shot(win,'REAL-PROGRAM-LEGO-initial-1366x768-zoom085.png');
 
     await win.webContents.executeJavaScript(`

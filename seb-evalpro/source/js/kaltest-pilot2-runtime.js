@@ -546,6 +546,7 @@
     for (const item of test.presentation?.inlineFlow || []) {
       if (item.type === 'text') {
         flow.appendChild(document.createTextNode(item.text || ''));
+        if (item.breakAfterSentence === true) flow.appendChild(document.createElement('br'));
       } else if (item.type === 'question') {
         const question = questionById(test, item.questionId);
         if (question) flow.appendChild(makeInput(test, question, { compact:true }));

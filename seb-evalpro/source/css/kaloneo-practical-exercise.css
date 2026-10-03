@@ -78,9 +78,9 @@ body{
   align-items:center;
   gap:7px;
   color:var(--seb-blue-100,#004E70);
-  font-family:var(--seb-font-light,"Calibri Light",Calibri,sans-serif);
+  font-family:var(--seb-font-main,Calibri,"Segoe UI",Arial,sans-serif);
   font-size:var(--seb-type-section-title,22px);
-  font-weight:300;
+  font-weight:700;
   line-height:1.05;
 }
 

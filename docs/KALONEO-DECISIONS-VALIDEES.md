@@ -1581,9 +1581,9 @@ Le Tri de chevilles et les futurs exercices chronométrés doivent donc utiliser
 
 #### Règle visuelle et libellés du chronomètre commun — 3 octobre 2026
 
-- **Démarrer** : bouton KALONÉO Crystal plein **vert** ;
-- **Arrêter** : bouton KALONÉO Crystal plein **rouge** ;
-- texte blanc sur les deux boutons ;
+- **Démarrer** : bouton Crystal à fond clair, avec texte et contour **verts** ;
+- **Arrêter** : bouton Crystal à fond clair, avec texte et contour **rouges** ;
+- les boutons ne sont pas remplis de vert ou de rouge ;
 - mêmes arrondis, ombres, survol, appui, focus et état désactivé que le système de boutons KALONÉO ;
 - le libellé normalisé est **« Arrêter »** et non « Stop » ;
 - la Page 1 / prise en main, LEGO / Briques et les futures pages chronométrées doivent appeler le **même contrôleur commun** `js/kaloneo-chrono.js`, sans `setInterval` concurrent propre à l’exercice.
@@ -2051,3 +2051,13 @@ Les exercices migrés sont replacés à la position fonctionnelle correspondant 
 - le parcours historique reste inchangé en dehors du mode PILOTE 11 ;
 - le mode PILOTE 11 est conservé dans la session afin que toutes les pages utilisent le même registre jusqu'à la page finale ;
 - un contrôle Electron du parcours complet doit vérifier l'ordre et l'absence de doublons.
+
+
+### Retour test réel PILOTE 11 — 3 octobre 2026
+
+Corrections validées à appliquer après test réel :
+
+- chronomètre : fond Crystal clair ; **Démarrer** = texte + contour verts ; **Arrêter** = texte + contour rouges ;
+- Texte à trous : retour à la ligne à la fin de chaque phrase pour mieux occuper la page et améliorer la lecture ;
+- LEGO / Briques : le titre **Consignes** utilise la police principale KALONÉO, pas Calibri Light ;
+- Conversions : la colonne **N°** est jugée trop large ; aucune règle KALONÉO générique de largeur de colonne n'est encore définie. Ne pas corriger localement avant validation de la future règle de largeur de colonnes.

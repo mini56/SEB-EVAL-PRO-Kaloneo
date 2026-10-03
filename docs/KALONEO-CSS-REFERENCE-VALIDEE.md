@@ -101,9 +101,10 @@ Couleur par rôle :
 
 Le chronomètre utilise la géométrie, les ombres, le focus et les états du bouton Crystal commun.
 
-- **Démarrer** : bouton plein vert `#198754`, texte blanc ;
-- **Arrêter** : bouton plein rouge `#C62828`, texte blanc ;
-- le bouton indisponible conserve sa couleur de rôle avec une opacité réduite ;
+- **Démarrer** : fond Crystal clair, texte et contour verts `#198754` ;
+- **Arrêter** : fond Crystal clair, texte et contour rouges `#C62828` ;
+- les boutons ne sont **pas remplis** de vert ou de rouge ;
+- le bouton indisponible conserve le même fond clair et sa couleur de rôle avec une opacité réduite ;
 - le libellé commun est **« Arrêter »**, et non « Stop ».
 
 Cette règle s’applique à la page d’accueil / prise en main, à LEGO / Briques et à tout futur exercice utilisant le chronomètre commun.

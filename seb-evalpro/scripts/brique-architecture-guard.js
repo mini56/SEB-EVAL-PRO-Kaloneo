@@ -45,9 +45,11 @@ if (!html.includes('<script src="js/seb-parcours.js"></script>') ||
     !html.includes('<script src="js/brique-page.js"></script>')) {
   fail('scripts modulaires Brique / chrono commun absents');
 }
-if (!html.includes('seb-btn-solid seb-btn-timer-start') ||
-    !html.includes('seb-btn-solid seb-btn-timer-stop')) {
-  fail('boutons chrono KALONÉO vert/rouge absents');
+if (!html.includes('seb-action-btn seb-btn-timer-start') ||
+    !html.includes('seb-action-btn seb-btn-timer-stop') ||
+    html.includes('seb-btn-solid seb-btn-timer-start') ||
+    html.includes('seb-btn-solid seb-btn-timer-stop')) {
+  fail('boutons chrono Crystal KALONÉO texte/contour vert-rouge invalides');
 }
 if (html.includes('id="resetBtn"')) fail('ancien bouton Remise à zéro réintroduit');
 if (!/<input\s+id="nivDiff"[^>]*\bmin="0"\s+max="10"/.test(html)) fail('zéro erreur Brique non autorisé');
