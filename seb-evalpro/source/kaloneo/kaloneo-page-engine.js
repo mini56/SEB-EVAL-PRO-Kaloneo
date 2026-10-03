@@ -534,20 +534,61 @@
     if(document.querySelector('.k-abandon-layer')) return;
     const layer=el('div','k-abandon-layer');
     const box=el('div','k-abandon-box');
+    box.setAttribute('role','dialog');
+    box.setAttribute('aria-modal','true');
+
     box.append(el('h2','','Abandonner l’exercice'));
     box.append(el('p','k-abandon-exercise',test.title||'Exercice'));
-    box.append(el('p','k-abandon-help','Indiquez la raison de votre abandon. Ce modèle sera commun à toutes les pages de test.'));
-    ['Je ne comprends pas la consigne.','L’exercice est trop difficile.','Fatigue, gêne ou douleur.','Autre raison.'].forEach(labelText=>{
+    box.append(el('p','k-abandon-help','Indiquez la ou les raisons de votre abandon. Au moins une proposition doit être cochée. L’abandon est ensuite validé par un administrateur.'));
+
+    const reasons=[
+      'Je ne comprends pas la consigne.',
+      'L’exercice est trop difficile.',
+      'Je ressens de la fatigue, une gêne ou une douleur.',
+      'Autre raison.'
+    ];
+    reasons.forEach((labelText,index)=>{
       const label=el('label','k-abandon-choice');
-      const cb=el('input'); cb.type='checkbox';
+      const cb=el('input'); cb.type='checkbox'; cb.dataset.abandonReason='1';
+      if(index===3) cb.dataset.other='1';
       label.append(cb,document.createTextNode(' '+labelText));
       box.append(label);
     });
+
+    const comment=el('textarea','k-abandon-comment');
+    comment.placeholder='Précisez si nécessaire. Si vous cochez « Autre raison », indiquez ici la raison.';
+    box.append(comment);
+
+    const neLabel=el('label','k-abandon-choice k-abandon-ne');
+    const ne=el('input'); ne.type='checkbox';
+    const neText=el('span');
+    const strong=el('strong','','Exercice non évalué dans le bilan');
+    const small=el('small','','Les points obtenus et le barème de cet exercice seront exclus des calculs du bilan.');
+    neText.append(strong,document.createElement('br'),small);
+    neLabel.append(ne,neText);
+    box.append(neLabel);
+
+    const admin=el('div','k-abandon-admin');
+    const adminLabel=el('label','','Validation administrateur');
+    const password=el('input'); password.type='password'; password.placeholder='Mot de passe administrateur'; password.autocomplete='off';
+    admin.append(adminLabel,password,el('small','','L’administrateur doit valider l’abandon avant de poursuivre.'));
+    box.append(admin);
+
+    const error=el('div','k-abandon-error');
+    box.append(error);
+
     const actions=el('div','k-abandon-actions');
     const cancel=el('button','k-btn stop','Annuler');
     const confirm=el('button','k-btn stop','Confirmer l’abandon');
     cancel.onclick=()=>layer.remove();
-    confirm.onclick=()=>layer.remove();
+    confirm.onclick=()=>{
+      const checked=[...box.querySelectorAll('input[data-abandon-reason="1"]:checked')];
+      if(!checked.length){error.textContent='Cochez au moins une raison avant de confirmer.';return;}
+      const other=checked.some(x=>x.dataset.other==='1');
+      if(other && !comment.value.trim()){error.textContent='Précisez la raison dans la zone de commentaire.';comment.focus();return;}
+      if(!password.value.trim()){error.textContent='Le mot de passe administrateur est obligatoire pour valider l’abandon.';password.focus();return;}
+      error.textContent='Aperçu : la validation réelle sera assurée par SEB EvalPro.';
+    };
     actions.append(cancel,confirm); box.append(actions); layer.append(box); document.body.append(layer);
   }
 
