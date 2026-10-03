@@ -522,8 +522,15 @@
     c.calc.classList.add('k-floating-calculator');
     page.append(c.calc);
     const api={
-      open(){ c.calc.classList.add('open'); },
-      close(){ c.calc.classList.remove('open'); c.reset(); }
+      open(){
+        document.body.classList.add('k-test-calculator-open');
+        c.calc.classList.add('open');
+      },
+      close(){
+        c.calc.classList.remove('open');
+        document.body.classList.remove('k-test-calculator-open');
+        c.reset();
+      }
     };
     c.close.onclick=api.close;
     state.calculators.set('test-calculator',api);
