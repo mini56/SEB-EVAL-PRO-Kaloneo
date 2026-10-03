@@ -1,0 +1,494 @@
+/* KALONÉO — harmonisation des pages restantes du parcours.
+   Visuel uniquement : aucun calcul, stockage, barème ou identifiant fonctionnel n'est modifié. */
+
+:root{
+  --k-blue:#004E70;
+  --k-blue-soft:#EAF5FB;
+  --k-blue-line:#B8D7E6;
+  --k-orange:#F9B233;
+  --k-orange-soft:#FFF8EA;
+  --k-green:#198754;
+  --k-red:#C62828;
+  --k-text:#26343C;
+  --k-page:linear-gradient(180deg,#FFFFFF 0%,#EBEEF5 100%);
+  --k-shadow:0 4px 14px rgba(0,0,0,.10);
+  --k-radius:12px;
+}
+
+body[data-kaloneo-page]{
+  margin:0!important;
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+  color:var(--k-text);
+  background:var(--k-page)!important;
+  font-family:Calibri,"Segoe UI",Arial,sans-serif!important;
+  font-weight:400!important;
+}
+
+body[data-kaloneo-page] h1,
+body[data-kaloneo-page] h2,
+body[data-kaloneo-page] h3{
+  color:var(--k-blue);
+}
+
+body[data-kaloneo-page] .k-page-title{
+  margin:0 0 7px;
+  text-align:center;
+  color:var(--k-blue);
+  font-family:"Calibri Light",Calibri,"Segoe UI",Arial,sans-serif;
+  font-size:28px;
+  font-weight:300;
+  line-height:1.05;
+}
+
+body[data-kaloneo-page] button{
+  font-family:Calibri,"Segoe UI",Arial,sans-serif;
+}
+
+/* Autoévaluations */
+body[data-kaloneo-page="autoeval1"] #pageAutoEval1,
+body[data-kaloneo-page="autoeval2"] #pageAutoEval2{
+  width:100%;
+  height:100vh;
+  padding:10px 16px 58px;
+}
+
+body[data-kaloneo-page="autoeval1"] .main,
+body[data-kaloneo-page="autoeval2"] .main{
+  height:100%;
+  margin:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,55fr) minmax(0,45fr);
+  gap:12px!important;
+}
+
+body[data-kaloneo-page="autoeval1"] #left,
+body[data-kaloneo-page="autoeval1"] #right,
+body[data-kaloneo-page="autoeval2"] #left,
+body[data-kaloneo-page="autoeval2"] #right{
+  min-width:0;
+  min-height:0!important;
+  max-width:none!important;
+  padding:14px 18px!important;
+  border:1px solid rgba(0,78,112,.22)!important;
+  border-radius:var(--k-radius);
+  background:rgba(255,255,255,.96)!important;
+  box-shadow:var(--k-shadow);
+  overflow:auto!important;
+}
+
+body[data-kaloneo-page="autoeval1"] #left h2,
+body[data-kaloneo-page="autoeval2"] #left h2{
+  margin:0 0 8px!important;
+  font-family:"Calibri Light",Calibri,sans-serif;
+  font-size:25px!important;
+  font-weight:300;
+}
+
+body[data-kaloneo-page="autoeval1"] .fr-checkbox-group,
+body[data-kaloneo-page="autoeval2"] .fr-checkbox-group{
+  margin:6px 0;
+  padding:8px 10px;
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  border:1px solid var(--k-blue-line);
+  border-radius:9px;
+  background:var(--k-blue-soft);
+}
+
+body[data-kaloneo-page="autoeval1"] textarea,
+body[data-kaloneo-page="autoeval2"] textarea{
+  width:100%!important;
+  min-height:105px;
+  resize:none;
+  border:1px solid #8398B0!important;
+  border-radius:9px!important;
+  padding:9px!important;
+  font:16px Calibri,"Segoe UI",Arial,sans-serif;
+}
+
+body[data-kaloneo-page="autoeval1"] #right,
+body[data-kaloneo-page="autoeval2"] #right{
+  justify-content:center;
+}
+
+body[data-kaloneo-page="autoeval1"] #right img,
+body[data-kaloneo-page="autoeval2"] #right img{
+  max-width:86%!important;
+  max-height:430px;
+  object-fit:contain;
+}
+
+body[data-kaloneo-page="autoeval1"] .footer,
+body[data-kaloneo-page="autoeval2"] .footer{
+  border:0!important;
+  padding:12px 0 0!important;
+}
+
+/* Planning */
+body[data-kaloneo-page="planning"] .container{
+  width:100%;
+  height:100vh;
+  padding:9px 16px 58px!important;
+  gap:8px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+body[data-kaloneo-page="planning"] .header{
+  min-height:56px;
+  padding:7px 12px!important;
+  border:1px solid rgba(0,78,112,.22);
+  border-radius:10px;
+  background:#fff!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.07)!important;
+}
+
+body[data-kaloneo-page="planning"] .header img{width:44px!important;height:44px!important}
+body[data-kaloneo-page="planning"] .main-content{gap:10px!important}
+body[data-kaloneo-page="planning"] .card{
+  padding:12px!important;
+  border:1px solid rgba(0,78,112,.20);
+  border-radius:12px!important;
+  background:#fff!important;
+  box-shadow:var(--k-shadow)!important;
+}
+body[data-kaloneo-page="planning"] #left{flex:1.8}
+body[data-kaloneo-page="planning"] #right{
+  flex:1;
+  background:linear-gradient(145deg,#F2F9FC,#FFFFFF)!important;
+}
+body[data-kaloneo-page="planning"] .consigne-header{
+  margin-bottom:5px!important;
+  padding:5px 7px;
+  border-radius:9px;
+  background:var(--k-orange-soft);
+}
+body[data-kaloneo-page="planning"] table{margin-top:7px!important}
+body[data-kaloneo-page="planning"] th{background:var(--k-blue)!important}
+body[data-kaloneo-page="planning"] td{background:#fff!important}
+body[data-kaloneo-page="planning"] select{
+  border:1px solid #8398B0!important;
+  border-radius:7px!important;
+  background:#fff!important;
+}
+
+/* Dictée */
+body[data-kaloneo-page="dictee"] .page{
+  height:100vh;
+  min-height:0!important;
+  padding:9px 16px 58px!important;
+  gap:8px!important;
+}
+body[data-kaloneo-page="dictee"] .card{
+  border:1px solid rgba(0,78,112,.20)!important;
+  border-radius:12px!important;
+  background:rgba(255,255,255,.97)!important;
+  box-shadow:var(--k-shadow)!important;
+}
+body[data-kaloneo-page="dictee"] .instructions{padding:8px 13px!important}
+body[data-kaloneo-page="dictee"] .scenario-line,
+body[data-kaloneo-page="dictee"] .instruction-line{
+  gap:8px!important;
+}
+body[data-kaloneo-page="dictee"] .scenario-line img,
+body[data-kaloneo-page="dictee"] .instruction-line img{
+  width:42px!important;height:42px!important;
+}
+body[data-kaloneo-page="dictee"] .workspace{
+  grid-template-columns:minmax(330px,40%) minmax(0,60%)!important;
+  gap:10px!important;
+}
+body[data-kaloneo-page="dictee"] .player-card{
+  background:linear-gradient(145deg,#F2F9FC,#FFFFFF)!important;
+}
+body[data-kaloneo-page="dictee"] .audio-info{
+  background:var(--k-blue-soft)!important;
+  border-color:var(--k-blue-line)!important;
+}
+body[data-kaloneo-page="dictee"] textarea{
+  border:1.5px solid #8398B0!important;
+  border-radius:9px!important;
+}
+body[data-kaloneo-page="dictee"] button.primary{
+  color:var(--k-blue)!important;
+  border:1.5px solid var(--k-blue)!important;
+  background:linear-gradient(#fff,#F4F7FA)!important;
+}
+body[data-kaloneo-page="dictee"] button.danger{
+  color:var(--k-red)!important;
+  border:1.5px solid var(--k-red)!important;
+  background:linear-gradient(#fff,#F4F7FA)!important;
+}
+
+/* Tri */
+body[data-kaloneo-page="tri"] .wrapper{
+  max-width:none!important;
+  width:100%!important;
+  height:100vh;
+  padding:9px 16px 58px!important;
+  gap:8px!important;
+}
+body[data-kaloneo-page="tri"] .header,
+body[data-kaloneo-page="tri"] #left,
+body[data-kaloneo-page="tri"] #right{
+  border:1px solid rgba(0,78,112,.22)!important;
+  border-radius:12px!important;
+  background:rgba(255,255,255,.97)!important;
+  box-shadow:var(--k-shadow)!important;
+}
+body[data-kaloneo-page="tri"] .header{padding:8px 13px!important}
+body[data-kaloneo-page="tri"] .main{gap:10px!important}
+body[data-kaloneo-page="tri"] #left{flex:1.08!important}
+body[data-kaloneo-page="tri"] #right{flex:.92!important}
+body[data-kaloneo-page="tri"] #consigne{
+  border:1px solid rgba(249,178,51,.58)!important;
+  background:linear-gradient(145deg,#FFF9EC,#FFFFFF)!important;
+}
+body[data-kaloneo-page="tri"] .chrono-card{
+  border:1px solid var(--k-blue-line);
+  border-radius:10px;
+  background:var(--k-blue-soft);
+  padding:9px;
+}
+body[data-kaloneo-page="tri"] #startBtn{
+  color:var(--k-green)!important;
+  border:1.5px solid var(--k-green)!important;
+  background:linear-gradient(#fff,#F4F7FA)!important;
+}
+body[data-kaloneo-page="tri"] #stopBtn{
+  color:var(--k-red)!important;
+  border:1.5px solid var(--k-red)!important;
+  background:linear-gradient(#fff,#F4F7FA)!important;
+}
+body[data-kaloneo-page="tri"] .row input{
+  border:1px solid #8398B0!important;
+  border-radius:7px!important;
+  background:#fff!important;
+}
+
+/* Traitement de texte + Mail */
+body[data-kaloneo-page="nwtexte"] #page7,
+body[data-kaloneo-page="nvmail"] #page8{
+  width:100%;
+  height:100vh;
+  padding:9px 16px 58px;
+}
+body[data-kaloneo-page="nwtexte"] .main,
+body[data-kaloneo-page="nvmail"] .main{
+  height:calc(100% - 36px);
+  margin:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(340px,38fr) minmax(0,62fr);
+  gap:10px!important;
+}
+body[data-kaloneo-page="nwtexte"] #left,
+body[data-kaloneo-page="nwtexte"] #right,
+body[data-kaloneo-page="nvmail"] #left,
+body[data-kaloneo-page="nvmail"] #right{
+  min-width:0;
+  min-height:0;
+  max-width:none!important;
+  padding:12px!important;
+  border:1px solid rgba(0,78,112,.22)!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  box-shadow:var(--k-shadow)!important;
+  overflow:auto!important;
+}
+body[data-kaloneo-page="nwtexte"] #right,
+body[data-kaloneo-page="nvmail"] #right{
+  overflow:hidden!important;
+}
+body[data-kaloneo-page="nwtexte"] #toolbar,
+body[data-kaloneo-page="nwtexte"] .toolbar-row2{
+  padding:5px 7px;
+  border:1px solid var(--k-blue-line);
+  border-radius:8px;
+  background:var(--k-blue-soft);
+}
+body[data-kaloneo-page="nwtexte"] #editor{
+  border:1.5px solid #8398B0!important;
+  border-radius:8px!important;
+  background:#fff!important;
+}
+body[data-kaloneo-page="nvmail"] #formEmail{
+  height:calc(100% - 48px);
+  padding:12px!important;
+  border:1px solid var(--k-blue-line);
+  border-radius:10px;
+  background:linear-gradient(145deg,#F6FBFE,#FFFFFF)!important;
+}
+body[data-kaloneo-page="nvmail"] input,
+body[data-kaloneo-page="nvmail"] textarea{
+  border:1px solid #8398B0!important;
+  border-radius:7px!important;
+  background:#fff!important;
+}
+
+/* Carré magique / Gratte-ciel */
+body[data-kaloneo-page="carre"] .container{
+  width:100%;
+  height:100vh;
+  padding:9px 16px 58px!important;
+  gap:8px!important;
+}
+body[data-kaloneo-page="carre"] .header,
+body[data-kaloneo-page="carre"] .card,
+body[data-kaloneo-page="carre"] .puzzle-container,
+body[data-kaloneo-page="carre"] .footer{
+  border:1px solid rgba(0,78,112,.22);
+  border-radius:12px!important;
+  background:rgba(255,255,255,.97)!important;
+  box-shadow:var(--k-shadow)!important;
+}
+body[data-kaloneo-page="carre"] .header{padding:9px 14px!important}
+body[data-kaloneo-page="carre"] .header h1{
+  color:var(--k-blue)!important;
+  font-family:"Calibri Light",Calibri,sans-serif;
+  font-size:27px!important;
+  font-weight:300;
+}
+body[data-kaloneo-page="carre"] .main-content{gap:10px!important}
+body[data-kaloneo-page="carre"] .explanations{
+  flex:0 0 46%!important;
+  padding:13px!important;
+}
+body[data-kaloneo-page="carre"] .puzzle-container{padding:18px!important}
+body[data-kaloneo-page="carre"] .example{
+  background:var(--k-blue-soft)!important;
+  color:#234654!important;
+}
+body[data-kaloneo-page="carre"] .example-yellow{background:var(--k-orange-soft)!important}
+body[data-kaloneo-page="carre"] .example-green{background:#ECF8F1!important}
+body[data-kaloneo-page="carre"] .clue-top,
+body[data-kaloneo-page="carre"] .clue-bottom{border-color:var(--k-blue)!important}
+body[data-kaloneo-page="carre"] .clue-left,
+body[data-kaloneo-page="carre"] .clue-right{border-color:var(--k-orange)!important}
+
+/* QCM historiques encore présents dans PILOTE 12 */
+#page4,#page5,#page5_1,#page11,#pageFinale{
+  box-sizing:border-box;
+  min-height:calc(100vh - 20px);
+  padding:8px 16px 60px!important;
+  color:var(--k-text);
+  font-family:Calibri,"Segoe UI",Arial,sans-serif;
+}
+#page4::before,#page5::before,#page5_1::before{
+  display:block;
+  margin:0 0 7px;
+  text-align:center;
+  color:var(--k-blue);
+  font-family:"Calibri Light",Calibri,sans-serif;
+  font-size:28px;
+  font-weight:300;
+  line-height:1.05;
+}
+#page4::before{content:"Fractions et proportions"}
+#page5::before{content:"Organisation d’une activité"}
+#page5_1::before{content:"Gestes et postures"}
+
+#page4>p:first-of-type,#page5>p:first-of-type,#page5_1>p:first-of-type{
+  margin:0!important;
+  padding:6px 11px 1px;
+  border:1px solid rgba(0,78,112,.20);
+  border-bottom:0;
+  border-radius:10px 10px 0 0;
+  background:#fff;
+  color:var(--k-blue);
+  font-weight:700;
+}
+#page4>p:nth-of-type(2),#page5>p:nth-of-type(2),#page5_1>p:nth-of-type(2){
+  margin:0 0 6px!important;
+  padding:0 11px 7px 62px;
+  border:1px solid rgba(0,78,112,.20);
+  border-top:0;
+  border-radius:0 0 10px 10px;
+  background:#fff;
+  box-shadow:0 2px 7px rgba(0,0,0,.06);
+}
+#page4>div[style*="display:flex"]:first-of-type,
+#page5>div[style*="display:flex"]:first-of-type,
+#page5_1>div[style*="display:flex"]:first-of-type{
+  margin:0 0 7px!important;
+  padding:6px 11px!important;
+  border:1px solid rgba(249,178,51,.55);
+  border-radius:10px;
+  background:linear-gradient(145deg,#FFF9EC,#FFFFFF);
+}
+#page4 .fractions,
+#page5 table,
+#page5_1>div[style*="justify-content:center"]{
+  border:1px solid rgba(0,78,112,.20);
+  border-radius:12px;
+  background:rgba(255,255,255,.96);
+  box-shadow:var(--k-shadow);
+}
+#page4 .fractions{padding:10px}
+#page4 .fraction-title{
+  color:var(--k-blue);
+  border:1px solid var(--k-blue-line);
+  border-radius:9px;
+  background:var(--k-blue-soft);
+}
+#page5 input.step,#page5_1 input.step{
+  min-height:30px;
+  border:1.5px solid #8398B0;
+  border-radius:7px;
+  text-align:center;
+  font-size:16px;
+}
+#page5 table{padding:12px!important}
+#page5_1>div[style*="justify-content:center"]{padding:8px!important}
+
+#page11{
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+#page11.visible{display:flex!important;flex-direction:column}
+#page11>div:first-of-type,
+#page11>div:nth-of-type(2){
+  width:min(1080px,92vw)!important;
+  margin:0 auto!important;
+  padding:15px 24px!important;
+  border:1px solid rgba(0,78,112,.20);
+  background:#fff;
+}
+#page11>div:first-of-type{
+  border-radius:14px 14px 0 0;
+  box-shadow:var(--k-shadow);
+}
+#page11>div:nth-of-type(2){
+  border-top:0;
+  border-radius:0 0 14px 14px;
+  color:var(--k-text)!important;
+  font-size:22px!important;
+  line-height:1.35;
+}
+#page11 strong{color:var(--k-blue)!important;font-family:"Calibri Light",Calibri,sans-serif;font-weight:300!important}
+
+#pageFinale.visible{
+  display:flex!important;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+}
+#pageFinale h2{
+  margin:4px 0 10px;
+  color:var(--k-blue);
+  font-family:"Calibri Light",Calibri,sans-serif;
+  font-size:28px;
+  font-weight:300;
+}
+#pageFinale #resultat{
+  width:min(1120px,94vw);
+  max-height:calc(100vh - 120px);
+  overflow:auto;
+  border:1px solid rgba(0,78,112,.22)!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  box-shadow:var(--k-shadow);
+}
