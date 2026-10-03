@@ -280,83 +280,85 @@ html, body {
 </head>
 <body data-kaloneo-page="nvmail">
 <div id="page8" class="page">
-<h1 class="k-page-title">Rédaction d’un e-mail</h1>
-<div class="main">
-  <!-- Colonne gauche -->
-  <div id="left">
-    <br>
-	<p><img src="imageqcm/scenario.png" alt="scenario" width="45" height="45" style="margin-right:8px;"><strong style="color:#1a73e8;">Scénario :</strong></p>
-	<p> Votre conseiller vous contacte par e-mail pour vous prévenir que votre rendez-vous est déplacé.
-	Il vous demande de lui envoyer votre rapport de stage en entreprise.</p><p> Vous devez répondre à son e-mail. Envoyez votre message sur <strong>les adresses e-mail
-	</strong> suivantes :</p>
-	<p> À votre conseiller :  <u style="color:#1a73e8;text-decoration: underline;">conseil.perso@sauvegarde56.org</u></p>
-	
-	<p> En copie à votre responsable de stage :  <u style="color:#1a73e8;text-decoration: underline;">stage-pro@sauvegarde56.org</u></p>
-	
-	<br>
-	<p>Dans l'éditeur, mettre en forme votre texte en respectant les consignes ci-dessous.</p>
-	 <div style="display:flex; align-items:center; margin-bottom:10px;">
-      <img src="imageqcm/avatar_transparant.png" alt="avatar" width="45" height="45" style="margin-right:8px;">
-      <p><strong style="color:#1a73e8;">Consigne :</strong></p>
-	  </div>
-	  <p>Mettez en objet : <strong>Prénom Mail-SEB</strong></p>
-	  <p>Ajoutez votre <strong>rapport</strong> en pièce jointe.</p>
-	  <p>Saisissez un message avec une formule de politesse en introduction et à la fin puis une signature avec votre prénom,
-	  nom et numéro de téléphone sur le modèle ci-dessous :</p>
-	  <p>Prénom NOM</p>
-	  <p>01.02.34.56.78</p>
-	  <br>
-	  <P>Ensuite, passez à l'étape suivante...</p>
-	  </div>
+  <h1 class="k-page-title">Rédaction d’un e-mail</h1>
 
-  <!-- Colonne droite -->
-  <div id="right">
+  <section class="kaloneo-context-card kaloneo-context-scenario nvmail-scenario">
+    <img src="imageqcm/scenario.png" alt="Scénario">
+    <div class="kaloneo-context-body">
+      <strong class="kaloneo-context-label">Scénario :</strong>
+      <span class="kaloneo-context-text">Votre conseiller vous contacte par e-mail pour vous prévenir que votre rendez-vous est déplacé. Il vous demande de lui envoyer votre rapport de stage en entreprise.</span>
+    </div>
+  </section>
 
-<!-- Fenêtre modale avec fichiers fictifs -->
-<div class="overlay" id="overlay"></div>
+  <div class="main nvmail-main-50">
+    <section id="left" class="nvmail-left-panel">
+      <div class="kaloneo-context-card kaloneo-context-consigne nvmail-consigne-panel">
+        <img src="imageqcm/avatar_transparant.png" alt="Consigne">
+        <div class="kaloneo-context-body">
+          <strong class="kaloneo-context-label">Consigne :</strong>
+          <span class="kaloneo-context-text">Vous devez répondre à son e-mail. Envoyez votre message sur les adresses e-mail suivantes :</span>
 
-<div class="modal" id="modalFichier">
-  <h3>Sélectionnez un fichier</h3>
-  <ul>
-    <li data-seb-file="CV_Julie.pdf">📄 CV_Julie.pdf</li>
-    <li data-seb-file="Rapport_stage.docx">📄 Rapport_stage.docx</li>
-    <li data-seb-file="Facture_2023.xlsx">📄 Facture_2023.xlsx</li>
-    <li data-seb-file="Memo.txt">📄 Memo.txt</li>
-  </ul>
+          <div class="kaloneo-context-details nvmail-consigne-details">
+            <p>À votre conseiller : <u>conseil.perso@sauvegarde56.org</u></p>
+            <p>En copie à votre responsable de stage : <u>stage-pro@sauvegarde56.org</u></p>
+
+            <p>Dans l'éditeur, mettre en forme votre texte en respectant les consignes ci-dessous.</p>
+            <p>Mettez en objet : <strong>Prénom* Mail-SEB</strong></p>
+            <p>Ajoutez votre <strong>rapport</strong> en pièce jointe.</p>
+            <p>Saisissez un message avec une formule de politesse en introduction et à la fin puis une signature avec votre prénom, nom et numéro de téléphone sur le modèle ci-dessous :</p>
+            <p>Prénom NOM</p>
+            <p>01.02.34.56.78</p>
+            <p class="kaloneo-footnote"><strong>* Mettre votre prénom.</strong></p>
+            <p>Ensuite, passez à l'étape suivante...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="right" class="nvmail-right-panel">
+      <div class="overlay" id="overlay"></div>
+
+      <div class="modal" id="modalFichier">
+        <h3>Sélectionnez un fichier</h3>
+        <ul>
+          <li data-seb-file="CV_Julie.pdf">📄 CV_Julie.pdf</li>
+          <li data-seb-file="Rapport_stage.docx">📄 Rapport_stage.docx</li>
+          <li data-seb-file="Facture_2023.xlsx">📄 Facture_2023.xlsx</li>
+          <li data-seb-file="Memo.txt">📄 Memo.txt</li>
+        </ul>
+      </div>
+
+      <form id="formEmail">
+        <h2>Nouveau message.&#9993;</h2>
+
+        <label for="to">À :</label>
+        <input type="text" id="to" name="to">
+
+        <label for="cc">Cc :</label>
+        <input type="text" id="cc" name="cc">
+
+        <label for="subject">Objet :</label>
+        <input type="text" id="subject" name="subject">
+
+        <label for="message">Message :</label>
+        <textarea id="message" name="message" rows="6"></textarea>
+
+        <label>Pièce jointe :</label>
+        <button type="button" class="seb-action-btn seb-btn-tool fake-file-input" id="nvmail-file-picker">📂 Parcourir…</button>
+        <div class="selected-file" id="fichierSelectionne">Aucun fichier sélectionné</div>
+
+        <button type="submit" class="seb-action-btn seb-btn-nav"><strong>Envoyer 📧</strong></button>
+
+        <div class="score" id="resultatScore"></div>
+      </form>
+
+      <div class="editor-footer">
+        <button id="nvmail-skip" type="button">Passer</button>
+        <button id="nvmail-next" type="button">Suivant -></button>
+      </div>
+    </section>
+  </div>
 </div>
-
-<form id="formEmail">
-  <h2 style="color:#1a73e8;">Nouveau message.&#9993;</h2>
-
-  <label for="to">À :</label>
-  <input type="text" id="to" name="to">
-
-  <label for="cc">Cc :</label>
-  <input type="text" id="cc" name="cc">
-
-  <label for="subject">Objet :</label>
-  <input type="text" id="subject" name="subject">
-
-  <label for="message">Message :</label>
-  <textarea id="message" name="message" rows="6"></textarea>
-
-  <label>Pièce jointe :</label>
-  <div class="fake-file-input" id="nvmail-file-picker">📂 Parcourir…</div>
-  <div class="selected-file" id="fichierSelectionne">Aucun fichier sélectionné</div>
-
-  <button type="submit"><strong>Envoyer 📧 </strong></button>
-
-  <div class="score" id="resultatScore"></div>
-</form>
-
-	<div class="editor-footer">
-  <button id="nvmail-skip" type="button">Passer</button>
-  <button id="nvmail-next" type="button">Suivant -></button>
-
-</div>
-  </div>
-  </div>
-  </div>
 <script src="js/seb-parcours.js"></script>
 <script src="js/nvmail-page.js"></script>
 
