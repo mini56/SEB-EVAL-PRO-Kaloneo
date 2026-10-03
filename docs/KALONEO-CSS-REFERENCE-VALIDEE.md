@@ -97,6 +97,17 @@ Couleur par rôle :
 - calculatrice : orange ;
 - danger : rouge.
 
+### Chronomètre commun KALONÉO
+
+Le chronomètre utilise la géométrie, les ombres, le focus et les états du bouton Crystal commun.
+
+- **Démarrer** : bouton plein vert `#198754`, texte blanc ;
+- **Arrêter** : bouton plein rouge `#C62828`, texte blanc ;
+- le bouton indisponible conserve sa couleur de rôle avec une opacité réduite ;
+- le libellé commun est **« Arrêter »**, et non « Stop ».
+
+Cette règle s’applique à la page d’accueil / prise en main, à LEGO / Briques et à tout futur exercice utilisant le chronomètre commun.
+
 ## 6. Champs
 
 Pour texte, nombre, mot de passe, date, select et textarea :
