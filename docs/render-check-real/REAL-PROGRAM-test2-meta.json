@@ -1,0 +1,13 @@
+{
+  "title": "Calculs de poids et volumes",
+  "progress": "Exercice 2 / 7",
+  "phaseVisible": true,
+  "calculatorVisible": "block",
+  "buttons": [
+    "🧮 Ouvrir la calculatrice",
+    "➜ Suivant"
+  ],
+  "bodyTestId": "calculs_poids_volumes",
+  "visualLayout": true,
+  "visualPanel": true
+}
