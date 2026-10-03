@@ -2374,3 +2374,20 @@ body:has(#page-identification.visible) #calc-container .seb-calc-brand{
   padding-top:6px!important;
   font-size:11.5px!important;
 }
+
+
+/* PILOTE 12 — prise en main : contenu des trois outils abaissé, zone statut réservée. */
+#page-identification .pilot2-chrono-card,
+#page-identification .pilot2-calculator-test-card,
+#page-identification .pilot2-audio-card{
+  position:relative;
+}
+#page-identification .pilot2-chrono-display{margin-top:12px!important}
+#page-identification .pilot2-calculator-test-card .seb-btn-calculator{margin-top:18px!important}
+#page-identification .pilot2-audio-controls{margin-top:16px!important}
+#page-identification .pilot2-tool-status{
+  min-height:16px!important;
+  height:16px!important;
+  margin-top:auto!important;
+  line-height:16px!important;
+}
