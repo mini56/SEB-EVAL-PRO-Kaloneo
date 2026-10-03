@@ -143,7 +143,24 @@
     "averages": [
       "moyenne_rangement",
       "moyenne_reception"
-    ]
+    ],
+    "kaloneoLayout": {
+      "type": "visual-schedule",
+      "ratio": "40/60",
+      "left": {
+        "type": "image",
+        "orientation": "portrait",
+        "src": "",
+        "alt": "Illustration de l’exercice sur les horaires",
+        "placeholder": "Image verticale"
+      },
+      "right": {
+        "order": [
+          "scheduleTable",
+          "averages"
+        ]
+      }
+    }
   },
   "runtime": {
     "start": true,
