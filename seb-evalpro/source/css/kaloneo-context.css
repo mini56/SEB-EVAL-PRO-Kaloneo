@@ -99,6 +99,8 @@
 .k-stock-context p,
 .scenario-line p{
   display:inline!important;
+  flex:1 1 0;
+  min-width:0;
   margin:0!important;
   color:#27313A!important;
   font-family:var(--kaloneo-context-font)!important;
