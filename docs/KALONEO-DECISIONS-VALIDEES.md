@@ -2060,4 +2060,50 @@ Corrections validées à appliquer après test réel :
 - chronomètre : fond Crystal clair ; **Démarrer** = texte + contour verts ; **Arrêter** = texte + contour rouges ;
 - Texte à trous : retour à la ligne à la fin de chaque phrase pour mieux occuper la page et améliorer la lecture ;
 - LEGO / Briques : le titre **Consignes** utilise la police principale KALONÉO, pas Calibri Light ;
-- Conversions : la colonne **N°** est jugée trop large ; aucune règle KALONÉO générique de largeur de colonne n'est encore définie. Ne pas corriger localement avant validation de la future règle de largeur de colonnes.
+- Conversions : la colonne **N°** est jugée trop large. La règle générique KALONÉO ci-dessous remplace désormais l'ancienne largeur fixe.
+
+
+---
+
+## 59. PILOTE 12 — harmonisation visuelle des pages restantes
+
+**Statut : EN TEST RÉEL — 3 octobre 2026**
+
+Les pages déjà validées restent les références visuelles. Les pages restantes du parcours sont harmonisées sans modifier leurs barèmes, réponses, clés de stockage ou logique métier.
+
+Pages concernées par la passe :
+- Fractions et proportions ;
+- Organisation d’une activité ;
+- Gestes et postures ;
+- Autoévaluation 1 ;
+- Planning ;
+- Dictée ;
+- Tri de chevilles ;
+- Traitement de texte ;
+- Rédaction d’un e-mail ;
+- Autoévaluation 2 ;
+- Carré magique / Gratte-ciel ;
+- Félicitations et page Résultats.
+
+Corrections incluses :
+- prise en main : contenu Chrono / Calculatrice / Audio légèrement abaissé, avec une zone réservée au message d’état ;
+- Texte à trous : retour à la ligne **après chaque point de fin de phrase** et banque de mots en bleu clair ;
+- Genre / Nombre : bloc global 100 %, deux blocs internes 50/50 et tableaux légèrement resserrés ;
+- Stock : « Comment ça fonctionne ? » placé au-dessus de « Consignes », puis les deux consignes empilées verticalement.
+
+### Largeur et alignement des colonnes de tableaux
+
+KALONÉO permet désormais de définir une présentation par colonne :
+
+- `widthChars` : largeur exprimée en **nombre de caractères** et traduite en unité CSS `ch` ;
+- valeur minimale admise : **3 caractères** ;
+- `align: "left"` : contenu aligné à gauche ;
+- `align: "center"` : contenu centré ;
+- une colonne sans largeur définie reste **automatique** ;
+- la dernière colonne laissée en automatique occupe le reste de la largeur disponible.
+
+Application de référence — Conversions :
+- N° : **5 caractères**, centré ;
+- Réponses : **14 caractères**, centré ;
+- Unités : **12 caractères**, centré ;
+- Opérations effectuées : **Automatique**, alignée à gauche.
