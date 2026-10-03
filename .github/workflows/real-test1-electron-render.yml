@@ -1,0 +1,56 @@
+name: Real Program Test 1 Electron render
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - pilot10-page1-readability
+    paths:
+      - 'seb-evalpro/source/kaltest-pilot2.html'
+      - 'seb-evalpro/source/css/kaltest-pilot2.css'
+      - 'seb-evalpro/source/css/kaltest-page1-validated.css'
+      - 'seb-evalpro/source/js/kaltest-pilot2-runtime.js'
+      - 'seb-evalpro/source/js/seb-floating-calculator.js'
+      - 'seb-evalpro/scripts/real-test1-electron-render-main.js'
+      - '.github/workflows/real-test1-electron-render.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: seb-evalpro
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Generate real KALTEST data
+        run: node scripts/build-kaltest-pilot2-data.js
+
+      - name: Prepare real SEB EvalPro web app
+        run: npm run prepare:web
+
+      - name: Capture real Electron Test 1
+        run: xvfb-run -a npx electron --no-sandbox scripts/real-test1-electron-render-main.js
+
+      - name: Commit real-program proof
+        working-directory: .
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/render-check-real/REAL-PROGRAM-test1-*
+          git diff --cached --quiet || git commit -m "Capture real SEB EvalPro Test 1 in Electron"
+          git push origin HEAD:pilot10-page1-readability
