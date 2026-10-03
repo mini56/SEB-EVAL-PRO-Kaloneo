@@ -33,7 +33,7 @@
   "presentation": {
     "layout": {
       "type": "split",
-      "ratio": "50/50",
+      "ratio": "60/40",
       "blocks": [
         {
           "id": "enonces"
@@ -51,6 +51,23 @@
         "Opérations effectuées"
       ],
       "roundedInstitutionalStyle": true
+    },
+    "kaloneoLayout": {
+      "type": "work-visual",
+      "ratio": "60/40",
+      "left": {
+        "order": [
+          "questions",
+          "responseTable"
+        ]
+      },
+      "right": {
+        "type": "image",
+        "orientation": "portrait",
+        "src": "",
+        "alt": "Illustration de l’atelier d’expédition",
+        "placeholder": "Image verticale"
+      }
     }
   },
   "runtime": {
