@@ -1,5 +1,5 @@
 /* KALONÉO — gabarit réutilisable d'exercice pratique 50/50 */
-html,body{width:100%;height:100%;margin:0;overflow:hidden}
+*,*::before,*::after{box-sizing:border-box}\nhtml,body{width:100%;height:100%;margin:0;overflow:hidden}
 body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#26343c}
 
 .kaloneo-practical-page{
@@ -35,6 +35,15 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
   border-radius:12px;
   background:rgba(255,255,255,.94);
   box-shadow:0 4px 14px rgba(0,0,0,.12);
+  overflow:hidden;
+}
+
+#consigne{
+  min-height:0;
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
   overflow:hidden;
 }
 
@@ -247,8 +256,11 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
 
 #autoEvalPart{
   display:none;
+  width:100%;
+  min-width:0;
   min-height:0;
-  overflow:auto;
+  overflow-y:auto;
+  overflow-x:hidden;
 }
 
 #autoEvalPart.visible{display:block}
