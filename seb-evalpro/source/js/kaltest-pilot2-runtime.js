@@ -3,6 +3,7 @@
 
   const DATA = window.sebKaltestPilot2Data;
   const STATE_KEY = 'seb_kaltest_pilot2_state_v1';
+  const FULL_PARCOURS_MODE = new URLSearchParams(window.location.search).get('fullParcours') === '1';
 
   if (!DATA || !Array.isArray(DATA.tests) || !DATA.tests.length) {
     throw new Error('Données KALTEST du PILOTE 2 absentes.');
@@ -881,6 +882,14 @@
   function advance() {
     try { window.closeCalculator?.(); } catch (_) {}
     if (state.testIndex + 1 >= DATA.tests.length) {
+      if (FULL_PARCOURS_MODE) {
+        state.phase = 'handoff';
+        persist();
+        try { window.dispatchEvent(new CustomEvent('seb-kaltest-handoff')); } catch (_) {}
+        window.location.href = 'autoeval1.html';
+        return;
+      }
+
       state.phase = 'final';
       persist();
       showPhase('final');
