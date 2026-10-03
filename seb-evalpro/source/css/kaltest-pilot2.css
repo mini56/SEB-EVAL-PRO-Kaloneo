@@ -2408,3 +2408,14 @@ body[data-seb-kaltest-id="genre_nombre"] .kaltest-grammar-table{
   width:94%;
   margin:0 auto;
 }
+
+
+/* PILOTE 12 — banque de mots Texte à trous en bleu clair KALONÉO. */
+body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] .kaltest-word-bank{
+  background:#EAF5FB;
+  border-color:#7FB5CF;
+}
+body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] .kaltest-word-bank span{
+  background:#EAF5FB;
+  border-color:#B8D7E6;
+}
