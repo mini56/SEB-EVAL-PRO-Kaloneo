@@ -392,7 +392,6 @@
 
       const unit = document.createElement('td');
       unit.appendChild(makeUnitInput(test, question));
-      applyTableColumnPresentation(unit, columnPresentation[2]);
       tr.appendChild(unit);
 
       tbody.appendChild(tr);
@@ -616,6 +615,7 @@
 
       const unit = document.createElement('td');
       unit.appendChild(makeUnitInput(test, question));
+      applyTableColumnPresentation(unit, columnPresentation[2]);
       tr.appendChild(unit);
 
       const operation = document.createElement('td');
