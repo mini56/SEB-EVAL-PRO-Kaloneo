@@ -2,14 +2,64 @@
   'use strict';
 
   const DATA = window.sebKaltestPilot2Data;
-  const STATE_KEY = 'seb_kaltest_pilot2_state_v1';
-  const FULL_PARCOURS_MODE = new URLSearchParams(window.location.search).get('fullParcours') === '1';
+  const PARAMS = new URLSearchParams(window.location.search);
+  const FULL_PARCOURS_MODE = PARAMS.get('fullParcours') === '1';
+  const REQUESTED_SEGMENT = String(PARAMS.get('segment') || '').trim();
 
   if (!DATA || !Array.isArray(DATA.tests) || !DATA.tests.length) {
     throw new Error('Données KALTEST du PILOTE 2 absentes.');
   }
 
   const testById = new Map(DATA.tests.map(test => [test.id, test]));
+  const SEGMENTS = Object.freeze({
+    initial:Object.freeze({
+      stepId:'kaltest-initial',
+      startPhase:'identification',
+      ids:Object.freeze([
+        'calculs_commandes_atelier',
+        'calculs_poids_volumes',
+        'horaires_reception_controle',
+        'texte_a_trous_stage_logistique'
+      ])
+    }),
+    conversions:Object.freeze({
+      stepId:'qcm-6',
+      startPhase:'exercise',
+      ids:Object.freeze(['conversions_atelier_expedition'])
+    }),
+    'genre-nombre':Object.freeze({
+      stepId:'genrenombres',
+      startPhase:'exercise',
+      ids:Object.freeze(['genre_nombre'])
+    }),
+    paronymes:Object.freeze({
+      stepId:'paronymes',
+      startPhase:'exercise',
+      ids:Object.freeze(['paronymes_rapport'])
+    })
+  });
+
+  const SEGMENT_KEY = REQUESTED_SEGMENT || (FULL_PARCOURS_MODE ? 'initial' : 'all');
+  if (SEGMENT_KEY !== 'all' && !SEGMENTS[SEGMENT_KEY]) {
+    throw new Error('Segment KALTEST PILOTE 11 inconnu : ' + SEGMENT_KEY);
+  }
+
+  const SEGMENT = SEGMENT_KEY === 'all' ? null : SEGMENTS[SEGMENT_KEY];
+  const ACTIVE_TESTS = SEGMENT
+    ? SEGMENT.ids.map(id => {
+        const test = testById.get(id);
+        if (!test) throw new Error('Test KALTEST absent du segment ' + SEGMENT_KEY + ' : ' + id);
+        return test;
+      })
+    : DATA.tests.slice();
+  const PILOT11_MODE = Boolean(SEGMENT);
+  const DEFAULT_PHASE = SEGMENT?.startPhase || 'identification';
+  const STATE_KEY = 'seb_kaltest_pilot2_state_v1' +
+    ((SEGMENT_KEY === 'all' || SEGMENT_KEY === 'initial') ? '' : ':' + SEGMENT_KEY);
+
+  if (PILOT11_MODE) {
+    try { sessionStorage.setItem('seb_kaltest_full_parcours', '1'); } catch (_) {}
+  }
 
   function emptyTestState() {
     return {
@@ -24,9 +74,9 @@
 
   function emptyState() {
     const tests = {};
-    for (const test of DATA.tests) tests[test.id] = emptyTestState();
+    for (const test of ACTIVE_TESTS) tests[test.id] = emptyTestState();
     return {
-      phase: 'identification',
+      phase: DEFAULT_PHASE,
       testIndex: 0,
       personId: null,
       evaluationId: null,
@@ -42,8 +92,12 @@
       if (!parsed || typeof parsed !== 'object') return emptyState();
       const merged = Object.assign(emptyState(), parsed);
       merged.tests = Object.assign({}, emptyState().tests, parsed.tests || {});
-      for (const test of DATA.tests) {
+      for (const test of ACTIVE_TESTS) {
         merged.tests[test.id] = Object.assign(emptyTestState(), merged.tests[test.id] || {});
+      }
+      merged.testIndex = Math.max(0, Math.min(Number(merged.testIndex) || 0, ACTIVE_TESTS.length - 1));
+      if (DEFAULT_PHASE === 'exercise' && !['exercise','handoff'].includes(merged.phase)) {
+        merged.phase = 'exercise';
       }
       return merged;
     } catch (_) {
@@ -71,7 +125,7 @@
   }
 
   function currentTest() {
-    return DATA.tests[state.testIndex] || null;
+    return ACTIVE_TESTS[state.testIndex] || null;
   }
 
   function currentTestState() {
@@ -830,7 +884,7 @@
 
     document.getElementById('kaltest-title').textContent = test.title || 'Exercice';
     document.getElementById('kaltest-progress').textContent =
-      'Exercice ' + (state.testIndex + 1) + ' / ' + DATA.tests.length;
+      'Exercice ' + (state.testIndex + 1) + ' / ' + ACTIVE_TESTS.length;
     document.getElementById('kaltest-scenario').textContent = test.scenario || '';
     document.getElementById('kaltest-instruction').textContent = test.instruction || '';
 
@@ -841,7 +895,8 @@
     else calculator.style.setProperty('display', 'none', 'important');
 
     const next = document.getElementById('kaltest-next');
-    next.textContent = state.testIndex === DATA.tests.length - 1 ? 'Terminer le parcours' : 'Suivant';
+    const isLastActiveTest = state.testIndex === ACTIVE_TESTS.length - 1;
+    next.textContent = isLastActiveTest && !PILOT11_MODE ? 'Terminer le parcours' : 'Suivant';
 
     const status = document.getElementById('exercise-status');
     status.textContent = '';
@@ -931,14 +986,24 @@
     advance();
   }
 
+  function handoffPilot11() {
+    if (!PILOT11_MODE || !SEGMENT?.stepId) {
+      throw new Error('Handoff PILOTE 11 demandé sans segment actif.');
+    }
+    if (!window.sebParcours?.goNext) {
+      throw new Error('Registre central du parcours indisponible pour le handoff PILOTE 11.');
+    }
+    try { window.dispatchEvent(new CustomEvent('seb-kaltest-handoff', { detail:{ segment:SEGMENT_KEY } })); } catch (_) {}
+    window.sebParcours.goNext(SEGMENT.stepId);
+  }
+
   function advance() {
     try { window.closeCalculator?.(); } catch (_) {}
-    if (state.testIndex + 1 >= DATA.tests.length) {
-      if (FULL_PARCOURS_MODE) {
+    if (state.testIndex + 1 >= ACTIVE_TESTS.length) {
+      if (PILOT11_MODE) {
         state.phase = 'handoff';
         persist();
-        try { window.dispatchEvent(new CustomEvent('seb-kaltest-handoff')); } catch (_) {}
-        window.location.href = 'autoeval1.html';
+        handoffPilot11();
         return;
       }
 
@@ -1030,7 +1095,7 @@
     });
 
     document.getElementById('intro-next').addEventListener('click', () => {
-      state.testIndex = Math.max(0, Math.min(state.testIndex, DATA.tests.length - 1));
+      state.testIndex = Math.max(0, Math.min(state.testIndex, ACTIVE_TESTS.length - 1));
       state.phase = 'exercise';
       renderCurrentTest();
       showPhase('exercise');
@@ -1040,11 +1105,18 @@
 
     installKeyboardNavigation();
 
+    if (PILOT11_MODE && state.phase === 'handoff') {
+      handoffPilot11();
+      return;
+    }
+
     if (state.phase === 'exercise') renderCurrentTest();
-    showPhase(state.phase || 'identification', false);
+    showPhase(state.phase || DEFAULT_PHASE, false);
 
     replay('PILOT2_READY', {
       tests:DATA.tests.map(test => test.id),
+      activeTests:ACTIVE_TESTS.map(test => test.id),
+      segment:SEGMENT_KEY,
       parcours:DATA.parcours?.id || ''
     });
   }
@@ -1056,6 +1128,8 @@
   window.sebKaltestPilot2 = Object.freeze({
     get state() { return JSON.parse(JSON.stringify(state)); },
     get data() { return JSON.parse(JSON.stringify(DATA)); },
+    get activeTests() { return ACTIVE_TESTS.map(test => test.id); },
+    get segment() { return SEGMENT_KEY; },
     currentTest,
     evaluateTest,
     parseDurationFr,
@@ -1066,7 +1140,8 @@
       sessionStorage.removeItem(STATE_KEY);
       state = emptyState();
       renderIdentity();
-      showPhase('identification', false);
+      if (state.phase === 'exercise') renderCurrentTest();
+      showPhase(state.phase || DEFAULT_PHASE, false);
       persist();
     }
   });
