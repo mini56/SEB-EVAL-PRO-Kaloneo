@@ -51,12 +51,16 @@ app.whenReady().then(async()=>{
         leftOverflow:left.scrollWidth-left.clientWidth,
         bodyOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
         labelTop:label.getBoundingClientRect().top,
-        textTop:text.getBoundingClientRect().top
+        labelBottom:label.getBoundingClientRect().bottom,
+        labelRight:label.getBoundingClientRect().right,
+        textTop:text.getBoundingClientRect().top,
+        textBottom:text.getBoundingClientRect().bottom,
+        textLeft:text.getBoundingClientRect().left
       };
     })()`);
     approx(nw.left/(nw.left+nw.right),0.5,0.025,'nwtexte 50/50');
     if(nw.leftOverflow>2 || nw.bodyOverflow>2) throw new Error('nwtexte scroll horizontal: '+JSON.stringify(nw));
-    if(Math.abs(nw.labelTop-nw.textTop)>5) throw new Error('nwtexte Consigne non alignée sur la même ligne');
+    if(!(nw.textTop < nw.labelBottom && nw.textBottom > nw.labelTop && nw.textLeft >= nw.labelRight-2)) throw new Error('nwtexte Consigne non alignée sur la même ligne: '+JSON.stringify(nw));
     if(nw.scenario < nw.page*0.93 || nw.consigne < nw.page*0.93) throw new Error('nwtexte contexte non pleine largeur');
 
     // E-mail : 50/50 + scénario pleine largeur + Parcourir au style KALONÉO.
@@ -76,14 +80,18 @@ app.whenReady().then(async()=>{
         page:page.getBoundingClientRect().width,
         bodyOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
         labelTop:label.getBoundingClientRect().top,
+        labelBottom:label.getBoundingClientRect().bottom,
+        labelRight:label.getBoundingClientRect().right,
         textTop:text.getBoundingClientRect().top,
+        textBottom:text.getBoundingClientRect().bottom,
+        textLeft:text.getBoundingClientRect().left,
         pickerBorder:ps.borderColor,
         pickerBg:ps.backgroundImage
       };
     })()`);
     approx(mail.left/(mail.left+mail.right),0.5,0.025,'nvmail 50/50');
     if(mail.bodyOverflow>2) throw new Error('nvmail scroll horizontal: '+JSON.stringify(mail));
-    if(Math.abs(mail.labelTop-mail.textTop)>5) throw new Error('nvmail Consigne non alignée sur la même ligne');
+    if(!(mail.textTop < mail.labelBottom && mail.textBottom > mail.labelTop && mail.textLeft >= mail.labelRight-2)) throw new Error('nvmail Consigne non alignée sur la même ligne: '+JSON.stringify(mail));
     if(mail.scenario < mail.page*0.93) throw new Error('nvmail scénario non pleine largeur');
     if(mail.pickerBorder!=='rgb(0, 78, 112)' || mail.pickerBg==='none') throw new Error('Parcourir hors style KALONÉO: '+JSON.stringify(mail));
 
@@ -136,14 +144,18 @@ app.whenReady().then(async()=>{
         labelFont:ls.fontFamily,
         labelWeight:ls.fontWeight,
         labelTop:label.getBoundingClientRect().top,
+        labelBottom:label.getBoundingClientRect().bottom,
+        labelRight:label.getBoundingClientRect().right,
         textTop:text.getBoundingClientRect().top,
+        textBottom:text.getBoundingClientRect().bottom,
+        textLeft:text.getBoundingClientRect().left,
         imageHeight:image.getBoundingClientRect().height,
         imageBottom:image.getBoundingClientRect().bottom,
         chronoHeight:chrono.getBoundingClientRect().height
       };
     })()`);
     if(lego.labelColor!=='rgb(0, 78, 112)' || !/Calibri/i.test(lego.labelFont) || lego.labelWeight!=='700') throw new Error('LEGO Consigne hors style commun: '+JSON.stringify(lego));
-    if(Math.abs(lego.labelTop-lego.textTop)>5) throw new Error('LEGO Consigne non alignée sur la même ligne');
+    if(!(lego.textTop < lego.labelBottom && lego.textBottom > lego.labelTop && lego.textLeft >= lego.labelRight-2)) throw new Error('LEGO Consigne non alignée sur la même ligne: '+JSON.stringify(lego));
     if(lego.imageHeight>435 || lego.imageBottom>735) throw new Error('LEGO image trop grande: '+JSON.stringify(lego));
     if(lego.chronoHeight<105) throw new Error('LEGO chrono pas assez aéré: '+JSON.stringify(lego));
 
