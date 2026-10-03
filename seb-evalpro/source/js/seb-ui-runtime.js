@@ -124,6 +124,26 @@
       .seb-btn-confirm,.seb-btn-tool,.seb-btn-functional{--seb-button-color:#004E70}
       .seb-btn-calculator{--seb-button-color:#F9B233}
       .seb-btn-danger{--seb-button-color:#C62828}
+      .seb-btn-timer-start{--seb-button-color:#198754}
+      .seb-btn-timer-stop{--seb-button-color:#C62828}
+      .seb-action-btn.seb-btn-solid{
+        color:#fff!important;
+        border-color:var(--seb-button-color)!important;
+        box-shadow:0 4px 10px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.30)!important;
+      }
+      .seb-action-btn.seb-btn-solid.seb-btn-timer-start{
+        background:linear-gradient(180deg,#28a866 0%,#198754 100%)!important;
+      }
+      .seb-action-btn.seb-btn-solid.seb-btn-timer-stop{
+        background:linear-gradient(180deg,#df4444 0%,#C62828 100%)!important;
+      }
+      .seb-action-btn.seb-btn-solid.seb-btn-timer-start:hover:not(:disabled){
+        background:linear-gradient(180deg,#34b572 0%,#16794c 100%)!important;
+      }
+      .seb-action-btn.seb-btn-solid.seb-btn-timer-stop:hover:not(:disabled){
+        background:linear-gradient(180deg,#e65656 0%,#ad2020 100%)!important;
+      }
+      .seb-action-btn.seb-btn-solid:disabled{opacity:.55!important}
       #seb-evalpro-abandon-fixed{
         position:fixed!important;
         left:16px!important;
@@ -209,14 +229,17 @@
     const raw = cleanText(button.textContent);
     if (!raw) return;
     const label = stripActionIcon(raw);
+    const explicitTimerKind = button.classList.contains('seb-btn-timer-start')
+      ? 'seb-btn-timer-start'
+      : (button.classList.contains('seb-btn-timer-stop') ? 'seb-btn-timer-stop' : '');
     const kind = buttonKind(label);
-    const desiredKind = 'seb-btn-' + kind;
-    for (const cls of ['seb-btn-nav', 'seb-btn-confirm', 'seb-btn-tool', 'seb-btn-functional', 'seb-btn-calculator', 'seb-btn-danger']) {
+    const desiredKind = explicitTimerKind || ('seb-btn-' + kind);
+    for (const cls of ['seb-btn-nav', 'seb-btn-confirm', 'seb-btn-tool', 'seb-btn-functional', 'seb-btn-calculator', 'seb-btn-danger', 'seb-btn-timer-start', 'seb-btn-timer-stop']) {
       if (cls !== desiredKind && button.classList.contains(cls)) button.classList.remove(cls);
     }
     if (!button.classList.contains('seb-action-btn')) button.classList.add('seb-action-btn');
     if (!button.classList.contains(desiredKind)) button.classList.add(desiredKind);
-    const nextLabel = iconizedLabel(label);
+    const nextLabel = explicitTimerKind ? label : iconizedLabel(label);
     if (nextLabel && cleanText(button.textContent) !== nextLabel) button.textContent = nextLabel;
   }
 
