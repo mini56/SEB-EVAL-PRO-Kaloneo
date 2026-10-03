@@ -61,11 +61,11 @@ app.whenReady().then(async () => {
     if (!start.pageVisible || start.fields !== 8) throw new Error('Identification incomplète.');
     if (start.sideTop > start.mouseTop + 2) throw new Error('Les trois blocs de droite sont encore trop bas : ' + JSON.stringify(start));
     if (start.badgeTop < start.chronoTop2 - 1) throw new Error('Le badge 2 reste coupé en haut : ' + JSON.stringify(start));
-    if (start.startText !== 'rgb(255, 255, 255)' || start.startBorder !== 'rgb(25, 135, 84)' || !/linear-gradient/.test(start.startBg)) {
-      throw new Error('Démarrer doit être le bouton KALONÉO plein vert avec texte blanc : ' + JSON.stringify(start));
+    if (start.startText !== 'rgb(25, 135, 84)' || start.startBorder !== 'rgb(25, 135, 84)' || !/linear-gradient/.test(start.startBg)) {
+      throw new Error('Démarrer doit garder le fond Crystal clair avec texte et contour verts : ' + JSON.stringify(start));
     }
-    if (start.stopText !== 'rgb(255, 255, 255)' || start.stopBorder !== 'rgb(198, 40, 40)' || !/linear-gradient/.test(start.stopBg)) {
-      throw new Error('Arrêter doit être le bouton KALONÉO plein rouge avec texte blanc : ' + JSON.stringify(start));
+    if (start.stopText !== 'rgb(198, 40, 40)' || start.stopBorder !== 'rgb(198, 40, 40)' || !/linear-gradient/.test(start.stopBg)) {
+      throw new Error('Arrêter doit garder le fond Crystal clair avec texte et contour rouges : ' + JSON.stringify(start));
     }
     if (!/Ouvrir la calculatrice/.test(start.calcText) ||
         !/seb-action-btn/.test(start.calcClass) || !/seb-btn-calculator/.test(start.calcClass)) {
@@ -131,8 +131,8 @@ app.whenReady().then(async () => {
 
     console.log('PILOT8_VISUAL_INTRO_SMOKE: OK');
     console.log('PILOT8_ONBOARDING_RIGHT_BLOCKS=RAISED');
-    console.log('PILOT8_CHRONO_START=KALONEO_SOLID_GREEN');
-    console.log('PILOT8_CHRONO_STOP=KALONEO_SOLID_RED');
+    console.log('PILOT8_CHRONO_START=KALONEO_OUTLINE_GREEN');
+    console.log('PILOT8_CHRONO_STOP=KALONEO_OUTLINE_RED');
     console.log('PILOT8_CALCULATOR_BUTTON=REAL_TEST_STYLE');
     console.log('PILOT8_INTRO_VIDEO=AUTOPLAY_ONCE');
     console.log('PILOT8_INTRO_LEGACY_IMAGE=REMOVED');
