@@ -20,7 +20,10 @@ const sandbox = { window:{ location:{ href:'' } }, encodeURIComponent };
 vm.runInNewContext(source, sandbox, { filename:'seb-parcours.js' });
 
 const api = sandbox.window.sebParcours;
-if (!api || !Array.isArray(api.steps)) fail('API sebParcours absente ou invalide');
+if (!api || !Array.isArray(api.steps) || !Array.isArray(api.legacySteps) || !Array.isArray(api.pilot11Steps)) {
+  fail('API sebParcours absente ou invalide');
+}
+if (api.mode !== 'legacy') fail('mode par défaut du registre différent de legacy');
 
 const expectedIds = [
   'qcm-1','qcm-2','qcm-2_1','qcm-3','qcm-texte-trous','qcm-4','qcm-5','qcm-5_1','qcm-6',
@@ -30,11 +33,42 @@ const expectedIds = [
 
 const ids = Array.from(api.steps, (step) => String(step.id));
 if (JSON.stringify(ids) !== JSON.stringify(expectedIds)) {
-  fail('ordre du parcours validé modifié: ' + JSON.stringify(ids));
+  fail('ordre du parcours historique validé modifié: ' + JSON.stringify(ids));
 }
-if (new Set(ids).size !== ids.length) fail('identifiant de parcours dupliqué');
+if (new Set(ids).size !== ids.length) fail('identifiant de parcours historique dupliqué');
 
-for (const step of api.steps) {
+const pilot11ExpectedIds = [
+  'kaltest-initial','qcm-4','qcm-5','qcm-5_1','qcm-6',
+  'autoeval1','introbrique','brique','stock','planning','genrenombres','dictee',
+  'tri-de-cheville','nwtexte','nvmail','autoeval2','paronymes','carre','qcm-11','qcm-finale'
+];
+const pilot11Ids = Array.from(api.pilot11Steps, (step) => String(step.id));
+if (JSON.stringify(pilot11Ids) !== JSON.stringify(pilot11ExpectedIds)) {
+  fail('ordre PILOTE 11 incorrect: ' + JSON.stringify(pilot11Ids));
+}
+if (new Set(pilot11Ids).size !== pilot11Ids.length) fail('identifiant PILOTE 11 dupliqué');
+
+const pilot11ById = new Map(Array.from(api.pilot11Steps, step => [String(step.id), step]));
+const expectedPilotRoutes = {
+  'kaltest-initial':'kaltest-pilot2.html?fullParcours=1',
+  'qcm-6':'kaltest-pilot2.html?fullParcours=1&segment=conversions',
+  'genrenombres':'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre',
+  'paronymes':'kaltest-pilot2.html?fullParcours=1&segment=paronymes'
+};
+for (const [id, expectedUrl] of Object.entries(expectedPilotRoutes)) {
+  const step = pilot11ById.get(id);
+  if (!step) fail('étape PILOTE 11 absente: ' + id);
+  const query = Object.entries(step.query || {})
+    .map(([key,value]) => encodeURIComponent(key) + '=' + encodeURIComponent(String(value)))
+    .join('&');
+  const url = step.file + (query ? '?' + query : '');
+  if (url !== expectedUrl) fail('route PILOTE 11 incorrecte pour ' + id + ': ' + url);
+}
+for (const removed of ['qcm-1','qcm-2','qcm-2_1','qcm-3','qcm-texte-trous']) {
+  if (pilot11Ids.includes(removed)) fail('ancienne page dupliquée dans PILOTE 11: ' + removed);
+}
+
+for (const step of [...api.legacySteps, ...api.pilot11Steps]) {
   if (!step.file || !/\.html(?:$|[?#])/i.test(String(step.file))) {
     fail('fichier de parcours invalide pour ' + step.id);
   }
@@ -85,4 +119,4 @@ const nwPage = read('app/web/js/nwtexte-page.js');
 if (!nwPage.includes("sebParcours.goNext('nwtexte')")) fail('nwtexte ne passe plus par le registre');
 if (/nvmail\.html/i.test(nwPage)) fail('couplage direct nwtexte -> nvmail réintroduit');
 
-console.log('SEB EvalPro garde parcours: ordre complet, destinations et contrats Résultats — OK.');
+console.log('SEB EvalPro garde parcours: parcours historique + PILOTE 11 ordonné sans doublons, destinations et contrats Résultats — OK.');
