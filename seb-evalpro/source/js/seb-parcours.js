@@ -226,6 +226,7 @@
     Object.freeze({
       ...legacyStep('qcm-6'),
       file:'kaltest-pilot2.html',
+      page:null,
       query:Object.freeze({ fullParcours:'1', segment:'conversions' })
     }),
     legacyStep('autoeval1'),
