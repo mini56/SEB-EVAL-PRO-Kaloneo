@@ -2374,3 +2374,48 @@ body:has(#page-identification.visible) #calc-container .seb-calc-brand{
   padding-top:6px!important;
   font-size:11.5px!important;
 }
+
+
+/* PILOTE 12 — prise en main : contenu des trois outils abaissé, zone statut réservée. */
+#page-identification .pilot2-chrono-card,
+#page-identification .pilot2-calculator-test-card,
+#page-identification .pilot2-audio-card{
+  position:relative;
+}
+#page-identification .pilot2-chrono-display{margin-top:12px!important}
+#page-identification .pilot2-calculator-test-card .seb-btn-calculator{margin-top:18px!important}
+#page-identification .pilot2-audio-controls{margin-top:16px!important}
+#page-identification .pilot2-tool-status{
+  min-height:16px!important;
+  height:16px!important;
+  margin-top:auto!important;
+  line-height:16px!important;
+}
+
+
+/* PILOTE 12 — Genre et nombre : bloc 100%, deux blocs 50/50, tableaux resserrés. */
+body[data-seb-kaltest-id="genre_nombre"] #kaltest-content{padding:8px 18px}
+body[data-seb-kaltest-id="genre_nombre"] .kaltest-two-tables{
+  width:100%;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:14px;
+}
+body[data-seb-kaltest-id="genre_nombre"] .kaltest-table-card{
+  width:100%;
+  padding:0 8px;
+}
+body[data-seb-kaltest-id="genre_nombre"] .kaltest-grammar-table{
+  width:94%;
+  margin:0 auto;
+}
+
+
+/* PILOTE 12 — banque de mots Texte à trous en bleu clair KALONÉO. */
+body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] .kaltest-word-bank{
+  background:#EAF5FB;
+  border-color:#7FB5CF;
+}
+body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] .kaltest-word-bank span{
+  background:#EAF5FB;
+  border-color:#B8D7E6;
+}

@@ -59,7 +59,12 @@
       },
       {
         "type": "text",
-        "text": ", j'ai souhaité vérifier que le métier d'agent logistique me conviendrait. Vous m'avez proposé un stage pour un poste de "
+        "text": ", j'ai souhaité vérifier que le métier d'agent logistique me conviendrait.",
+        "breakAfterSentence": true
+      },
+      {
+        "type": "text",
+        "text": "Vous m'avez proposé un stage pour un poste de "
       },
       {
         "type": "question",
@@ -67,8 +72,12 @@
       },
       {
         "type": "text",
-        "text": ". J'",
+        "text": ".",
         "breakAfterSentence": true
+      },
+      {
+        "type": "text",
+        "text": "J'"
       },
       {
         "type": "question",
@@ -92,8 +101,12 @@
       },
       {
         "type": "text",
-        "text": ". J'ai réalisé des ",
+        "text": ".",
         "breakAfterSentence": true
+      },
+      {
+        "type": "text",
+        "text": "J'ai réalisé des "
       },
       {
         "type": "question",
@@ -109,8 +122,12 @@
       },
       {
         "type": "text",
-        "text": " en cas de besoin. Je ",
+        "text": " en cas de besoin.",
         "breakAfterSentence": true
+      },
+      {
+        "type": "text",
+        "text": "Je "
       },
       {
         "type": "question",
@@ -134,8 +151,12 @@
       },
       {
         "type": "text",
-        "text": ". Pour moi, les ",
+        "text": ".",
         "breakAfterSentence": true
+      },
+      {
+        "type": "text",
+        "text": "Pour moi, les "
       },
       {
         "type": "question",
@@ -159,8 +180,12 @@
       },
       {
         "type": "text",
-        "text": " les commandes avec soin. Je pense continuer à faire des ",
+        "text": " les commandes avec soin.",
         "breakAfterSentence": true
+      },
+      {
+        "type": "text",
+        "text": "Je pense continuer à faire des "
       },
       {
         "type": "question",
@@ -176,7 +201,8 @@
       },
       {
         "type": "text",
-        "text": "."
+        "text": ".",
+        "breakAfterSentence": true
       }
     ],
     "kaloneoLayout": {
