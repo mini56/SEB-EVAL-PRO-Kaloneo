@@ -346,8 +346,7 @@
     return wrapper;
   }
 
-  function renderQuestionnaireVisual(test) {
-    const visual = test.presentation?.kaloneoLayout?.right || {};
+  function renderVisualPanel(visual = {}) {
     const panel = document.createElement('aside');
     panel.className = 'kaltest-visual-panel';
     panel.setAttribute('aria-label', visual.alt || 'Illustration de l’exercice');
@@ -374,6 +373,10 @@
 
     panel.appendChild(frame);
     return panel;
+  }
+
+  function renderQuestionnaireVisual(test) {
+    return renderVisualPanel(test.presentation?.kaloneoLayout?.right || {});
   }
 
   function renderBasic(test, host) {
@@ -448,6 +451,20 @@
       label.textContent = question.prompt;
       row.append(label, makeInput(test, question, { compact:true }));
       averages.appendChild(row);
+    }
+
+    const configured = test.presentation?.kaloneoLayout;
+    if (configured?.type === 'visual-schedule' && configured?.ratio === '40/60') {
+      const layout = document.createElement('div');
+      layout.className = 'kaltest-schedule-visual-layout';
+
+      const work = document.createElement('section');
+      work.className = 'kaltest-schedule-work';
+      work.append(wrap, averages);
+
+      layout.append(renderVisualPanel(configured.left || {}), work);
+      host.appendChild(layout);
+      return;
     }
 
     const layout = document.createElement('div');
