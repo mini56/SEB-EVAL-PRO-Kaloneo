@@ -28,7 +28,7 @@
     "defaultEnabled": false
   },
   "scenario": "Dans votre service, vous êtes chargé de relire un rapport rédigé à la hâte avant son envoi à la direction. Plusieurs mots semblent corrects au premier abord, mais leur sens ne correspond pas vraiment au contexte.",
-  "instruction": "Sélectionnez, pour chaque mot souligné, le mot qui a le sens le plus proche. Une seule réponse est possible par ligne.",
+  "instruction": "Sélectionnez, pour chaque mot, la proposition qui a le sens le plus proche. Une seule réponse par ligne.",
   "presentation": {
     "layout": "single-block",
     "choiceTable": {
@@ -40,6 +40,22 @@
         "Proposition 4",
         "Proposition 5"
       ]
+    },
+    "kaloneoLayout": {
+      "type": "visual-choice-table",
+      "ratio": "40/60",
+      "left": {
+        "type": "image",
+        "orientation": "portrait",
+        "src": "",
+        "alt": "Illustration de l’exercice Paronymes",
+        "placeholder": "Image verticale"
+      },
+      "right": {
+        "order": [
+          "choiceTable"
+        ]
+      }
     }
   },
   "runtime": {
