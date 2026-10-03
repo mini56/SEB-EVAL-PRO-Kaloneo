@@ -85,9 +85,11 @@ app.whenReady().then(async()=>{
     const test1=await captureTest(win,0,'REAL-PROGRAM-test1');
     try { await win.webContents.executeJavaScript("window.closeCalculator?.();true",true); } catch (_) {}
     const test2=await captureTest(win,1,'REAL-PROGRAM-test2');
+    try { await win.webContents.executeJavaScript("window.closeCalculator?.();true",true); } catch (_) {}
+    const test3=await captureTest(win,2,'REAL-PROGRAM-test3');
 
     console.log('REAL_PROGRAM_FIRST_TESTS_RENDER: OK');
-    console.log(JSON.stringify({test1,test2}));
+    console.log(JSON.stringify({test1,test2,test3}));
     win.destroy();
     app.exit(0);
   }catch(error){
