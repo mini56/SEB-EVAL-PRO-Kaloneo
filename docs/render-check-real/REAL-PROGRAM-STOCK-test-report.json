@@ -1,0 +1,720 @@
+{
+  "initial": {
+    "layout": "stock-full-context-35-65",
+    "pots": 34,
+    "cases": 35,
+    "sourcePots": 33,
+    "triPots": 0,
+    "leftWidth": 512.3529052734375,
+    "rightWidth": 951.5440673828125,
+    "ratio": 1.857204394839887,
+    "button": "✓ Vérifier",
+    "result": null,
+    "storedState": {
+      "positions": [
+        {
+          "id": "1",
+          "type": "source",
+          "index": 0
+        },
+        {
+          "id": "2",
+          "type": "source",
+          "index": 1
+        },
+        {
+          "id": "3",
+          "type": "source",
+          "index": 2
+        },
+        {
+          "id": "4",
+          "type": "source",
+          "index": 3
+        },
+        {
+          "id": "5",
+          "type": "source",
+          "index": 4
+        },
+        {
+          "id": "6",
+          "type": "source",
+          "index": 5
+        },
+        {
+          "id": "7",
+          "type": "source",
+          "index": 6
+        },
+        {
+          "id": "9",
+          "type": "source",
+          "index": 7
+        },
+        {
+          "id": "10",
+          "type": "source",
+          "index": 8
+        },
+        {
+          "id": "11",
+          "type": "source",
+          "index": 9
+        },
+        {
+          "id": "12",
+          "type": "source",
+          "index": 10
+        },
+        {
+          "id": "13",
+          "type": "source",
+          "index": 11
+        },
+        {
+          "id": "14",
+          "type": "source",
+          "index": 12
+        },
+        {
+          "id": "15",
+          "type": "source",
+          "index": 13
+        },
+        {
+          "id": "16",
+          "type": "source",
+          "index": 14
+        },
+        {
+          "id": "17",
+          "type": "source",
+          "index": 15
+        },
+        {
+          "id": "18",
+          "type": "source",
+          "index": 16
+        },
+        {
+          "id": "19",
+          "type": "source",
+          "index": 17
+        },
+        {
+          "id": "20",
+          "type": "source",
+          "index": 18
+        },
+        {
+          "id": "21",
+          "type": "source",
+          "index": 19
+        },
+        {
+          "id": "22",
+          "type": "source",
+          "index": 20
+        },
+        {
+          "id": "23",
+          "type": "source",
+          "index": 21
+        },
+        {
+          "id": "24",
+          "type": "source",
+          "index": 22
+        },
+        {
+          "id": "25",
+          "type": "source",
+          "index": 23
+        },
+        {
+          "id": "26",
+          "type": "source",
+          "index": 24
+        },
+        {
+          "id": "27",
+          "type": "source",
+          "index": 25
+        },
+        {
+          "id": "28",
+          "type": "source",
+          "index": 26
+        },
+        {
+          "id": "29",
+          "type": "source",
+          "index": 27
+        },
+        {
+          "id": "30",
+          "type": "source",
+          "index": 28
+        },
+        {
+          "id": "31",
+          "type": "source",
+          "index": 29
+        },
+        {
+          "id": "32",
+          "type": "source",
+          "index": 30
+        },
+        {
+          "id": "33",
+          "type": "source",
+          "index": 31
+        },
+        {
+          "id": "34",
+          "type": "source",
+          "index": 32
+        },
+        {
+          "id": "8",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "1",
+          "caseNum": "1"
+        }
+      ],
+      "validated": false,
+      "savedAt": 1791024573421
+    }
+  },
+  "placement": {
+    "failures": [],
+    "score": {
+      "correct": 33,
+      "errors": 0,
+      "total": 33
+    }
+  },
+  "verified": {
+    "layout": "stock-full-context-35-65",
+    "pots": 34,
+    "cases": 35,
+    "sourcePots": 0,
+    "triPots": 0,
+    "leftWidth": 512.3529052734375,
+    "rightWidth": 951.5440673828125,
+    "ratio": 1.857204394839887,
+    "button": "➜ Suivant",
+    "result": {
+      "correct": 33,
+      "errors": 0,
+      "total": 33
+    },
+    "storedState": {
+      "positions": [
+        {
+          "id": "11",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "3",
+          "caseNum": "1"
+        },
+        {
+          "id": "31",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "3",
+          "caseNum": "2"
+        },
+        {
+          "id": "29",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "3",
+          "caseNum": "3"
+        },
+        {
+          "id": "12",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "2",
+          "caseNum": "1"
+        },
+        {
+          "id": "13",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "2",
+          "caseNum": "2"
+        },
+        {
+          "id": "3",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "2",
+          "caseNum": "3"
+        },
+        {
+          "id": "23",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "2",
+          "caseNum": "4"
+        },
+        {
+          "id": "8",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "1",
+          "caseNum": "1"
+        },
+        {
+          "id": "14",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "1",
+          "caseNum": "2"
+        },
+        {
+          "id": "27",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "1",
+          "caseNum": "3"
+        },
+        {
+          "id": "15",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "1",
+          "caseNum": "4"
+        },
+        {
+          "id": "5",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "3",
+          "caseNum": "1"
+        },
+        {
+          "id": "26",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "3",
+          "caseNum": "2"
+        },
+        {
+          "id": "20",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "3",
+          "caseNum": "3"
+        },
+        {
+          "id": "4",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "3",
+          "caseNum": "4"
+        },
+        {
+          "id": "28",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "2",
+          "caseNum": "1"
+        },
+        {
+          "id": "33",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "2",
+          "caseNum": "2"
+        },
+        {
+          "id": "7",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "2",
+          "caseNum": "3"
+        },
+        {
+          "id": "25",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "2",
+          "caseNum": "4"
+        },
+        {
+          "id": "34",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "1",
+          "caseNum": "1"
+        },
+        {
+          "id": "18",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "1",
+          "caseNum": "2"
+        },
+        {
+          "id": "16",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "1",
+          "caseNum": "3"
+        },
+        {
+          "id": "2",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "1",
+          "caseNum": "4"
+        },
+        {
+          "id": "6",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "1"
+        },
+        {
+          "id": "30",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "2"
+        },
+        {
+          "id": "21",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "3"
+        },
+        {
+          "id": "24",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "4"
+        },
+        {
+          "id": "9",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "5"
+        },
+        {
+          "id": "22",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "6"
+        },
+        {
+          "id": "10",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "7"
+        },
+        {
+          "id": "17",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "8"
+        },
+        {
+          "id": "32",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "9"
+        },
+        {
+          "id": "1",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "10"
+        },
+        {
+          "id": "19",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "11"
+        }
+      ],
+      "validated": true,
+      "savedAt": 1791024574320
+    }
+  },
+  "restored": {
+    "layout": "stock-full-context-35-65",
+    "pots": 34,
+    "cases": 35,
+    "sourcePots": 0,
+    "triPots": 0,
+    "leftWidth": 512.3529052734375,
+    "rightWidth": 951.5440673828125,
+    "ratio": 1.857204394839887,
+    "button": "➜ Suivant",
+    "result": {
+      "correct": 33,
+      "errors": 0,
+      "total": 33
+    },
+    "storedState": {
+      "positions": [
+        {
+          "id": "11",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "3",
+          "caseNum": "1"
+        },
+        {
+          "id": "31",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "3",
+          "caseNum": "2"
+        },
+        {
+          "id": "29",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "3",
+          "caseNum": "3"
+        },
+        {
+          "id": "12",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "2",
+          "caseNum": "1"
+        },
+        {
+          "id": "13",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "2",
+          "caseNum": "2"
+        },
+        {
+          "id": "3",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "2",
+          "caseNum": "3"
+        },
+        {
+          "id": "23",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "2",
+          "caseNum": "4"
+        },
+        {
+          "id": "8",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "1",
+          "caseNum": "1"
+        },
+        {
+          "id": "14",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "1",
+          "caseNum": "2"
+        },
+        {
+          "id": "27",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "1",
+          "caseNum": "3"
+        },
+        {
+          "id": "15",
+          "type": "case",
+          "etagere": "1",
+          "niveau": "1",
+          "caseNum": "4"
+        },
+        {
+          "id": "5",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "3",
+          "caseNum": "1"
+        },
+        {
+          "id": "26",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "3",
+          "caseNum": "2"
+        },
+        {
+          "id": "20",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "3",
+          "caseNum": "3"
+        },
+        {
+          "id": "4",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "3",
+          "caseNum": "4"
+        },
+        {
+          "id": "28",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "2",
+          "caseNum": "1"
+        },
+        {
+          "id": "33",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "2",
+          "caseNum": "2"
+        },
+        {
+          "id": "7",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "2",
+          "caseNum": "3"
+        },
+        {
+          "id": "25",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "2",
+          "caseNum": "4"
+        },
+        {
+          "id": "34",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "1",
+          "caseNum": "1"
+        },
+        {
+          "id": "18",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "1",
+          "caseNum": "2"
+        },
+        {
+          "id": "16",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "1",
+          "caseNum": "3"
+        },
+        {
+          "id": "2",
+          "type": "case",
+          "etagere": "2",
+          "niveau": "1",
+          "caseNum": "4"
+        },
+        {
+          "id": "6",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "1"
+        },
+        {
+          "id": "30",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "2"
+        },
+        {
+          "id": "21",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "3"
+        },
+        {
+          "id": "24",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "4"
+        },
+        {
+          "id": "9",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "5"
+        },
+        {
+          "id": "22",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "6"
+        },
+        {
+          "id": "10",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "7"
+        },
+        {
+          "id": "17",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "8"
+        },
+        {
+          "id": "32",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "9"
+        },
+        {
+          "id": "1",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "10"
+        },
+        {
+          "id": "19",
+          "type": "case",
+          "etagere": "3",
+          "niveau": "1",
+          "caseNum": "11"
+        }
+      ],
+      "validated": true,
+      "savedAt": 1791024574320
+    }
+  }
+}
