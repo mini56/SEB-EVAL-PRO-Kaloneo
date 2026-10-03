@@ -688,3 +688,12 @@ button,input{font:inherit}
   font-size:var(--k-secondary);
   font-weight:700;
 }
+
+
+body.k-test-calculator-open .k-test-workspace{
+  padding-right:286px;
+}
+body.k-test-calculator-open .k-test-split{
+  grid-template-columns:minmax(0,1fr) minmax(360px,.86fr);
+  gap:12px;
+}
