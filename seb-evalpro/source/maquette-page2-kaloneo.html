@@ -919,6 +919,147 @@ window.KALONEO_PAGE_DEFINITION = Object.freeze({
     return wrap;
   }
 
+
+  function testInput(question, unit){
+    const input=el('input','k-test-input');
+    input.type='text';
+    input.autocomplete='off';
+    input.dataset.questionId=question.id;
+    input.dataset.answerKind=unit?'unit':'answer';
+    if(question.response && question.response.type==='number') input.inputMode='decimal';
+    return input;
+  }
+
+  function renderTestContext(label,text,icon,kind){
+    const row=el('section','k-card k-test-context '+(kind||''));
+    const img=el('img');
+    img.src=icon||'';
+    img.alt=label;
+    const body=el('div');
+    body.append(el('strong','',label+' :'));
+    const p=el('p','',text||'');
+    body.append(p);
+    row.append(img,body);
+    return row;
+  }
+
+  function renderBasicQuestionnaire(test){
+    const card=el('section','k-card k-test-workspace');
+    const layout=el('div','k-test-split');
+
+    const questions=el('ol','k-test-question-list');
+    (test.questions||[]).forEach(question=>{
+      questions.append(el('li','',question.prompt||''));
+    });
+    layout.append(questions);
+
+    const tableWrap=el('div','k-test-table-wrap');
+    const table=el('table','k-test-table');
+    const thead=el('thead');
+    const hr=el('tr');
+    const headers=(test.presentation && test.presentation.responseTable && test.presentation.responseTable.headers)
+      || ['Question N°','Réponse','Unités'];
+    headers.forEach(h=>hr.append(el('th','',h)));
+    thead.append(hr); table.append(thead);
+
+    const tbody=el('tbody');
+    (test.questions||[]).forEach((question,index)=>{
+      const tr=el('tr');
+      tr.append(el('td','k-test-row-number',String(index+1)));
+      const answer=el('td');
+      answer.append(testInput(question,false));
+      tr.append(answer);
+      if(headers.length>=3){
+        const unit=el('td');
+        if(question.unitInput) unit.append(testInput(question,true));
+        tr.append(unit);
+      }
+      tbody.append(tr);
+    });
+    table.append(tbody);
+    tableWrap.append(table);
+    layout.append(tableWrap);
+    card.append(layout);
+    return card;
+  }
+
+  function renderTestCalculator(page,test){
+    if(!test.calculator || !test.calculator.enabled) return null;
+    const c=calculatorMarkup('test-calculator');
+    c.calc.classList.add('k-floating-calculator');
+    page.append(c.calc);
+    const api={
+      open(){ c.calc.classList.add('open'); },
+      close(){ c.calc.classList.remove('open'); c.reset(); }
+    };
+    c.close.onclick=api.close;
+    state.calculators.set('test-calculator',api);
+    return api;
+  }
+
+  function openAbandonPreview(test){
+    if(document.querySelector('.k-abandon-layer')) return;
+    const layer=el('div','k-abandon-layer');
+    const box=el('div','k-abandon-box');
+    box.append(el('h2','','Abandonner l’exercice'));
+    box.append(el('p','k-abandon-exercise',test.title||'Exercice'));
+    box.append(el('p','k-abandon-help','Indiquez la raison de votre abandon. Ce modèle sera commun à toutes les pages de test.'));
+    ['Je ne comprends pas la consigne.','L’exercice est trop difficile.','Fatigue, gêne ou douleur.','Autre raison.'].forEach(labelText=>{
+      const label=el('label','k-abandon-choice');
+      const cb=el('input'); cb.type='checkbox';
+      label.append(cb,document.createTextNode(' '+labelText));
+      box.append(label);
+    });
+    const actions=el('div','k-abandon-actions');
+    const cancel=el('button','k-btn stop','Annuler');
+    const confirm=el('button','k-btn stop','Confirmer l’abandon');
+    cancel.onclick=()=>layer.remove();
+    confirm.onclick=()=>layer.remove();
+    actions.append(cancel,confirm); box.append(actions); layer.append(box); document.body.append(layer);
+  }
+
+  function renderTestPage(page,test,nav){
+    const heading=el('header','k-test-heading');
+    heading.append(el('h1','',test.title||'Exercice'));
+    const progress=test.progress||{};
+    heading.append(el('div','k-test-progress','Exercice '+(progress.index||1)+' / '+(progress.total||1)));
+    page.append(heading);
+
+    const contexts=el('div','k-test-contexts');
+    contexts.append(renderTestContext('Scénario',test.scenario,test.scenarioIcon,'scenario'));
+    contexts.append(renderTestContext('Consigne',test.instruction,test.instructionIcon,'instruction'));
+    page.append(contexts);
+
+    page.append(renderBasicQuestionnaire(test));
+
+    const footer=el('footer','k-test-footer');
+    const left=el('div','k-test-footer-left');
+    if(nav && nav.abandon){
+      const abandon=el('button','k-btn k-btn-abandon',nav.abandon.label||'Abandonner l’exercice');
+      abandon.id='k-'+(nav.abandon.id||'abandon');
+      abandon.onclick=()=>openAbandonPreview(test);
+      left.append(abandon);
+    }
+
+    const center=el('div','k-test-footer-center');
+    if(test.calculator && test.calculator.enabled){
+      const calc=el('button','k-btn calc','Ouvrir la calculatrice');
+      calc.onclick=()=>state.calculators.get('test-calculator')?.open();
+      center.append(calc);
+    }
+
+    const right=el('div','k-test-footer-right');
+    if(nav && nav.next){
+      const next=el('button','k-btn next',nav.next.label||'Suivant');
+      next.id='k-'+(nav.next.id||'next');
+      right.append(next);
+    }
+    footer.append(left,center,right);
+    page.append(footer);
+
+    renderTestCalculator(page,test);
+  }
+
   function renderNavigation(nav){
     const foot=el('footer','k-footer');
     if(nav?.next){
@@ -933,17 +1074,22 @@ window.KALONEO_PAGE_DEFINITION = Object.freeze({
     applyTypography(DEF);
     root.innerHTML='';
     const hasHeader=!!DEF.header;
-    const isContentPage=(DEF.sections||[]).some(section=>section.type==='content-stack');
-    const page=el('div','k-page'+(isContentPage?' k-page-content':''));
+    const isTestPage=DEF.pageType==='test' && !!DEF.test;
+    const isContentPage=!isTestPage && (DEF.sections||[]).some(section=>section.type==='content-stack');
+    const page=el('div','k-page'+(isContentPage?' k-page-content':'')+(isTestPage?' k-page-test':''));
     page.dataset.kaloneoGenerated='1';
     page.dataset.kaloneoPageId=DEF.id||'';
-    if(hasHeader) page.append(renderHeader(DEF.header));
-    for(const section of DEF.sections||[]){
-      if(section.type==='form-grid') page.append(renderFormGrid(section));
-      else if(section.type==='practice-grid') page.append(renderPractice(section));
-      else if(section.type==='content-stack') page.append(renderContentStack(section));
+    if(isTestPage){
+      renderTestPage(page,DEF.test,DEF.navigation||{});
+    }else{
+      if(hasHeader) page.append(renderHeader(DEF.header));
+      for(const section of DEF.sections||[]){
+        if(section.type==='form-grid') page.append(renderFormGrid(section));
+        else if(section.type==='practice-grid') page.append(renderPractice(section));
+        else if(section.type==='content-stack') page.append(renderContentStack(section));
+      }
+      page.append(renderNavigation(DEF.navigation||{}));
     }
-    page.append(renderNavigation(DEF.navigation||{}));
     root.append(page);
 
     window.KaloneoPageRuntime = Object.freeze({
