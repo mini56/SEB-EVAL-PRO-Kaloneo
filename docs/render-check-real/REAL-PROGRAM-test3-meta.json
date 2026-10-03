@@ -1,0 +1,13 @@
+{
+  "title": "Réception, contrôle et horaires",
+  "progress": "Exercice 3 / 7",
+  "phaseVisible": true,
+  "calculatorVisible": "block",
+  "buttons": [
+    "🧮 Ouvrir la calculatrice",
+    "➜ Suivant"
+  ],
+  "bodyTestId": "horaires_reception_controle",
+  "visualLayout": false,
+  "visualPanel": true
+}
