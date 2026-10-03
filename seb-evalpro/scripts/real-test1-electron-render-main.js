@@ -1,3 +1,4 @@
+// REAL PROGRAM RENDER — no preview HTML involved
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const fs = require('fs');
