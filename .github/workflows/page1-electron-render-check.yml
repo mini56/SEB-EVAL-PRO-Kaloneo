@@ -51,5 +51,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/render-check/electron-page1-*-1366x768-zoom085.png
           git diff --cached --quiet || git commit -m "Render integrated Page 1 in Electron at zoom 0.85"
-          git pull --rebase origin pilot10-page1-readability
-          git push origin HEAD:pilot10-page1-readability
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin pilot10-page1-readability
+            if git push origin HEAD:pilot10-page1-readability; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo "Impossible de publier les captures après 5 tentatives." >&2
+          exit 1
