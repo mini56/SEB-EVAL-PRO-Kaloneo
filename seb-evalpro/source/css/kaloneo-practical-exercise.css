@@ -397,3 +397,65 @@ body{
   .kaloneo-admin-help{font-size:15px;margin-bottom:4px}
   #validBtn{min-height:34px}
 }
+
+
+/* PILOTE 13 — LEGO : consignes verticales, image contenue et chrono plus aéré. */
+.kaloneo-consigne{
+  display:flex!important;
+  align-items:center!important;
+}
+.kaloneo-consigne .kaloneo-context-body{
+  width:100%;
+}
+.kaloneo-consigne ul{
+  display:block!important;
+  columns:1!important;
+  margin:4px 0 0 18px!important;
+  padding-left:18px!important;
+}
+.kaloneo-consigne li{
+  margin:3px 0!important;
+}
+.kaloneo-practical-left{
+  padding-bottom:24px!important;
+}
+.kaloneo-image-phase{
+  align-items:flex-start!important;
+  max-height:430px;
+  margin-bottom:14px;
+}
+.kaloneo-practical-image{
+  max-height:430px;
+}
+.kaloneo-practical-image img{
+  max-height:430px!important;
+  object-fit:contain!important;
+}
+.kaloneo-practical-right .kaloneo-control-card:first-child{
+  padding:14px 12px 13px!important;
+}
+.kaloneo-practical-right .kaloneo-control-card:first-child h2{
+  margin:0 0 8px!important;
+}
+.kaloneo-practical-right .kaloneo-chrono-display{
+  margin-bottom:12px!important;
+  font-size:58px;
+}
+.kaloneo-practical-right .kaloneo-chrono-buttons{
+  gap:14px!important;
+  margin-bottom:2px;
+}
+@media(max-height:800px){
+  .kaloneo-image-phase,
+  .kaloneo-practical-image,
+  .kaloneo-practical-image img{
+    max-height:410px!important;
+  }
+  .kaloneo-practical-right .kaloneo-control-card:first-child{
+    padding:10px 10px 9px!important;
+  }
+  .kaloneo-practical-right .kaloneo-chrono-display{
+    font-size:50px!important;
+    margin-bottom:9px!important;
+  }
+}
