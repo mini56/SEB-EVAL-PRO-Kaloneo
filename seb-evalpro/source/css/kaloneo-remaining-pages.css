@@ -492,3 +492,32 @@ body[data-kaloneo-page="carre"] .clue-right{border-color:var(--k-orange)!importa
   background:#fff!important;
   box-shadow:var(--k-shadow);
 }
+
+
+/* PILOTE 13 — Autoévaluations : 50/50 strict et aucun défilement horizontal. */
+body[data-kaloneo-page="autoeval1"] #pageAutoEval1,
+body[data-kaloneo-page="autoeval2"] #pageAutoEval2{
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+body[data-kaloneo-page="autoeval1"] .main,
+body[data-kaloneo-page="autoeval2"] .main{
+  width:100%!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  overflow:hidden!important;
+}
+body[data-kaloneo-page="autoeval1"] #left,
+body[data-kaloneo-page="autoeval1"] #right,
+body[data-kaloneo-page="autoeval2"] #left,
+body[data-kaloneo-page="autoeval2"] #right{
+  box-sizing:border-box!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+}
+body[data-kaloneo-page="autoeval1"] form,
+body[data-kaloneo-page="autoeval2"] form,
+body[data-kaloneo-page="autoeval1"] textarea,
+body[data-kaloneo-page="autoeval2"] textarea{
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
