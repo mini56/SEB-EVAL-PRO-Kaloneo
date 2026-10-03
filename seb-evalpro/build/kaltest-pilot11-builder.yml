@@ -26,4 +26,4 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: "SEB EvalPro Kalonéo - PILOTE 11"
   deleteAppDataOnUninstall: true
-  artifactName: "SEB-EvalPro-Kaloneo-PILOTE-11-0.0.11-Windows-Setup.${ext}"
+  artifactName: "SEB-EvalPro-Kaloneo-PILOTE-11-R2-Windows-Setup.${ext}"
