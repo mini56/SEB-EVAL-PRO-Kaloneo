@@ -35,6 +35,24 @@ app.whenReady().then(async()=>{
     await win.loadFile(page);
     win.webContents.setZoomFactor(0.85);
     await wait(700);
+    const chronoStyles=await win.webContents.executeJavaScript(`
+      (() => {
+        const start=getComputedStyle(document.getElementById('startBtn'));
+        const stop=getComputedStyle(document.getElementById('stopBtn'));
+        return {
+          startBorder:start.borderColor,
+          stopBorder:stop.borderColor,
+          startColor:start.color,
+          stopColor:stop.color,
+          startBackground:start.backgroundImage,
+          stopBackground:stop.backgroundImage
+        };
+      })()
+    `,true);
+    if(chronoStyles.startBorder!=='rgb(25, 135, 84)') throw new Error('Démarrer LEGO n’est pas vert dans Electron: '+JSON.stringify(chronoStyles));
+    if(chronoStyles.stopBorder!=='rgb(198, 40, 40)') throw new Error('Arrêter LEGO n’est pas rouge dans Electron: '+JSON.stringify(chronoStyles));
+    if(chronoStyles.startColor!=='rgb(255, 255, 255)' || chronoStyles.stopColor!=='rgb(255, 255, 255)') throw new Error('Texte chrono LEGO non blanc: '+JSON.stringify(chronoStyles));
+    if(chronoStyles.startBackground==='none' || chronoStyles.stopBackground==='none') throw new Error('Fond plein chrono LEGO absent: '+JSON.stringify(chronoStyles));
     await shot(win,'REAL-PROGRAM-LEGO-initial-1366x768-zoom085.png');
 
     await win.webContents.executeJavaScript(`
