@@ -516,6 +516,94 @@ body[data-seb-kaltest-id="calculs_poids_volumes"] .kaltest-heading h2 {
   font-size: 28px;
 }
 
+
+/* KALONÉO 40/60 — horaires avec visuel à gauche */
+.kaltest-schedule-visual-layout {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(300px, 2fr) minmax(0, 3fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.kaltest-schedule-work {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: start;
+  gap: 12px;
+  padding: 3px 0;
+}
+
+.kaltest-schedule-work .kaltest-table-wrap {
+  width: 100%;
+  overflow: visible;
+}
+
+.kaltest-schedule-work .kaltest-table {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 15px;
+}
+
+.kaltest-schedule-work .kaltest-table th {
+  padding: 5px 4px;
+  line-height: 1.12;
+  white-space: normal;
+}
+
+.kaltest-schedule-work .kaltest-table td {
+  padding: 4px 4px;
+  line-height: 1.12;
+}
+
+.kaltest-schedule-work .kaltest-table input {
+  min-height: 31px;
+  padding: 4px 5px;
+  font-size: 15.5px;
+}
+
+.kaltest-schedule-work .kaltest-averages {
+  margin-top: 0;
+  gap: 7px;
+}
+
+.kaltest-schedule-work .kaltest-average-row {
+  grid-template-columns: minmax(0,1fr) 155px;
+  padding: 7px 8px;
+  font-size: 15.5px;
+}
+
+body[data-seb-kaltest-id="horaires_reception_controle"] #kaltest-content {
+  padding: 9px 11px;
+}
+
+body[data-seb-kaltest-id="horaires_reception_controle"] .kaltest-context p,
+body[data-seb-kaltest-id="horaires_reception_controle"] .kaltest-context strong {
+  font-size: 16px;
+}
+
+body[data-seb-kaltest-id="horaires_reception_controle"] .kaltest-heading h2 {
+  font-size: 28px;
+}
+
+body[data-seb-kaltest-id="horaires_reception_controle"] .kaltest-progress {
+  font-size: 15px;
+}
+
+@media (max-height:760px) {
+  .kaltest-schedule-visual-layout { gap: 12px; }
+  .kaltest-schedule-work { gap: 7px; }
+  .kaltest-schedule-work .kaltest-table { font-size: 14px; }
+  .kaltest-schedule-work .kaltest-table th { padding: 3px; }
+  .kaltest-schedule-work .kaltest-table td { padding: 3px; }
+  .kaltest-schedule-work .kaltest-table input { min-height: 27px; font-size: 14.5px; }
+  .kaltest-schedule-work .kaltest-average-row { padding: 5px 7px; font-size: 14.5px; }
+}
+
 /* Texte à trous : même densité globale que Build #20, sans écraser la police. */
 .kaltest-word-bank {
   width: min(780px,100%);
