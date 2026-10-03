@@ -122,3 +122,32 @@ Le gabarit commun est `css/kaloneo-practical-exercise.css`.
 La page réelle conserve les identifiants fonctionnels historiques afin de préserver la sauvegarde et les résultats : `startBtn`, `stopBtn`, `temps`, `nivDiff`, `secretCode`, `validBtn`, `autoEvalPart`, `autoEvalForm`, `autoEvalBtn`.
 
 La page doit être contrôlée dans Electron en 1366×768 au zoom adaptatif réel.
+
+
+## Gabarit Stock 35/65
+
+Pour l'exercice `stock` / Ranger le stock de produits :
+
+- en haut :
+  - **Scénario pleine largeur** ;
+  - **Consigne pleine largeur** ;
+- zone interactive :
+  - **35 % à gauche** : pots à ranger + zone de tri ;
+  - **65 % à droite** : casiers 1, 2 et 3 avec leurs emplacements ;
+- en bas :
+  - bouton **Vérifier**, puis **Suivant** après validation ;
+  - abandon commun SEB EvalPro disponible.
+
+Le gabarit réel utilise `css/kaloneo-stock.css`.
+
+Le moteur historique `stock-page.js` est conservé sans modification fonctionnelle : 34 flacons, 33 évalués, exemple, doublons, placements exacts, sauvegarde/reprise et Résultats.
+
+### Test réel validé
+
+Le contrôle Electron en 1366×768 au zoom réel a vérifié :
+- 34 flacons et 35 emplacements ;
+- ratio visuel 35/65 ;
+- placement des 33 flacons évalués ;
+- score 33/33, 0 erreur ;
+- passage du bouton Vérifier à Suivant ;
+- restauration complète après rechargement.
