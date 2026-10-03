@@ -2003,3 +2003,51 @@ Texte de référence :
 La barre Admin reste une barre d'accès et de navigation.
 
 Les fonctions détaillées de gestion des tests et des parcours restent regroupées dans leur page dédiée afin de ne pas surcharger la barre principale.
+
+
+---
+
+## 58. PILOTE 11 — ordre réel du parcours sans doublons
+
+**Statut : VALIDÉ — 3 octobre 2026**
+
+Le PILOTE 11 ne doit plus jouer les sept migrations KALTEST en un bloc au début du parcours.
+
+Les exercices migrés sont replacés à la position fonctionnelle correspondant au parcours historique, et remplacent l'ancienne page équivalente au lieu de s'y ajouter.
+
+### Ordre PILOTE 11 validé
+
+1. Page 1 KALONÉO — Identification ;
+2. Page 2 KALONÉO — Introduction ;
+3. Calculs commandes atelier — KALTEST ;
+4. Calculs poids / volumes — KALTEST ;
+5. Horaires réception / contrôle — KALTEST ;
+6. Texte à trous — KALTEST ;
+7. Page 4 — fractions / nuage ;
+8. Page 5 — organisation ;
+9. Page 5_1 — postures ;
+10. Conversions en atelier — KALTEST, en remplacement de l'ancienne Page 6 ;
+11. Autoévaluation 1 ;
+12. Introduction vidéo Briques ;
+13. LEGO / Briques ;
+14. Stock ;
+15. Planning ;
+16. Genre / Nombre — KALTEST, en remplacement de l'ancienne page Genre / Nombre ;
+17. Dictée ;
+18. Tri de chevilles ;
+19. Traitement de texte ;
+20. Mail ;
+21. Autoévaluation 2 ;
+22. Paronymes — KALTEST, en remplacement de l'ancienne page Paronymes ;
+23. Carré magique ;
+24. QCM page 11 ;
+25. Page finale.
+
+### Règles anti-régression
+
+- aucun exercice migré ne doit être exécuté deux fois ;
+- les anciennes pages `genrenombres.html`, `paronymes.html` et l'ancienne Page 6 restent disponibles pour le parcours historique, mais sont remplacées par leur version KALTEST dans le mode PILOTE 11 ;
+- les Pages 4, 5 et 5_1 restent obligatoires tant qu'elles ne sont pas elles-mêmes migrées ;
+- le parcours historique reste inchangé en dehors du mode PILOTE 11 ;
+- le mode PILOTE 11 est conservé dans la session afin que toutes les pages utilisent le même registre jusqu'à la page finale ;
+- un contrôle Electron du parcours complet doit vérifier l'ordre et l'absence de doublons.
