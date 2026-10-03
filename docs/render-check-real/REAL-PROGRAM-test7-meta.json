@@ -1,0 +1,13 @@
+{
+  "title": "Paronymes",
+  "progress": "Exercice 7 / 7",
+  "phaseVisible": true,
+  "calculatorVisible": "block",
+  "buttons": [
+    "🧮 Ouvrir la calculatrice",
+    "Terminer le parcours"
+  ],
+  "bodyTestId": "paronymes_rapport",
+  "visualLayout": false,
+  "visualPanel": false
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Texte à trous — Stage en logistique",
+  "progress": "Exercice 4 / 7",
+  "phaseVisible": true,
+  "calculatorVisible": "block",
+  "buttons": [
+    "🧮 Ouvrir la calculatrice",
+    "➜ Suivant"
+  ],
+  "bodyTestId": "texte_a_trous_stage_logistique",
+  "visualLayout": false,
+  "visualPanel": true
+}

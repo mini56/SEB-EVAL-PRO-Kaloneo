@@ -1,0 +1,13 @@
+{
+  "title": "Conversions en atelier d'expédition",
+  "progress": "Exercice 5 / 7",
+  "phaseVisible": true,
+  "calculatorVisible": "block",
+  "buttons": [
+    "🧮 Ouvrir la calculatrice",
+    "➜ Suivant"
+  ],
+  "bodyTestId": "conversions_atelier_expedition",
+  "visualLayout": false,
+  "visualPanel": true
+}
