@@ -1,0 +1,11 @@
+{
+  "title": "Calculs de commandes en atelier",
+  "progress": "Exercice 1 / 7",
+  "phaseVisible": true,
+  "calculatorVisible": "block",
+  "buttons": [
+    "🧮 Ouvrir la calculatrice",
+    "➜ Suivant"
+  ],
+  "bodyTestId": "calculs_commandes_atelier"
+}
