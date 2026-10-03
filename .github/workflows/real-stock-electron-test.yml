@@ -1,0 +1,52 @@
+name: Real Stock Electron test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - pilot10-page1-readability
+    paths:
+      - 'seb-evalpro/source/stock.html'
+      - 'seb-evalpro/source/css/kaloneo-stock.css'
+      - 'seb-evalpro/source/js/stock-page.js'
+      - 'seb-evalpro/scripts/real-stock-electron-test-main.js'
+      - '.github/workflows/real-stock-electron-test.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: seb-evalpro
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Prepare real SEB EvalPro web app
+        run: npm run prepare:web
+
+      - name: Run real Stock functional test in Electron
+        run: xvfb-run -a npx electron --no-sandbox scripts/real-stock-electron-test-main.js
+
+      - name: Commit real Stock proof
+        working-directory: .
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/render-check-real/REAL-PROGRAM-STOCK-*
+          git diff --cached --quiet || git commit -m "Capture real SEB EvalPro Stock functional test"
+          git pull --rebase origin pilot10-page1-readability
+          git push origin HEAD:pilot10-page1-readability
