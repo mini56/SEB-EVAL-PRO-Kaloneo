@@ -392,6 +392,7 @@
 
       const unit = document.createElement('td');
       unit.appendChild(makeUnitInput(test, question));
+      applyTableColumnPresentation(unit, columnPresentation[2]);
       tr.appendChild(unit);
 
       tbody.appendChild(tr);
@@ -566,6 +567,18 @@
     host.appendChild(wrapper);
   }
 
+  function applyTableColumnPresentation(cell, definition) {
+    if (!cell || !definition) return;
+    const widthChars = Number(definition.widthChars);
+    if (Number.isFinite(widthChars) && widthChars >= 3) {
+      cell.style.width = widthChars + 'ch';
+      cell.style.minWidth = widthChars + 'ch';
+      cell.style.maxWidth = widthChars + 'ch';
+    }
+    if (definition.align === 'center') cell.style.textAlign = 'center';
+    if (definition.align === 'left') cell.style.textAlign = 'left';
+  }
+
   function renderConversions(test, host) {
     const questions = renderQuestionList(test);
 
@@ -576,9 +589,11 @@
 
     const thead = document.createElement('thead');
     const head = document.createElement('tr');
-    (test.presentation?.responseTable?.headers || ['N°','Réponses','Unités','Opérations effectuées']).forEach(label => {
+    const columnPresentation = test.presentation?.responseTable?.columns || [];
+    (test.presentation?.responseTable?.headers || ['N°','Réponses','Unités','Opérations effectuées']).forEach((label, columnIndex) => {
       const th = document.createElement('th');
       th.textContent = label;
+      applyTableColumnPresentation(th, columnPresentation[columnIndex]);
       head.appendChild(th);
     });
     thead.appendChild(head);
@@ -591,10 +606,12 @@
       const number = document.createElement('td');
       number.className = 'kaltest-row-label';
       number.textContent = String(index + 1);
+      applyTableColumnPresentation(number, columnPresentation[0]);
       tr.appendChild(number);
 
       const answer = document.createElement('td');
       answer.appendChild(makeInput(test, question, { compact:true }));
+      applyTableColumnPresentation(answer, columnPresentation[1]);
       tr.appendChild(answer);
 
       const unit = document.createElement('td');
@@ -604,6 +621,7 @@
       const operation = document.createElement('td');
       const field = question.supplementalFields?.[0];
       if (field) operation.appendChild(makeSupplementalInput(test, question, field));
+      applyTableColumnPresentation(operation, columnPresentation[3]);
       tr.appendChild(operation);
 
       tbody.appendChild(tr);
