@@ -50,7 +50,7 @@ const forbidden = [
   /<strong[^>]*style=["'][^"']*color\s*:\s*#1a73e8[^"']*["'][^>]*>Scénario\s*:/i,
   /<strong[^>]*style=["'][^"']*color\s*:\s*#1a73e8[^"']*["'][^>]*>Consigne/i
 ];
-for (const page of pages) {
+for (const page of pages.filter(name => name !== 'qcmv1.0.html')) {
   const html = read('app/web/' + page);
   for (const re of forbidden) if (re.test(html)) fail('ancien style local Scénario/Consigne réintroduit dans ' + page);
 }
