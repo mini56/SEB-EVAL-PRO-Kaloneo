@@ -349,6 +349,7 @@ href='data:image/svg+xml;utf8,
 </svg>'>
 <link rel="stylesheet" href="css/kaloneo-remaining-pages.css">
 <link rel="stylesheet" href="css/seb-in-app-alert.css" id="seb-evalpro-in-app-alert-css">
+<link rel="stylesheet" href="css/kaloneo-context.css">
 </head>
 
 <body data-kaloneo-page="tri">
@@ -360,28 +361,37 @@ href='data:image/svg+xml;utf8,
         </h1>
         <!--img class="icon-svg" src="imageqcm/avatar_transparant.png" alt="Avatar décoratif"-->
       </div>
-      <div><p><img src="imageqcm/scenario.png" alt="scenario.png" width="65" height="65" style="margin-right:8px; float : left ;"><strong style="color:#1a73e8;">Scénario :</strong>
-Une mauvaise manipulation a provoqué la chute d’une caisse entière de chevilles au chargement du camion, semant le désordre, tout est mélangé. Un client important attend sa commande en urgence, et la production est à l’arrêt. Toute l’équipe est mobilisée pour remettre de l’ordre, trier les boîtes de chevilles par couleurs et permettre à la livraison d’être honorée dans les temps. Chacun des employés doit trier de trois à cinq boîtes de chevilles, selon le temps disponible, et noter les temps passés.</p></div>
+      <section class="kaloneo-context-card kaloneo-context-scenario tri-scenario">
+        <img src="imageqcm/scenario.png" alt="Scénario">
+        <div class="kaloneo-context-body">
+          <strong class="kaloneo-context-label">Scénario :</strong>
+          <span class="kaloneo-context-text">Une mauvaise manipulation a provoqué la chute d’une caisse entière de chevilles au chargement du camion, semant le désordre, tout est mélangé. Un client important attend sa commande en urgence, et la production est à l’arrêt. Toute l’équipe est mobilisée pour remettre de l’ordre, trier les boîtes de chevilles par couleurs et permettre à la livraison d’être honorée dans les temps. Chacun des employés doit trier de trois à cinq boîtes de chevilles, selon le temps disponible, et noter les temps passés.</span>
+        </div>
+      </section>
     </div>
 
     <div class="main">
       <!-- Colonne gauche -->
       <div id="left">
         <!-- Bloc1 -->
-        <div id="consigne">
-		
-          <h1> <img src="imageqcm/avatar_transparant.png" alt="avatar" width="45" height="45" style="margin-right:8px;"> Consignes :</h1>
-          <p><strong>Lisez les indications avant de commencer l’exercice :</strong></p>
-          <ul>
-            <li>Pour chaque boîte de chevilles, cliquez sur <strong>Démarrer le chronomètre</strong> au moment où vous commencez le tri.</li>
-            <li>Lorsque le tri est terminé, cliquez sur <strong>Arrêter le chronomètre</strong>. Le temps est automatiquement reporté dans les cases Minutes et Secondes.</li>
-            <li>Le curseur se place ensuite dans la case <strong>Erreurs</strong> du tri correspondant. Saisissez le nombre d’erreurs, même s’il est égal à <strong>0</strong>.</li>
-            <li>Après la saisie des erreurs, le chronomètre revient à <strong>00:00</strong> et le tri suivant peut commencer.</li>
-            <li>Effectuez entre <strong>3 et 5 tris</strong> selon le temps disponible pour le plateau.</li>
-            <li>À partir de 3 tris complets, cliquez sur <strong>Voir les résultats</strong> pour afficher votre moyenne, le nombre total d’erreurs et compléter votre autoévaluation personnelle.</li>
-          </ul>
-        
- <div><p><img src="imageqcm/chariot.png" alt="img_chariot" width="480" height="370" style=" margin: auto; display: block;"></div></div>
+        <div id="consigne" class="kaloneo-context-card kaloneo-context-consigne tri-consigne">
+          <img src="imageqcm/avatar_transparant.png" alt="Consigne">
+          <div class="kaloneo-context-body">
+            <strong class="kaloneo-context-label">Consigne :</strong>
+            <span class="kaloneo-context-text">Lisez les indications avant de commencer l’exercice :</span>
+            <div class="kaloneo-context-details">
+              <ul>
+                <li>Pour chaque boîte de chevilles, cliquez sur <strong>Démarrer le chronomètre</strong> au moment où vous commencez le tri.</li>
+                <li>Lorsque le tri est terminé, cliquez sur <strong>Arrêter le chronomètre</strong>. Le temps est automatiquement reporté dans les cases Minutes et Secondes.</li>
+                <li>Le curseur se place ensuite dans la case <strong>Erreurs</strong> du tri correspondant. Saisissez le nombre d’erreurs, même s’il est égal à <strong>0</strong>.</li>
+                <li>Après la saisie des erreurs, le chronomètre revient à <strong>00:00</strong> et le tri suivant peut commencer.</li>
+                <li>Effectuez entre <strong>3 et 5 tris</strong> selon le temps disponible pour le plateau.</li>
+                <li>À partir de 3 tris complets, cliquez sur <strong>Voir les résultats</strong> pour afficher votre moyenne, le nombre total d’erreurs et compléter votre autoévaluation personnelle.</li>
+              </ul>
+              <img class="tri-illustration" src="imageqcm/chariot.png" alt="Illustration logistique">
+            </div>
+          </div>
+        </div>
         <!-- Partie Autoévaluation (cachée au début) -->
         <div id="autoEvalPart">
 	  <!-- Bloc2-->

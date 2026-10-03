@@ -48,8 +48,8 @@ app.whenReady().then(async()=>{
           stopBackground:stop.backgroundImage,
           startClass:document.getElementById('startBtn')?.className||'',
           stopClass:document.getElementById('stopBtn')?.className||'',
-          consigneFont:getComputedStyle(document.querySelector('.kaloneo-consigne h2')).fontFamily,
-          consigneWeight:getComputedStyle(document.querySelector('.kaloneo-consigne h2')).fontWeight
+          consigneFont:getComputedStyle(document.querySelector('.kaloneo-consigne .kaloneo-context-label')).fontFamily,
+          consigneWeight:getComputedStyle(document.querySelector('.kaloneo-consigne .kaloneo-context-label')).fontWeight
         };
       })()
     `,true);

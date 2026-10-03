@@ -627,6 +627,7 @@ html.seb-results-page-scroll body {
   overflow-x: hidden !important;
 }
 </style>
+<link rel="stylesheet" href="css/kaloneo-context.css">
 </head>
 <body>
 <!-- === CALCULATRICE : structure unique, présente dans tout le SPA === -->
@@ -1101,13 +1102,18 @@ html.seb-results-page-scroll body {
   <script src="js/qcm-texte-trous.js"></script>
 
   <div id="page4" class="page">
-  <p><img src="imageqcm/scenario.png" alt="scenario.png" width="45" height="45" style="margin-right:8px;"><strong style="color:#1a73e8;">Scénario :</strong></p><p> Vous êtes en train de préparer des lots de pièces dans l'atelier. Certaines pièces sont regroupées par type et doivent être
-   emballées selon des fractions précises.</p>
-	 <div style="display:flex; align-items:center; margin-bottom:10px;">
-      <img src="imageqcm/avatar_transparant.png" alt="avatar" width="45" height="45" style="margin-right:8px;">
-		<p><strong style="color:#1a73e8;">Consigne :</strong>  Sélectionnez pour chaque fraction indiquée, le nombre d'images correspondant à celle-ci.</p>
-</div>
+  <section class="k-qcm-context k-qcm-scenario kaloneo-context-card kaloneo-context-scenario">
+    <img src="imageqcm/scenario.png" alt="Scénario">
+    <div class="kaloneo-context-body"><strong class="kaloneo-context-label">Scénario :</strong><span class="kaloneo-context-text">Vous êtes en train de préparer des lots de pièces dans l'atelier. Certaines pièces sont regroupées par type et doivent être emballées selon des fractions précises.</span></div>
+  </section>
+  <section class="k-qcm-context k-qcm-consigne kaloneo-context-card kaloneo-context-consigne">
+    <img src="imageqcm/avatar_transparant.png" alt="Consigne">
+    <div class="kaloneo-context-body"><strong class="kaloneo-context-label">Consigne :</strong><span class="kaloneo-context-text">Sélectionnez pour chaque fraction indiquée, le nombre d'images correspondant à celle-ci.</span></div>
+  </section>
 
+  <div class="k-qcm-split k-qcm-fractions-layout">
+    <div class="k-qcm-visual"><img src="imageqcm/chariot.png" alt="Illustration de préparation de lots"></div>
+    <div class="k-qcm-exercise">
 <div class="fractions">
   <!-- fraction 3/4 -->
   <button class="fraction-title">Fraction 3/4 <img src="imageqcm/image3.png" width="35" height="35" style="border: 2px solid #000; border-radius: 4px;"></button>
@@ -1149,7 +1155,8 @@ html.seb-results-page-scroll body {
     <div class="item" tabindex="0" role="button" aria-pressed="false" style="background-image:url('imageqcm/image1.png')"></div>
   </div>
 </div>
-<br>
+    </div>
+  </div>
 	<div class="tablecenter">
    <button id="page4Pass" type="button" class="passez">Passez</button>	
    <button id="page4Next" type="button" class="suivant">Suivant</button>
@@ -1159,15 +1166,18 @@ html.seb-results-page-scroll body {
   <script src="js/qcm-page4.js"></script>
 
   <div id="page5" class="page">
-  <!--h2>Page 5</h2-->
-  <p><img src="imageqcm/scenario.png" alt="scenario.png" width="45" height="45" style="margin-right:8px;"><strong style="color:#1a73e8;">Scénario :</strong></p><p> L'entreprise va ouvrir un deuxième atelier. Vous participez à l'équipe chargée de déménager une partie du stock de pièces 
-  et de machines et de préparer les nouveaux locaux. Pour que tout se déroule efficacement, il faut planifier l'ordre des étapes correctement.</p>
-	 <div style="display:flex; align-items:center; margin-bottom:10px;">
-      <p><img src="imageqcm/avatar_transparant.png" alt="avatar" width="45" height="45" style="margin-right:8px;"></p>
-      <p><strong style="color:#1a73e8;">Consigne :</strong> Numérotez les actions de 1 à 8 pour organiser le déménagement dans le bon ordre.</p>
-	  </div>
-	  <br>
+  <section class="k-qcm-context k-qcm-scenario kaloneo-context-card kaloneo-context-scenario">
+    <img src="imageqcm/scenario.png" alt="Scénario">
+    <div class="kaloneo-context-body"><strong class="kaloneo-context-label">Scénario :</strong><span class="kaloneo-context-text">L'entreprise va ouvrir un deuxième atelier. Vous participez à l'équipe chargée de déménager une partie du stock de pièces et de machines et de préparer les nouveaux locaux. Pour que tout se déroule efficacement, il faut planifier l'ordre des étapes correctement.</span></div>
+  </section>
+  <section class="k-qcm-context k-qcm-consigne kaloneo-context-card kaloneo-context-consigne">
+    <img src="imageqcm/avatar_transparant.png" alt="Consigne">
+    <div class="kaloneo-context-body"><strong class="kaloneo-context-label">Consigne :</strong><span class="kaloneo-context-text">Numérotez les actions de 1 à 8 pour organiser le déménagement dans le bon ordre.</span></div>
+  </section>
 
+  <div class="k-qcm-split k-qcm-organisation-layout">
+    <div class="k-qcm-visual"><img src="imageqcm/demenagement.png" alt="Illustration du déménagement d'atelier"></div>
+    <div class="k-qcm-exercise">
 	  <table>
 	  <p> <input class="step"  type="text" maxlength="1" style="width:30px;" id="reponse5_1">   Emballer les pièces et protéger les machines fragiles.</p>
 	  <p> <input class="step"  type="text" maxlength="1" style="width:30px;" id="reponse5_2">   Décharger le camion et positionner les machines.</p>
@@ -1178,6 +1188,8 @@ html.seb-results-page-scroll body {
 	  <p> <input class="step"  type="text" maxlength="1" style="width:30px;" id="reponse5_7">   Préparer le planning des premières productions dans le nouvel atelier.</p>
 	  <p> <input class="step"  type="text" maxlength="1" style="width:30px;" id="reponse5_8">   Vérifier que tout le matériel est intact et fonctionnel.</p>
 	  </table>
+    </div>
+  </div>
 	  <div class="tablecenter">
 	    <button id="page5Pass" type="button" class="passez">Passez</button>
 		<button id="page5Next" type="button" class="suivant">Suivant</button>
@@ -1188,13 +1200,14 @@ html.seb-results-page-scroll body {
 
 <!--- Page 5--->
   <div id="page5_1" class="page">
-<br>
-<p><img src="imageqcm/scenario.png" alt="scenario.png" width="45" height="45" style="margin-right:8px;"><strong style="color:#1a73e8;">Scénario :</strong></p><p> Pour ce déménagement, vous avez été sensibilisé-e aux bons gestes professionnels. Vous devez les transmettre à un collègue qui n'était pas là.</p>
-	 <div style="display:flex; align-items:center; margin-bottom:10px;">
-      <img src="imageqcm/avatar_transparant.png" alt="avatar" width="45" height="45" style="margin-right:8px;">
-      <p><strong style="color:#1a73e8;">Consigne :</strong> Sélectionnez les trois bonnes postures parmi les six images proposées.</p>
-	  </div>
-	  <br>
+<section class="k-qcm-context k-qcm-scenario kaloneo-context-card kaloneo-context-scenario">
+  <img src="imageqcm/scenario.png" alt="Scénario">
+  <div class="kaloneo-context-body"><strong class="kaloneo-context-label">Scénario :</strong><span class="kaloneo-context-text">Pour ce déménagement, vous avez été sensibilisé-e aux bons gestes professionnels. Vous devez les transmettre à un collègue qui n'était pas là.</span></div>
+</section>
+<section class="k-qcm-context k-qcm-consigne kaloneo-context-card kaloneo-context-consigne">
+  <img src="imageqcm/avatar_transparant.png" alt="Consigne">
+  <div class="kaloneo-context-body"><strong class="kaloneo-context-label">Consigne :</strong><span class="kaloneo-context-text">Sélectionnez les trois bonnes postures parmi les six images proposées.</span></div>
+</section>
 	  <div style="display:flex; justify-content:center; margin-bottom:10px;">
       <img src="imageqcm/qcm_posture.png" alt="qcm_posture" width="567" height="375" style="margin-right:8px;">
 	  </div>
