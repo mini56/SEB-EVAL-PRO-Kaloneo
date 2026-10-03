@@ -1,4 +1,4 @@
-# PILOT11_R2_RETRY_1
+# PILOT11_R3
 name: Build Windows KALTEST Pilot 11 full parcours
 
 on:
@@ -103,7 +103,7 @@ jobs:
       - name: Verify Pilot 11 setup
         shell: pwsh
         run: |
-          $setup = Get-ChildItem -Path dist -Filter 'SEB-EvalPro-Kaloneo-PILOTE-11-R2-Windows-Setup.exe' -File | Select-Object -First 1
+          $setup = Get-ChildItem -Path dist -Filter 'SEB-EvalPro-Kaloneo-PILOTE-11-R3-Windows-Setup.exe' -File | Select-Object -First 1
           if (-not $setup) { throw 'Setup PILOTE 11 introuvable.' }
           $hash = (Get-FileHash -Algorithm SHA256 $setup.FullName).Hash.ToUpperInvariant()
           "SETUP_PATH=$($setup.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
@@ -115,8 +115,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SEB-EvalPro-Kaloneo-PILOTE-11-R2-Windows
-          path: seb-evalpro/dist/SEB-EvalPro-Kaloneo-PILOTE-11-R2-Windows-Setup.exe
+          name: SEB-EvalPro-Kaloneo-PILOTE-11-R3-Windows
+          path: seb-evalpro/dist/SEB-EvalPro-Kaloneo-PILOTE-11-R3-Windows-Setup.exe
           if-no-files-found: error
 
       - name: Publish Pilot 11 release
@@ -124,20 +124,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'seb-kaloneo-pilot-011-r2'
-          $title = 'SEB EvalPro Kalonéo — PILOTE #11 R2'
+          $tag = 'seb-kaloneo-pilot-011-r3'
+          $title = 'SEB EvalPro Kalonéo — PILOTE #11 R3'
           if (gh release view $tag 2>$null) { throw "La Release $tag existe deja." }
           $notes = @"
-          PILOTE #11 R2 Windows — parcours complet remis dans l'ordre réel.
+          PILOTE #11 R3 Windows — corrections issues du test réel.
 
-          Correction principale :
-          - les 7 migrations KALTEST ne sont plus jouées en bloc au début ;
-          - Pages 4, 5 et 5_1 sont restaurées à leur place ;
-          - Conversions remplace l'ancienne Page 6 ;
-          - Genre / Nombre est joué à sa place après Planning ;
-          - Paronymes est joué à sa place après Autoévaluation 2 ;
-          - aucune ancienne page équivalente n'est rejouée ensuite ;
-          - LEGO / Briques et Stock restent dans leur position validée.
+          Corrections principales :
+          - chronomètre KALONÉO : fond Crystal clair, texte + contour verts pour Démarrer, rouges pour Arrêter ;
+          - Texte à trous : retour à la ligne à la fin de chaque phrase ;
+          - LEGO / Briques : police du titre Consignes alignée sur la police principale KALONÉO ;
+          - parcours complet R2 conservé sans doublon ;
+          - largeur de la colonne N° de Conversions volontairement non modifiée en attente d'une règle KALONÉO générique.
 
           Vérifications avant publication :
           - parcours historique inchangé hors mode PILOTE 11 ;
