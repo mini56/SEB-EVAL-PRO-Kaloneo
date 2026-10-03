@@ -31,7 +31,7 @@ jobs:
         run: |
           node scripts/kaloneo-build-page.js source/kaloneo/definitions/page1-start.js source/kaloneo/generated/page1-start.generated.html
           node scripts/kaloneo-build-page.js source/kaloneo/definitions/page2-intro.js source/maquette-page2-kaloneo.html
-          node scripts/kaloneo-build-test-page.js ../tests/fixtures/kaltests/calculs-commandes-atelier/1.0.0/test.json source/maquette-test1-kaloneo.html 1 7
+          node scripts/kaloneo-build-test-page.js tests/fixtures/kaltests/calculs-commandes-atelier/1.0.0/test.json source/maquette-test1-kaloneo.html 1 7
 
       - name: Publish generated Page 1 to existing preview path
         shell: bash
