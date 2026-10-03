@@ -1,0 +1,29 @@
+appId: fr.sauvegarde56.sebevalpro.kaloneo.pilot13
+productName: "SEB EvalPro Kalonéo - PILOTE 13"
+asar: true
+compression: store
+
+directories:
+  buildResources: build/pilot-resources
+
+extraMetadata:
+  main: src/kaltest-pilot13-main.js
+  version: 0.0.13
+
+files:
+  - src/**/*
+  - app/**/*
+  - package.json
+
+win:
+  target:
+    - nsis
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: "SEB EvalPro Kalonéo - PILOTE 13"
+  deleteAppDataOnUninstall: true
+  artifactName: "SEB-EvalPro-Kaloneo-PILOTE-13-0.0.13-Windows-Setup.${ext}"
