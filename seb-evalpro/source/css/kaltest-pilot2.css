@@ -819,6 +819,203 @@ body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context {
 }
 
 
+
+/* KALONÉO — Texte à trous 40/60, Conversions 60/40, Paronymes plein écran */
+.kaltest-inline-visual-layout,
+.kaltest-conversions-visual-layout{
+  width:100%;
+  height:100%;
+  min-height:0;
+  display:grid;
+  gap:14px;
+  align-items:stretch;
+}
+
+.kaltest-inline-visual-layout{
+  grid-template-columns:minmax(300px,2fr) minmax(0,3fr);
+}
+
+.kaltest-conversions-visual-layout{
+  grid-template-columns:minmax(0,3fr) minmax(300px,2fr);
+}
+
+.kaltest-inline-work,
+.kaltest-conversions-work{
+  min-width:0;
+  min-height:0;
+}
+
+.kaltest-inline-work{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  padding:4px 2px;
+  overflow:auto;
+}
+
+.kaltest-inline-work .kaltest-word-bank{
+  flex:0 0 auto;
+}
+
+.kaltest-inline-work .kaltest-inline-flow{
+  flex:1 1 auto;
+  padding:10px 12px;
+  border:1px solid rgba(0,78,112,.18);
+  border-radius:10px;
+  background:rgba(255,255,255,.94);
+  font-size:17px;
+  line-height:1.55;
+}
+
+body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] #kaltest-content{
+  padding:7px 9px;
+}
+
+body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] .kaltest-word-bank span{
+  font-size:15px;
+}
+
+.kaltest-conversions-work{
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  gap:8px;
+  overflow:hidden;
+}
+
+.kaltest-conversions-work .kaltest-question-list{
+  margin:0;
+  padding:2px 8px 2px 28px;
+  font-size:15px;
+  line-height:1.18;
+  overflow:auto;
+}
+
+.kaltest-conversions-work .kaltest-question-list li{
+  margin:3px 0;
+}
+
+.kaltest-conversions-work .kaltest-table-wrap{
+  min-height:0;
+  overflow:auto;
+}
+
+.kaltest-conversions-table{
+  width:100%;
+  table-layout:fixed;
+  font-size:15px;
+}
+
+.kaltest-conversions-table th{
+  padding:4px 5px;
+  line-height:1.1;
+}
+
+.kaltest-conversions-table td{
+  padding:3px 4px;
+}
+
+.kaltest-conversions-table input{
+  min-height:29px;
+  font-size:15px;
+}
+
+body[data-seb-kaltest-id="conversions_atelier_expedition"] #kaltest-content{
+  padding:7px 9px;
+}
+
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-context p,
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-context strong{
+  font-size:16px;
+}
+
+/* Paronymes : Scénario et Consigne restent les blocs pleine largeur du shell.
+   La zone d'exercice occupe ensuite 100 %, avec un second bloc interne à 100 %. */
+.kaltest-choice-fullwidth-outer{
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  padding:6px;
+  display:flex;
+  border:1px solid rgba(0,78,112,.18);
+  border-radius:11px;
+  background:rgba(255,255,255,.94);
+  overflow:hidden;
+}
+
+.kaltest-choice-fullwidth-inner{
+  width:100%;
+  min-width:0;
+  min-height:0;
+  overflow:auto;
+}
+
+.kaltest-choice-fullwidth-inner .kaltest-choice-table{
+  width:100%;
+  min-width:0;
+  table-layout:fixed;
+  font-size:15px;
+}
+
+.kaltest-choice-fullwidth-inner .kaltest-choice-table th{
+  padding:4px 5px;
+  line-height:1.08;
+  font-size:15px;
+}
+
+.kaltest-choice-fullwidth-inner .kaltest-choice-table td{
+  padding:3px 4px;
+  line-height:1.08;
+  font-size:15px;
+}
+
+.kaltest-choice-fullwidth-inner .kaltest-choice-table .kaltest-row-label{
+  width:15%;
+}
+
+body[data-seb-kaltest-id="paronymes_rapport"] #kaltest-content{
+  padding:5px 8px;
+}
+
+body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context{
+  min-height:44px;
+  padding-top:3px;
+  padding-bottom:3px;
+}
+
+body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context p,
+body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context strong{
+  font-size:16px;
+}
+
+@media(max-height:760px){
+  .kaltest-inline-visual-layout,
+  .kaltest-conversions-visual-layout{gap:9px}
+
+  .kaltest-inline-work .kaltest-inline-flow{
+    padding:7px 9px;
+    font-size:15px;
+    line-height:1.42;
+  }
+
+  .kaltest-conversions-work{gap:5px}
+
+  .kaltest-conversions-work .kaltest-question-list{
+    font-size:15px;
+    line-height:1.12;
+  }
+
+  .kaltest-conversions-table,
+  .kaltest-conversions-table input,
+  .kaltest-choice-fullwidth-inner .kaltest-choice-table,
+  .kaltest-choice-fullwidth-inner .kaltest-choice-table th,
+  .kaltest-choice-fullwidth-inner .kaltest-choice-table td{
+    font-size:15px;
+  }
+
+  .kaltest-choice-fullwidth-outer{padding:4px}
+}
+
 /* PILOTE 7 — page candidat accueillante et prise en main KALONÉO */
 
 /* La page d'identification utilise désormais deux colonnes lisibles et des champs
