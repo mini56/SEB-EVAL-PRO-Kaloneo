@@ -50,7 +50,28 @@
         "Unités",
         "Opérations effectuées"
       ],
-      "roundedInstitutionalStyle": true
+      "roundedInstitutionalStyle": true,
+      "columns": [
+        {
+          "id": "number",
+          "widthChars": 5,
+          "align": "center"
+        },
+        {
+          "id": "answer",
+          "widthChars": 14,
+          "align": "center"
+        },
+        {
+          "id": "unit",
+          "widthChars": 12,
+          "align": "center"
+        },
+        {
+          "id": "operation",
+          "align": "left"
+        }
+      ]
     },
     "kaloneoLayout": {
       "type": "work-visual",
