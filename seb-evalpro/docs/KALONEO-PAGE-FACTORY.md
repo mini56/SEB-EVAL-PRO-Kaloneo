@@ -107,21 +107,16 @@ Pour `horaires_reception_controle` :
 - cette disposition est déclarée par `presentation.kaloneoLayout.type = "visual-schedule"` et `ratio = "40/60"`.
 
 
-## Gabarit exercice pratique LEGO 50/50
+## Gabarit exercice pratique LEGO — contexte pleine largeur + 50/50
 
 Pour l'exercice `brique` / Construction à base de briques :
 
-- **50 % à gauche** :
+- en haut, **deux blocs pleine largeur** :
   - scénario et tâche ;
   - consignes ;
-  - image de référence de l'exercice ;
-  - l'autoévaluation remplace ensuite cette zone après validation de l'exercice ;
-- **50 % à droite** :
-  - chronomètre ;
-  - temps enregistré ;
-  - nombre d'erreurs ;
-  - déblocage administrateur ;
-  - bouton de validation.
+- en dessous, une zone de travail **50/50** :
+  - **50 % à gauche** : image de référence de l'exercice ; l'autoévaluation remplace ensuite cette image après validation ;
+  - **50 % à droite** : chronomètre, temps enregistré, nombre d'erreurs, déblocage administrateur et bouton de validation.
 
 Le gabarit commun est `css/kaloneo-practical-exercise.css`.
 La page réelle conserve les identifiants fonctionnels historiques afin de préserver la sauvegarde et les résultats : `startBtn`, `stopBtn`, `temps`, `nivDiff`, `secretCode`, `validBtn`, `autoEvalPart`, `autoEvalForm`, `autoEvalBtn`.
