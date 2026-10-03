@@ -683,6 +683,18 @@
     table.appendChild(tbody);
 
     const configured = test.presentation?.kaloneoLayout;
+
+    if (configured?.type === 'full-width-choice-table') {
+      const outer = document.createElement('section');
+      outer.className = 'kaltest-choice-fullwidth-outer';
+      const inner = document.createElement('div');
+      inner.className = 'kaltest-choice-fullwidth-inner';
+      inner.appendChild(table);
+      outer.appendChild(inner);
+      host.appendChild(outer);
+      return;
+    }
+
     if (configured?.type === 'visual-choice-table' && configured?.ratio === '40/60') {
       const layout = document.createElement('div');
       layout.className = 'kaltest-choice-visual-layout';
