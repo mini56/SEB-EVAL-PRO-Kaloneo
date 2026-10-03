@@ -1,0 +1,10 @@
+{
+  "layout": "practical-50-50",
+  "exercise": "brique",
+  "image": "imageqcm/brique.jpg",
+  "chrono": "00:01",
+  "time": "00:01",
+  "errors": "2",
+  "validDisabled": false,
+  "autoEvalVisible": "none"
+}
