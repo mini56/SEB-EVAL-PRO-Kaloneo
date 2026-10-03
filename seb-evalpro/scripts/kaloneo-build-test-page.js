@@ -11,6 +11,17 @@ function fail(message){
   process.exit(2);
 }
 
+function assetDataUri(relativePath){
+  const file = path.join(sebRoot, 'source', relativePath);
+  if(!fs.existsSync(file)) return relativePath;
+  const ext = path.extname(file).toLowerCase();
+  const mime = ext === '.png' ? 'image/png'
+    : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg'
+    : ext === '.svg' ? 'image/svg+xml'
+    : 'application/octet-stream';
+  return 'data:' + mime + ';base64,' + fs.readFileSync(file).toString('base64');
+}
+
 const sourceArg = process.argv[2];
 const outputArg = process.argv[3];
 const exerciseIndex = Number(process.argv[4] || 1);
@@ -60,8 +71,8 @@ const definition = {
     },
     scenario: test.scenario || '',
     instruction: test.instruction || '',
-    scenarioIcon: 'imageqcm/scenario.png',
-    instructionIcon: 'imageqcm/avatar_transparant.png',
+    scenarioIcon: assetDataUri('imageqcm/scenario.png'),
+    instructionIcon: assetDataUri('imageqcm/avatar_transparant.png'),
     presentation: test.presentation || {},
     questions: test.questions.map((q, i) => ({
       id: q.id || ('q' + (i + 1)),
