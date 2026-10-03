@@ -71,6 +71,7 @@
 .scenario-line>div,
 .instruction-line>div{
   min-width:0;
+  flex:1 1 auto;
   display:flex!important;
   align-items:baseline!important;
   flex-wrap:wrap!important;
