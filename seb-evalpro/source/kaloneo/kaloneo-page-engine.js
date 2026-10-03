@@ -222,27 +222,31 @@
     const row=el('div','k-button-row');
     const start=el('button','k-btn start',block.startLabel||'Démarrer');
     const stop=el('button','k-btn stop',block.stopLabel||'Arrêter');
-    stop.disabled=true;
     const status=el('div','k-status');
-    let timer=null,startAt=0;
 
-    function tick(){
-      const sec=Math.floor((Date.now()-startAt)/1000);
-      time.textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+    if(!window.KaloneoChrono?.create){
+      throw new Error('KALONÉO: chronomètre commun indisponible.');
     }
-    start.onclick=()=>{
-      if(timer)return;
-      startAt=Date.now();tick();timer=setInterval(tick,250);
-      start.disabled=true;stop.disabled=false;status.textContent=block.statusRunning||'En cours…';
-    };
-    stop.onclick=()=>{
-      if(!timer)return;
-      tick();clearInterval(timer);timer=null;
-      start.disabled=false;stop.disabled=true;status.textContent=block.statusDone||'Terminé ✓';
-    };
+
+    const controller=window.KaloneoChrono.create({
+      startButton:start,
+      stopButton:stop,
+      initialSeconds:0,
+      resetOnStart:true,
+      intervalMs:250,
+      onRender(seconds,formatted){
+        time.textContent=formatted;
+      },
+      onStart(){
+        status.textContent=block.statusRunning||'En cours…';
+      },
+      onStop(){
+        status.textContent=block.statusDone||'Terminé ✓';
+      }
+    });
 
     row.append(start,stop);card.append(time,row,status);
-    state.timers.set(block.title||'timer',{start,stop,status});
+    state.timers.set(block.title||'timer',{start,stop,status,controller});
     return card;
   }
 
