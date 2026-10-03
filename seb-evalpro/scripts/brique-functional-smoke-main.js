@@ -49,7 +49,9 @@ async function initialState(win) {
   return win.webContents.executeJavaScript(`
     (function(){
       return {
-        chronoButtons: document.querySelectorAll('.chrono-buttons button').length,
+        chronoButtons: document.querySelectorAll('.kaloneo-chrono-buttons button, .chrono-buttons button').length,
+        chronoStart: Boolean(document.getElementById('startBtn')),
+        chronoStop: Boolean(document.getElementById('stopBtn')),
         resetExists: Boolean(document.getElementById('resetBtn')),
         secretType: document.getElementById('secretCode')?.type || '',
         errorMin: document.getElementById('nivDiff')?.min || '',
@@ -82,7 +84,9 @@ app.whenReady().then(async () => {
     await waitForBrique(win);
 
     const initial = await initialState(win);
-    if (initial.chronoButtons !== 2) throw new Error('Le chrono Brique doit avoir exactement 2 boutons.');
+    if (initial.chronoButtons !== 2 || !initial.chronoStart || !initial.chronoStop) {
+      throw new Error('Le chrono Brique doit avoir exactement Démarrer + Arrêter.');
+    }
     if (initial.resetExists) throw new Error('Ancien bouton Remise à zéro encore présent.');
     if (initial.secretType !== 'password') throw new Error('Le code de validation Brique n’est pas masqué.');
     if (initial.errorMin !== '0') throw new Error('La valeur 0 erreur n’est pas autorisée.');
