@@ -1618,9 +1618,9 @@ body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context strong{
   background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
 }
 #page-identification #pilot2-chrono-stop.pilot2-chrono-stop:disabled{
-  color:#fff!important;
-  border-color:#C62828!important;
-  background:linear-gradient(180deg,#df4444 0%,#C62828 100%)!important;
+  color:var(--seb-red,#C62828)!important;
+  border-color:var(--seb-red,#C62828)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
   opacity:.55!important;
 }
 
