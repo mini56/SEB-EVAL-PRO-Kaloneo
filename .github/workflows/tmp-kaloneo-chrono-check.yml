@@ -1,0 +1,45 @@
+name: Temporary KALONEO chrono validation
+
+on:
+  push:
+    branches:
+      - fix-kaloneo-chrono-common
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: seb-evalpro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Prepare application and architecture guards
+        run: npm run prepare:web
+      - name: Generate KALONEO Page 1 with common chrono
+        run: |
+          mkdir -p ../docs/chrono-check
+          node scripts/kaloneo-build-page.js source/kaloneo/definitions/page1-start.js ../docs/chrono-check/page1.html
+          node - <<'NODE'
+          const fs=require('fs');
+          const html=fs.readFileSync('../docs/chrono-check/page1.html','utf8');
+          if(!html.includes('window.KaloneoChrono')) throw new Error('Chronomètre commun absent de la page générée');
+          if(!html.includes('seb-btn-timer-start') && !html.includes('k-btn start')) throw new Error('Bouton Démarrer absent');
+          if(!html.includes('Démarrer')) throw new Error('Libellé Démarrer absent');
+          if(!html.includes('Arrêter')) throw new Error('Libellé Arrêter absent');
+          console.log('KALONEO_COMMON_CHRONO_GENERATED: OK');
+          NODE
+      - name: LEGO functional smoke
+        run: xvfb-run -a npx electron --no-sandbox scripts/brique-functional-smoke-main.js
+      - name: LEGO real Electron render
+        run: xvfb-run -a npx electron --no-sandbox scripts/real-brique-electron-render-main.js
+      - name: Page 1 real Electron render
+        run: xvfb-run -a npx electron --no-sandbox scripts/pilot10-page1-render-main.js
