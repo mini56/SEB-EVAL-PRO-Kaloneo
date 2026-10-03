@@ -1,0 +1,56 @@
+name: Temporary Pilot 12 full-page validation
+
+on:
+  push:
+    branches:
+      - pilot12-style-remaining-pages
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: seb-evalpro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Generate KALTEST data
+        run: node scripts/build-kaltest-pilot2-data.js
+      - name: Prepare app and architecture guards
+        run: npm run prepare:web
+      - name: KALTEST functional
+        run: xvfb-run -a npx electron --no-sandbox scripts/kaltest-pilot2-functional-smoke-main.js
+      - name: QCM page 4
+        run: xvfb-run -a npx electron --no-sandbox scripts/qcm-page4-functional-smoke-main.js
+      - name: QCM page 5
+        run: xvfb-run -a npx electron --no-sandbox scripts/qcm-page5-functional-smoke-main.js
+      - name: QCM page 5_1
+        run: xvfb-run -a npx electron --no-sandbox scripts/qcm-page5-1-functional-smoke-main.js
+      - name: Autoeval 1
+        run: xvfb-run -a npx electron --no-sandbox scripts/autoeval1-functional-smoke-main.js
+      - name: Planning
+        run: xvfb-run -a npx electron --no-sandbox scripts/planning-functional-smoke-main.js
+      - name: Dictée
+        run: xvfb-run -a npx electron --no-sandbox scripts/dictee-functional-smoke-main.js
+      - name: Tri
+        run: xvfb-run -a npx electron --no-sandbox scripts/tri-functional-smoke-main.js
+      - name: Traitement de texte
+        run: xvfb-run -a npx electron --no-sandbox scripts/nwtexte-functional-smoke-main.js
+      - name: Mail
+        run: xvfb-run -a npx electron --no-sandbox scripts/nvmail-functional-smoke-main.js
+      - name: Autoeval 2
+        run: xvfb-run -a npx electron --no-sandbox scripts/autoeval2-functional-smoke-main.js
+      - name: Carré
+        run: xvfb-run -a npx electron --no-sandbox scripts/carre-functional-smoke-main.js
+      - name: Final QCM
+        run: xvfb-run -a npx electron --no-sandbox scripts/qcm-final-functional-smoke-main.js
+      - name: Full Pilot 12 journey
+        run: xvfb-run -a npx electron --no-sandbox scripts/full-pilot-journey-smoke-main.js
