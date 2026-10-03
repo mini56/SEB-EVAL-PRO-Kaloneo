@@ -1,4 +1,4 @@
-# PILOT11_RETRY_2
+# PILOT11_R2
 name: Build Windows KALTEST Pilot 11 full parcours
 
 on:
@@ -103,7 +103,7 @@ jobs:
       - name: Verify Pilot 11 setup
         shell: pwsh
         run: |
-          $setup = Get-ChildItem -Path dist -Filter 'SEB-EvalPro-Kaloneo-PILOTE-11-0.0.11-Windows-Setup.exe' -File | Select-Object -First 1
+          $setup = Get-ChildItem -Path dist -Filter 'SEB-EvalPro-Kaloneo-PILOTE-11-R2-Windows-Setup.exe' -File | Select-Object -First 1
           if (-not $setup) { throw 'Setup PILOTE 11 introuvable.' }
           $hash = (Get-FileHash -Algorithm SHA256 $setup.FullName).Hash.ToUpperInvariant()
           "SETUP_PATH=$($setup.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
@@ -115,8 +115,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SEB-EvalPro-Kaloneo-PILOTE-11-0.0.11-Windows
-          path: seb-evalpro/dist/SEB-EvalPro-Kaloneo-PILOTE-11-0.0.11-Windows-Setup.exe
+          name: SEB-EvalPro-Kaloneo-PILOTE-11-R2-Windows
+          path: seb-evalpro/dist/SEB-EvalPro-Kaloneo-PILOTE-11-R2-Windows-Setup.exe
           if-no-files-found: error
 
       - name: Publish Pilot 11 release
@@ -124,28 +124,30 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'seb-kaloneo-pilot-011'
-          $title = 'SEB EvalPro Kalonéo — PILOTE #11'
+          $tag = 'seb-kaloneo-pilot-011-r2'
+          $title = 'SEB EvalPro Kalonéo — PILOTE #11 R2'
           if (gh release view $tag 2>$null) { throw "La Release $tag existe deja." }
           $notes = @"
-          PILOTE #11 Windows — parcours complet corrigé.
+          PILOTE #11 R2 Windows — parcours complet remis dans l'ordre réel.
 
           Correction principale :
-          - le PILOTE 10 s'arrêtait après les 7 tests KALTEST ;
-          - le PILOTE 11 enchaîne maintenant vers Autoévaluation 1 ;
-          - puis la vraie vidéo Briques video_brique.mp4 ;
-          - puis LEGO / Briques ;
-          - puis Stock ;
-          - puis la suite du parcours central.
+          - les 7 migrations KALTEST ne sont plus jouées en bloc au début ;
+          - Pages 4, 5 et 5_1 sont restaurées à leur place ;
+          - Conversions remplace l'ancienne Page 6 ;
+          - Genre / Nombre est joué à sa place après Planning ;
+          - Paronymes est joué à sa place après Autoévaluation 2 ;
+          - aucune ancienne page équivalente n'est rejouée ensuite ;
+          - LEGO / Briques et Stock restent dans leur position validée.
 
           Vérifications avant publication :
-          - introduction KALONÉO visible ;
-          - handoff KALTEST -> autoeval1 ;
-          - vidéo Briques présente et autoplay ;
-          - page LEGO réelle ;
-          - page Stock réelle ;
+          - parcours historique inchangé hors mode PILOTE 11 ;
+          - PILOTE 10 standalone toujours fonctionnel ;
+          - parcours complet PILOTE 11 sans doublon ;
+          - Pages 4 -> 5 -> 5_1 -> Conversions vérifiées ;
+          - Genre / Nombre et Paronymes vérifiés à leur position réelle ;
+          - vidéo Briques, LEGO et Stock fonctionnels ;
           - Stock 33/33, 0 erreur, sauvegarde/reprise ;
-          - Admin, KALTEST, Page 1, LEGO, Stock et garde-fous architecture tous VERTS.
+          - Admin, KALTEST et garde-fous architecture VERTS.
 
           Fichier : $env:SETUP_NAME
           SHA256 : $env:SETUP_SHA256
