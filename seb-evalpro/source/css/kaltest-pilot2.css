@@ -1604,18 +1604,18 @@ body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context strong{
   z-index:2;
 }
 
-/* Chronomètre : codes couleur validés. */
+/* Chronomètre : style Crystal KALONÉO, fond clair + texte/contour par rôle. */
 #page-identification #pilot2-chrono-start.pilot2-chrono-start{
   --seb-button-color:var(--seb-green,#198754)!important;
-  color:#fff!important;
-  border-color:#198754!important;
-  background:linear-gradient(180deg,#28a866 0%,#198754 100%)!important;
+  color:var(--seb-green,#198754)!important;
+  border-color:var(--seb-green,#198754)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
 }
 #page-identification #pilot2-chrono-stop.pilot2-chrono-stop{
   --seb-button-color:var(--seb-red,#C62828)!important;
-  color:#fff!important;
-  border-color:#C62828!important;
-  background:linear-gradient(180deg,#df4444 0%,#C62828 100%)!important;
+  color:var(--seb-red,#C62828)!important;
+  border-color:var(--seb-red,#C62828)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
 }
 #page-identification #pilot2-chrono-stop.pilot2-chrono-stop:disabled{
   color:#fff!important;
