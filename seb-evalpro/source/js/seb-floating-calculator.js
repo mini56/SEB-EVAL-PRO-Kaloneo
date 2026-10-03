@@ -207,39 +207,37 @@
     const rect = container.getBoundingClientRect();
     const width = rect.width || 258;
     const height = rect.height || 360;
-    const dock = document.getElementById('pilot2-calculator-dock');
-    const dockRect = dock ? dock.getBoundingClientRect() : null;
-    const dockVisible = !!(dock && dockRect &&
-      getComputedStyle(dock).display !== 'none' &&
+    const onboardingDock = document.getElementById('pilot2-calculator-dock');
+    const exerciseVisual = document.querySelector('.pilot2-page.visible .kaltest-visual-panel');
+    const preferredDock = exerciseVisual || onboardingDock;
+    const dockRect = preferredDock ? preferredDock.getBoundingClientRect() : null;
+    const dockVisible = !!(preferredDock && dockRect &&
+      getComputedStyle(preferredDock).display !== 'none' &&
       dockRect.width >= width - 12 &&
-      dockRect.height >= 150);
+      dockRect.height >= Math.min(150, height));
 
     let left;
     let top;
 
     if (dockVisible) {
       left = Math.round(dockRect.left + (dockRect.width - width) / 2);
-      // Sur la prise en main, on privilégie l'alignement en haut : le candidat
-      // voit immédiatement toute la calculatrice sans qu'elle paraisse trop basse.
-      top = Math.round(dockRect.top + 6);
+      top = Math.round(dockRect.top + Math.max(6, (dockRect.height - height) / 2));
     } else {
-      // Sur Introduction et pendant les exercices, la calculatrice s'ouvre
-      // volontairement à l'extrême droite pour ne plus masquer les consignes.
+      // Secours pour les pages sans zone visuelle dédiée.
       left = Math.round(window.innerWidth - width - 24);
       top = Math.round(Math.max(62, (window.innerHeight - height) / 2));
     }
 
     setPosition(left, top);
 
-    // Electron peut appliquer un facteur de zoom au contenu. Dans ce cas, une
-    // coordonnée CSS calculée depuis getBoundingClientRect peut être légèrement
-    // décalée à l'écran. On corrige visuellement une fois après le placement.
+    // Après application du zoom Electron, on recale visuellement la calculatrice
+    // dans la zone dédiée (prise en main ou visuel de l'exercice).
     if (dockVisible) {
       requestAnimationFrame(() => {
         const actual = container.getBoundingClientRect();
-        const freshDock = dock.getBoundingClientRect();
+        const freshDock = preferredDock.getBoundingClientRect();
         const wantedLeft = freshDock.left + (freshDock.width - actual.width) / 2;
-        const wantedTop = freshDock.top + 6;
+        const wantedTop = freshDock.top + Math.max(6, (freshDock.height - actual.height) / 2);
         const currentLeft = Number.parseFloat(container.style.left) || actual.left;
         const currentTop = Number.parseFloat(container.style.top) || actual.top;
         const correctedLeft = currentLeft + (wantedLeft - actual.left);
