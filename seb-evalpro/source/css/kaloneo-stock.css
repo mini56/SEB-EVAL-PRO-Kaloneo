@@ -220,7 +220,7 @@ body{
   padding:1px 3px;
   border-radius:3px;
   background:rgba(255,255,255,.55);
-  font-size:14px;
+  font-size:15px;
 }
 
 .pot-percent{
@@ -228,7 +228,7 @@ body{
   padding:1px 3px;
   border-radius:3px;
   background:rgba(255,255,255,.55);
-  font-size:12px;
+  font-size:15px;
 }
 
 .k-stock-shelves{
@@ -304,7 +304,7 @@ body{
   border-radius:3px;
   background:rgba(255,255,255,.82);
   color:#5b442a;
-  font-size:11px;
+  font-size:15px;
   font-weight:700;
   line-height:1.05;
   text-align:center;
@@ -393,7 +393,7 @@ body{
   .k-stock-instructions h2{font-size:18px;margin-bottom:1px}
   .k-stock-instructions h2 img{width:25px;height:25px}
   .k-stock-instruction-grid{gap:2px 15px}
-  .k-stock-instruction-grid p{font-size:14.5px;line-height:1.10}
+  .k-stock-instruction-grid p{font-size:15px;line-height:1.10}
   .k-stock-how img{width:28px;height:28px}
   .k-stock-game{gap:7px}
   .k-stock-left,.k-stock-shelves{padding:5px}
@@ -401,7 +401,7 @@ body{
   .zone-pots h2,.zone-tri h2{font-size:16px;margin-bottom:3px}
   .pot,.pot-placeholder{width:48px;height:60px;flex-basis:48px}
   .zone-tri .pots-container{grid-template-columns:repeat(auto-fill,48px)}
-  .pot-code{font-size:13px;margin-top:6px}
+  .pot-code{font-size:15px;margin-top:6px}
   .pot-percent{font-size:11px}
   .k-stock-shelves{gap:5px}
   .row-etageres{gap:5px}
