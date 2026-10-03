@@ -415,3 +415,22 @@ body{
   .niveau-large{padding:3px;gap:3px}
   .etagere-large .case{width:47px;height:52px;flex-basis:47px}
 }
+
+
+/* PILOTE 12 — Comment ça fonctionne au-dessus, deux consignes empilées. */
+.k-stock-instructions .k-stock-how{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 5px;
+  padding:0 0 5px!important;
+  border-bottom:1px solid rgba(249,178,51,.42);
+  font-size:var(--seb-type-control,16px);
+  line-height:1.18;
+}
+.k-stock-instructions .k-stock-how::before{display:none!important}
+.k-stock-instruction-grid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:3px!important;
+}
