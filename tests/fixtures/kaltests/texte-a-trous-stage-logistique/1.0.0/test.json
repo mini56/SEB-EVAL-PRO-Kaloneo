@@ -173,7 +173,24 @@
         "type": "text",
         "text": "."
       }
-    ]
+    ],
+    "kaloneoLayout": {
+      "type": "visual-inline-gaps",
+      "ratio": "40/60",
+      "left": {
+        "type": "image",
+        "orientation": "portrait",
+        "src": "",
+        "alt": "Illustration de l’exercice Texte à trous",
+        "placeholder": "Image verticale"
+      },
+      "right": {
+        "order": [
+          "wordBank",
+          "inlineFlow"
+        ]
+      }
+    }
   },
   "runtime": {
     "start": true,
