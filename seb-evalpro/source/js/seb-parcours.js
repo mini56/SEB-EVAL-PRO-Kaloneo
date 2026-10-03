@@ -8,7 +8,7 @@
   // Les pages non encore migrées continuent temporairement leur navigation
   // historique ; le registre permet leur migration progressive sans changer
   // les scénarios, consignes, réponses ou résultats existants.
-  const steps = Object.freeze([
+  const legacySteps = Object.freeze([
     Object.freeze({ id:'qcm-1', file:'qcmv1.0.html', page:'1' }),
     Object.freeze({
       id:'qcm-2',
@@ -209,6 +209,64 @@
     Object.freeze({ id:'qcm-finale', file:'qcmv1.0.html', page:'finale' })
   ]);
 
+
+  function legacyStep(id) {
+    return legacySteps.find((step) => step.id === id);
+  }
+
+  const pilot11Steps = Object.freeze([
+    Object.freeze({
+      id:'kaltest-initial',
+      file:'kaltest-pilot2.html',
+      query:Object.freeze({ fullParcours:'1' })
+    }),
+    legacyStep('qcm-4'),
+    legacyStep('qcm-5'),
+    legacyStep('qcm-5_1'),
+    Object.freeze({
+      ...legacyStep('qcm-6'),
+      file:'kaltest-pilot2.html',
+      page:null,
+      query:Object.freeze({ fullParcours:'1', segment:'conversions' })
+    }),
+    legacyStep('autoeval1'),
+    legacyStep('introbrique'),
+    legacyStep('brique'),
+    legacyStep('stock'),
+    legacyStep('planning'),
+    Object.freeze({
+      ...legacyStep('genrenombres'),
+      file:'kaltest-pilot2.html',
+      query:Object.freeze({ fullParcours:'1', segment:'genre-nombre' })
+    }),
+    legacyStep('dictee'),
+    legacyStep('tri-de-cheville'),
+    legacyStep('nwtexte'),
+    legacyStep('nvmail'),
+    legacyStep('autoeval2'),
+    Object.freeze({
+      ...legacyStep('paronymes'),
+      file:'kaltest-pilot2.html',
+      query:Object.freeze({ fullParcours:'1', segment:'paronymes' })
+    }),
+    legacyStep('carre'),
+    legacyStep('qcm-11'),
+    legacyStep('qcm-finale')
+  ]);
+
+  function pilot11Enabled() {
+    try {
+      const search = String(window.location?.search || '');
+      if (/(?:^|[?&])fullParcours=1(?:&|$)/.test(search)) return true;
+      if (/(?:^|[?&])segment=/.test(search)) return true;
+      return window.sessionStorage?.getItem('seb_kaltest_full_parcours') === '1';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  const steps = pilot11Enabled() ? pilot11Steps : legacySteps;
+
   function indexOf(id) {
     return steps.findIndex((step) => step.id === String(id || ''));
   }
@@ -229,9 +287,26 @@
 
   function urlForStep(step) {
     if (!step) return null;
-    if (!step.page) return step.file;
-    const hash = step.page === 'finale' ? 'pageFinale' : (String(step.page).startsWith('page') ? step.page : 'page' + step.page);
-    return step.file + '?page=' + encodeURIComponent(step.page) + '#' + hash;
+
+    const query = [];
+    if (step.query && typeof step.query === 'object') {
+      for (const [key, value] of Object.entries(step.query)) {
+        if (value === undefined || value === null || value === '') continue;
+        query.push(encodeURIComponent(key) + '=' + encodeURIComponent(String(value)));
+      }
+    }
+    if (step.page) query.push('page=' + encodeURIComponent(step.page));
+
+    let url = step.file;
+    if (query.length) url += '?' + query.join('&');
+
+    if (step.page) {
+      const hash = step.page === 'finale'
+        ? 'pageFinale'
+        : (String(step.page).startsWith('page') ? step.page : 'page' + step.page);
+      url += '#' + hash;
+    }
+    return url;
   }
 
   function urlFor(id) {
@@ -269,6 +344,9 @@
 
   window.sebParcours = Object.freeze({
     steps,
+    legacySteps,
+    pilot11Steps,
+    mode: pilot11Enabled() ? 'pilot11' : 'legacy',
     stepFor,
     fileFor,
     urlFor,

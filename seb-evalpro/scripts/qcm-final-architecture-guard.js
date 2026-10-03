@@ -84,7 +84,8 @@ if (parcours.indexOf("id:'qcm-11'") < 0 || parcours.indexOf("id:'qcm-finale'") <
   fail('étapes finales absentes du registre');
 }
 if (!parcours.includes("Object.freeze({ id:'qcm-finale', file:'qcmv1.0.html', page:'finale' })") ||
-    !parcours.includes("step.page === 'finale' ? 'pageFinale'")) {
+    !parcours.includes("step.page === 'finale'") ||
+    !parcours.includes("'pageFinale'")) {
   fail('destination qcm-finale absente du registre');
 }
 
