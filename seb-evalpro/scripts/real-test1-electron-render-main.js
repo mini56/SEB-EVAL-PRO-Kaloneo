@@ -87,9 +87,15 @@ app.whenReady().then(async()=>{
     const test2=await captureTest(win,1,'REAL-PROGRAM-test2');
     try { await win.webContents.executeJavaScript("window.closeCalculator?.();true",true); } catch (_) {}
     const test3=await captureTest(win,2,'REAL-PROGRAM-test3');
+    try { await win.webContents.executeJavaScript("window.closeCalculator?.();true",true); } catch (_) {}
+    const test4=await captureTest(win,3,'REAL-PROGRAM-test4');
+    try { await win.webContents.executeJavaScript("window.closeCalculator?.();true",true); } catch (_) {}
+    const test5=await captureTest(win,4,'REAL-PROGRAM-test5');
+    try { await win.webContents.executeJavaScript("window.closeCalculator?.();true",true); } catch (_) {}
+    const test7=await captureTest(win,6,'REAL-PROGRAM-test7');
 
-    console.log('REAL_PROGRAM_FIRST_TESTS_RENDER: OK');
-    console.log(JSON.stringify({test1,test2,test3}));
+    console.log('REAL_PROGRAM_KALONEO_TESTS_RENDER: OK');
+    console.log(JSON.stringify({test1,test2,test3,test4,test5,test7}));
     win.destroy();
     app.exit(0);
   }catch(error){
