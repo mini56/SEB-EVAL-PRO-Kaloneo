@@ -97,4 +97,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/render-check/program-page1-*-1366x768.png
           git diff --cached --quiet || git commit -m "Render integrated Page 1 program at 1366x768"
+          git pull --rebase origin pilot10-page1-readability
           git push origin HEAD:pilot10-page1-readability

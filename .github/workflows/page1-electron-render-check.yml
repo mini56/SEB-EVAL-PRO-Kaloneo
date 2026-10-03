@@ -51,4 +51,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/render-check/electron-page1-*-1366x768-zoom085.png
           git diff --cached --quiet || git commit -m "Render integrated Page 1 in Electron at zoom 0.85"
+          git pull --rebase origin pilot10-page1-readability
           git push origin HEAD:pilot10-page1-readability
