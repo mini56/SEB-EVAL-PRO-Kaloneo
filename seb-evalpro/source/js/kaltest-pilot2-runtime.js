@@ -476,6 +476,7 @@
 
   function renderInlineGaps(test, host) {
     const wrapper = document.createElement('div');
+    wrapper.className = 'kaltest-inline-work';
 
     const bank = document.createElement('div');
     bank.className = 'kaltest-word-bank';
@@ -497,19 +498,26 @@
       }
     }
     wrapper.appendChild(flow);
+
+    const configured = test.presentation?.kaloneoLayout;
+    if (configured?.type === 'visual-inline-gaps' && configured?.ratio === '40/60') {
+      const layout = document.createElement('div');
+      layout.className = 'kaltest-inline-visual-layout';
+      layout.append(renderVisualPanel(configured.left || {}), wrapper);
+      host.appendChild(layout);
+      return;
+    }
+
     host.appendChild(wrapper);
   }
 
   function renderConversions(test, host) {
-    const layout = document.createElement('div');
-    layout.className = 'kaltest-split-layout kaltest-split-50';
-
-    layout.appendChild(renderQuestionList(test));
+    const questions = renderQuestionList(test);
 
     const wrapper = document.createElement('div');
     wrapper.className = 'kaltest-table-wrap';
     const table = document.createElement('table');
-    table.className = 'kaltest-table';
+    table.className = 'kaltest-table kaltest-conversions-table';
 
     const thead = document.createElement('thead');
     const head = document.createElement('tr');
@@ -547,7 +555,24 @@
     });
     table.appendChild(tbody);
     wrapper.appendChild(table);
-    layout.appendChild(wrapper);
+
+    const configured = test.presentation?.kaloneoLayout;
+    if (configured?.type === 'work-visual' && configured?.ratio === '60/40') {
+      const layout = document.createElement('div');
+      layout.className = 'kaltest-conversions-visual-layout';
+
+      const work = document.createElement('section');
+      work.className = 'kaltest-conversions-work';
+      work.append(questions, wrapper);
+
+      layout.append(work, renderVisualPanel(configured.right || {}));
+      host.appendChild(layout);
+      return;
+    }
+
+    const layout = document.createElement('div');
+    layout.className = 'kaltest-split-layout kaltest-split-50';
+    layout.append(questions, wrapper);
     host.appendChild(layout);
   }
 
@@ -656,6 +681,21 @@
     }
 
     table.appendChild(tbody);
+
+    const configured = test.presentation?.kaloneoLayout;
+    if (configured?.type === 'visual-choice-table' && configured?.ratio === '40/60') {
+      const layout = document.createElement('div');
+      layout.className = 'kaltest-choice-visual-layout';
+
+      const tableWrap = document.createElement('div');
+      tableWrap.className = 'kaltest-choice-table-wrap';
+      tableWrap.appendChild(table);
+
+      layout.append(renderVisualPanel(configured.left || {}), tableWrap);
+      host.appendChild(layout);
+      return;
+    }
+
     host.appendChild(table);
   }
 
