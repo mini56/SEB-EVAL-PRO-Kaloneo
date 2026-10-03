@@ -1,0 +1,40 @@
+name: Temporary Pilot 11 feedback validation
+
+on:
+  push:
+    branches:
+      - pilot11-test-feedback-round1
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: seb-evalpro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Generate KALTEST data
+        run: node scripts/build-kaltest-pilot2-data.js
+      - name: Prepare app and guards
+        run: npm run prepare:web
+      - name: Pilot functional smoke
+        run: xvfb-run -a npx electron --no-sandbox scripts/kaltest-pilot2-functional-smoke-main.js
+      - name: Page 1 visual chrono smoke
+        run: xvfb-run -a npx electron --no-sandbox scripts/pilot8-visual-intro-smoke-main.js
+      - name: Page 1 real render
+        run: xvfb-run -a npx electron --no-sandbox scripts/pilot10-page1-render-main.js
+      - name: LEGO functional smoke
+        run: xvfb-run -a npx electron --no-sandbox scripts/brique-functional-smoke-main.js
+      - name: LEGO real render
+        run: xvfb-run -a npx electron --no-sandbox scripts/real-brique-electron-render-main.js
+      - name: Full Pilot 11 journey
+        run: xvfb-run -a npx electron --no-sandbox scripts/full-pilot-journey-smoke-main.js
