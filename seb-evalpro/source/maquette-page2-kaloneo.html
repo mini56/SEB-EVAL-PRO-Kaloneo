@@ -697,6 +697,15 @@ button,input{font:inherit}
   font-weight:700;
 }
 
+
+body.k-test-calculator-open .k-test-workspace{
+  padding-right:286px;
+}
+body.k-test-calculator-open .k-test-split{
+  grid-template-columns:minmax(0,1fr) minmax(360px,.86fr);
+  gap:12px;
+}
+
 </style>
 </head>
 <body>
@@ -1285,8 +1294,15 @@ window.KALONEO_PAGE_DEFINITION = Object.freeze({
     c.calc.classList.add('k-floating-calculator');
     page.append(c.calc);
     const api={
-      open(){ c.calc.classList.add('open'); },
-      close(){ c.calc.classList.remove('open'); c.reset(); }
+      open(){
+        document.body.classList.add('k-test-calculator-open');
+        c.calc.classList.add('open');
+      },
+      close(){
+        c.calc.classList.remove('open');
+        document.body.classList.remove('k-test-calculator-open');
+        c.reset();
+      }
     };
     c.close.onclick=api.close;
     state.calculators.set('test-calculator',api);
