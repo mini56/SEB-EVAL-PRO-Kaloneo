@@ -26,6 +26,8 @@ jobs:
         run: node scripts/build-kaltest-pilot2-data.js
       - name: Prepare app and architecture guards
         run: npm run prepare:web
+      - name: Pilot 13 real layout
+        run: xvfb-run -a npx electron --no-sandbox scripts/pilot13-layout-smoke-main.js
       - name: KALTEST functional
         run: xvfb-run -a npx electron --no-sandbox scripts/kaltest-pilot2-functional-smoke-main.js
       - name: QCM Fractions
