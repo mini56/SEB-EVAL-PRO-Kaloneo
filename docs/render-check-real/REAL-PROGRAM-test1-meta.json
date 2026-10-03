@@ -7,5 +7,7 @@
     "🧮 Ouvrir la calculatrice",
     "➜ Suivant"
   ],
-  "bodyTestId": "calculs_commandes_atelier"
+  "bodyTestId": "calculs_commandes_atelier",
+  "visualLayout": true,
+  "visualPanel": true
 }
