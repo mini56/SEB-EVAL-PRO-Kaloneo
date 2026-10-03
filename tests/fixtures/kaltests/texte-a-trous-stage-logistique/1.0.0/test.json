@@ -67,7 +67,8 @@
       },
       {
         "type": "text",
-        "text": ". J'"
+        "text": ". J'",
+        "breakAfterSentence": true
       },
       {
         "type": "question",
@@ -91,7 +92,8 @@
       },
       {
         "type": "text",
-        "text": ". J'ai réalisé des "
+        "text": ". J'ai réalisé des ",
+        "breakAfterSentence": true
       },
       {
         "type": "question",
@@ -107,7 +109,8 @@
       },
       {
         "type": "text",
-        "text": " en cas de besoin. Je "
+        "text": " en cas de besoin. Je ",
+        "breakAfterSentence": true
       },
       {
         "type": "question",
@@ -131,7 +134,8 @@
       },
       {
         "type": "text",
-        "text": ". Pour moi, les "
+        "text": ". Pour moi, les ",
+        "breakAfterSentence": true
       },
       {
         "type": "question",
@@ -155,7 +159,8 @@
       },
       {
         "type": "text",
-        "text": " les commandes avec soin. Je pense continuer à faire des "
+        "text": " les commandes avec soin. Je pense continuer à faire des ",
+        "breakAfterSentence": true
       },
       {
         "type": "question",
