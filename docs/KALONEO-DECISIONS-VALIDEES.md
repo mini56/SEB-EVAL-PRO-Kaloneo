@@ -2107,3 +2107,88 @@ Application de référence — Conversions :
 - Réponses : **14 caractères**, centré ;
 - Unités : **12 caractères**, centré ;
 - Opérations effectuées : **Automatique**, alignée à gauche.
+
+
+---
+
+## 60. PILOTE 13 — harmonisation Scénario / Consigne et layouts validés
+
+**Statut : EN TEST RÉEL — 3 octobre 2026**
+
+### Composant Scénario / Consigne commun
+
+KALONÉO utilise désormais un composant unique pour les blocs **Scénario** et **Consigne**.
+
+Règles obligatoires :
+- même police KALONÉO sur toutes les pages ;
+- même couleur KALONÉO pour les libellés `Scénario :` et `Consigne :` ;
+- même graisse, même taille, même icône et mêmes espacements ;
+- Scénario : fond blanc, bordure bleu/gris légère ;
+- Consigne : fond crème très clair, bordure orange ;
+- le texte commence **immédiatement après les deux-points, sur la même ligne** ;
+- seules les listes ou informations complémentaires peuvent passer à la ligne ;
+- aucune page ne doit redéfinir localement la couleur ou la police de ces deux libellés.
+
+Le composant est chargé par KALTEST, QCM historiques utilisés dans le parcours, LEGO/Briques, Stock, Dictée, Tri, Planning, Traitement de texte et Rédaction d’un e-mail. Un garde dédié est exécuté pendant `prepare:web`.
+
+### Pages validées sans modification
+
+- **Félicitations** : validée en l’état.
+- **Puzzle / Gratte-ciel** : validé en l’état.
+
+### Autoévaluations
+
+- deux blocs **50/50 stricts** ;
+- illustration à droite ;
+- suppression du défilement horizontal inutile ;
+- aucun changement du contenu ou du fonctionnement.
+
+### Rédaction d’un e-mail
+
+- Scénario pleine largeur en haut ;
+- dessous : deux blocs **50/50** ;
+- bloc gauche : consigne complète ;
+- bloc droit : formulaire e-mail ;
+- objet demandé : **Prénom* Mail-SEB** ;
+- note : **`* Mettre votre prénom.`** ;
+- bouton **Parcourir…** au style KALONÉO ;
+- aucune modification du barème ni de la validation fonctionnelle.
+
+### Traitement de texte
+
+- Scénario court pleine largeur ;
+- Consigne courte pleine largeur : **« Répondez à l'une des trois questions suivantes dans un texte de dix lignes. »** ;
+- dessous : deux blocs **50/50 stricts** ;
+- bloc gauche : questions, préparation, règles de mise en forme et nom du fichier ;
+- bloc droit : éditeur complet ;
+- nom demandé : **Nom*_Evaluation_Bureautique_SEB** ;
+- note : **`* Remplacez Nom par votre vrai nom.`**.
+
+### LEGO / Briques
+
+- libellé Consigne repris par le composant commun KALONÉO ;
+- consignes présentées verticalement, les unes sous les autres ;
+- chronomètre légèrement plus aéré verticalement ;
+- image légèrement réduite afin de ne pas descendre sur la zone du bouton Abandonner ;
+- moteur chrono, temps, erreurs, code administrateur et autoévaluation inchangés.
+
+### Fractions et proportions
+
+- Scénario et Consigne pleine largeur ;
+- sous la Consigne : image à gauche, exercice à droite ;
+- répartition de référence : **40 % image / 60 % exercice** afin de laisser davantage de place aux fractions.
+
+### Organisation d’une activité
+
+- Scénario et Consigne pleine largeur ;
+- dessous : deux blocs **50/50** ;
+- image de déménagement à gauche ;
+- exercice d’ordonnancement à droite.
+
+### Conversions en atelier d’expédition
+
+- disposition **60/40** conservée ;
+- exercice/tableau à gauche ;
+- image à droite ;
+- système de largeur de colonnes en caractères conservé.
+
