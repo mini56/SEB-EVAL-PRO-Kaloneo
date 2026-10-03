@@ -45,7 +45,12 @@ app.whenReady().then(async()=>{
           startColor:start.color,
           stopColor:stop.color,
           startBackground:start.backgroundImage,
-          stopBackground:stop.backgroundImage
+          stopBackground:stop.backgroundImage,
+          startClass:document.getElementById('startBtn')?.className||'',
+          stopClass:document.getElementById('stopBtn')?.className||'',
+          solidRules:[...document.styleSheets].flatMap(sheet=>{
+            try{return [...sheet.cssRules].map(rule=>rule.selectorText||'');}catch(_){return [];}
+          }).filter(selector=>selector.includes('seb-btn-solid'))
         };
       })()
     `,true);
