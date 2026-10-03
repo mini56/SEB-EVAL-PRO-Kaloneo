@@ -95,7 +95,11 @@ try {
   assert(!closeIpc.includes('setAdminUnlocked(false)'), 'Fermer la session active doit conserver le mode Administrateur pour revenir aux dossiers candidats.');
   assert(preload.includes("ipcRenderer.invoke('admin:open-candidate-browser')"), 'Après fermeture de session, SEB EvalPro doit revenir à l’espace candidats.');
 
-  assert(main.includes("mainWindow.loadFile(existingWebPage(state.lastEvaluationPage || state.lastPage));"), 'Le démarrage doit reprendre la dernière page enregistrée.');
+  assert(
+    main.includes("loadEvaluationFile(existingWebPage(state.lastEvaluationPage || state.lastPage));") ||
+    main.includes("mainWindow.loadFile(existingWebPage(state.lastEvaluationPage || state.lastPage));"),
+    'Le démarrage doit reprendre la dernière page enregistrée.'
+  );
 
   console.log('ADMIN_QUIT_PRESERVES_ACTIVE_CANDIDATE: OK');
   console.log('ADMIN_QUIT_PRESERVES_LAST_PAGE: dictee.html');
