@@ -42,19 +42,11 @@
       ]
     },
     "kaloneoLayout": {
-      "type": "visual-choice-table",
-      "ratio": "40/60",
-      "left": {
-        "type": "image",
-        "orientation": "portrait",
-        "src": "",
-        "alt": "Illustration de l’exercice Paronymes",
-        "placeholder": "Image verticale"
-      },
-      "right": {
-        "order": [
-          "choiceTable"
-        ]
+      "type": "full-width-choice-table",
+      "ratio": "100/100",
+      "work": {
+        "width": "100%",
+        "tableWidth": "100%"
       }
     }
   },
