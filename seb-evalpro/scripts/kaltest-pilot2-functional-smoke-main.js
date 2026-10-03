@@ -212,7 +212,7 @@ app.whenReady().then(async () => {
       await assertNoOverflow(win, testId);
 
       const visualContract = await win.webContents.executeJavaScript(
-        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null};})()",
+        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null};})()",
         true
       );
 
@@ -221,6 +221,9 @@ app.whenReady().then(async () => {
       }
       if (testId === 'horaires_reception_controle' && visualContract.durationPlaceholders) {
         throw new Error('Réception / contrôle : exemples de réponses encore affichés dans les champs.');
+      }
+      if (testId === 'texte_a_trous_stage_logistique' && visualContract.textGapBreaks !== 5) {
+        throw new Error('Texte à trous : retours à la ligne de fin de phrase incorrects : ' + JSON.stringify(visualContract));
       }
       if (testId === 'genre_nombre' && visualContract.genreTables !== 2) {
         throw new Error('Genre / Nombre : les deux tableaux Build #20 ne sont pas rendus.');
