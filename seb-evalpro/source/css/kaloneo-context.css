@@ -1,0 +1,176 @@
+/* KALONÉO — composant unique Scénario / Consigne.
+   Règle : même police/couleur/icône partout et le texte commence immédiatement après les deux-points. */
+
+:root{
+  --kaloneo-context-blue:var(--seb-blue-100,#004E70);
+  --kaloneo-context-orange:var(--seb-orange,#F9B233);
+  --kaloneo-context-font:var(--seb-font-main,Calibri,"Segoe UI",Arial,sans-serif);
+}
+
+.kaloneo-context-card,
+.kaltest-context,
+.kaloneo-scenario,
+.kaloneo-consigne,
+.k-stock-context,
+.scenario-line,
+.instruction-line,
+.k-qcm-context{
+  width:100%;
+  min-height:46px;
+  box-sizing:border-box;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  padding:5px 10px!important;
+  border-radius:10px!important;
+  font-family:var(--kaloneo-context-font)!important;
+  font-size:15.5px!important;
+  line-height:1.2!important;
+}
+
+.kaloneo-context-card img,
+.kaltest-context>img,
+.kaloneo-scenario>img,
+.k-stock-context>img,
+.scenario-line>img,
+.instruction-line>img,
+.k-qcm-context>img{
+  width:42px!important;
+  height:42px!important;
+  flex:0 0 42px!important;
+  object-fit:contain!important;
+  margin:0!important;
+  float:none!important;
+}
+
+.kaloneo-context-scenario,
+.kaltest-context:first-child,
+.kaloneo-scenario,
+.k-stock-scenario,
+.scenario-line,
+.k-qcm-scenario{
+  border:1px solid rgba(0,78,112,.22)!important;
+  background:rgba(255,255,255,.96)!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.06)!important;
+}
+
+.kaloneo-context-consigne,
+.kaltest-context:nth-child(2),
+.kaloneo-consigne,
+.k-stock-instructions,
+.instruction-line,
+.k-qcm-consigne{
+  border:1px solid rgba(249,178,51,.65)!important;
+  background:linear-gradient(145deg,#FFF9EC,#FFFFFF)!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.05)!important;
+}
+
+.kaloneo-context-body,
+.kaltest-context>div,
+.kaloneo-scenario>div,
+.scenario-line>div,
+.instruction-line>div{
+  min-width:0;
+  display:flex!important;
+  align-items:baseline!important;
+  flex-wrap:wrap!important;
+  gap:0 4px!important;
+}
+
+.kaloneo-context-label,
+.kaltest-context strong,
+.kaloneo-scenario strong,
+.k-stock-context strong,
+.scenario-line .label,
+.instruction-line .label,
+.k-qcm-context .kaloneo-context-label{
+  color:var(--kaloneo-context-blue)!important;
+  font-family:var(--kaloneo-context-font)!important;
+  font-size:16px!important;
+  font-weight:700!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+}
+
+.kaloneo-context-text,
+.kaltest-context p,
+.kaloneo-scenario p,
+.k-stock-context p,
+.scenario-line p{
+  display:inline!important;
+  margin:0!important;
+  color:#27313A!important;
+  font-family:var(--kaloneo-context-font)!important;
+  font-size:15.5px!important;
+  font-weight:400!important;
+  line-height:1.2!important;
+}
+
+.kaloneo-context-details{
+  flex:1 0 100%;
+  margin:4px 0 0!important;
+  padding-left:0!important;
+  color:#27313A;
+}
+
+.kaloneo-context-details ul,
+.instruction-line .consignes{
+  margin:4px 0 0 18px!important;
+  padding-left:18px!important;
+}
+
+.kaloneo-context-details li,
+.instruction-line .consignes li{
+  margin:2px 0!important;
+  font-family:var(--kaloneo-context-font)!important;
+  font-size:15.5px!important;
+  line-height:1.18!important;
+}
+
+/* Les titres locaux ne doivent jamais redéfinir la police/couleur des mots Scénario / Consigne. */
+.kaloneo-context-card h2,
+.kaloneo-context-card h3{
+  font-family:var(--kaloneo-context-font)!important;
+}
+
+@media(max-height:800px){
+  .kaloneo-context-card,
+  .kaltest-context,
+  .kaloneo-scenario,
+  .kaloneo-consigne,
+  .k-stock-context,
+  .scenario-line,
+  .instruction-line,
+  .k-qcm-context{
+    min-height:42px;
+    padding:4px 9px!important;
+    font-size:14.5px!important;
+  }
+  .kaloneo-context-card img,
+  .kaltest-context>img,
+  .kaloneo-scenario>img,
+  .k-stock-context>img,
+  .scenario-line>img,
+  .instruction-line>img,
+  .k-qcm-context>img{
+    width:38px!important;
+    height:38px!important;
+    flex-basis:38px!important;
+  }
+  .kaloneo-context-label,
+  .kaltest-context strong,
+  .kaloneo-scenario strong,
+  .k-stock-context strong,
+  .scenario-line .label,
+  .instruction-line .label,
+  .k-qcm-context .kaloneo-context-label{
+    font-size:15px!important;
+  }
+  .kaloneo-context-text,
+  .kaltest-context p,
+  .kaloneo-scenario p,
+  .k-stock-context p,
+  .scenario-line p{
+    font-size:14.5px!important;
+  }
+}
