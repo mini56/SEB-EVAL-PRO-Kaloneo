@@ -625,3 +625,66 @@ button,input{font:inherit}
 @media(max-width:1100px){
   .k-test-split{grid-template-columns:1fr 1fr;gap:10px}
 }
+
+
+.k-abandon-comment{
+  width:100%;
+  min-height:76px;
+  margin-top:8px;
+  padding:8px 10px;
+  border:1px solid #9AA4AA;
+  border-radius:7px;
+  resize:vertical;
+  font-family:Calibri,"Segoe UI",Arial,sans-serif;
+  font-size:var(--k-control);
+  line-height:1.25;
+}
+.k-abandon-ne{
+  margin-top:6px;
+  padding:9px 7px;
+  border:1px solid #D7DCE5;
+  border-radius:8px;
+  background:#F7F9FC;
+}
+.k-abandon-ne span{
+  line-height:1.2;
+}
+.k-abandon-ne small{
+  color:#59656D;
+  font-size:var(--k-secondary);
+}
+.k-abandon-admin{
+  margin-top:10px;
+  padding:10px;
+  border:1px solid #D7DCE5;
+  border-radius:8px;
+  background:#F7F9FC;
+}
+.k-abandon-admin label{
+  display:block;
+  margin-bottom:5px;
+  color:var(--k-blue);
+  font-size:var(--k-control);
+  font-weight:700;
+}
+.k-abandon-admin input{
+  width:100%;
+  min-height:36px;
+  padding:6px 9px;
+  border:1px solid #8A959C;
+  border-radius:6px;
+  font-size:var(--k-field);
+}
+.k-abandon-admin small{
+  display:block;
+  margin-top:4px;
+  color:#59656D;
+  font-size:var(--k-secondary);
+}
+.k-abandon-error{
+  min-height:18px;
+  margin-top:6px;
+  color:var(--k-red);
+  font-size:var(--k-secondary);
+  font-weight:700;
+}
