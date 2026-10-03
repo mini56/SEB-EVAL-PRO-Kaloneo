@@ -92,6 +92,16 @@ KALONÉO utilise le gabarit `questions-table-visual` en ratio **60/40** :
   - l’image définitive peut être renseignée ultérieurement dans la définition KALTEST ;
 - la calculatrice flottante s’ouvre du côté du visuel et ne doit pas masquer les champs de réponse.
 
-Le troisième test `horaires_reception_controle` conserve son gabarit spécifique de tableau d’horaires : sa structure ne doit pas être forcée dans le modèle questionnaire 60/40.
+Le troisième test `horaires_reception_controle` utilise une variation **40/60** : image verticale à gauche (40 %) et tableau d’horaires + moyennes à droite (60 %). La calculatrice s’ouvre dans la zone visuelle de gauche afin de ne pas masquer les champs de réponse.
 
 Cette règle doit être appliquée par le moteur KALONÉO à partir de la propriété `presentation.kaloneoLayout`, et non par une page HTML spéciale.
+
+
+### Variation horaires 40/60
+
+Pour `horaires_reception_controle` :
+
+- **40 % à gauche** : image verticale ;
+- **60 % à droite** : tableau d’horaires puis moyennes ;
+- calculatrice ancrée dans la zone visuelle de gauche lorsqu’elle est ouverte ;
+- cette disposition est déclarée par `presentation.kaloneoLayout.type = "visual-schedule"` et `ratio = "40/60"`.
