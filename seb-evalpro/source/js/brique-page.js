@@ -6,7 +6,7 @@
   const CHECKPOINT_KEY = 'seb_evalpro_brique_checkpoint';
   const PERIOD_SECONDS = 1;
 
-  let chronoInterval = null;
+  let chronoController = null;
   let chronoSeconds = 0;
   let lastSavedBucket = 0;
 
@@ -45,37 +45,46 @@
     return true;
   }
 
+  function installChronoController() {
+    if (!window.KaloneoChrono?.create) {
+      throw new Error('Chronomètre commun KALONÉO indisponible.');
+    }
+    if (chronoController?.destroy) chronoController.destroy();
+    chronoController = window.KaloneoChrono.create({
+      startButton: 'startBtn',
+      stopButton: 'stopBtn',
+      initialSeconds: chronoSeconds,
+      resetOnStart: false,
+      intervalMs: 250,
+      onRender(seconds) {
+        chronoSeconds = seconds;
+        updateChrono();
+      },
+      onTick(seconds) {
+        chronoSeconds = seconds;
+        persistCheckpoint(false);
+      },
+      onStop(seconds) {
+        chronoSeconds = seconds;
+        updateChrono();
+        const temps = document.getElementById('temps');
+        if (temps) {
+          const min = document.getElementById('chrono-min')?.textContent || '00';
+          const sec = document.getElementById('chrono-sec')?.textContent || '00';
+          temps.value = min + ':' + sec;
+        }
+        persistCheckpoint(true);
+      }
+    });
+    return chronoController;
+  }
+
   function startChrono() {
-    if (chronoInterval) return false;
-    chronoInterval = setInterval(() => {
-      chronoSeconds += 1;
-      updateChrono();
-      persistCheckpoint(false);
-    }, 1000);
-    const start = document.getElementById('startBtn');
-    const stop = document.getElementById('stopBtn');
-    if (start) start.disabled = true;
-    if (stop) stop.disabled = false;
-    return true;
+    return chronoController ? chronoController.start() : false;
   }
 
   function stopChrono() {
-    if (!chronoInterval) return false;
-    clearInterval(chronoInterval);
-    chronoInterval = null;
-    updateChrono();
-    const temps = document.getElementById('temps');
-    if (temps) {
-      const min = document.getElementById('chrono-min')?.textContent || '00';
-      const sec = document.getElementById('chrono-sec')?.textContent || '00';
-      temps.value = min + ':' + sec;
-    }
-    const start = document.getElementById('startBtn');
-    const stop = document.getElementById('stopBtn');
-    if (start) start.disabled = false;
-    if (stop) stop.disabled = true;
-    persistCheckpoint(true);
-    return true;
+    return chronoController ? chronoController.stop() : false;
   }
 
   function codeIsValid() {
@@ -222,9 +231,8 @@
 
   function install() {
     restoreCanonicalState();
+    installChronoController();
 
-    document.getElementById('startBtn')?.addEventListener('click', startChrono);
-    document.getElementById('stopBtn')?.addEventListener('click', stopChrono);
     document.getElementById('nivDiff')?.addEventListener('input', checkInputs);
     document.getElementById('secretCode')?.addEventListener('input', checkInputs);
     document.getElementById('validBtn')?.addEventListener('click', validateMainEvaluation);
@@ -235,6 +243,7 @@
     // Les valeurs officielles Brique doivent rester prioritaires.
     setTimeout(function () {
       restoreCanonicalState();
+      if (chronoController) chronoController.setSeconds(chronoSeconds);
       checkInputs();
     }, 0);
   }

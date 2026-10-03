@@ -13,8 +13,7 @@
   });
 
   let state = readState();
-  let chronoTimer = null;
-  let chronoStartedAt = 0;
+  let chronoController = null;
 
   function byId(id) {
     return document.getElementById(id);
@@ -182,42 +181,42 @@
     if (sec) sec.textContent = String(state.chronoSeconds % 60).padStart(2, '0');
   }
 
-  function chronoTick() {
-    if (!chronoStartedAt) return;
-    state.chronoSeconds = Math.max(0, Math.floor((Date.now() - chronoStartedAt) / 1000));
-    renderChrono();
+  function installChronoController() {
+    if (!window.KaloneoChrono?.create) {
+      throw new Error('Chronomètre commun KALONÉO indisponible.');
+    }
+    if (chronoController?.destroy) chronoController.destroy();
+    chronoController = window.KaloneoChrono.create({
+      startButton: 'pilot2-chrono-start',
+      stopButton: 'pilot2-chrono-stop',
+      initialSeconds: state.chronoSeconds,
+      resetOnStart: true,
+      intervalMs: 250,
+      onRender(seconds) {
+        state.chronoSeconds = seconds;
+        renderChrono();
+      },
+      onStart() {
+        const status = byId('pilot2-chrono-status');
+        if (status) status.textContent = 'Chronomètre en cours…';
+      },
+      onStop(seconds) {
+        state.chronoSeconds = seconds;
+        state.chronoTested = true;
+        const status = byId('pilot2-chrono-status');
+        if (status) status.textContent = 'Chronomètre testé ✓';
+        persist();
+      }
+    });
+    return chronoController;
   }
 
   function startChrono() {
-    if (chronoTimer !== null) return false;
-    state.chronoSeconds = 0;
-    chronoStartedAt = Date.now();
-    chronoTimer = setInterval(chronoTick, 250);
-    chronoTick();
-    const start = byId('pilot2-chrono-start');
-    const stop = byId('pilot2-chrono-stop');
-    if (start) start.disabled = true;
-    if (stop) stop.disabled = false;
-    const status = byId('pilot2-chrono-status');
-    if (status) status.textContent = 'Chronomètre en cours…';
-    return true;
+    return chronoController ? chronoController.start() : false;
   }
 
   function stopChrono() {
-    if (chronoTimer === null) return false;
-    chronoTick();
-    clearInterval(chronoTimer);
-    chronoTimer = null;
-    chronoStartedAt = 0;
-    state.chronoTested = true;
-    const start = byId('pilot2-chrono-start');
-    const stop = byId('pilot2-chrono-stop');
-    if (start) start.disabled = false;
-    if (stop) stop.disabled = true;
-    const status = byId('pilot2-chrono-status');
-    if (status) status.textContent = 'Chronomètre testé ✓';
-    persist();
-    return true;
+    return chronoController ? chronoController.stop() : false;
   }
 
   function playTestTone() {
@@ -279,8 +278,7 @@
     installDrag('pilot2-drag-house', 'pilot2-house-target', 'housePlaced');
     installDrag('pilot2-drag-car', 'pilot2-car-target', 'carPlaced');
 
-    byId('pilot2-chrono-start')?.addEventListener('click', startChrono);
-    byId('pilot2-chrono-stop')?.addEventListener('click', stopChrono);
+    installChronoController();
 
     byId('pilot2-calculator-test-open')?.addEventListener('click', () => {
       state.calculatorTested = true;
@@ -303,6 +301,7 @@
     });
 
     restore();
+    if (chronoController) chronoController.setSeconds(state.chronoSeconds);
   }
 
   window.sebPilot2Onboarding = Object.freeze({

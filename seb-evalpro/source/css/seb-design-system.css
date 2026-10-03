@@ -131,6 +131,41 @@ h2,
   --seb-button-color: var(--seb-red);
 }
 
+.seb-btn-timer-start {
+  --seb-button-color: var(--seb-green);
+}
+
+.seb-btn-timer-stop {
+  --seb-button-color: var(--seb-red);
+}
+
+.seb-action-btn.seb-btn-solid {
+  color: #fff;
+  border-color: var(--seb-button-color);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--seb-button-color) 82%, #fff) 0%,
+    var(--seb-button-color) 100%
+  );
+  box-shadow:
+    0 4px 10px rgba(0,0,0,.16),
+    inset 0 1px 0 rgba(255,255,255,.30);
+}
+
+.seb-action-btn.seb-btn-solid:hover:not(:disabled) {
+  color: #fff;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--seb-button-color) 72%, #fff) 0%,
+    color-mix(in srgb, var(--seb-button-color) 92%, #000) 100%
+  );
+}
+
+.seb-action-btn.seb-btn-solid:disabled {
+  color: #fff;
+  opacity: .55;
+}
+
 input[type="text"],
 input[type="number"],
 input[type="password"],

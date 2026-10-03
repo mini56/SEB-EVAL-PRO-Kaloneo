@@ -2030,26 +2030,12 @@ body[data-seb-kaltest-id="paronymes_rapport"] .kaltest-context strong{
   line-height:1.15;
 }
 
-/* Chronomètre : style KALONÉO inchangé, seule la couleur du texte distingue les actions. */
+/* Chronomètre commun KALONÉO : Démarrer vert, Arrêter rouge. */
 #page-identification #pilot2-chrono-start.pilot2-chrono-start{
-  --seb-button-color:#004E70!important;
-  color:#198754!important;
-  border-color:#004E70!important;
-  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
-  box-shadow:0 4px 10px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.98)!important;
+  --seb-button-color:var(--seb-green,#198754)!important;
 }
 #page-identification #pilot2-chrono-stop.pilot2-chrono-stop{
-  --seb-button-color:#004E70!important;
-  color:#C62828!important;
-  border-color:#004E70!important;
-  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
-  box-shadow:0 4px 10px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.98)!important;
-}
-#page-identification #pilot2-chrono-stop.pilot2-chrono-stop:disabled{
-  color:#C62828!important;
-  border-color:#004E70!important;
-  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(245,248,252,.84) 100%)!important;
-  opacity:.58!important;
+  --seb-button-color:var(--seb-red,#C62828)!important;
 }
 
 /* Colonne calculatrice plus grande et alignée en haut des autres outils. */

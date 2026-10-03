@@ -1579,6 +1579,15 @@ Les variantes fonctionnelles nécessaires — chrono simple, mesures répétées
 
 Le Tri de chevilles et les futurs exercices chronométrés doivent donc utiliser cette norme commune.
 
+#### Règle visuelle et libellés du chronomètre commun — 3 octobre 2026
+
+- **Démarrer** : bouton KALONÉO Crystal plein **vert** ;
+- **Arrêter** : bouton KALONÉO Crystal plein **rouge** ;
+- texte blanc sur les deux boutons ;
+- mêmes arrondis, ombres, survol, appui, focus et état désactivé que le système de boutons KALONÉO ;
+- le libellé normalisé est **« Arrêter »** et non « Stop » ;
+- la Page 1 / prise en main, LEGO / Briques et les futures pages chronométrées doivent appeler le **même contrôleur commun** `js/kaloneo-chrono.js`, sans `setInterval` concurrent propre à l’exercice.
+
 ### 50.5 Intervention Administrateur unique
 
 Il n’existe qu’**un seul mécanisme sécurisé d’Intervention Administrateur**, fourni par KALONÉO / SEB EvalPro.
