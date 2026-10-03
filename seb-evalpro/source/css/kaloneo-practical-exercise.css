@@ -1,14 +1,18 @@
-/* KALONÉO — gabarit réutilisable d'exercice pratique 50/50 */
-*,*::before,*::after{box-sizing:border-box}\nhtml,body{width:100%;height:100%;margin:0;overflow:hidden}
-body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#26343c}
+/* KALONÉO — exercice pratique : contexte pleine largeur + zone de travail 50/50 */
+*,*::before,*::after{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden}
+body{
+  background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));
+  color:#26343c;
+}
 
 .kaloneo-practical-page{
   width:100%;
   height:100vh;
-  padding:12px 18px 10px;
+  padding:10px 18px 9px;
   display:grid;
-  grid-template-rows:auto minmax(0,1fr);
-  gap:8px;
+  grid-template-rows:auto auto auto minmax(0,1fr);
+  gap:7px;
 }
 
 .kaloneo-practical-title{
@@ -21,11 +25,105 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
   text-align:center;
 }
 
+.kaloneo-full-context{
+  width:100%;
+  min-width:0;
+  flex:0 0 auto;
+}
+
+.kaloneo-info-card{
+  padding:7px 11px;
+  border:1px solid rgba(0,78,112,.20);
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 2px 7px rgba(0,0,0,.06);
+}
+
+.kaloneo-scenario{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr);
+  gap:10px;
+  align-items:center;
+}
+
+.kaloneo-scenario img{
+  width:46px;
+  height:46px;
+  object-fit:contain;
+}
+
+.kaloneo-scenario strong{
+  display:inline;
+  color:var(--seb-blue-100,#004E70);
+  font-size:var(--seb-type-block-title,18px);
+}
+
+.kaloneo-scenario p{
+  margin:1px 0;
+  font-size:var(--seb-type-body,17px);
+  line-height:1.20;
+}
+
+.kaloneo-consigne{
+  padding:6px 10px 7px;
+  border:1px solid rgba(249,178,51,.58);
+  border-radius:10px;
+  background:linear-gradient(145deg,#fffaf0,#fff);
+  box-shadow:0 2px 7px rgba(0,0,0,.05);
+}
+
+.kaloneo-consigne h2{
+  margin:0 0 2px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:var(--seb-blue-100,#004E70);
+  font-family:var(--seb-font-light,"Calibri Light",Calibri,sans-serif);
+  font-size:var(--seb-type-section-title,22px);
+  font-weight:300;
+  line-height:1.05;
+}
+
+.kaloneo-consigne h2 img{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+}
+
+.kaloneo-consigne-content{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:12px;
+  align-items:start;
+}
+
+.kaloneo-consigne p{
+  margin:1px 0 0;
+  font-size:var(--seb-type-control,16px);
+  line-height:1.18;
+  white-space:nowrap;
+}
+
+.kaloneo-consigne ul{
+  margin:0;
+  padding-left:20px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  column-gap:24px;
+  row-gap:1px;
+}
+
+.kaloneo-consigne li{
+  margin:0;
+  font-size:var(--seb-type-control,16px);
+  line-height:1.18;
+}
+
 .kaloneo-practical-grid{
   min-height:0;
   display:grid;
   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  gap:16px;
+  gap:14px;
 }
 
 .kaloneo-practical-column{
@@ -38,94 +136,35 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
   overflow:hidden;
 }
 
-#consigne{
-  min-height:0;
-  flex:1 1 auto;
+.kaloneo-practical-left{
+  padding:9px 11px;
   display:flex;
   flex-direction:column;
   gap:7px;
-  overflow:hidden;
-}
-
-.kaloneo-practical-left{
-  padding:12px 14px;
-  display:flex;
-  flex-direction:column;
-  gap:9px;
 }
 
 .kaloneo-practical-right{
-  padding:12px 14px;
+  padding:9px 11px;
   display:grid;
   grid-template-rows:auto auto auto auto auto;
   align-content:start;
-  gap:10px;
+  gap:7px;
 }
 
-.kaloneo-info-card{
-  padding:9px 11px;
-  border:1px solid rgba(0,78,112,.20);
-  border-radius:10px;
-  background:#fff;
-}
-
-.kaloneo-scenario{
-  display:grid;
-  grid-template-columns:52px minmax(0,1fr);
-  gap:10px;
-  align-items:start;
-}
-
-.kaloneo-scenario img{
-  width:50px;
-  height:50px;
-  object-fit:contain;
-}
-
-.kaloneo-scenario strong,
-.kaloneo-consigne h2,
-.kaloneo-control-card h2{
-  color:var(--seb-blue-100,#004E70);
-}
-
-.kaloneo-scenario strong{
-  display:block;
-  margin-bottom:2px;
-  font-size:var(--seb-type-block-title,18px);
-}
-
-.kaloneo-scenario p,
-.kaloneo-consigne p,
-.kaloneo-consigne li{
-  margin:0;
-  font-size:var(--seb-type-body,17px);
-  line-height:1.28;
-}
-
-.kaloneo-scenario p+p{margin-top:5px}
-
-.kaloneo-consigne{
-  padding:9px 11px;
-  border:1px solid rgba(249,178,51,.55);
-  border-radius:10px;
-  background:linear-gradient(145deg,#fffaf0,#fff);
-}
-
-.kaloneo-consigne h2{
-  margin:0 0 5px;
+.kaloneo-image-phase{
+  min-height:0;
+  flex:1 1 auto;
   display:flex;
-  align-items:center;
-  gap:8px;
-  font-family:var(--seb-font-light,"Calibri Light",Calibri,sans-serif);
-  font-size:var(--seb-type-section-title,22px);
-  font-weight:300;
+  transition:opacity .35s ease,transform .35s ease;
 }
 
-.kaloneo-consigne h2 img{width:38px;height:38px;object-fit:contain}
-.kaloneo-consigne ul{margin:5px 0 0;padding-left:23px}
-.kaloneo-consigne li{margin:3px 0}
+.kaloneo-image-phase.fade-out{
+  opacity:0;
+  transform:translateY(-5px);
+}
 
 .kaloneo-practical-image{
+  width:100%;
   min-height:0;
   flex:1 1 auto;
   display:flex;
@@ -146,7 +185,7 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
 }
 
 .kaloneo-control-card{
-  padding:10px 12px;
+  padding:8px 10px;
   border:1px solid rgba(0,78,112,.20);
   border-radius:11px;
   background:#fff;
@@ -154,7 +193,8 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
 }
 
 .kaloneo-control-card h2{
-  margin:0 0 7px;
+  margin:0 0 5px;
+  color:var(--seb-blue-100,#004E70);
   font-family:var(--seb-font-light,"Calibri Light",Calibri,sans-serif);
   font-size:var(--seb-type-section-title,22px);
   font-weight:300;
@@ -162,10 +202,10 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
 }
 
 .kaloneo-chrono-display{
-  margin:2px auto 9px;
+  margin:0 auto 7px;
   color:var(--seb-blue-100,#004E70);
   text-align:center;
-  font-size:58px;
+  font-size:54px;
   line-height:1;
   font-weight:800;
   font-variant-numeric:tabular-nums;
@@ -177,7 +217,11 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
   gap:10px;
 }
 
-.kaloneo-chrono-buttons .seb-action-btn{min-width:130px}
+.kaloneo-chrono-buttons .seb-action-btn{
+  min-width:130px;
+  min-height:38px;
+  padding:7px 15px;
+}
 #startBtn{--seb-button-color:var(--seb-green,#198754)}
 #stopBtn{--seb-button-color:var(--seb-red,#C62828)}
 
@@ -197,8 +241,8 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
 
 .kaloneo-field-row input{
   width:100%;
-  min-height:38px;
-  padding:6px 9px;
+  min-height:36px;
+  padding:5px 8px;
   font-size:var(--seb-type-field,17px);
 }
 
@@ -209,7 +253,10 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
   font-weight:700;
 }
 
-#nivDiff{max-width:100px;text-align:center}
+#nivDiff{
+  max-width:100px;
+  text-align:center;
+}
 
 .kaloneo-admin-card{
   border-color:rgba(249,178,51,.62);
@@ -224,10 +271,10 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
 }
 
 .kaloneo-admin-help{
-  margin:0 0 8px;
+  margin:0 0 6px;
   color:#58666f;
   font-size:var(--seb-type-secondary,15px);
-  line-height:1.22;
+  line-height:1.18;
 }
 
 #secretCode{
@@ -245,6 +292,8 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
 #validBtn{
   --seb-button-color:var(--seb-green,#198754);
   min-width:160px;
+  min-height:38px;
+  padding:7px 15px;
 }
 
 #msg{
@@ -263,7 +312,9 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
   overflow-x:hidden;
 }
 
-#autoEvalPart.visible{display:block}
+#autoEvalPart.visible{
+  display:block;
+}
 
 .kaloneo-autoeval-card{
   padding:10px 12px;
@@ -284,11 +335,15 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
   font-size:var(--seb-type-control,16px);
 }
 
-.fr-checkbox-group input{width:18px;height:18px;vertical-align:middle}
+.fr-checkbox-group input{
+  width:18px;
+  height:18px;
+  vertical-align:middle;
+}
 
 #autoComment{
   width:100%;
-  min-height:110px;
+  min-height:95px;
   padding:8px 10px;
   resize:vertical;
   font-size:var(--seb-type-field,17px);
@@ -313,12 +368,32 @@ body{background:var(--seb-page-background,linear-gradient(#fff,#ebeef5));color:#
 }
 
 @media(max-height:800px){
-  .kaloneo-practical-page{padding:8px 14px 7px;gap:6px}
+  .kaloneo-practical-page{
+    padding:7px 14px 6px;
+    gap:5px;
+  }
+  .kaloneo-practical-title{font-size:26px}
+  .kaloneo-info-card{padding:5px 9px}
+  .kaloneo-scenario{
+    grid-template-columns:40px minmax(0,1fr);
+    gap:8px;
+  }
+  .kaloneo-scenario img{width:38px;height:38px}
+  .kaloneo-scenario p{font-size:15.5px;line-height:1.15}
+  .kaloneo-scenario strong{font-size:17px}
+  .kaloneo-consigne{padding:4px 8px 5px}
+  .kaloneo-consigne h2{font-size:19px;margin-bottom:1px}
+  .kaloneo-consigne h2 img{width:28px;height:28px}
+  .kaloneo-consigne-content{gap:10px}
+  .kaloneo-consigne p,.kaloneo-consigne li{font-size:15px;line-height:1.12}
+  .kaloneo-consigne ul{column-gap:18px}
   .kaloneo-practical-grid{gap:10px}
-  .kaloneo-practical-left,.kaloneo-practical-right{padding:8px 10px;gap:6px}
-  .kaloneo-info-card,.kaloneo-consigne,.kaloneo-control-card{padding:6px 9px}
-  .kaloneo-scenario p,.kaloneo-consigne p,.kaloneo-consigne li{font-size:16px}
-  .kaloneo-consigne h2,.kaloneo-control-card h2{font-size:20px}
-  .kaloneo-chrono-display{font-size:48px;margin-bottom:6px}
-  .kaloneo-field-row input{min-height:34px}
+  .kaloneo-practical-left,.kaloneo-practical-right{padding:7px 9px;gap:5px}
+  .kaloneo-control-card{padding:6px 9px}
+  .kaloneo-control-card h2{font-size:20px;margin-bottom:3px}
+  .kaloneo-chrono-display{font-size:46px;margin-bottom:4px}
+  .kaloneo-chrono-buttons .seb-action-btn{min-height:34px;padding:5px 12px}
+  .kaloneo-field-row input{min-height:32px}
+  .kaloneo-admin-help{font-size:14.5px;margin-bottom:4px}
+  #validBtn{min-height:34px}
 }
