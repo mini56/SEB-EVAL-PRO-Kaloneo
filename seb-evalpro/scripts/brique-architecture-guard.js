@@ -16,6 +16,7 @@ function read(rel) {
 
 const html = read('app/web/brique.html');
 const page = read('app/web/js/brique-page.js');
+const chrono = read('app/web/js/kaloneo-chrono.js');
 const parcours = read('app/web/js/seb-parcours.js');
 const qcm = read('app/web/qcmv1.0.html') + '\n' + read('app/web/js/qcm-runtime.js') + '\n' + read('app/web/js/qcm-runtime-ui.js') + '\n' + read('app/web/js/qcm-runtime-tail.js');
 const resume = read('app/web/js/seb-page-draft-resume.js');
@@ -40,8 +41,13 @@ for (const value of ['ease_br','difficulties_br','progress_br','motivation_br','
 }
 
 if (!html.includes('<script src="js/seb-parcours.js"></script>') ||
+    !html.includes('<script src="js/kaloneo-chrono.js"></script>') ||
     !html.includes('<script src="js/brique-page.js"></script>')) {
-  fail('scripts modulaires Brique absents');
+  fail('scripts modulaires Brique / chrono commun absents');
+}
+if (!html.includes('seb-btn-solid seb-btn-timer-start') ||
+    !html.includes('seb-btn-solid seb-btn-timer-stop')) {
+  fail('boutons chrono KALONÉO vert/rouge absents');
 }
 if (html.includes('id="resetBtn"')) fail('ancien bouton Remise à zéro réintroduit');
 if (!/<input\s+id="nivDiff"[^>]*\bmin="0"\s+max="10"/.test(html)) fail('zéro erreur Brique non autorisé');
@@ -76,6 +82,9 @@ for (const token of [
 }
 if (/stock\.html/i.test(page)) fail('couplage direct Brique -> stock réintroduit');
 if (/removeItem\(['"]eval_brique/.test(page)) fail('effacement destructif Brique réintroduit');
+if (!page.includes('window.KaloneoChrono.create')) fail('Brique ne passe plus par le chronomètre commun KALONÉO');
+if (/setInterval\s*\(/.test(page)) fail('moteur de chronomètre local Brique réintroduit');
+if (!chrono.includes('window.KaloneoChrono') || !chrono.includes('function create(options)')) fail('contrôleur de chronomètre commun KALONÉO invalide');
 
 const introPos = parcours.indexOf("id:'introbrique'");
 const briquePos = parcours.indexOf("id:'brique'");
@@ -109,4 +118,4 @@ for (const token of [
   if (!resume.includes(token)) fail('protection reprise structurelle Brique absente: ' + token);
 }
 
-console.log('SEB EvalPro garde Brique: chrono, code, zéro erreur, reprise, autoévaluation, Résultats et navigation centrale — OK.');
+console.log('SEB EvalPro garde Brique: chrono commun KALONÉO, boutons vert/rouge, code, zéro erreur, reprise, autoévaluation, Résultats et navigation centrale — OK.');
