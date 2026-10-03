@@ -346,7 +346,52 @@
     return wrapper;
   }
 
+  function renderQuestionnaireVisual(test) {
+    const visual = test.presentation?.kaloneoLayout?.right || {};
+    const panel = document.createElement('aside');
+    panel.className = 'kaltest-visual-panel';
+    panel.setAttribute('aria-label', visual.alt || 'Illustration de l’exercice');
+
+    const frame = document.createElement('div');
+    frame.className = 'kaltest-visual-frame';
+
+    if (visual.src) {
+      const img = document.createElement('img');
+      img.src = visual.src;
+      img.alt = visual.alt || '';
+      frame.appendChild(img);
+    } else {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'kaltest-visual-placeholder';
+      const badge = document.createElement('span');
+      badge.className = 'kaltest-visual-placeholder-icon';
+      badge.textContent = '▧';
+      const label = document.createElement('strong');
+      label.textContent = visual.placeholder || 'Image verticale';
+      placeholder.append(badge, label);
+      frame.appendChild(placeholder);
+    }
+
+    panel.appendChild(frame);
+    return panel;
+  }
+
   function renderBasic(test, host) {
+    const configured = test.presentation?.kaloneoLayout;
+    if (configured?.type === 'questions-table-visual' && configured?.ratio === '60/40') {
+      const layout = document.createElement('div');
+      layout.className = 'kaltest-questionnaire-visual-layout';
+
+      const left = document.createElement('section');
+      left.className = 'kaltest-questionnaire-left';
+      left.appendChild(renderQuestionList(test));
+      left.appendChild(renderBasicResponseTable(test));
+
+      layout.append(left, renderQuestionnaireVisual(test));
+      host.appendChild(layout);
+      return;
+    }
+
     const layout = document.createElement('div');
     layout.className = 'kaltest-simple-layout';
     layout.appendChild(renderQuestionList(test));
