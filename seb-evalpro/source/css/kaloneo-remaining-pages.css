@@ -1047,3 +1047,64 @@ body[data-kaloneo-page="tri"] #stopBtn:focus-visible{
   outline-offset:2px!important;
 }
 
+
+
+/* PILOTE 20 — finitions locales Gratte-ciel / Tri après revue réelle. */
+
+/* Gratte-ciel : le bloc supérieur EST le scénario KALONÉO. */
+body[data-kaloneo-page="carre"] .carre-scenario{
+  width:100%!important;
+  flex:0 0 auto!important;
+  margin:0!important;
+  text-align:left!important;
+  align-items:flex-start!important;
+}
+body[data-kaloneo-page="carre"] .carre-scenario>img{
+  margin-top:0!important;
+  align-self:flex-start!important;
+}
+body[data-kaloneo-page="carre"] .carre-scenario .kaloneo-context-body{
+  align-content:flex-start!important;
+}
+
+/* Tri : Scénario et Consigne commencent au même axe vertical.
+   Le compteur commun KALONÉO reste volontairement inchangé (44 px via seb-design-system.css). */
+body[data-kaloneo-page="tri"] .tri-scenario,
+body[data-kaloneo-page="tri"] .tri-consigne{
+  align-items:flex-start!important;
+}
+body[data-kaloneo-page="tri"] .tri-scenario>img,
+body[data-kaloneo-page="tri"] .tri-consigne>img{
+  margin-top:0!important;
+  align-self:flex-start!important;
+}
+body[data-kaloneo-page="tri"] .tri-scenario .kaloneo-context-body,
+body[data-kaloneo-page="tri"] .tri-consigne .kaloneo-context-body{
+  align-content:flex-start!important;
+}
+
+/* Tri : l'illustration exploite le reste du panneau gauche sans recadrage. */
+body[data-kaloneo-page="tri"] .tri-consigne{
+  flex:1 1 auto!important;
+  min-height:0!important;
+}
+body[data-kaloneo-page="tri"] .tri-consigne .kaloneo-context-body{
+  min-height:0!important;
+  height:100%!important;
+}
+body[data-kaloneo-page="tri"] .tri-consigne .kaloneo-context-details{
+  min-height:0!important;
+  flex:1 1 100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+body[data-kaloneo-page="tri"] .tri-consigne .tri-illustration{
+  width:100%!important;
+  max-width:520px!important;
+  height:auto!important;
+  max-height:none!important;
+  min-height:0!important;
+  flex:1 1 auto!important;
+  object-fit:contain!important;
+  margin:8px auto 0!important;
+}
