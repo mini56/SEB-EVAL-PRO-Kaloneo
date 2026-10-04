@@ -211,6 +211,7 @@
         version:def.version||'1.0.0',
         category:def.category||'mathematiques',
         scored:def.scored!==false,
+        icon:def.icon?clone(def.icon):null,
         layout:layoutFromDefinition(def),
         scenario:def.scenario||'',
         instruction:def.instruction||'',
@@ -352,6 +353,8 @@
       def.version=m.version||def.version;
       def.category=m.category||def.category;
       def.scored=m.scored!==false;
+      if(m.icon) def.icon=clone(m.icon);
+      else if(Object.prototype.hasOwnProperty.call(def,'icon')) delete def.icon;
       def.scenario=m.scenario||'';
       def.instruction=m.instruction||'';
       def.calculator=Object.assign({},def.calculator||{},{
@@ -424,6 +427,7 @@
       category:m.category||'',
       kind:'exercise',
       scored:m.scored!==false,
+      icon:m.icon?clone(m.icon):undefined,
       features:[...new Set(features)],
       scenario:m.scenario||'',
       instruction:m.instruction||'',
