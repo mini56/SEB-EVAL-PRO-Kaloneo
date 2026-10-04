@@ -51,12 +51,12 @@
 
     const observer = new MutationObserver(() => {
       if (page.classList.contains('visible')) {
-        requestAnimationFrame(playOnce);
+        setTimeout(playOnce, 0);
       }
     });
     observer.observe(page, { attributes:true, attributeFilter:['class'] });
 
-    if (page.classList.contains('visible')) requestAnimationFrame(playOnce);
+    if (page.classList.contains('visible')) setTimeout(playOnce, 0);
   }
 
   window.sebPilot2IntroVideo = Object.freeze({
