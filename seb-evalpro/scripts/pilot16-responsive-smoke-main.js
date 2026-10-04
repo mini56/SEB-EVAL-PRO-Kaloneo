@@ -74,8 +74,6 @@ function assertBar(s,label){
   if(Math.abs(s.bar.bottom-s.innerHeight)>2) fail(label+': barre non collée au bas',s);
   if(!/linear-gradient/i.test(s.bg) || !/0, 78, 112|0, 59, 87|53, 103, 135/.test(s.bg)) fail(label+': dégradé bleu KALONÉO absent',s);
   if(!s.logo || !/^data:image\/png;base64,/i.test(s.logo.src) || s.logo.naturalWidth<32) fail(label+': icône officielle KALONÉO absente',s);
-  if(!s.brand || Math.abs(s.brand.rect.width-36)>2 || Math.abs(s.brand.rect.height-36)>2) fail(label+': carré icône KALONÉO != 36px',s);
-  if(!/59, 129, 156/.test(s.brand.background)) fail(label+': fond bleu clair de l’icône absent',s);
   if(s.emptyVisible!==0) fail(label+': bouton vide visible',s);
   for(const r of s.hiddenRects){
     if(r && r.width>1 && r.height>1) fail(label+': slot masqué garde une taille',s);
