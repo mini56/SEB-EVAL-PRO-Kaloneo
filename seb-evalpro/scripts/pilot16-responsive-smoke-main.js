@@ -53,6 +53,7 @@ async function barSnapshot(win){
       body:rect(body),
       bar:rect(bar),
       bg:bar?getComputedStyle(bar).backgroundImage:'',
+      brand:(() => {const b=document.getElementById('kaloneo-nav-brand');const s=b?getComputedStyle(b):null;return b?{rect:rect(b),background:s?.backgroundColor||''}:null})(),
       logo:(() => {const i=document.getElementById('kaloneo-nav-logo-img');return i?{src:i.src,naturalWidth:i.naturalWidth,naturalHeight:i.naturalHeight,rect:rect(i)}:null})(),
       actions:visibleActions.map(b=>({text:(b.textContent||'').trim(),rect:rect(b),disabled:b.disabled})),
       hiddenRects:hiddenActions.map(b=>rect(b)),
@@ -73,6 +74,8 @@ function assertBar(s,label){
   if(Math.abs(s.bar.bottom-s.innerHeight)>2) fail(label+': barre non collée au bas',s);
   if(!/linear-gradient/i.test(s.bg) || !/0, 78, 112|0, 59, 87|53, 103, 135/.test(s.bg)) fail(label+': dégradé bleu KALONÉO absent',s);
   if(!s.logo || !/^data:image\/png;base64,/i.test(s.logo.src) || s.logo.naturalWidth<32) fail(label+': icône officielle KALONÉO absente',s);
+  if(!s.brand || Math.abs(s.brand.rect.width-36)>2 || Math.abs(s.brand.rect.height-36)>2) fail(label+': carré icône KALONÉO != 36px',s);
+  if(!/59, 129, 156/.test(s.brand.background)) fail(label+': fond bleu clair de l’icône absent',s);
   if(s.emptyVisible!==0) fail(label+': bouton vide visible',s);
   for(const r of s.hiddenRects){
     if(r && r.width>1 && r.height>1) fail(label+': slot masqué garde une taille',s);
@@ -168,6 +171,17 @@ async function testTri(){
     await load(win,'tri_de_cheville.html');
     let bar=await barSnapshot(win);
     assertBar(bar,'Tri initial');
+    await js(win,`document.getElementById('startBtn')?.click();true`);
+    await wait(120);
+    const timerStyle=await js(win,`(() => {
+      const b=document.getElementById('startBtn');
+      const s=b?getComputedStyle(b):null;
+      return b?{border:s.borderColor,outline:s.outlineColor,disabled:b.disabled}:null;
+    })()`);
+    if(!timerStyle || timerStyle.border!=='rgb(25, 135, 84)' || /249, 178, 51|249,178,51|f9b233/i.test(timerStyle.outline)) fail('Tri: contour orange encore présent sur Démarrer',timerStyle);
+    await js(win,`window.sebTri?.stopChrono?.();true`);
+    await wait(80);
+
     const initial=await js(win,`(() => {
       const header=document.querySelector('.header');
       const main=document.querySelector('.main');
@@ -230,6 +244,27 @@ async function testMailAndStock(){
     if(mail.bg!=='none') fail('E-mail: la confirmation doit rester un message intégré sans fond',mail);
     if(parseFloat(mail.borderWidth||'0')>0) fail('E-mail: la confirmation ne doit plus être encadrée',mail);
     if(mail.listType!=='none' || String(mail.marker).includes('•')) fail('E-mail: puces encore présentes devant les fichiers',mail);
+
+    await load(win,'planning.html');
+    bar=await barSnapshot(win);
+    assertBar(bar,'Planning');
+    const planning=await js(win,`(() => {
+      const page=document.querySelector('.container');
+      const scenario=document.querySelector('.header.kaloneo-context-scenario');
+      const consigne=document.querySelector('.consigne-header.kaloneo-context-consigne');
+      const main=document.querySelector('.main-content');
+      const r=el=>el?el.getBoundingClientRect():null;
+      const p=r(page),s=r(scenario),c=r(consigne),m=r(main);
+      return {
+        page:p?{left:p.left,right:p.right,width:p.width}:null,
+        scenario:s?{left:s.left,right:s.right,width:s.width,bottom:s.bottom}:null,
+        consigne:c?{left:c.left,right:c.right,width:c.width,top:c.top,bottom:c.bottom}:null,
+        main:m?{top:m.top}:null
+      };
+    })()`);
+    if(!planning.page||!planning.scenario||!planning.consigne||!planning.main) fail('Planning: structure incomplète',planning);
+    if(planning.scenario.width<planning.page.width*.94 || planning.consigne.width<planning.page.width*.94) fail('Planning: Scénario/Consigne non pleine largeur',planning);
+    if(planning.consigne.top<planning.scenario.bottom-2 || planning.main.top<planning.consigne.bottom-2) fail('Planning: ordre Scénario > Consigne > contenu incorrect',planning);
 
     await load(win,'stock.html');
     bar=await barSnapshot(win);
