@@ -17,10 +17,10 @@ async function navSnapshot(win){
     const bar=document.getElementById('kaloneo-common-navigation');
     const brand=document.getElementById('kaloneo-nav-brand');
     const center=document.getElementById('kaloneo-nav-center');
-    const home=document.getElementById('seb-evalpro-privacy-toggle');
+    const home=document.getElementById('kaloneo-nav-home');
     const clock=document.getElementById('kaloneo-nav-clock');
     const actions=Array.from(document.querySelectorAll('#kaloneo-nav-center .kaloneo-nav-action')).filter(b=>!b.hidden);
-    const abandon=document.getElementById('seb-evalpro-abandon-fixed');
+    const abandon=document.getElementById('kaloneo-nav-abandon');
     const rect=(el)=>el?({left:el.getBoundingClientRect().left,top:el.getBoundingClientRect().top,right:el.getBoundingClientRect().right,bottom:el.getBoundingClientRect().bottom,width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}):null;
     return {
       innerHeight:window.innerHeight,
