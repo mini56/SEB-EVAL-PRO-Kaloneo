@@ -139,6 +139,7 @@ async function testIdentification1200(){
     await load(win,'kaltest-pilot2.html');
     const bar=await barSnapshot(win);
     assertBar(bar,'Identification 1200x800');
+    if(!bar.actions.some(a=>/suivant/i.test(a.text))) fail('Identification: bouton Suivant absent de la barre',bar);
     const m=await js(win,`(() => {
       const grid=document.querySelector('.pilot2-onboarding-grid');
       const shell=document.getElementById('pilot2-shell');
