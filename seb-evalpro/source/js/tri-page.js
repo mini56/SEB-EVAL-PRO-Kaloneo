@@ -11,8 +11,7 @@
   let currentTri = 1;
   let awaitingError = null;
   let chronoSeconds = 0;
-  let chronoInterval = null;
-  let chronoStartedAt = 0;
+  let chronoController = null;
 
   function byId(id) {
     return document.getElementById(id);
@@ -69,7 +68,7 @@
   }
 
   function isRunning() {
-    return chronoInterval !== null;
+    return Boolean(chronoController && chronoController.isRunning());
   }
 
   function updateChronoDisplay() {
@@ -83,17 +82,25 @@
     sessionStorage.setItem(LIVE_KEY, String(Math.max(0, Math.floor(chronoSeconds))));
   }
 
-  function tickChrono() {
-    if (!chronoStartedAt) return;
-    chronoSeconds = Math.max(0, Math.floor((Date.now() - chronoStartedAt) / 1000));
-    persistLiveChrono();
-    updateChronoDisplay();
-  }
-
-  function stopInterval() {
-    if (chronoInterval !== null) clearInterval(chronoInterval);
-    chronoInterval = null;
-    chronoStartedAt = 0;
+  function installChronoController() {
+    if (!window.KaloneoChrono?.create) {
+      throw new Error('Compteur commun KALONÉO indisponible.');
+    }
+    if (chronoController?.destroy) chronoController.destroy();
+    chronoController = window.KaloneoChrono.create({
+      startButton: 'startBtn',
+      stopButton: 'stopBtn',
+      initialSeconds: chronoSeconds,
+      resetOnStart: false,
+      intervalMs: 250,
+      bindButtons: false,
+      onRender(seconds) {
+        chronoSeconds = seconds;
+        persistLiveChrono();
+        updateChronoDisplay();
+      }
+    });
+    return chronoController;
   }
 
   function startChrono() {
@@ -103,19 +110,19 @@
       if (errorInput) errorInput.focus();
       return false;
     }
+    if (!chronoController) return false;
 
-    chronoStartedAt = Date.now() - chronoSeconds * 1000;
-    chronoInterval = setInterval(tickChrono, 250);
-    tickChrono();
+    chronoController.setSeconds(chronoSeconds);
+    const started = chronoController.start();
     updateControls();
-    return true;
+    return started;
   }
 
   function stopChrono() {
-    if (!isRunning() || currentTri > MAX_TRIS) return false;
+    if (!isRunning() || currentTri > MAX_TRIS || !chronoController) return false;
 
-    tickChrono();
-    stopInterval();
+    if (!chronoController.stop()) return false;
+    chronoSeconds = chronoController.getSeconds();
 
     const minutes = Math.floor(chronoSeconds / 60);
     const secondes = chronoSeconds % 60;
@@ -256,6 +263,7 @@
     if (consigne) {
       consigne.classList.add('fade-out');
       setTimeout(() => {
+        consigne.classList.add('tri-consigne-replaced');
         consigne.style.display = 'none';
         autoEvalPart.style.display = 'block';
         // La visibilité fonctionnelle ne dépend jamais de requestAnimationFrame :
@@ -316,7 +324,9 @@
     currentTri = index + 1;
     awaitingError = null;
     chronoSeconds = 0;
+    if (chronoController) chronoController.setSeconds(0);
     sessionStorage.setItem(LIVE_KEY, '0');
+    if (chronoController) chronoController.setSeconds(chronoSeconds);
     updateChronoDisplay();
     persistTriData();
     updateControls();
@@ -433,7 +443,11 @@
     if (sessionStorage.getItem(READY_KEY) === '1' && minimumTrisDone()) {
       const autoPart = byId('autoEvalPart');
       if (autoPart) {
-        byId('consigne')?.style && (byId('consigne').style.display = 'none');
+        const consigne = byId('consigne');
+        if (consigne) {
+          consigne.classList.add('tri-consigne-replaced');
+          consigne.style.display = 'none';
+        }
         autoPart.style.display = 'block';
         autoPart.classList.add('visible');
       }
@@ -492,6 +506,7 @@
       if (s) s.readOnly = true;
     }
 
+    installChronoController();
     byId('startBtn')?.addEventListener('click', startChrono);
     byId('stopBtn')?.addEventListener('click', stopChrono);
     byId('calc')?.addEventListener('click', showResults);
