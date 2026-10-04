@@ -259,7 +259,7 @@
 
     if (state.chronoTested) {
       const status = byId('pilot2-chrono-status');
-      if (status) status.textContent = 'Chronomètre testé ✓';
+      if (status) status.textContent = 'Compteur testé ✓';
     }
     if (state.calculatorTested) {
       const status = byId('pilot2-calculator-status');
