@@ -995,7 +995,16 @@
         bottom:-10000px!important;
         transform:none!important;
       }
-      .seb-kaloneo-legacy-actions-empty{display:none!important}
+      .seb-kaloneo-legacy-actions-empty{
+        min-height:0!important;
+        height:0!important;
+        padding:0!important;
+        margin:0!important;
+        border:0!important;
+        background:transparent!important;
+        box-shadow:none!important;
+        overflow:visible!important;
+      }
       body.seb-kaloneo-nav-active{
         padding-bottom:var(--kaloneo-nav-height)!important;
         box-sizing:border-box!important;
