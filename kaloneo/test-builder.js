@@ -930,7 +930,7 @@
       frame.className='preview-html-frame';frame.sandbox='allow-scripts';
       frame.srcdoc='<!doctype html><html><body style="font-family:Calibri,Arial,sans-serif;margin:10px">'+
         (block.html||'<em>Bloc HTML vide</em>')+
-        (block.type==='html-js'&&block.js?'<script>'+block.js.replace(/<\\/script/gi,'<\\\\/script')+'<\\/script>':'')+
+        (block.type==='html-js'&&block.js?'<script>'+block.js.replace(/<\/script/gi,'<\\/script')+'</script>':'')+
         '</body></html>';
       wrap.appendChild(frame);return wrap;
     }
