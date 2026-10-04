@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>KALONÉO — Test Builder</title>
-  <link rel="stylesheet" href="../seb-evalpro/source/css/seb-design-system.css">
+  <link rel="stylesheet" href="../css/seb-design-system.css">
   <link rel="stylesheet" href="test-builder.css">
 </head>
 <body>
@@ -14,6 +14,9 @@
       <p>Créer → Prévisualiser → Contrôler → Générer KALTEST</p>
     </div>
     <div class="builder-top-actions">
+      <button id="back-tests" class="seb-action-btn seb-btn-functional" type="button">← Tests / Parcours</button>
+      <button id="import-json" class="seb-action-btn seb-btn-functional" type="button">Importer test.json</button>
+      <input id="import-json-file" type="file" accept=".json,application/json" hidden>
       <button id="new-test" class="seb-action-btn seb-btn-danger" type="button">Nouveau</button>
       <button id="save-draft" class="seb-action-btn seb-btn-functional" type="button">Sauvegarder</button>
       <button id="download-json" class="seb-action-btn seb-btn-nav" type="button">Générer test.json</button>
@@ -65,8 +68,34 @@
             <option value="50-50">2 blocs — 50 / 50</option>
             <option value="40-60">2 blocs — 40 / 60</option>
             <option value="60-40">2 blocs — 60 / 40</option>
+            <option value="chars-rest">Largeurs en caractères + reste disponible</option>
           </select>
         </label>
+
+        <label>Modèle KALONÉO
+          <select id="test-template">
+            <option value="generic">Libre / générique</option>
+            <option value="questions-table-visual-60-40">Questions + tableau 60 / image 40</option>
+            <option value="visual-inline-gaps-40-60">Image 40 / texte à trous 60</option>
+            <option value="work-visual-60-40">Travail + tableau 60 / image 40</option>
+            <option value="two-tables-50-50">Deux tableaux 50 / 50</option>
+            <option value="visual-schedule-40-60">Image 40 / tableau horaires 60</option>
+            <option value="full-width-choice-table">Tableau de choix pleine largeur</option>
+            <option value="practical-context-50-50">Exercice pratique image / commandes 50 / 50</option>
+            <option value="grid-full-width">Grille / tableau pleine largeur</option>
+            <option value="gratte-ciel-6x6">Gratte-ciel 6 × 6</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="custom-sizing-row" class="form-grid cols-3" hidden>
+        <label>Bloc 1 — largeur en caractères
+          <input id="block1-width-chars" type="number" min="3" placeholder="Ex. 15">
+        </label>
+        <label>Bloc 2 — largeur en caractères
+          <input id="block2-width-chars" type="number" min="3" placeholder="Optionnel">
+        </label>
+        <label class="inline-checkbox"><input id="last-block-remainder" type="checkbox" checked> Dernier bloc = reste de la place</label>
       </div>
 
       <div class="form-grid cols-2">
@@ -118,11 +147,11 @@
 
         <section class="preview-context">
           <div class="preview-context-card">
-            <img src="../seb-evalpro/source/imageqcm/scenario.png" alt="">
+            <img src="../imageqcm/scenario.png" alt="">
             <div><strong>Scénario :</strong><p id="preview-scenario"></p></div>
           </div>
           <div class="preview-context-card">
-            <img src="../seb-evalpro/source/imageqcm/avatar_transparant.png" alt="">
+            <img src="../imageqcm/avatar_transparant.png" alt="">
             <div><strong>Consignes :</strong><p id="preview-instruction"></p></div>
           </div>
         </section>
@@ -130,11 +159,11 @@
         <section id="preview-exercise" class="preview-exercise"></section>
 
         <section id="preview-chrono" class="preview-common-tool" hidden>
-          <strong>Chronomètre</strong>
-          <span>00:00</span>
+          <strong>Compteur KALONÉO commun</strong>
+          <span class="seb-chrono-display">00:00</span>
           <div>
-            <button class="seb-action-btn seb-btn-functional" type="button" disabled>Démarrer</button>
-            <button class="seb-action-btn seb-btn-danger" type="button" disabled>Arrêter</button>
+            <button class="seb-action-btn seb-btn-timer-start" type="button" disabled>Démarrer le compteur</button>
+            <button class="seb-action-btn seb-btn-timer-stop" type="button" disabled>Arrêter le compteur</button>
           </div>
         </section>
 
@@ -159,6 +188,10 @@
           <option value="audio">Audio</option>
           <option value="video">Vidéo</option>
           <option value="question">Question</option>
+          <option value="response-table">Tableau de réponses</option>
+          <option value="table-grid">Tableau / grille cellule par cellule</option>
+          <option value="inline-flow">Texte à trous / flux continu</option>
+          <option value="multiple-tables">Tableau structuré supplémentaire</option>
         </select>
         <select class="block-zone">
           <option value="left">Zone gauche</option>
@@ -172,6 +205,7 @@
     </article>
   </template>
 
+  <script src="builder-core.js"></script>
   <script src="test-builder.js"></script>
 </body>
 </html>
