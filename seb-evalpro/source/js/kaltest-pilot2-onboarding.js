@@ -198,13 +198,13 @@
       },
       onStart() {
         const status = byId('pilot2-chrono-status');
-        if (status) status.textContent = 'Chronomètre en cours…';
+        if (status) status.textContent = 'Compteur en cours…';
       },
       onStop(seconds) {
         state.chronoSeconds = seconds;
         state.chronoTested = true;
         const status = byId('pilot2-chrono-status');
-        if (status) status.textContent = 'Chronomètre testé ✓';
+        if (status) status.textContent = 'Compteur testé ✓';
         persist();
       }
     });
