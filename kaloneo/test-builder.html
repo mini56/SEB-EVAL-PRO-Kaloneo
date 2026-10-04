@@ -167,6 +167,28 @@
 
       <hr>
 
+      <section class="builder-contract-section">
+        <div class="section-title-row">
+          <div>
+            <h2>Sorties et Bilan</h2>
+            <p class="muted">Les sorties du test peuvent alimenter zéro, une ou plusieurs lignes du Bilan SEB. Les liaisons utilisent des IDs stables.</p>
+          </div>
+          <button id="add-output" class="mini-btn" type="button">+ Sortie</button>
+        </div>
+        <div id="outputs-editor" class="contract-list"></div>
+
+        <div class="section-title-row subsection">
+          <div>
+            <h3>Liaisons vers le Bilan</h3>
+            <p class="muted">Les lignes automatiques ou manuelles proviennent du catalogue Bilan intégré à SEB EvalPro.</p>
+          </div>
+          <button id="add-bilan-contribution" class="mini-btn" type="button">+ Liaison Bilan</button>
+        </div>
+        <div id="bilan-editor" class="contract-list"></div>
+      </section>
+
+      <hr>
+
       <div class="section-title-row">
         <div>
           <h2>Bloc Exercice</h2>
