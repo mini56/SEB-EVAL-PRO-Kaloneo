@@ -56,7 +56,11 @@ app.whenReady().then(async()=>{
     show:false,width,height,useContentSize:true,
     webPreferences:{contextIsolation:true,nodeIntegration:false,sandbox:false,devTools:false,spellcheck:false}
   });
+  win.webContents.on('console-message',(_event,level,message,line,sourceId)=>{
+    if(level>=2) console.log('RENDERER_CONSOLE['+level+'] '+message+' @ '+sourceId+':'+line);
+  });
   try{
+    console.log('PILOT16_STAGE=conversions');
     await load(win,'kaltest-pilot2.html',{query:{fullParcours:'1',segment:'conversions'}});
     await waitKaltest(win,'conversions_atelier_expedition');
     await wait(180);
@@ -72,6 +76,7 @@ app.whenReady().then(async()=>{
     })()`);
     if(conversions.rows!==10||conversions.wrapScroll>conversions.wrapClient+3||!conversions.last||conversions.last.bottom>conversions.content.bottom+2)fail('Conversions: contenu/scroll incorrect',conversions);
 
+    console.log('PILOT16_STAGE=fractions');
     await load(win,'qcmv1.0.html',{query:{page:'4'},hash:'page4'});
     await wait(200);
     const fracBase=await base(win,'Fractions');
@@ -82,6 +87,7 @@ app.whenReady().then(async()=>{
     })()`);
     if(!frac||Math.abs(frac.left/(frac.left+frac.right)-.4)>.06||frac.top<0||frac.bottom>frac.barTop+2)fail('Fractions: 40/60 ou hauteur incorrecte',frac);
 
+    console.log('PILOT16_STAGE=nwtexte');
     await load(win,'nwtexte.html');
     await wait(180);
     await base(win,'Traitement de texte');
@@ -91,6 +97,7 @@ app.whenReady().then(async()=>{
     })()`);
     if(Math.abs(text.left/(text.left+text.right)-.5)>.04||text.pageTop<0||text.pageBottom>text.barTop+2)fail('Traitement de texte: 50/50 ou hauteur incorrecte',text);
 
+    console.log('PILOT16_STAGE=tri');
     await load(win,'tri_de_cheville.html');
     await wait(180);
     await base(win,'Tri');
@@ -100,6 +107,7 @@ app.whenReady().then(async()=>{
     })()`);
     if(tri.headerTop<0||tri.mainBottom>tri.barTop+2)fail('Tri: bloc hors zone utile',tri);
 
+    console.log('PILOT16_STAGE=stock');
     await load(win,'stock.html');
     await wait(180);
     await base(win,'Stock');
