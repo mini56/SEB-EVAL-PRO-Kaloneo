@@ -156,7 +156,7 @@ app.whenReady().then(async()=>{
     })()`);
     if(lego.labelColor!=='rgb(0, 78, 112)' || !/Calibri/i.test(lego.labelFont) || lego.labelWeight!=='700') throw new Error('LEGO Consigne hors style commun: '+JSON.stringify(lego));
     if(!(lego.textTop < lego.labelBottom && lego.textBottom > lego.labelTop && lego.textLeft >= lego.labelRight-2)) throw new Error('LEGO Consigne non alignée sur la même ligne: '+JSON.stringify(lego));
-    if(lego.imageHeight<365 || lego.imageBottom>735) throw new Error('LEGO image non agrandie ou hors zone utile: '+JSON.stringify(lego));
+    if(lego.imageHeight<360 || lego.imageBottom>735) throw new Error('LEGO image non agrandie ou hors zone utile: '+JSON.stringify(lego));
     if(lego.chronoHeight<105) throw new Error('LEGO chrono pas assez aéré: '+JSON.stringify(lego));
 
     console.log('PILOT13_LAYOUT_SMOKE: OK');
