@@ -573,8 +573,6 @@
       });
       document.body.appendChild(button);
     }
-    const navCenter = document.getElementById('kaloneo-nav-center');
-    if (navCenter && button.parentElement !== navCenter) navCenter.insertBefore(button, navCenter.firstChild);
     return button;
   }
 
@@ -1033,31 +1031,44 @@
       }
       #kaloneo-common-navigation button:hover:not(:disabled){transform:translateY(-1px)!important}
       #kaloneo-common-navigation button:active:not(:disabled){transform:translateY(0)!important}
-      #kaloneo-common-navigation #seb-evalpro-abandon-fixed{
-        position:static!important;
-        left:auto!important;
-        right:auto!important;
-        top:auto!important;
-        bottom:auto!important;
-        min-width:0!important;
-        z-index:auto!important;
-      }
-      #kaloneo-common-navigation #seb-evalpro-privacy-toggle{
-        position:static!important;
-        left:auto!important;
-        right:auto!important;
-        top:auto!important;
-        bottom:auto!important;
-        z-index:auto!important;
-        margin:0!important;
-        padding:7px 12px!important;
+      #kaloneo-nav-abandon,
+      #kaloneo-nav-home{
         min-height:36px!important;
         height:36px!important;
         max-height:36px!important;
+        margin:0!important;
+        position:static!important;
+        transform:none!important;
+        box-sizing:border-box!important;
+        white-space:nowrap!important;
+      }
+      #kaloneo-nav-home{
+        padding:7px 12px!important;
         border-radius:8px!important;
         box-shadow:none!important;
+      }
+      html body #seb-evalpro-abandon-fixed.seb-kaloneo-global-source,
+      html body #seb-evalpro-privacy-toggle.seb-kaloneo-global-source{
+        position:fixed!important;
+        left:0!important;
+        top:0!important;
+        right:auto!important;
+        bottom:auto!important;
+        width:1px!important;
+        min-width:0!important;
+        max-width:1px!important;
+        height:1px!important;
+        min-height:0!important;
+        max-height:1px!important;
+        margin:0!important;
+        padding:0!important;
+        border:0!important;
+        opacity:0!important;
+        overflow:hidden!important;
+        pointer-events:none!important;
+        box-shadow:none!important;
         transform:none!important;
-        white-space:nowrap!important;
+        clip-path:inset(50%)!important;
       }
       #kaloneo-nav-clock{
         width:76px;
@@ -1135,9 +1146,11 @@
         <span id="kaloneo-nav-logo" aria-hidden="true"></span>
         <span id="kaloneo-nav-brand-name">KALONÉO</span>
       </div>
-      <div id="kaloneo-nav-center"></div>
+      <div id="kaloneo-nav-center">
+        <button id="kaloneo-nav-abandon" type="button" class="seb-action-btn seb-btn-danger" hidden>⏹ Abandonner l’exercice</button>
+      </div>
       <div id="kaloneo-nav-right">
-        <span id="kaloneo-home-slot"></span>
+        <button id="kaloneo-nav-home" type="button" class="seb-action-btn seb-btn-tool" hidden>⌂ Afficher l’écran d’accueil</button>
         <span id="kaloneo-nav-clock" aria-label="Date et heure">
           <span id="kaloneo-nav-time"></span>
           <span id="kaloneo-nav-date"></span>
@@ -1145,6 +1158,17 @@
       </div>
     `;
     document.body.appendChild(bar);
+
+    bar.querySelector('#kaloneo-nav-abandon')?.addEventListener('click',function(event){
+      event.preventDefault();
+      const source=document.getElementById('seb-evalpro-abandon-fixed');
+      if(source&&!source.disabled) source.click();
+    });
+    bar.querySelector('#kaloneo-nav-home')?.addEventListener('click',function(event){
+      event.preventDefault();
+      const source=document.getElementById('seb-evalpro-privacy-toggle');
+      if(source&&!source.disabled) source.click();
+    });
 
     const center=bar.querySelector('#kaloneo-nav-center');
     for(let i=0;i<3;i++){
@@ -1167,19 +1191,25 @@
     return bar;
   }
 
-  function attachGlobalButtons(){
+  function syncGlobalButtons(){
     const bar=ensureBar();
-    const center=bar.querySelector('#kaloneo-nav-center');
-    const rightSlot=bar.querySelector('#kaloneo-home-slot');
-
-    const abandon=document.getElementById('seb-evalpro-abandon-fixed');
-    if(abandon&&abandon.parentElement!==center){
-      center.insertBefore(abandon,center.firstChild);
+    const abandonSource=document.getElementById('seb-evalpro-abandon-fixed');
+    const abandonButton=bar.querySelector('#kaloneo-nav-abandon');
+    if(abandonSource) abandonSource.classList.add('seb-kaloneo-global-source');
+    if(abandonButton){
+      const visible=!!abandonSource&&visibleSource(abandonSource);
+      abandonButton.hidden=!visible;
+      abandonButton.disabled=!abandonSource||!!abandonSource.disabled;
+      abandonButton.title=abandonSource?.title||'';
     }
 
-    const home=document.getElementById('seb-evalpro-privacy-toggle');
-    if(home&&home.parentElement!==rightSlot){
-      rightSlot.appendChild(home);
+    const homeSource=document.getElementById('seb-evalpro-privacy-toggle');
+    const homeButton=bar.querySelector('#kaloneo-nav-home');
+    if(homeSource) homeSource.classList.add('seb-kaloneo-global-source');
+    if(homeButton){
+      homeButton.hidden=!homeSource;
+      homeButton.disabled=!homeSource||!!homeSource.disabled;
+      homeButton.title=homeSource?.title||'';
     }
   }
 
@@ -1336,7 +1366,7 @@
     document.body.classList.toggle('seb-kaloneo-bullet-scope',eligible);
     bar.hidden=!eligible;
     if(!eligible) return;
-    attachGlobalButtons();
+    syncGlobalButtons();
     renderActions();
     normalizeBulletText();
     updateClock();
