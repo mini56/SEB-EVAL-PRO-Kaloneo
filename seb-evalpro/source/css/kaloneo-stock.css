@@ -443,7 +443,15 @@ body{
   grid-template-rows:auto auto auto minmax(0,1fr)!important;
   padding-bottom:7px!important;
 }
-.k-stock-actions{display:none!important}
+.k-stock-actions{
+  display:flex!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
+}
 .k-stock-instruction-grid p{
   padding-left:20px!important;
 }
