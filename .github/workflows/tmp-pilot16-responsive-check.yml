@@ -39,14 +39,15 @@ jobs:
           for size in 1366x768 1200x800 1280x720 1920x1080; do
             w="${size%x*}"
             h="${size#*x}"
-            log="/tmp/pilot16-${size}.log"
-            PILOT16_WIDTH="$w" PILOT16_HEIGHT="$h" \
-              xvfb-run -a -s "-screen 0 2200x1400x24" \
-              npx electron --no-sandbox scripts/pilot16-viewport-smoke-main.js 2>&1 | tee "$log"
-            grep -q "PILOT16_VIEWPORT_${size}: OK" "$log"
-            if grep -q "PILOT16_VIEWPORT_${size}: FAIL" "$log"; then exit 2; fi
+            for page in conversions fractions nwtexte tri stock; do
+              log="/tmp/pilot16-${size}-${page}.log"
+              PILOT16_WIDTH="$w" PILOT16_HEIGHT="$h" PILOT16_PAGE="$page" \
+                xvfb-run -a -s "-screen 0 2200x1400x24" \
+                npx electron --no-sandbox scripts/pilot16-single-page-viewport-smoke-main.js 2>&1 | tee "$log"
+              grep -q "PILOT16_VIEWPORT_${size}_${page}: OK" "$log"
+              if grep -q "PILOT16_VIEWPORT_${size}_${page}: FAIL" "$log"; then exit 2; fi
+            done
           done
-
       - name: KALTEST functional
         run: xvfb-run -a npx electron --no-sandbox scripts/kaltest-pilot2-functional-smoke-main.js
 
