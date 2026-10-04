@@ -6,8 +6,6 @@ on:
   push:
     branches:
       - pilot21-kaloneo-builder-sync
-    paths:
-      - '.github/workflows/build-kaltest-pilot21-setup.yml'
 
 permissions:
   contents: write
