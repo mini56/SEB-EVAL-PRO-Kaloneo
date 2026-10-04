@@ -13,31 +13,33 @@ function read(rel){
 }
 
 const runtime=read('app/web/js/seb-ui-runtime.js');
-const marker='// KALONEO_STABLE_BOTTOM_BAR_V15';
+const marker='// KALONEO_STABLE_BOTTOM_BAR_V16';
 const markerIndex=runtime.indexOf(marker);
-if(markerIndex<0) fail('barre stable V15 absente');
+if(markerIndex<0) fail('barre stable V16 absente');
 const stable=runtime.slice(markerIndex);
 
 for(const token of [
-  '--kaloneo-bottom-bar-height:52px',
+  'const BAR_HEIGHT=52;',
+  '--kaloneo-bottom-bar-height:${BAR_HEIGHT}px',
   'Barre de navigation KALONÉO',
   'id="kaloneo-nav-brand"',
-  'id="kaloneo-nav-logo"',
+  'id="kaloneo-nav-logo-img"',
   'KALONÉO',
   'id="kaloneo-nav-center"',
   'id="kaloneo-nav-right"',
   'id="kaloneo-nav-time"',
   'id="kaloneo-nav-date"',
-  'grid-template-columns:minmax(145px,190px) minmax(0,1fr) minmax(300px,390px)',
-  'background:linear-gradient(180deg,rgba(248,251,253,.97),rgba(231,238,245,.97))',
-  'border-top:1px solid rgba(0,78,112,.34)',
-  'box-shadow:none!important',
+  'grid-template-columns:minmax(92px,150px) minmax(0,1fr) minmax(310px,390px)',
+  'background:linear-gradient(90deg,#003B57 0%,#004E70 48%,#356787 100%)',
+  '--kaloneo-work-height:calc(100dvh - var(--kaloneo-bottom-bar-height))',
+  'height:var(--kaloneo-work-height)!important',
   'id="kaloneo-nav-abandon"',
   'id="kaloneo-nav-home"',
   'seb-kaloneo-global-source',
   "setInterval(updateClock,60000)",
   'content:"•  "',
-  '#modalFichier ul>li::marker'
+  '#modalFichier ul>li::marker',
+  '#kaloneo-common-navigation button[hidden]'
 ]) if(!stable.includes(token)) fail('contrat stable absent: '+token);
 
 for(const forbidden of [
@@ -49,7 +51,7 @@ for(const forbidden of [
 ]) if(stable.includes(forbidden)) fail('ancien mécanisme dynamique encore présent dans la barre: '+forbidden);
 
 for(const id of [
-  'page4Next','stockActionBtn','btnValider','btnSuivant','btnNextGenreNombre','seb-dictee-action',
+  'kaltest-calculator','page4Next','stockActionBtn','btnValider','btnSuivant','btnNextGenreNombre','seb-dictee-action',
   'seb-tri-auto-validate','seb-tri-next','btn-score','nvmail-next','autoeval1-validate',
   'autoeval2-validate','btnNextParonymes','btnValidate','btnNext'
 ]) if(!stable.includes(id)) fail('action courante non déclarée: '+id);
@@ -72,4 +74,4 @@ for(const [file,tokens] of Object.entries(protectedButtons)){
 const mail=read('app/web/nvmail.html');
 if(!mail.includes('<ul class="seb-kaloneo-no-bullets">')) fail('liste des pièces jointes non protégée contre les puces');
 
-console.log('SEB EvalPro garde navigation KALONÉO: barre stable 52 px, logo, horloge, actions uniques et puce fichier retirée — OK.');
+console.log('SEB EvalPro garde navigation KALONÉO: barre V16 52 px, vrai logo, gradient bleu, horloge, calculatrice intégrable, actions uniques et viewport réservé — OK.');

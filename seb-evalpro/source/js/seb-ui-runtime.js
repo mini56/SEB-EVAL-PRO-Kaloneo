@@ -873,16 +873,17 @@
 })();
 
 
-// KALONEO_STABLE_BOTTOM_BAR_V15
+// KALONEO_STABLE_BOTTOM_BAR_V16
 (function(){
   'use strict';
 
+  const BAR_HEIGHT=52;
   const ELIGIBLE_FILES=new Set([
     'kaltest-pilot2.html','qcmv1.0.html','brique.html','stock.html','planning.html','genrenombres.html',
     'dictee.html','tri_de_cheville.html','nwtexte.html','nvmail.html','autoeval1.html','autoeval2.html',
     'paronymes.html','carre.html'
   ]);
-
+  const QCM_EXERCISE_IDS=new Set(['page2','page2_1','page3','pageTexteTrous','page4','page5','page5_1','page6','page11']);
   const QCM_NEXT_BY_PAGE=Object.freeze({
     page2:'#page2Next',
     page2_1:'#page2_1Next',
@@ -894,14 +895,14 @@
     page6:'#page6Next',
     page11:'.suivant'
   });
-
   const OWNED_SOURCE_SELECTORS=[
-    '#identity-next','#intro-next','#kaltest-next',
+    '#identity-next','#intro-next','#kaltest-next','#kaltest-calculator',
     '#page2Next','#page2_1Next','#page3Next','#texteTrousNext','#page4Next','#page5Next','#page5_1Next','#page6Next','#page11 .suivant',
     '#autoEvalBtn','#validBtn','#stockActionBtn','#btnValider','#btnSuivant','#btnCheck','#btnNextGenreNombre',
     '#seb-dictee-action','#calc','#seb-tri-auto-validate','#seb-tri-next','#btn-score','#nvmail-next',
     '#autoeval1-validate','#autoeval1-next','#autoeval2-validate','#btnNextParonymes',
-    '#carre-reset','#btnValidate','#btnNext'
+    '#carre-reset','#btnValidate','#btnNext',
+    'button[data-seb-action="open-calculator"]'
   ];
 
   let currentActions=[];
@@ -912,33 +913,42 @@
     try{return decodeURIComponent((window.location.pathname.split('/').pop()||'').toLowerCase())}
     catch(_){return ''}
   }
-
   function clean(value){return String(value||'').replace(/\s+/g,' ').trim()}
-
   function isEligible(){return ELIGIBLE_FILES.has(fileName())}
-
-  function visibleSource(source){
-    if(!source||!source.isConnected||source.hidden) return false;
-    if(source.getAttribute('aria-hidden')==='true' && source.classList.contains('seb-exercise-nav-locked')) return false;
-    let node=source;
-    try{
-      while(node&&node.nodeType===1){
-        const style=getComputedStyle(node);
-        if(style.display==='none'||style.visibility==='hidden') return false;
-        if(node===document.body) break;
-        node=node.parentElement;
-      }
-    }catch(_){return false}
-    return true;
-  }
-
   function source(selector,scope){
     try{return (scope||document).querySelector(selector)}
     catch(_){return null}
   }
-
   function visiblePage(){
     return Array.from(document.querySelectorAll('.page')).find(node=>node.classList.contains('visible'))||null;
+  }
+  function visibleSource(node){
+    if(!node||!node.isConnected||node.hidden) return false;
+    if(node.getAttribute('aria-hidden')==='true'&&node.classList.contains('seb-exercise-nav-locked')) return false;
+    let cursor=node;
+    try{
+      while(cursor&&cursor.nodeType===1){
+        const style=getComputedStyle(cursor);
+        if(style.display==='none'||style.visibility==='hidden') return false;
+        if(cursor===document.body) break;
+        cursor=cursor.parentElement;
+      }
+    }catch(_){return false}
+    return true;
+  }
+  function currentViewAllowsAbandon(){
+    const file=fileName();
+    if(file==='kaltest-pilot2.html'){
+      if(document.getElementById('page-final')?.classList.contains('visible')) return false;
+      if(document.getElementById('page-identification')?.classList.contains('visible')) return false;
+      if(document.getElementById('page-intro')?.classList.contains('visible')) return false;
+      return !!document.getElementById('page-exercise')?.classList.contains('visible');
+    }
+    if(file==='qcmv1.0.html'){
+      const page=visiblePage();
+      return !!page&&QCM_EXERCISE_IDS.has(page.id);
+    }
+    return file!=='';
   }
 
   function ensureStyle(){
@@ -946,7 +956,10 @@
     const style=document.createElement('style');
     style.id='kaloneo-stable-bottom-bar-style';
     style.textContent=`
-      :root{--kaloneo-bottom-bar-height:52px}
+      :root{
+        --kaloneo-bottom-bar-height:${BAR_HEIGHT}px;
+        --kaloneo-work-height:calc(100dvh - var(--kaloneo-bottom-bar-height));
+      }
       #kaloneo-common-navigation{
         position:fixed!important;
         left:0!important;
@@ -955,57 +968,34 @@
         height:var(--kaloneo-bottom-bar-height)!important;
         z-index:2147482500!important;
         display:grid!important;
-        grid-template-columns:minmax(145px,190px) minmax(0,1fr) minmax(300px,390px)!important;
+        grid-template-columns:minmax(92px,150px) minmax(0,1fr) minmax(310px,390px)!important;
         align-items:center!important;
         gap:12px!important;
-        padding:6px 15px!important;
+        padding:5px 14px!important;
         box-sizing:border-box!important;
-        border-top:1px solid rgba(0,78,112,.34)!important;
-        background:linear-gradient(180deg,rgba(248,251,253,.97),rgba(231,238,245,.97))!important;
-        backdrop-filter:blur(5px)!important;
-        -webkit-backdrop-filter:blur(5px)!important;
-        box-shadow:none!important;
+        border-top:1px solid rgba(255,255,255,.36)!important;
+        background:linear-gradient(90deg,#003B57 0%,#004E70 48%,#356787 100%)!important;
+        box-shadow:0 -3px 12px rgba(0,39,57,.18)!important;
       }
-      #kaloneo-common-navigation[hidden]{display:none!important}
+      #kaloneo-common-navigation[hidden],
+      #kaloneo-common-navigation button[hidden]{display:none!important}
       #kaloneo-nav-brand{
         min-width:0;
+        height:100%;
         display:flex;
         align-items:center;
-        gap:8px;
-        color:#004E70;
-        font:700 13px Calibri,"Segoe UI",Arial,sans-serif;
-        white-space:nowrap;
+        justify-content:flex-start;
       }
-      #kaloneo-nav-logo{
-        width:34px;
-        height:34px;
-        flex:0 0 34px;
-        display:grid;
-        place-items:center;
-        position:relative;
-        border:1px solid rgba(0,78,112,.28);
-        border-radius:9px;
-        background:rgba(255,255,255,.82);
-        overflow:hidden;
+      #kaloneo-nav-logo-img{
+        display:block;
+        width:auto;
+        height:42px;
+        max-width:86px;
+        object-fit:contain;
+        border-radius:7px;
+        background:#fff;
+        box-shadow:0 1px 4px rgba(0,0,0,.16);
       }
-      #kaloneo-nav-logo::before{
-        content:"K";
-        color:#004E70;
-        font:800 21px Calibri,"Segoe UI",Arial,sans-serif;
-        transform:translateX(-2px);
-      }
-      #kaloneo-nav-logo::after{
-        content:"";
-        position:absolute;
-        width:5px;
-        height:30px;
-        background:#F28C18;
-        transform:rotate(28deg);
-        left:18px;
-        top:2px;
-        border-radius:4px;
-      }
-      #kaloneo-nav-brand-name{letter-spacing:.35px}
       #kaloneo-nav-center{
         min-width:0;
         display:flex!important;
@@ -1018,7 +1008,7 @@
         display:flex!important;
         align-items:center!important;
         justify-content:flex-end!important;
-        gap:11px!important;
+        gap:10px!important;
       }
       #kaloneo-common-navigation button{
         min-height:36px!important;
@@ -1028,27 +1018,29 @@
         position:static!important;
         transform:none!important;
         box-sizing:border-box!important;
+        box-shadow:0 2px 5px rgba(0,0,0,.18)!important;
       }
       #kaloneo-common-navigation button:hover:not(:disabled){transform:translateY(-1px)!important}
       #kaloneo-common-navigation button:active:not(:disabled){transform:translateY(0)!important}
-      #kaloneo-nav-abandon,
-      #kaloneo-nav-home{
-        min-height:36px!important;
-        height:36px!important;
-        max-height:36px!important;
-        margin:0!important;
-        position:static!important;
-        transform:none!important;
-        box-sizing:border-box!important;
-        white-space:nowrap!important;
+      #kaloneo-nav-home{white-space:nowrap!important}
+      #kaloneo-nav-clock{
+        width:76px;
+        flex:0 0 76px;
+        display:flex;
+        flex-direction:column;
+        align-items:flex-end;
+        justify-content:center;
+        color:#fff;
+        font-family:Calibri,"Segoe UI",Arial,sans-serif;
+        line-height:1.05;
+        user-select:none;
+        text-shadow:0 1px 2px rgba(0,0,0,.22);
       }
-      #kaloneo-nav-home{
-        padding:7px 12px!important;
-        border-radius:8px!important;
-        box-shadow:none!important;
-      }
+      #kaloneo-nav-time{font-size:13px;font-weight:700}
+      #kaloneo-nav-date{font-size:11px;margin-top:3px}
       html body #seb-evalpro-abandon-fixed.seb-kaloneo-global-source,
-      html body #seb-evalpro-privacy-toggle.seb-kaloneo-global-source{
+      html body #seb-evalpro-privacy-toggle.seb-kaloneo-global-source,
+      html body button.seb-kaloneo-owned-nav-source{
         position:fixed!important;
         left:0!important;
         top:0!important;
@@ -1070,45 +1062,83 @@
         transform:none!important;
         clip-path:inset(50%)!important;
       }
-      #kaloneo-nav-clock{
-        width:76px;
-        flex:0 0 76px;
-        display:flex;
-        flex-direction:column;
-        align-items:flex-end;
-        justify-content:center;
-        color:#27313A;
-        font-family:Calibri,"Segoe UI",Arial,sans-serif;
-        line-height:1.05;
-        user-select:none;
-      }
-      #kaloneo-nav-time{font-size:13px;font-weight:700}
-      #kaloneo-nav-date{font-size:11px;margin-top:3px}
-      button.seb-kaloneo-owned-nav-source{
-        position:fixed!important;
-        left:0!important;
-        top:0!important;
-        width:1px!important;
-        min-width:0!important;
-        max-width:1px!important;
-        height:1px!important;
-        min-height:0!important;
-        max-height:1px!important;
-        padding:0!important;
-        margin:0!important;
-        border:0!important;
-        opacity:0!important;
-        overflow:hidden!important;
-        pointer-events:none!important;
-        box-shadow:none!important;
-        transform:none!important;
-        clip-path:inset(50%)!important;
-      }
+
+      /* La barre prend sa propre place : aucune page ne doit être plus haute que la zone utile. */
+      html{height:100dvh!important;overflow:hidden!important}
       body.seb-kaloneo-nav-active{
-        padding-bottom:var(--kaloneo-bottom-bar-height)!important;
-        scroll-padding-bottom:var(--kaloneo-bottom-bar-height)!important;
+        width:100%!important;
+        height:var(--kaloneo-work-height)!important;
+        margin:0!important;
+        min-height:0!important;
+        max-height:var(--kaloneo-work-height)!important;
+        padding-bottom:0!important;
+        margin-bottom:0!important;
+        overflow:hidden!important;
+        box-sizing:border-box!important;
+        scroll-padding-bottom:0!important;
+      }
+      body.seb-kaloneo-nav-active #pilot2-shell,
+      body.seb-kaloneo-nav-active .kaloneo-practical-page,
+      body.seb-kaloneo-nav-active .k-stock-page,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="planning"] .container,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="dictee"] .page,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="tri"] .wrapper,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="nwtexte"] #page7,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="nvmail"] #page8,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="autoeval1"] #pageAutoEval1,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="autoeval2"] #pageAutoEval2,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="carre"] .container{
+        height:100%!important;
+        min-height:0!important;
+        max-height:100%!important;
+        padding-bottom:8px!important;
+        overflow:hidden!important;
         box-sizing:border-box!important;
       }
+      body.seb-kaloneo-nav-active #page2,
+      body.seb-kaloneo-nav-active #page2_1,
+      body.seb-kaloneo-nav-active #page3,
+      body.seb-kaloneo-nav-active #pageTexteTrous,
+      body.seb-kaloneo-nav-active #page4,
+      body.seb-kaloneo-nav-active #page5,
+      body.seb-kaloneo-nav-active #page5_1,
+      body.seb-kaloneo-nav-active #page6,
+      body.seb-kaloneo-nav-active #page11,
+      body.seb-kaloneo-nav-active #pageFinale{
+        height:100%!important;
+        min-height:0!important;
+        max-height:100%!important;
+        padding-bottom:8px!important;
+        overflow:hidden!important;
+        box-sizing:border-box!important;
+      }
+
+      /* Les anciens pieds de page ne réservent plus de place aux boutons déplacés dans la barre. */
+      body.seb-kaloneo-nav-active .kaltest-footer .pilot2-actions,
+      body.seb-kaloneo-nav-active .k-stock-actions,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="planning"] #left>div:has(#btnValider,#btnSuivant),
+      body.seb-kaloneo-nav-active[data-kaloneo-page="autoeval1"] .footer,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="autoeval2"] .footer,
+      body.seb-kaloneo-nav-active[data-kaloneo-page="tri"] .footer:has(#seb-tri-next),
+      body.seb-kaloneo-nav-active[data-kaloneo-page="tri"] .footer:has(#seb-tri-auto-validate),
+      body.seb-kaloneo-nav-active[data-kaloneo-page="dictee"] footer.card.footer{
+        display:flex!important;
+        height:0!important;
+        min-height:0!important;
+        max-height:0!important;
+        margin:0!important;
+        padding:0!important;
+        border:0!important;
+        background:transparent!important;
+        box-shadow:none!important;
+        overflow:visible!important;
+      }
+      body.seb-kaloneo-nav-active .kaltest-footer{
+        min-height:0!important;
+        height:auto!important;
+        margin:0!important;
+      }
+      body.seb-kaloneo-nav-active .kaltest-footer .pilot2-status:empty{display:none!important}
 
       /* Une seule puce ordinaire KALONÉO : le gros point. */
       body.seb-kaloneo-bullet-scope ul:not(.seb-kaloneo-no-bullets){
@@ -1116,9 +1146,7 @@
         list-style-position:outside!important;
         padding-left:1.45em!important;
       }
-      body.seb-kaloneo-bullet-scope ul:not(.seb-kaloneo-no-bullets)>li{
-        padding-left:.15em!important;
-      }
+      body.seb-kaloneo-bullet-scope ul:not(.seb-kaloneo-no-bullets)>li{padding-left:.15em!important}
       body.seb-kaloneo-bullet-scope ul:not(.seb-kaloneo-no-bullets)>li::marker{
         content:"•  ";
         font-size:1.32em;
@@ -1130,6 +1158,17 @@
         list-style:none!important;
         content:""!important;
         padding-left:0!important;
+      }
+
+      @media(max-width:1240px){
+        #kaloneo-common-navigation{
+          grid-template-columns:minmax(78px,110px) minmax(0,1fr) minmax(270px,330px)!important;
+          gap:8px!important;
+          padding-left:9px!important;
+          padding-right:9px!important;
+        }
+        #kaloneo-nav-logo-img{height:38px;max-width:68px}
+        #kaloneo-common-navigation button{padding-left:12px!important;padding-right:12px!important;font-size:14px!important}
       }
     `;
     (document.head||document.documentElement).appendChild(style);
@@ -1143,8 +1182,7 @@
     bar.setAttribute('aria-label','Barre de navigation KALONÉO');
     bar.innerHTML=`
       <div id="kaloneo-nav-brand" aria-label="KALONÉO">
-        <span id="kaloneo-nav-logo" aria-hidden="true"></span>
-        <span id="kaloneo-nav-brand-name">KALONÉO</span>
+        <img id="kaloneo-nav-logo-img" alt="KALONÉO" src="assets/kaloneo-logo-bar.svg">
       </div>
       <div id="kaloneo-nav-center">
         <button id="kaloneo-nav-abandon" type="button" class="seb-action-btn seb-btn-danger" hidden>⏹ Abandonner l’exercice</button>
@@ -1161,13 +1199,13 @@
 
     bar.querySelector('#kaloneo-nav-abandon')?.addEventListener('click',function(event){
       event.preventDefault();
-      const source=document.getElementById('seb-evalpro-abandon-fixed');
-      if(source&&!source.disabled) source.click();
+      const original=document.getElementById('seb-evalpro-abandon-fixed');
+      if(original&&!original.disabled) original.click();
     });
     bar.querySelector('#kaloneo-nav-home')?.addEventListener('click',function(event){
       event.preventDefault();
-      const source=document.getElementById('seb-evalpro-privacy-toggle');
-      if(source&&!source.disabled) source.click();
+      const original=document.getElementById('seb-evalpro-privacy-toggle');
+      if(original&&!original.disabled) original.click();
     });
 
     const center=bar.querySelector('#kaloneo-nav-center');
@@ -1184,7 +1222,7 @@
         if(!target||target.disabled||target.getAttribute('aria-disabled')==='true') return;
         try{target.click()}catch(_){}
         scheduleRefresh();
-        setTimeout(scheduleRefresh,45);
+        setTimeout(scheduleRefresh,40);
       });
       center.appendChild(button);
     }
@@ -1197,7 +1235,8 @@
     const abandonButton=bar.querySelector('#kaloneo-nav-abandon');
     if(abandonSource) abandonSource.classList.add('seb-kaloneo-global-source');
     if(abandonButton){
-      const visible=!!abandonSource&&visibleSource(abandonSource);
+      const allowed=currentViewAllowsAbandon();
+      const visible=allowed&&!!abandonSource&&visibleSource(abandonSource);
       abandonButton.hidden=!visible;
       abandonButton.disabled=!abandonSource||!!abandonSource.disabled;
       abandonButton.title=abandonSource?.title||'';
@@ -1219,28 +1258,41 @@
     node.classList.add('seb-kaloneo-owned-nav-source');
     return {source:node,label:clean(node.textContent)};
   }
-
   function chooseNextOrPrimary(nextSelector,primarySelector){
     const next=sourceAction(nextSelector);
     if(next) return [next];
     const primary=sourceAction(primarySelector);
     return primary?[primary]:[];
   }
+  function calculatorFrom(scope){
+    const node=source('button[data-seb-action="open-calculator"]',scope);
+    if(!node||!visibleSource(node)) return null;
+    node.classList.add('seb-kaloneo-owned-nav-source');
+    return {source:node,label:clean(node.textContent)||'Ouvrir la calculatrice'};
+  }
+  function withCalculator(actions,scope){
+    const calc=calculatorFrom(scope);
+    return calc?[calc,...actions]:actions;
+  }
 
   function resolveActions(){
     const file=fileName();
 
     if(file==='kaltest-pilot2.html'){
-      return ['#identity-next','#intro-next','#kaltest-next'].map(sel=>sourceAction(sel)).filter(Boolean);
+      if(!document.getElementById('page-exercise')?.classList.contains('visible')){
+        return ['#identity-next','#intro-next'].map(sel=>sourceAction(sel)).filter(Boolean);
+      }
+      const primary=sourceAction('#kaltest-next');
+      const calc=sourceAction('#kaltest-calculator');
+      return [calc,primary].filter(Boolean);
     }
 
     if(file==='qcmv1.0.html'){
       const page=visiblePage();
       if(!page) return [];
       const selector=QCM_NEXT_BY_PAGE[page.id];
-      if(!selector) return [];
-      const action=sourceAction(selector,page);
-      return action?[action]:[];
+      const primary=selector?sourceAction(selector,page):null;
+      return withCalculator(primary?[primary]:[],page);
     }
 
     if(file==='brique.html'){
@@ -1249,20 +1301,16 @@
       const validate=sourceAction('#validBtn');
       return validate?[validate]:[];
     }
-
     if(file==='stock.html'){
       const action=sourceAction('#stockActionBtn');
       return action?[action]:[];
     }
-
     if(file==='planning.html') return chooseNextOrPrimary('#btnSuivant','#btnValider');
     if(file==='genrenombres.html') return chooseNextOrPrimary('#btnNextGenreNombre','#btnCheck');
-
     if(file==='dictee.html'){
       const action=sourceAction('#seb-dictee-action');
       return action?[action]:[];
     }
-
     if(file==='tri_de_cheville.html'){
       const next=sourceAction('#seb-tri-next');
       if(next) return [next];
@@ -1271,33 +1319,26 @@
       const results=sourceAction('#calc');
       return results?[results]:[];
     }
-
     if(file==='nwtexte.html'){
       const action=sourceAction('#btn-score');
       return action?[action]:[];
     }
-
     if(file==='nvmail.html'){
       const action=sourceAction('#nvmail-next');
       return action?[action]:[];
     }
-
     if(file==='autoeval1.html'){
       const action=sourceAction('#autoeval1-validate');
       return action?[action]:[];
     }
-
     if(file==='autoeval2.html'){
       const action=sourceAction('#autoeval2-validate');
       return action?[action]:[];
     }
-
     if(file==='paronymes.html') return chooseNextOrPrimary('#btnNextParonymes','#btnCheck');
-
     if(file==='carre.html'){
       return ['#carre-reset','#btnValidate','#btnNext'].map(sel=>sourceAction(sel)).filter(Boolean);
     }
-
     return [];
   }
 
@@ -1305,7 +1346,8 @@
     const label=clean(action?.label);
     const lower=label.toLowerCase();
     let cls='seb-action-btn kaloneo-nav-action ';
-    if(/suivant|page suivante|étape suivante|etape suivante|commencez l'évaluation|commencer l'évaluation|continuer/.test(lower)) cls+='seb-btn-nav';
+    if(/calculatrice/.test(lower)) cls+='seb-btn-calculator';
+    else if(/suivant|page suivante|étape suivante|etape suivante|commencez l'évaluation|commencer l'évaluation|continuer/.test(lower)) cls+='seb-btn-nav';
     else if(/recommencer/.test(lower)) cls+='seb-btn-tool';
     else cls+='seb-btn-functional';
     if(button.className!==cls) button.className=cls;
@@ -1313,15 +1355,15 @@
 
   function renderActions(){
     const bar=ensureBar();
-    currentActions=resolveActions().slice(0,3);
+    currentActions=resolveActions().filter(Boolean).slice(0,3);
     const buttons=Array.from(bar.querySelectorAll('.kaloneo-nav-action'));
-
     buttons.forEach((button,index)=>{
       const action=currentActions[index];
       if(!action){
         button.hidden=true;
         button.textContent='';
         button.disabled=false;
+        button.removeAttribute('title');
         return;
       }
       const src=action.source;
@@ -1371,13 +1413,11 @@
     normalizeBulletText();
     updateClock();
   }
-
   function scheduleRefresh(){
     if(refreshScheduled) return;
     refreshScheduled=true;
     setTimeout(refresh,0);
   }
-
   function init(){
     ensureStyle();
     ensureBar();
@@ -1385,7 +1425,7 @@
       try{document.querySelectorAll(sel).forEach(node=>node.classList.add('seb-kaloneo-owned-nav-source'))}catch(_){}
     });
     refresh();
-    [40,160,500,1000,1600].forEach(ms=>setTimeout(refresh,ms));
+    [40,160,500,1000].forEach(ms=>setTimeout(refresh,ms));
     ['click','input','change','drop'].forEach(type=>{
       document.addEventListener(type,function(){setTimeout(scheduleRefresh,0)},true);
     });

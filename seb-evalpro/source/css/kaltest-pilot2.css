@@ -2419,3 +2419,173 @@ body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] .kaltest-word-bank sp
   background:#EAF5FB;
   border-color:#B8D7E6;
 }
+
+
+/* PILOTE 16 — socle responsive : la fenêtre réelle pilote la géométrie, pas 1366×768. */
+#pilot2-shell{
+  height:100%!important;
+  min-height:0!important;
+}
+#page-exercise{
+  min-height:0!important;
+  overflow:hidden!important;
+}
+#page-exercise .kaltest-footer{
+  min-height:0!important;
+  margin:0!important;
+}
+#page-exercise .kaltest-footer .pilot2-actions{
+  display:flex!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
+}
+#page-exercise .kaltest-footer .pilot2-status{
+  min-height:0!important;
+  margin-top:0!important;
+}
+#page-exercise .kaltest-footer .pilot2-status:empty{
+  display:none!important;
+}
+
+/* Conversions : les 10 lignes doivent tenir dans la zone disponible sans scrollbar interne artificielle. */
+.kaltest-conversions-work{
+  grid-template-rows:auto auto!important;
+  align-content:start!important;
+  overflow:hidden!important;
+}
+.kaltest-conversions-work .kaltest-question-list{
+  overflow:visible!important;
+}
+.kaltest-conversions-work .kaltest-table-wrap{
+  overflow:hidden!important;
+}
+.kaltest-conversions-table{
+  height:auto!important;
+}
+.kaltest-conversions-table th{padding:3px 5px!important}
+.kaltest-conversions-table td{padding:2px 4px!important}
+.kaltest-conversions-table input{
+  min-height:27px!important;
+  padding:3px 6px!important;
+}
+
+/* Les visuels verticaux s'adaptent à la hauteur réelle au lieu d'imposer une hauteur minimale. */
+.kaltest-visual-placeholder{
+  min-height:0!important;
+  height:clamp(220px,92%,500px)!important;
+}
+.kaltest-visual-frame{
+  min-height:0!important;
+}
+
+/* 1200 px de large reste un affichage de bureau : on conserve les proportions demandées sans débordement. */
+@media (max-width:1240px){
+  #pilot2-shell{padding-left:12px!important;padding-right:12px!important}
+  #page-identification .pilot2-onboarding-grid{
+    grid-template-columns:minmax(390px,1.35fr) minmax(330px,1fr) minmax(220px,.66fr)!important;
+    gap:8px!important;
+  }
+  #page-identification .pilot2-onboarding-title-row{
+    grid-template-columns:auto minmax(0,1fr)!important;
+    column-gap:12px!important;
+  }
+  .kaltest-questionnaire-visual-layout,
+  .kaltest-conversions-visual-layout{
+    grid-template-columns:minmax(0,3fr) minmax(260px,2fr)!important;
+    gap:12px!important;
+  }
+  .kaltest-schedule-visual-layout,
+  .kaltest-inline-visual-layout{
+    grid-template-columns:minmax(250px,2fr) minmax(0,3fr)!important;
+    gap:12px!important;
+  }
+}
+@media (max-width:1080px){
+  #page-identification .pilot2-onboarding-grid{
+    grid-template-columns:minmax(360px,1.25fr) minmax(320px,1fr)!important;
+  }
+  #page-identification .pilot2-calculator-dock{
+    grid-column:1/-1;
+    min-height:72px!important;
+  }
+  .kaltest-questionnaire-left .kaltest-question-list{font-size:16px!important}
+  .kaltest-questionnaire-left .kaltest-table{font-size:15.5px!important}
+}
+
+/* Hauteur courte (ex. 1280×720) : densité réduite sans zoom global ni texte microscopique. */
+@media (max-height:740px){
+  #pilot2-shell{padding-top:6px!important;padding-bottom:5px!important}
+  #page-exercise{gap:2px!important}
+  .kaltest-heading{min-height:30px!important}
+  .kaltest-heading h2{font-size:23px!important}
+  .kaltest-progress{font-size:12px!important}
+  .kaltest-context-row{gap:3px!important}
+  .kaltest-context{
+    min-height:36px!important;
+    padding:2px 7px!important;
+  }
+  .kaltest-context img{width:32px!important;height:32px!important}
+  .kaltest-context p,.kaltest-context strong{font-size:14px!important}
+  #kaltest-content{padding:4px 6px!important}
+  .kaltest-conversions-work{gap:4px!important}
+  .kaltest-conversions-work .kaltest-question-list{
+    font-size:13.5px!important;
+    line-height:1.08!important;
+    padding-top:0!important;
+    padding-bottom:0!important;
+  }
+  .kaltest-conversions-work .kaltest-question-list li{margin:1px 0!important}
+  .kaltest-conversions-table{font-size:13.5px!important}
+  .kaltest-conversions-table th{padding:2px 4px!important}
+  .kaltest-conversions-table td{padding:1px 3px!important}
+  .kaltest-conversions-table input{
+    min-height:24px!important;
+    font-size:13.5px!important;
+    padding:2px 4px!important;
+  }
+  .kaltest-visual-placeholder{height:clamp(190px,90%,430px)!important}
+}
+
+/* Écran large : on évite d'étirer le texte et les tableaux au-delà d'une largeur utile. */
+@media (min-width:1700px){
+  .kaltest-questionnaire-left,
+  .kaltest-schedule-work,
+  .kaltest-inline-work,
+  .kaltest-conversions-work{
+    max-width:1050px;
+  }
+}
+
+
+/* PILOTE 16 — Conversions : 10 questions + 10 lignes visibles à 768 px avec la barre de 52 px. */
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-work{
+  gap:4px!important;
+}
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-work .kaltest-question-list{
+  font-size:14px!important;
+  line-height:1.06!important;
+  padding:0 6px 0 26px!important;
+}
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-work .kaltest-question-list li{
+  margin:1px 0!important;
+  padding-left:3px!important;
+}
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-table{
+  font-size:14px!important;
+}
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-table th{
+  padding:2px 4px!important;
+}
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-table td{
+  padding:1px 3px!important;
+}
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-table input{
+  min-height:24px!important;
+  height:24px!important;
+  padding:1px 4px!important;
+  font-size:14px!important;
+}

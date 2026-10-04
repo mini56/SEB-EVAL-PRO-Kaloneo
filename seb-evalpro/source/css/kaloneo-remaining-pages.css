@@ -708,3 +708,231 @@ body[data-kaloneo-page="tri"] .tri-consigne .tri-illustration{
   margin:10px auto 0!important;
   border-radius:10px;
 }
+
+
+/* PILOTE 16 — fondation responsive commune.
+   Les pages utilisent la hauteur utile fournie par KALONÉO, jamais 100vh + une marge de barre. */
+body[data-kaloneo-page]{
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+body[data-kaloneo-page="autoeval1"] #pageAutoEval1,
+body[data-kaloneo-page="autoeval2"] #pageAutoEval2,
+body[data-kaloneo-page="planning"] .container,
+body[data-kaloneo-page="dictee"] .page,
+body[data-kaloneo-page="tri"] .wrapper,
+body[data-kaloneo-page="nwtexte"] #page7,
+body[data-kaloneo-page="nvmail"] #page8,
+body[data-kaloneo-page="carre"] .container{
+  height:100%!important;
+  min-height:0!important;
+  max-height:100%!important;
+  padding-bottom:8px!important;
+  overflow:hidden!important;
+}
+
+/* Autoévaluations : pas de scrollbar horizontale et densité adaptée à la hauteur. */
+body[data-kaloneo-page="autoeval1"] #left,
+body[data-kaloneo-page="autoeval1"] #right,
+body[data-kaloneo-page="autoeval2"] #left,
+body[data-kaloneo-page="autoeval2"] #right{
+  overflow-x:hidden!important;
+  overflow-y:hidden!important;
+}
+body[data-kaloneo-page="autoeval1"] textarea,
+body[data-kaloneo-page="autoeval2"] textarea{
+  min-height:clamp(82px,19vh,150px)!important;
+}
+
+/* Planning : les anciens boutons déplacés dans la barre ne réservent plus de hauteur. */
+body[data-kaloneo-page="planning"] .main-content{
+  min-height:0!important;
+  flex:1 1 auto!important;
+}
+body[data-kaloneo-page="planning"] #left,
+body[data-kaloneo-page="planning"] #right{
+  min-height:0!important;
+  overflow:hidden!important;
+}
+body[data-kaloneo-page="planning"] #left>div:has(#btnValider,#btnSuivant){
+  display:flex!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
+}
+
+/* Dictée : le footer historique vide disparaît, le workspace reçoit toute la hauteur disponible. */
+body[data-kaloneo-page="dictee"] .workspace{
+  min-height:0!important;
+  flex:1 1 auto!important;
+}
+body[data-kaloneo-page="dictee"] footer.card.footer{
+  display:flex!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  overflow:visible!important;
+}
+
+/* Tri : aucune page longue. Le panneau autoévaluation remplace le panneau consigne dans la même zone. */
+body[data-kaloneo-page="tri"] .wrapper{
+  min-height:0!important;
+}
+body[data-kaloneo-page="tri"] .main{
+  min-height:0!important;
+  flex:1 1 auto!important;
+  overflow:hidden!important;
+}
+body[data-kaloneo-page="tri"] #left,
+body[data-kaloneo-page="tri"] #right{
+  min-height:0!important;
+  overflow:hidden!important;
+}
+body[data-kaloneo-page="tri"] #autoEvalPart{
+  min-height:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+}
+body[data-kaloneo-page="tri"] #autoEvalPart.visible{
+  display:flex!important;
+  flex-direction:column!important;
+}
+body[data-kaloneo-page="tri"] #autoEvalPart .intro-box{
+  flex:0 0 auto;
+  margin-bottom:7px!important;
+  padding:8px 12px!important;
+}
+body[data-kaloneo-page="tri"] #autoEvalPart h2,
+body[data-kaloneo-page="tri"] #autoEvalPart p{
+  margin-top:5px!important;
+  margin-bottom:5px!important;
+}
+body[data-kaloneo-page="tri"] #autoEvalForm{
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+}
+body[data-kaloneo-page="tri"] #autoEvalPart .fr-checkbox-group{
+  margin:4px 0!important;
+}
+body[data-kaloneo-page="tri"] #autoComment{
+  min-height:82px!important;
+  max-height:120px!important;
+  resize:none!important;
+}
+body[data-kaloneo-page="tri"] .footer:has(#seb-tri-next),
+body[data-kaloneo-page="tri"] .footer:has(#seb-tri-auto-validate){
+  display:flex!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  overflow:visible!important;
+}
+
+/* Traitement de texte / Mail : 50/50 réels dans la hauteur utile. */
+body[data-kaloneo-page="nwtexte"] .main,
+body[data-kaloneo-page="nvmail"] .main{
+  min-height:0!important;
+  height:auto!important;
+}
+body[data-kaloneo-page="nvmail"] #formEmail{
+  min-height:0!important;
+  height:100%!important;
+}
+
+/* Confirmation d'envoi : reste dans la page, mais adopte l'identité KALONÉO. */
+body[data-kaloneo-page="nvmail"] #status,
+body[data-kaloneo-page="nvmail"] .success,
+body[data-kaloneo-page="nvmail"] .message-envoye{
+  border:1px solid rgba(25,135,84,.48)!important;
+  border-radius:9px!important;
+  background:linear-gradient(135deg,#ECF8F1,#FFFFFF)!important;
+  color:#17683F!important;
+  box-shadow:none!important;
+  font-weight:700!important;
+}
+
+/* QCM historiques : la barre n'ajoute plus 60 px à des pages déjà hautes. */
+#page4,#page5,#page5_1,#page11,#pageFinale{
+  height:100%!important;
+  min-height:0!important;
+  max-height:100%!important;
+  padding-bottom:8px!important;
+  overflow:hidden!important;
+}
+#pageFinale #resultat{
+  max-height:calc(100% - 86px)!important;
+}
+
+/* 1200×800 : conserver les 50/50 et 60/40, réduire uniquement les espaces. */
+@media(max-width:1240px){
+  body[data-kaloneo-page="planning"] .container,
+  body[data-kaloneo-page="dictee"] .page,
+  body[data-kaloneo-page="tri"] .wrapper,
+  body[data-kaloneo-page="nwtexte"] #page7,
+  body[data-kaloneo-page="nvmail"] #page8,
+  body[data-kaloneo-page="carre"] .container{
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+  body[data-kaloneo-page="nwtexte"] .main,
+  body[data-kaloneo-page="nvmail"] .main{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;
+  }
+}
+
+/* 1280×720 : densité contrôlée, pas de zoom global. */
+@media(max-height:740px){
+  body[data-kaloneo-page="tri"] .header{padding:5px 9px!important}
+  body[data-kaloneo-page="tri"] .main{gap:7px!important}
+  body[data-kaloneo-page="tri"] #left,
+  body[data-kaloneo-page="tri"] #right{padding:6px!important;gap:5px!important}
+  body[data-kaloneo-page="tri"] .chrono-card{padding:7px!important;margin-bottom:5px!important}
+  body[data-kaloneo-page="tri"] .row{margin-bottom:4px!important}
+  body[data-kaloneo-page="tri"] input[type=number],
+  body[data-kaloneo-page="tri"] input[type=text]{padding:5px!important}
+  body[data-kaloneo-page="autoeval1"] .fr-checkbox-group,
+  body[data-kaloneo-page="autoeval2"] .fr-checkbox-group{margin:4px 0!important;padding:6px 8px!important}
+}
+
+
+/* PILOTE 16 — finitions générales déjà validées lors du test réel. */
+body[data-kaloneo-page="nvmail"] #resultatScore:not(:empty){
+  margin-top:10px!important;
+  padding:10px 12px!important;
+  border:1px solid rgba(25,135,84,.48)!important;
+  border-radius:9px!important;
+  background:linear-gradient(135deg,#ECF8F1,#FFFFFF)!important;
+  color:#17683F!important;
+  box-shadow:none!important;
+  font-weight:700!important;
+}
+body[data-kaloneo-page="planning"] .plats-box .puce{
+  position:relative!important;
+  padding-left:18px!important;
+}
+body[data-kaloneo-page="planning"] .plats-box .puce::before{
+  content:"•"!important;
+  position:absolute!important;
+  left:0!important;
+  top:-2px!important;
+  margin:0!important;
+  width:auto!important;
+  height:auto!important;
+  background:none!important;
+  color:var(--k-blue)!important;
+  font-size:20px!important;
+  font-weight:900!important;
+  line-height:1!important;
+}
