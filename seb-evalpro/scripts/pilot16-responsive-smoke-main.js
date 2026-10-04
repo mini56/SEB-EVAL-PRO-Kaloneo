@@ -72,7 +72,7 @@ function assertBar(s,label){
   if(Math.abs(s.bar.height-52)>2) fail(label+': barre != 52px',s);
   if(Math.abs(s.bar.bottom-s.innerHeight)>2) fail(label+': barre non collée au bas',s);
   if(!/linear-gradient/i.test(s.bg) || !/0, 78, 112|0, 59, 87|53, 103, 135/.test(s.bg)) fail(label+': dégradé bleu KALONÉO absent',s);
-  if(!s.logo || !/assets\/kaloneo-logo-bar\.svg$/i.test(s.logo.src) || !s.logo.naturalWidth) fail(label+': vrai visuel KALONÉO absent',s);
+  if(!s.logo || !/^data:image\/png;base64,/i.test(s.logo.src) || s.logo.naturalWidth<32) fail(label+': icône officielle KALONÉO absente',s);
   if(s.emptyVisible!==0) fail(label+': bouton vide visible',s);
   for(const r of s.hiddenRects){
     if(r && r.width>1 && r.height>1) fail(label+': slot masqué garde une taille',s);
@@ -141,15 +141,22 @@ async function testIdentification1200(){
     const m=await js(win,`(() => {
       const grid=document.querySelector('.pilot2-onboarding-grid');
       const shell=document.getElementById('pilot2-shell');
+      const calcTest=document.getElementById('pilot2-calculator-test-open');
+      const calcInBar=Array.from(document.querySelectorAll('#kaloneo-nav-center .kaloneo-nav-action')).some(b=>/calculatrice/i.test(b.textContent||''));
       const r=el=>el?el.getBoundingClientRect():null;
       const g=r(grid),s=r(shell);
       return {
         grid:g?{left:g.left,right:g.right,width:g.width}:null,
         shell:s?{left:s.left,right:s.right,width:s.width}:null,
-        bodyOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
+        bodyOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+        calcTestVisible:calcTest?getComputedStyle(calcTest).display!=='none':false,
+        calcTestRect:calcTest?{width:calcTest.getBoundingClientRect().width,height:calcTest.getBoundingClientRect().height}:null,
+        calcInBar
       };
     })()`);
     if(m.bodyOverflow>2) fail('Identification 1200x800: débordement horizontal',m);
+    if(!m.calcTestVisible || !m.calcTestRect || m.calcTestRect.width<40 || m.calcTestRect.height<25) fail('Identification: bouton de test Calculatrice absent de la page',m);
+    if(m.calcInBar) fail('Identification: la calculatrice de prise en main ne doit pas être déplacée dans la barre',m);
     if(m.grid && m.shell && (m.grid.left<m.shell.left-2 || m.grid.right>m.shell.right+2)) fail('Identification 1200x800: grille hors écran',m);
     return {bar,m};
   } finally { try{win.destroy()}catch(_){} await wait(180); }
@@ -174,7 +181,7 @@ async function testTri(){
     await js(win,`(() => {
       const c=document.getElementById('consigne');
       const a=document.getElementById('autoEvalPart');
-      if(c)c.style.display='none';
+      if(c){c.classList.add('tri-consigne-replaced');c.style.display='none';}
       if(a){a.style.display='flex';a.classList.add('visible');}
       document.dispatchEvent(new Event('change',{bubbles:true}));
       return true;
@@ -219,7 +226,8 @@ async function testMailAndStock(){
         marker:li?getComputedStyle(li,'::marker').content:''
       };
     })()`);
-    if(mail.bg==='none' || /rgb\(35, 118, 229\)/.test(mail.bg)) fail('E-mail: confirmation non KALONÉO',mail);
+    if(mail.bg!=='none') fail('E-mail: la confirmation doit rester un message intégré sans fond',mail);
+    if(!/rgba\(0, 0, 0, 0\)|transparent/.test(mail.border)) fail('E-mail: la confirmation ne doit plus être encadrée',mail);
     if(mail.listType!=='none' || String(mail.marker).includes('•')) fail('E-mail: puces encore présentes devant les fichiers',mail);
 
     await load(win,'stock.html');
