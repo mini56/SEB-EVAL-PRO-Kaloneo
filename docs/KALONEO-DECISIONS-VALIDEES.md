@@ -2547,3 +2547,16 @@ Retour de test réel du PILOTE 21 :
 - une garde de compilation bloque désormais toute régression de ce comportement.
 
 Cette règle s’applique à tous les blocs média KALONÉO (image, audio, vidéo).
+
+## 68. PILOTE 21 R2 — ancien parcours autonome neutralisé
+
+Décision après retour réel :
+
+- l’ancien parcours autonome démarrant sur `qcmv1.0.html` n’a plus vocation à être lancé dans le PILOTE 21 ;
+- les pages historiques encore nécessaires (4, 5, 5_1, 11 et finale) restent utilisées uniquement comme **conteneurs techniques d’exercices** dans le parcours KALONÉO validé ;
+- chaque étape du parcours KALONÉO porte désormais explicitement `fullParcours=1`, y compris les pages historiques encore conservées comme modules ;
+- une reprise ancienne et ambiguë vers `qcmv1.0.html` sans numéro de page est refusée et retourne à l’entrée du parcours KALONÉO ;
+- la sauvegarde de reprise conserve désormais le fichier, les paramètres de requête et le fragment (`file + query + hash`) afin de reprendre exactement une page 4, 5, 5_1, un segment KALTEST, etc. ;
+- le Builder KALONÉO est une page Administrateur et ne doit jamais écraser le pointeur de reprise candidat ;
+- l’affichage Administrateur des résultats peut continuer à utiliser `qcmv1.0.html` en lecture seule : cela ne réactive pas l’ancien parcours candidat ;
+- une garde de compilation bloque toute réintroduction du point d’entrée autonome historique dans le PILOTE 21.

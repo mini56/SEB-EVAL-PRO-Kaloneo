@@ -12,6 +12,7 @@ const { createCandidateTransfer } = require('./candidate-transfer-main');
 const { configureLocalKey, readJsonFile, encodeJson, migrateJsonFile, migrateJsonTree } = require('./candidate-data-crypto');
 const { createCandidateLocalProtection } = require('./candidate-local-protection');
 const { internalStorageRoot, documentsWordRoot, migrateLegacyDocumentsStorage } = require('./storage-layout');
+const kaloneoFullParcoursRoute = require('./kaloneo-full-parcours-route');
 
 const ADMIN_PASSWORD_SHA256 = 'c800892ba3f11b33d36eedf7d3c4297f2b6c02e2c347dda8954b4c577f6666b5';
 const STATE_VERSION = 1;
@@ -268,12 +269,17 @@ function installDownloadRouting() {
 
 function defaultState() {
   const initialPage = KALTEST_PILOT2_MODE ? 'kaltest-pilot2.html' : 'qcmv1.0.html';
+  const initialRoute = KALTEST_PILOT2_MODE && KALTEST_FULL_PARCOURS_MODE
+    ? kaloneoFullParcoursRoute.INITIAL_ROUTE
+    : initialPage;
   return {
     version: STATE_VERSION,
     sessionStorage: {},
     localStorage: {},
     lastPage: initialPage,
     lastEvaluationPage: initialPage,
+    lastRoute: initialRoute,
+    lastEvaluationRoute: initialRoute,
     updatedAt: null
   };
 }
@@ -557,6 +563,23 @@ function loadEvaluationFile(target) {
   mainWindow.loadFile(target);
 }
 
+function loadKaloneoCandidateRoute(route) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  const resolved = kaloneoFullParcoursRoute.toLoadOptions(route);
+  const target = existingWebPage(resolved.file);
+  const options = { query:resolved.query };
+  if (resolved.hash) options.hash = resolved.hash;
+  mainWindow.loadFile(target, options);
+}
+
+function loadSavedCandidateEvaluation(state) {
+  if (KALTEST_PILOT2_MODE && KALTEST_FULL_PARCOURS_MODE) {
+    loadKaloneoCandidateRoute(kaloneoFullParcoursRoute.resolveStateRoute(state));
+    return;
+  }
+  loadEvaluationFile(existingWebPage(state.lastEvaluationPage || state.lastPage));
+}
+
 function createWindow() {
   Menu.setApplicationMenu(null);
   setSplashProgress(28, 'Lecture de la sauvegarde…');
@@ -585,7 +608,7 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false);
   installDownloadRouting();
   setSplashProgress(48, 'Chargement du parcours…');
-  loadEvaluationFile(existingWebPage(state.lastEvaluationPage || state.lastPage));
+  loadSavedCandidateEvaluation(state);
 
   mainWindow.webContents.on('did-finish-load', () => {
     applyAdminWindowMode(adminSessionUnlocked);
@@ -607,6 +630,11 @@ function createWindow() {
     const current = readState();
     current.lastPage = page;
     current.lastEvaluationPage = page;
+    if (KALTEST_PILOT2_MODE && KALTEST_FULL_PARCOURS_MODE) {
+      const route = kaloneoFullParcoursRoute.routeFromNavigationUrl(url);
+      current.lastRoute = route;
+      current.lastEvaluationRoute = route;
+    }
     writeState(current);
     applyAdaptiveZoom();
   });
@@ -845,10 +873,9 @@ ipcMain.handle('admin:lock', () => {
   applyAdminWindowMode(false);
   if (mainWindow && !mainWindow.isDestroyed()) {
     const state = readState();
-    const target = existingWebPage(state.lastEvaluationPage || 'qcmv1.0.html');
     setTimeout(() => {
       if (!mainWindow || mainWindow.isDestroyed() || adminSessionUnlocked) return;
-      loadEvaluationFile(target);
+      loadSavedCandidateEvaluation(state);
     }, 90);
   }
   return true;
@@ -1025,7 +1052,7 @@ ipcMain.handle('admin:return-evaluation', () => {
   if (!mainWindow || !adminSessionUnlocked) return false;
   adminCandidateResultsMode = false;
   const state = readState();
-  mainWindow.loadFile(existingWebPage(state.lastEvaluationPage || 'qcmv1.0.html'));
+  loadSavedCandidateEvaluation(state);
   return true;
 });
 

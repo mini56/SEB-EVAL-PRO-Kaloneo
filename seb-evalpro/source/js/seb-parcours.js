@@ -214,44 +214,51 @@
     return legacySteps.find((step) => step.id === id);
   }
 
+  function fullParcoursStep(step, extraQuery = {}) {
+    return Object.freeze({
+      ...step,
+      query:Object.freeze({
+        fullParcours:'1',
+        ...(step.query || {}),
+        ...extraQuery
+      })
+    });
+  }
+
   const pilot11Steps = Object.freeze([
-    Object.freeze({
+    fullParcoursStep({
       id:'kaltest-initial',
-      file:'kaltest-pilot2.html',
-      query:Object.freeze({ fullParcours:'1' })
+      file:'kaltest-pilot2.html'
     }),
-    legacyStep('qcm-4'),
-    legacyStep('qcm-5'),
-    legacyStep('qcm-5_1'),
-    Object.freeze({
+    fullParcoursStep(legacyStep('qcm-4')),
+    fullParcoursStep(legacyStep('qcm-5')),
+    fullParcoursStep(legacyStep('qcm-5_1')),
+    fullParcoursStep({
       ...legacyStep('qcm-6'),
       file:'kaltest-pilot2.html',
-      page:null,
-      query:Object.freeze({ fullParcours:'1', segment:'conversions' })
-    }),
-    legacyStep('autoeval1'),
-    legacyStep('introbrique'),
-    legacyStep('brique'),
-    legacyStep('stock'),
-    legacyStep('planning'),
-    Object.freeze({
+      page:null
+    }, { segment:'conversions' }),
+    fullParcoursStep(legacyStep('autoeval1')),
+    fullParcoursStep(legacyStep('introbrique')),
+    fullParcoursStep(legacyStep('brique')),
+    fullParcoursStep(legacyStep('stock')),
+    fullParcoursStep(legacyStep('planning')),
+    fullParcoursStep({
       ...legacyStep('genrenombres'),
-      file:'kaltest-pilot2.html',
-      query:Object.freeze({ fullParcours:'1', segment:'genre-nombre' })
-    }),
-    legacyStep('dictee'),
-    legacyStep('tri-de-cheville'),
-    legacyStep('nwtexte'),
-    legacyStep('nvmail'),
-    legacyStep('autoeval2'),
-    Object.freeze({
+      file:'kaltest-pilot2.html'
+    }, { segment:'genre-nombre' }),
+    fullParcoursStep(legacyStep('dictee')),
+    fullParcoursStep(legacyStep('tri-de-cheville')),
+    fullParcoursStep(legacyStep('nwtexte')),
+    fullParcoursStep(legacyStep('nvmail')),
+    fullParcoursStep(legacyStep('autoeval2')),
+    fullParcoursStep({
       ...legacyStep('paronymes'),
-      file:'kaltest-pilot2.html',
-      query:Object.freeze({ fullParcours:'1', segment:'paronymes' })
-    }),
-    legacyStep('carre'),
-    legacyStep('qcm-11'),
-    legacyStep('qcm-finale')
+      file:'kaltest-pilot2.html'
+    }, { segment:'paronymes' }),
+    fullParcoursStep(legacyStep('carre')),
+    fullParcoursStep(legacyStep('qcm-11')),
+    fullParcoursStep(legacyStep('qcm-finale'))
   ]);
 
   function pilot11Enabled() {

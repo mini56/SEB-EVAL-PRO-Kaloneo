@@ -145,9 +145,10 @@ app.whenReady().then(async()=>{
       'autoeval1','introbrique','brique','stock','planning','genrenombres','dictee',
       'tri-de-cheville','nwtexte','nvmail','autoeval2','paronymes','carre','qcm-11','qcm-finale'
     ];
-    if(!page4.visible || page4.mode!=='pilot11' ||
-       page4.next4!=='qcmv1.0.html?page=5#page5' ||
-       page4.next5!=='qcmv1.0.html?page=5_1#page5_1' ||
+    const page4Location=locationInfo(win);
+    if(!page4.visible || page4.mode!=='pilot11' || page4Location.search.indexOf('fullParcours=1')<0 ||
+       page4.next4!=='qcmv1.0.html?fullParcours=1&page=5#page5' ||
+       page4.next5!=='qcmv1.0.html?fullParcours=1&page=5_1#page5_1' ||
        page4.next51!=='kaltest-pilot2.html?fullParcours=1&segment=conversions' ||
        JSON.stringify(page4.ids)!==JSON.stringify(expectedPilotIds)){
       throw new Error('Ordre central PILOTE 11 invalide: '+JSON.stringify(page4));
@@ -195,7 +196,7 @@ app.whenReady().then(async()=>{
         next:window.sebParcours?.nextFile('autoeval1')||''
       })
     `,true);
-    if(!auto.parcours || auto.next!=='introbrique.html'){
+    if(!auto.parcours || auto.next!=='introbrique.html?fullParcours=1'){
       throw new Error('Autoévaluation ne mène pas à introbrique.html: '+JSON.stringify(auto));
     }
 
@@ -228,7 +229,7 @@ app.whenReady().then(async()=>{
         next:window.sebParcours?.nextFile('brique')||''
       })
     `,true);
-    if(lego.exercise!=='brique' || !lego.chrono || lego.next!=='stock.html'){
+    if(lego.exercise!=='brique' || !lego.chrono || lego.next!=='stock.html?fullParcours=1'){
       throw new Error('Page LEGO/Briques invalide: '+JSON.stringify(lego));
     }
 
@@ -245,7 +246,7 @@ app.whenReady().then(async()=>{
         next:window.sebParcours?.nextUrl('stock')||''
       })
     `,true);
-    if(stock.exercise!=='stock' || stock.pots!==34 || !stock.engine || stock.next!=='planning.html'){
+    if(stock.exercise!=='stock' || stock.pots!==34 || !stock.engine || stock.next!=='planning.html?fullParcours=1'){
       throw new Error('Page Stock absente/invalide: '+JSON.stringify(stock));
     }
 
@@ -292,10 +293,10 @@ app.whenReady().then(async()=>{
         auto2:window.sebParcours?.nextUrl('autoeval2')||''
       })
     `,true);
-    if(middle.dictee!=='tri_de_cheville.html' ||
-       middle.tri!=='nwtexte.html' ||
-       middle.nwtexte!=='nvmail.html' ||
-       middle.nvmail!=='autoeval2.html' ||
+    if(middle.dictee!=='tri_de_cheville.html?fullParcours=1' ||
+       middle.tri!=='nwtexte.html?fullParcours=1' ||
+       middle.nwtexte!=='nvmail.html?fullParcours=1' ||
+       middle.nvmail!=='autoeval2.html?fullParcours=1' ||
        middle.auto2!=='kaltest-pilot2.html?fullParcours=1&segment=paronymes'){
       throw new Error('Milieu/fin de parcours PILOTE 11 incorrect: '+JSON.stringify(middle));
     }
@@ -332,8 +333,8 @@ app.whenReady().then(async()=>{
         after11:window.sebParcours?.nextUrl('qcm-11')||''
       })
     `,true);
-    if(ending.afterCarre!=='qcmv1.0.html?page=11#page11' ||
-       ending.after11!=='qcmv1.0.html?page=finale#pageFinale'){
+    if(ending.afterCarre!=='qcmv1.0.html?fullParcours=1&page=11#page11' ||
+       ending.after11!=='qcmv1.0.html?fullParcours=1&page=finale#pageFinale'){
       throw new Error('Fin du parcours PILOTE 11 incorrecte: '+JSON.stringify(ending));
     }
 

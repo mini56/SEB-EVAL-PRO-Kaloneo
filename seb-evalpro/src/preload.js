@@ -75,12 +75,29 @@ function isAdminTestsParcoursPage(page = pageName()) {
   return String(page || '').toLowerCase() === 'admin-tests-parcours.html';
 }
 
+function isAdminKaloneoBuilderPage(page = pageName()) {
+  return String(page || '').toLowerCase() === 'test-builder.html';
+}
+
 function isAdminNavigationPage(page = pageName()) {
-  return isAdminBilanPage(page) || isAdminCandidatesPage(page) || isAdminTestsParcoursPage(page);
+  return isAdminBilanPage(page) || isAdminCandidatesPage(page) ||
+    isAdminTestsParcoursPage(page) || isAdminKaloneoBuilderPage(page);
+}
+
+function pageRoute() {
+  const page = pageName();
+  try {
+    return page + String(window.location.search || '') + String(window.location.hash || '');
+  } catch (_) {
+    return page;
+  }
 }
 
 function buildSnapshot() {
   const page = pageName();
+  const route = pageRoute();
+  const previousRoute = restoredState.lastEvaluationRoute || restoredState.lastRoute ||
+    restoredState.lastEvaluationPage || restoredState.lastPage || 'qcmv1.0.html';
   return {
     ...restoredState,
     sessionStorage: storageToObject(window.sessionStorage),
@@ -90,7 +107,9 @@ function buildSnapshot() {
       : page,
     lastEvaluationPage: isAdminNavigationPage(page)
       ? (restoredState.lastEvaluationPage || 'qcmv1.0.html')
-      : page
+      : page,
+    lastRoute: isAdminNavigationPage(page) ? previousRoute : route,
+    lastEvaluationRoute: isAdminNavigationPage(page) ? previousRoute : route
   };
 }
 
@@ -100,7 +119,9 @@ function snapshotFingerprint(snapshot) {
       sessionStorage: snapshot && snapshot.sessionStorage || {},
       localStorage: snapshot && snapshot.localStorage || {},
       lastPage: snapshot && snapshot.lastPage || '',
-      lastEvaluationPage: snapshot && snapshot.lastEvaluationPage || ''
+      lastEvaluationPage: snapshot && snapshot.lastEvaluationPage || '',
+      lastRoute: snapshot && snapshot.lastRoute || '',
+      lastEvaluationRoute: snapshot && snapshot.lastEvaluationRoute || ''
     });
   } catch (_) {
     return '';

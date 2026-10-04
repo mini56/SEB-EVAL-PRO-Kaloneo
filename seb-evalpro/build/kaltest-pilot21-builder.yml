@@ -1,5 +1,5 @@
 appId: fr.sauvegarde56.sebevalpro.kaloneo.pilot21
-productName: "SEB EvalPro Kalonéo - PILOTE 21 R1"
+productName: "SEB EvalPro Kalonéo - PILOTE 21 R2"
 asar: true
 compression: store
 
@@ -24,6 +24,6 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  shortcutName: "SEB EvalPro Kalonéo - PILOTE 21 R1"
+  shortcutName: "SEB EvalPro Kalonéo - PILOTE 21 R2"
   deleteAppDataOnUninstall: true
-  artifactName: "SEB-EvalPro-Kaloneo-PILOTE-21-R1-0.0.21-Windows-Setup.${ext}"
+  artifactName: "SEB-EvalPro-Kaloneo-PILOTE-21-R2-0.0.21-Windows-Setup.${ext}"
