@@ -64,11 +64,11 @@
 
         <label>Présentation de l’exercice
           <select id="test-layout">
-            <option value="single">1 bloc — pleine largeur</option>
-            <option value="50-50">2 blocs — 50 / 50</option>
-            <option value="40-60">2 blocs — 40 / 60</option>
-            <option value="60-40">2 blocs — 60 / 40</option>
-            <option value="chars-rest">Largeurs en caractères + reste disponible</option>
+            <option value="single">1 bloc — pleine largeur (ex. Paronymes / Gratte-ciel)</option>
+            <option value="50-50">Préréglage 50 / 50 (ex. Genre et nombre)</option>
+            <option value="40-60">Préréglage 40 / 60 (ex. Texte à trous)</option>
+            <option value="60-40">Préréglage 60 / 40 (ex. Conversions)</option>
+            <option value="chars-rest">Libre — largeurs en caractères + dernier bloc = reste</option>
           </select>
         </label>
 
@@ -102,6 +102,8 @@
         <input id="selected-icon-id" type="hidden">
         <div id="icon-picker" class="icon-picker" aria-label="Bibliothèque d’icônes KALONÉO"></div>
       </div>
+
+      <p class="muted">Les préréglages reproduisent les pages déjà validées. Pour une nouvelle page, utilisez le mode Libre afin de fixer les premiers blocs en nombre de caractères ; le dernier bloc peut prendre automatiquement tout l’espace restant.</p>
 
       <div id="custom-sizing-row" class="form-grid cols-3" hidden>
         <label>Bloc 1 — largeur en caractères
