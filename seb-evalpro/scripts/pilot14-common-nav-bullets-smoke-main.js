@@ -32,6 +32,12 @@ async function snapshot(win){
         if(!b) return {exists:false};
         const s=getComputedStyle(b);
         return {exists:true,display:s.display,visibility:s.visibility,hidden:b.hidden,title:b.title,className:b.className,ariaHidden:b.getAttribute('aria-hidden')};
+      })(),
+      page4NextSource:(() => {
+        const b=document.getElementById('page4Next');
+        if(!b) return null;
+        const s=getComputedStyle(b);
+        return {display:s.display,visibility:s.visibility,hidden:b.hidden,className:b.className,ariaHidden:b.getAttribute('aria-hidden'),activity:sessionStorage.getItem('seb_exercise_activity:qcmv1.0.html#page4')};
       })()
     };
   })()`);
