@@ -175,9 +175,12 @@ async function testTri(){
     const timerStyle=await js(win,`(() => {
       const b=document.getElementById('startBtn');
       const s=b?getComputedStyle(b):null;
-      return b?{border:s.borderColor,outline:s.outlineColor,disabled:b.disabled}:null;
+      const display=document.querySelector('.seb-chrono-display');
+      const ds=display?getComputedStyle(display):null;
+      return b?{border:s.borderColor,outline:s.outlineColor,disabled:b.disabled,displayFontSize:ds?.fontSize||''}:null;
     })()`);
     if(!timerStyle || timerStyle.border!=='rgb(25, 135, 84)' || /249, 178, 51|249,178,51|f9b233/i.test(timerStyle.outline)) fail('Tri: contour orange encore présent sur Démarrer',timerStyle);
+    if(timerStyle.displayFontSize!=='44px') fail('Tri: taille du compteur KALONÉO modifiée',timerStyle);
     await js(win,`window.sebTri?.stopChrono?.();true`);
     await wait(80);
 
@@ -186,10 +189,25 @@ async function testTri(){
       const main=document.querySelector('.main');
       const left=document.getElementById('left');
       const bar=document.getElementById('kaloneo-common-navigation');
-      const r=el=>el?({top:el.getBoundingClientRect().top,bottom:el.getBoundingClientRect().bottom,height:el.getBoundingClientRect().height}):null;
-      return {header:r(header),main:r(main),left:r(left),bar:r(bar),scrollY:window.scrollY};
+      const scenario=document.querySelector('.tri-scenario');
+      const consigne=document.querySelector('.tri-consigne');
+      const scenarioIcon=scenario?.querySelector(':scope > img');
+      const scenarioBody=scenario?.querySelector('.kaloneo-context-body');
+      const consigneIcon=consigne?.querySelector(':scope > img');
+      const consigneBody=consigne?.querySelector('.kaloneo-context-body');
+      const illustration=document.querySelector('.tri-illustration');
+      const r=el=>el?({top:el.getBoundingClientRect().top,bottom:el.getBoundingClientRect().bottom,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right,width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}):null;
+      return {
+        header:r(header),main:r(main),left:r(left),bar:r(bar),scrollY:window.scrollY,
+        scenarioIcon:r(scenarioIcon),scenarioBody:r(scenarioBody),
+        consigneIcon:r(consigneIcon),consigneBody:r(consigneBody),
+        illustration:r(illustration)
+      };
     })()`);
     if(initial.scrollY!==0 || initial.header.top<0 || initial.main.bottom>initial.bar.top+2) fail('Tri initial: contenu décalé',initial);
+    if(!initial.scenarioIcon || !initial.scenarioBody || Math.abs(initial.scenarioIcon.top-initial.scenarioBody.top)>4) fail('Tri: Scénario mal aligné verticalement',initial);
+    if(!initial.consigneIcon || !initial.consigneBody || Math.abs(initial.consigneIcon.top-initial.consigneBody.top)>4) fail('Tri: Consigne mal alignée verticalement',initial);
+    if(!initial.illustration || initial.illustration.width<440) fail('Tri: illustration n’utilise pas assez la largeur disponible',initial);
 
     await js(win,`(() => {
       const c=document.getElementById('consigne');
