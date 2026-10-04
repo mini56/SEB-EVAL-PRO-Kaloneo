@@ -217,9 +217,17 @@
         calculatorCompatible:def.calculator?.compatible===true,
         calculatorDefaultEnabled:def.calculator?.defaultEnabled===true,
         chronoEnabled:def.chrono?.enabled===true||def.features?.includes('host.chrono'),
-        adminIntervention:Boolean(def.adminIntervention)||def.features?.includes('host.admin-intervention'),
+        chronoMode:def.chrono?.mode||'simple',
+        chronoMinMeasures:Math.max(1,Number(def.chrono?.minMeasures)||1),
+        chronoMaxMeasures:Math.max(1,Number(def.chrono?.maxMeasures)||1),
+        chronoAutoReset:Boolean(def.chrono?.autoReset),
+        chronoFocusAfterStop:Boolean(def.chrono?.focusAfterStop),
+        chronoShowTime:def.chrono?.showTime!==false,
+        adminIntervention:Boolean(def.adminIntervention?.enabled ?? def.adminIntervention)||def.features?.includes('host.admin-intervention'),
+        adminInstructions:typeof def.adminIntervention==='object'?(def.adminIntervention.instructions||''):'',
         autoevaluation:Boolean(def.autoevaluation)||def.features?.includes('host.autoevaluation'),
-        externalMaterial:Boolean(def.externalMaterial)||def.features?.includes('host.external-material'),
+        externalMaterial:Boolean(def.externalMaterial?.enabled ?? def.externalMaterial)||def.features?.includes('host.external-material'),
+        externalMaterialText:typeof def.externalMaterial==='object'?(def.externalMaterial.material||''):'',
         template:def.presentation?.kaloneoLayout?.type||(
           def.presentation?.choiceTable?'full-width-choice-table':
           def.presentation?.tables?'two-tables-50-50':
@@ -350,10 +358,33 @@
         compatible:Boolean(m.calculatorCompatible),
         defaultEnabled:Boolean(m.calculatorCompatible&&m.calculatorDefaultEnabled)
       });
-      if(m.chronoEnabled||def.chrono) def.chrono={enabled:Boolean(m.chronoEnabled),engine:m.chronoEnabled?'seb-common':null};
-      if(m.adminIntervention||Object.prototype.hasOwnProperty.call(def,'adminIntervention')) def.adminIntervention=Boolean(m.adminIntervention);
+      if(m.chronoEnabled||def.chrono) {
+        const chrono=Object.assign({},def.chrono||{},{
+          enabled:Boolean(m.chronoEnabled),
+          engine:m.chronoEnabled?'seb-common':null
+        });
+        if(m.chronoEnabled) {
+          if(m.chronoMode&&m.chronoMode!=='simple') chrono.mode=m.chronoMode;
+          else if(Object.prototype.hasOwnProperty.call(chrono,'mode')) chrono.mode=m.chronoMode||'simple';
+          if(Number(m.chronoMinMeasures)>1||Object.prototype.hasOwnProperty.call(chrono,'minMeasures')) chrono.minMeasures=Math.max(1,Number(m.chronoMinMeasures)||1);
+          if(Number(m.chronoMaxMeasures)>1||Object.prototype.hasOwnProperty.call(chrono,'maxMeasures')) chrono.maxMeasures=Math.max(1,Number(m.chronoMaxMeasures)||1);
+          if(m.chronoAutoReset||Object.prototype.hasOwnProperty.call(chrono,'autoReset')) chrono.autoReset=Boolean(m.chronoAutoReset);
+          if(m.chronoFocusAfterStop||Object.prototype.hasOwnProperty.call(chrono,'focusAfterStop')) chrono.focusAfterStop=Boolean(m.chronoFocusAfterStop);
+          if(m.chronoShowTime===false||Object.prototype.hasOwnProperty.call(chrono,'showTime')) chrono.showTime=m.chronoShowTime!==false;
+        }
+        def.chrono=chrono;
+      }
+      if(m.adminIntervention||Object.prototype.hasOwnProperty.call(def,'adminIntervention')) {
+        if(typeof def.adminIntervention==='object'||m.adminInstructions) {
+          def.adminIntervention={enabled:Boolean(m.adminIntervention),instructions:m.adminInstructions||''};
+        } else def.adminIntervention=Boolean(m.adminIntervention);
+      }
       if(m.autoevaluation||Object.prototype.hasOwnProperty.call(def,'autoevaluation')) def.autoevaluation=Boolean(m.autoevaluation);
-      if(m.externalMaterial||Object.prototype.hasOwnProperty.call(def,'externalMaterial')) def.externalMaterial=Boolean(m.externalMaterial);
+      if(m.externalMaterial||Object.prototype.hasOwnProperty.call(def,'externalMaterial')) {
+        if(typeof def.externalMaterial==='object'||m.externalMaterialText) {
+          def.externalMaterial={enabled:Boolean(m.externalMaterial),material:m.externalMaterialText||''};
+        } else def.externalMaterial=Boolean(m.externalMaterial);
+      }
       updateImportedQuestions(def,model);
       return def;
     }
@@ -397,10 +428,19 @@
       scenario:m.scenario||'',
       instruction:m.instruction||'',
       calculator:{compatible:Boolean(m.calculatorCompatible),defaultEnabled:Boolean(m.calculatorCompatible&&m.calculatorDefaultEnabled)},
-      chrono:{enabled:Boolean(m.chronoEnabled),engine:m.chronoEnabled?'seb-common':null},
-      adminIntervention:Boolean(m.adminIntervention),
+      chrono:m.chronoEnabled?{
+        enabled:true,
+        engine:'seb-common',
+        mode:m.chronoMode||'simple',
+        minMeasures:Math.max(1,Number(m.chronoMinMeasures)||1),
+        maxMeasures:Math.max(1,Number(m.chronoMaxMeasures)||1),
+        autoReset:Boolean(m.chronoAutoReset),
+        focusAfterStop:Boolean(m.chronoFocusAfterStop),
+        showTime:m.chronoShowTime!==false
+      }:{enabled:false,engine:null},
+      adminIntervention:m.adminIntervention?{enabled:true,instructions:m.adminInstructions||''}:{enabled:false},
       autoevaluation:Boolean(m.autoevaluation),
-      externalMaterial:Boolean(m.externalMaterial),
+      externalMaterial:m.externalMaterial?{enabled:true,material:m.externalMaterialText||''}:{enabled:false},
       presentation:genericPresentation(model),
       navigation:{next:'host',abandon:'host-common'},
       runtime:{start:true,save:true,restore:true,finish:true},
