@@ -2294,3 +2294,95 @@ La règle de puce unique `•` reste applicable aux listes ordinaires.
 Exception explicite :
 - la liste des fichiers proposés dans la fenêtre de pièce jointe de **Rédaction d’un e-mail** ne reçoit **aucune puce de liste**.
 
+
+
+---
+
+## 63. Retour réel PILOTE 16 — corrections PILOTE 17 et règles de construction
+
+**Statut : VALIDÉ FONCTIONNELLEMENT — 4 octobre 2026**
+
+Le test réel Windows du PILOTE 16 confirme la stabilité de la barre basse. Cette architecture reste la base et ne doit pas être remplacée.
+
+### 63.1 Compteur commun KALONÉO
+
+Un seul moteur de compteur est autorisé : `js/kaloneo-chrono.js`.
+
+Règles visibles communes :
+- bouton vert : **Démarrer le compteur** ;
+- bouton rouge : **Arrêter le compteur** ;
+- même taille de chiffres sur la prise en main, Briques et Tri ;
+- mêmes dimensions et mêmes états de boutons ;
+- Tri conserve ses règles métier (3 à 5 tris, report Minutes/Secondes, focus Erreurs, remise à zéro pour le tri suivant), mais ne possède plus de `setInterval` concurrent.
+
+Le terme **compteur** est privilégié dans l'interface candidat car il est jugé plus simple à comprendre.
+
+### 63.2 Barre basse — zones fixes
+
+La barre basse stable de 52 px est conservée.
+
+Organisation :
+- **gauche** : icône officielle KALONÉO puis **Abandonner l’exercice**, position fixe ;
+- **centre** : uniquement les actions propres à l’exercice ;
+- **droite** : **Afficher l’écran d’accueil**, puis heure/date.
+
+Même lorsque Abandonner est absent, la zone centrale ne doit pas glisser dans l'emplacement réservé à gauche.
+
+Le bouton **Afficher l’écran d’accueil** utilise un bleu KALONÉO plus sombre et une graisse renforcée afin d'être plus facilement repérable.
+
+L'icône de barre est l'icône caméléon officielle fournie pour KALONÉO, et non le logo complet.
+
+### 63.3 Calculatrice — activation explicite
+
+La calculatrice n'est jamais affichée « au cas où ».
+
+- prise en main candidat : **Ouvrir la calculatrice** reste dans le bloc **Test de la calculatrice** ; c'est l'unique exception où ce bouton n'est pas dans la barre ;
+- exercice compatible et activé : bouton Calculatrice dans la barre ;
+- exercice non compatible ou non activé : aucun bouton Calculatrice et toute calculatrice déjà ouverte est refermée au changement d'exercice.
+
+L'activation reste une capacité déclarée par le test / parcours.
+
+### 63.4 Consignes et puces
+
+Les listes de consignes utilisent une seule puce KALONÉO correctement alignée.
+
+Pour une consigne sur plusieurs lignes :
+- l'icône de Consigne est alignée sur le haut du contenu ;
+- le retrait de la puce est unique ;
+- aucun pseudo-élément historique ne doit se superposer au marqueur commun.
+
+Planning :
+- la phrase **« La colonne de droite vous guide pour remplir correctement le tableau. »** reste du texte normal précédé d'une seule puce ;
+- aucun caractère ou pictogramme parasite ne doit remplacer la lettre **L**.
+
+### 63.5 Tri — autoévaluation
+
+Lorsque les résultats du Tri ouvrent l'autoévaluation :
+- l'ancien bloc de consigne quitte réellement le flux de mise en page ;
+- aucun grand espace vide ne doit rester au-dessus de l'autoévaluation ;
+- le bloc d'autoévaluation commence en haut de la colonne disponible.
+
+### 63.6 Rédaction d'un e-mail
+
+Après l'envoi, **Message envoyé !** s'affiche comme un message d'état intégré à la page.
+
+Il ne doit plus apparaître dans un grand bloc bleu ou dans une carte colorée autonome.
+
+### 63.7 Largeur des blocs pour le futur Test Builder
+
+Pour les **nouvelles pages**, le créateur ne doit pas avoir à comprendre les pourcentages CSS ou les unités `fr`.
+
+Principe d'interface :
+- une largeur peut être demandée en **nombre de caractères** ;
+- exemple : **Bloc 1 : 15 caractères** ;
+- les blocs suivants peuvent recevoir leur propre largeur en caractères ;
+- le dernier bloc peut être déclaré **reste de la place**.
+
+Implémentation technique autorisée : `ch` + grille responsive (`minmax()`, `1fr`, repli si nécessaire).
+
+Cette règle concerne le futur créateur de pages. Elle **ne migre pas automatiquement les pages déjà validées** :
+- Texte à trous conserve son rendu 40/60 validé ;
+- Conversions conserve son rendu 60/40 validé ;
+- Paronymes conserve son rendu pleine largeur validé.
+
+L'objectif est de simplifier la création future sans provoquer de régression sur les gabarits déjà contrôlés en Electron réel.
