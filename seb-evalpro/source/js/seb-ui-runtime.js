@@ -1068,6 +1068,7 @@
       body.seb-kaloneo-nav-active{
         width:100%!important;
         height:var(--kaloneo-work-height)!important;
+        margin:0!important;
         min-height:0!important;
         max-height:var(--kaloneo-work-height)!important;
         padding-bottom:0!important;
