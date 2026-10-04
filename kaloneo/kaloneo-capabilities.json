@@ -100,7 +100,8 @@
     ],
     "lastColumnUsesRemainder": true,
     "multipleTables": true,
-    "gridMode": true
+    "gridMode": true,
+    "cellMediaFileEmbedding": true
   },
   "media": {
     "offlineEmbedded": true,
@@ -127,7 +128,17 @@
     "stopLabel": "Arrêter le compteur",
     "startColorRole": "green",
     "stopColorRole": "red",
-    "perTestLocalTimerForbidden": true
+    "perTestLocalTimerForbidden": true,
+    "configurableMode": true,
+    "modes": [
+      "simple",
+      "repeated"
+    ],
+    "minimumMeasures": true,
+    "maximumMeasures": true,
+    "autoReset": true,
+    "focusAfterStop": true,
+    "showTime": true
   },
   "navigation": {
     "commonBottomBarHeightPx": 52,
@@ -161,10 +172,12 @@
   },
   "adminIntervention": {
     "supported": true,
-    "commonHostMechanism": true
+    "commonHostMechanism": true,
+    "instructions": true
   },
   "externalMaterial": {
-    "supported": true
+    "supported": true,
+    "materialDescription": true
   },
   "scoring": {
     "scoredAndUnscoredTests": true,
@@ -230,10 +243,11 @@
   },
   "iconLibrary": {
     "selectorSupported": true,
-    "targetCount": 80,
-    "historicallyDocumentedCount": 70,
-    "exactHistoricalNamesRecovered": false,
-    "institutionalScenarioAndInstructionIconsAutomatic": true
+    "validatedCount": 70,
+    "searchable": true,
+    "selectedIconStoredInKaltest": true,
+    "exactHistoricalLibraryRestoredFrom": "kaloneo_test_builder_v5.html",
+    "exactHistoricalNamesRecovered": true
   },
   "validatedArchetypes": {
     "calculs_commandes_atelier": [
@@ -336,5 +350,12 @@
     "conversions_atelier_expedition",
     "genre_nombre",
     "paronymes_rapport"
-  ]
+  ],
+  "editor": {
+    "continuousOrderedBlocks": true,
+    "insertQuestionAtCursor": true,
+    "automaticStableQuestionIds": true,
+    "autoGrowingTextareas": true,
+    "contextualHelp": true
+  }
 }
