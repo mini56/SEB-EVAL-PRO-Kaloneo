@@ -92,9 +92,17 @@
       calculatorCompatible:false,
       calculatorDefaultEnabled:false,
       chronoEnabled:false,
+      chronoMode:'simple',
+      chronoMinMeasures:1,
+      chronoMaxMeasures:1,
+      chronoAutoReset:false,
+      chronoFocusAfterStop:false,
+      chronoShowTime:true,
       adminIntervention:false,
+      adminInstructions:'',
       autoevaluation:false,
       externalMaterial:false,
+      externalMaterialText:'',
       block1WidthChars:'',
       block2WidthChars:'',
       lastBlockRemainder:true
@@ -115,9 +123,17 @@
       calculatorCompatible:$('calculator-compatible').checked,
       calculatorDefaultEnabled:false,
       chronoEnabled:$('chrono-enabled').checked,
+      chronoMode:$('chrono-mode').value,
+      chronoMinMeasures:Math.max(1,Number($('chrono-min-measures').value)||1),
+      chronoMaxMeasures:Math.max(1,Number($('chrono-max-measures').value)||1),
+      chronoAutoReset:$('chrono-auto-reset').checked,
+      chronoFocusAfterStop:$('chrono-focus-after-stop').checked,
+      chronoShowTime:$('chrono-show-time').checked,
       adminIntervention:$('admin-intervention').checked,
+      adminInstructions:$('admin-instructions').value.trim(),
       autoevaluation:$('autoevaluation-enabled').checked,
       externalMaterial:$('external-material').checked,
+      externalMaterialText:$('external-material-text').value.trim(),
       block1WidthChars:$('block1-width-chars').value,
       block2WidthChars:$('block2-width-chars').value,
       lastBlockRemainder:$('last-block-remainder').checked
@@ -137,13 +153,28 @@
     $('test-instruction').value=m.instruction;
     $('calculator-compatible').checked=Boolean(m.calculatorCompatible);
     $('chrono-enabled').checked=Boolean(m.chronoEnabled);
+    $('chrono-mode').value=m.chronoMode||'simple';
+    $('chrono-min-measures').value=Math.max(1,Number(m.chronoMinMeasures)||1);
+    $('chrono-max-measures').value=Math.max(1,Number(m.chronoMaxMeasures)||1);
+    $('chrono-auto-reset').checked=Boolean(m.chronoAutoReset);
+    $('chrono-focus-after-stop').checked=Boolean(m.chronoFocusAfterStop);
+    $('chrono-show-time').checked=m.chronoShowTime!==false;
     $('admin-intervention').checked=Boolean(m.adminIntervention);
+    $('admin-instructions').value=m.adminInstructions||'';
     $('autoevaluation-enabled').checked=Boolean(m.autoevaluation);
     $('external-material').checked=Boolean(m.externalMaterial);
+    $('external-material-text').value=m.externalMaterialText||'';
     $('block1-width-chars').value=m.block1WidthChars || '';
     $('block2-width-chars').value=m.block2WidthChars || '';
     $('last-block-remainder').checked=m.lastBlockRemainder !== false;
     $('custom-sizing-row').hidden=m.layout !== 'chars-rest';
+    syncCapabilityOptions();
+  }
+
+  function syncCapabilityOptions() {
+    $('chrono-options').hidden=!$('chrono-enabled').checked;
+    $('admin-options').hidden=!$('admin-intervention').checked;
+    $('material-options').hidden=!$('external-material').checked;
   }
 
   function currentModel() {
@@ -178,7 +209,31 @@
   }
 
   function normalizeIdFromTitle() {
-    return Core.cleanId($('test-title').value);
+    return Core.cleanId($('test-id').value || $('test-title').value || 'test');
+  }
+
+  function usedQuestionIds() {
+    const ids=new Set();
+    for(const block of state.blocks) {
+      if(block.type==='question'&&block.question?.id) ids.add(block.question.id);
+      if(block.type==='table-grid') {
+        for(const cell of (block.table?.cells||[]).flat()) if(cell?.questionId) ids.add(cell.questionId);
+      }
+    }
+    return ids;
+  }
+
+  function nextQuestionId() {
+    const suffix=normalizeIdFromTitle();
+    const used=usedQuestionIds();
+    let n=1;
+    while(used.has('ID'+n+'_'+suffix)) n++;
+    return 'ID'+n+'_'+suffix;
+  }
+
+  function ensureQuestionId(question) {
+    if(!question.id) question.id=nextQuestionId();
+    return question.id;
   }
 
   function inputField(label,value,onInput,options={}) {
@@ -188,9 +243,18 @@
     if (!options.multiline) el.type=options.type||'text';
     el.value=value == null ? '' : value;
     if (options.placeholder) el.placeholder=options.placeholder;
+    if (options.title) { el.title=options.title; wrap.title=options.title; }
     if (options.min != null) el.min=String(options.min);
     if (options.max != null) el.max=String(options.max);
-    el.addEventListener('input',()=>onInput(el.value));
+    if (options.readOnly) el.readOnly=true;
+    const grow=()=>{
+      if(el.tagName==='TEXTAREA'){
+        el.style.height='auto';
+        el.style.height=Math.max(42,el.scrollHeight)+'px';
+      }
+    };
+    el.addEventListener('input',()=>{grow();onInput(el.value);});
+    if(el.tagName==='TEXTAREA') requestAnimationFrame(grow);
     wrap.appendChild(el);
     return wrap;
   }
@@ -260,11 +324,12 @@
 
   function renderQuestionEditor(block,body) {
     const q=block.question||(block.question=baseQuestion());
+    ensureQuestionId(q);
     const row1=document.createElement('div');
     row1.className='field-row';
     row1.append(
-      inputField('ID automatique / stable',q.id,value=>{q.id=Core.cleanId(value);changed();},{placeholder:'Créé automatiquement si vide'}),
-      inputField('Question',q.prompt,value=>{q.prompt=value;changed();})
+      inputField('ID automatique / stable',q.id,()=>{},{readOnly:true,title:'Identifiant généré automatiquement. Il reste stable même si la question est déplacée ou reformulée.'}),
+      inputField('Question',q.prompt,value=>{q.prompt=value;changed();},{multiline:true,title:'Entrez le texte de la question présenté au candidat.'})
     );
     body.appendChild(row1);
 
@@ -275,15 +340,15 @@
         ['text','Texte'],['number','Nombre'],['number-unit','Nombre + unité'],['duration','Durée / horaire'],
         ['single-choice','Choix unique'],['multiple-choice','Choix multiple'],['boolean','Vrai / Faux'],['select','Liste déroulante']
       ],value=>{q.responseType=value;changed();renderBlocks();}),
-      inputField('Réponse(s) acceptée(s)',q.acceptedAnswers,value=>{q.acceptedAnswers=value;changed();},{placeholder:'Séparer par ;'}),
-      inputField('Points',q.example?0:q.points,value=>{if(!q.example)q.points=Math.max(0,Number(value)||0);changed();},{type:'number',min:0})
+      inputField('Réponse(s) attendue(s)',q.acceptedAnswers,value=>{q.acceptedAnswers=value;changed();},{placeholder:'Séparer par ;',title:'Entrez la ou les réponses correctes. Séparez plusieurs réponses acceptées par un point-virgule ;'}),
+      inputField('Points',q.example?0:q.points,value=>{if(!q.example)q.points=Math.max(0,Number(value)||0);changed();},{type:'number',min:0,readOnly:Boolean(q.example),title:'Nombre de points attribués. Une question d’exemple reste automatiquement à 0.'})
     );
     body.appendChild(row2);
 
     const row3=document.createElement('div');
     row3.className='field-row cols-3';
     row3.append(
-      inputField('Unité(s) acceptée(s)',q.units,value=>{q.units=value;changed();},{placeholder:'Séparer par ;'}),
+      inputField('Unité(s)',q.units,value=>{q.units=value;changed();},{placeholder:'Séparer par ;',title:'Indiquez les écritures d’unité acceptées, séparées par ;. Laissez vide si aucune unité n’est demandée.'}),
       checkboxField('Champ unité affiché',q.unitInput,value=>{q.unitInput=value;changed();}),
       checkboxField('Unité notée',q.unitScored,value=>{q.unitScored=value;changed();})
     );
