@@ -58,7 +58,7 @@ jobs:
           $smokes = @(
             'scripts/build21-admin-foundation-smoke-main.js',
             'scripts/pilot13-layout-smoke-main.js',
-            'scripts/pilot16-stable-bottom-bar-smoke-main.js',
+            'scripts/pilot16-responsive-smoke-main.js',
             'scripts/kaltest-pilot2-functional-smoke-main.js',
             'scripts/pilot8-visual-intro-smoke-main.js',
             'scripts/pilot10-page1-render-main.js',
@@ -97,7 +97,7 @@ jobs:
             if ($process.ExitCode -ne 0) { throw "Smoke $smoke en echec (code $($process.ExitCode))." }
           }
 
-      - name: Verify Pilot 15 launcher contract
+      - name: Verify Pilot 16 launcher contract
         shell: pwsh
         run: |
           $main = Get-Content -Raw 'src/kaltest-pilot16-main.js'
@@ -106,10 +106,10 @@ jobs:
           if ($core -notmatch "fullParcours:'1'") { throw 'main.js ne transmet pas fullParcours=1.' }
           Write-Host 'PILOT16_FULL_PARCOURS_LAUNCHER=OK'
 
-      - name: Build isolated Windows Pilot 15 setup
+      - name: Build isolated Windows Pilot 16 setup
         run: npx electron-builder --win nsis --config build/kaltest-pilot16-builder.yml --publish never
 
-      - name: Verify Pilot 15 setup
+      - name: Verify Pilot 16 setup
         shell: pwsh
         run: |
           $setup = Get-ChildItem -Path dist -Filter 'SEB-EvalPro-Kaloneo-PILOTE-16-0.0.16-Windows-Setup.exe' -File | Select-Object -First 1
@@ -128,7 +128,7 @@ jobs:
           path: seb-evalpro/dist/SEB-EvalPro-Kaloneo-PILOTE-16-0.0.16-Windows-Setup.exe
           if-no-files-found: error
 
-      - name: Publish Pilot 15 release
+      - name: Publish Pilot 16 release
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -137,7 +137,7 @@ jobs:
           $title = 'SEB EvalPro Kalonéo — PILOTE #16'
           if (gh release view $tag 2>$null) { throw "La Release $tag existe deja." }
           $notes = @"
-          PILOTE #16 Windows — barre basse KALONÉO stable.
+          PILOTE #16 Windows — socle responsive KALONÉO et barre basse finalisée.
 
           Cette version ne modifie pas les contenus métier ni n'ajoute les images manquantes.
 
