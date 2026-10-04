@@ -7,11 +7,11 @@ const web = path.join(root, 'app', 'web');
 function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
 function fail(message,data){ throw new Error(message+(data?' — '+JSON.stringify(data):'')); }
 
-function createWindow(){
+function createWindow(width,height){
   return new BrowserWindow({
     show:false,
-    width:1100,
-    height:760,
+    width,
+    height,
     useContentSize:true,
     webPreferences:{
       contextIsolation:true,
@@ -20,22 +20,6 @@ function createWindow(){
       devTools:false,
       spellcheck:false
     }
-  });
-}
-
-async function emulateViewport(win,width,height){
-  const dbg=win.webContents.debugger;
-  if(!dbg.isAttached()) dbg.attach('1.3');
-  await dbg.sendCommand('Emulation.setDeviceMetricsOverride',{
-    width,
-    height,
-    deviceScaleFactor:1,
-    mobile:false,
-    screenWidth:width,
-    screenHeight:height,
-    positionX:0,
-    positionY:0,
-    dontSetVisibleSize:false
   });
 }
 
@@ -88,7 +72,7 @@ function assertBar(s,label){
   if(Math.abs(s.bar.height-52)>2) fail(label+': barre != 52px',s);
   if(Math.abs(s.bar.bottom-s.innerHeight)>2) fail(label+': barre non collée au bas',s);
   if(!/linear-gradient/i.test(s.bg) || !/0, 78, 112|0, 59, 87|53, 103, 135/.test(s.bg)) fail(label+': dégradé bleu KALONÉO absent',s);
-  if(!s.logo || !/^data:image\/jpeg;base64,/i.test(s.logo.src) || !s.logo.naturalWidth) fail(label+': vrai visuel KALONÉO absent',s);
+  if(!s.logo || !/assets\/kaloneo-logo-bar\.svg$/i.test(s.logo.src) || !s.logo.naturalWidth) fail(label+': vrai visuel KALONÉO absent',s);
   if(s.emptyVisible!==0) fail(label+': bouton vide visible',s);
   for(const r of s.hiddenRects){
     if(r && r.width>1 && r.height>1) fail(label+': slot masqué garde une taille',s);
@@ -108,9 +92,8 @@ async function waitKaltest(win,id){
 }
 
 async function testConversions(width,height){
-  const win=createWindow();
+  const win=createWindow(width,height);
   try{
-    await emulateViewport(win,width,height);
     await load(win,'kaltest-pilot2.html',{query:{fullParcours:'1',segment:'conversions'}});
     await waitKaltest(win,'conversions_atelier_expedition');
     await wait(250);
@@ -150,9 +133,8 @@ async function testConversions(width,height){
 }
 
 async function testIdentification1200(){
-  const win=createWindow();
+  const win=createWindow(1200,800);
   try{
-    await emulateViewport(win,1200,800);
     await load(win,'kaltest-pilot2.html');
     const bar=await barSnapshot(win);
     assertBar(bar,'Identification 1200x800');
@@ -174,9 +156,8 @@ async function testIdentification1200(){
 }
 
 async function testTri(){
-  const win=createWindow();
+  const win=createWindow(1366,768);
   try{
-    await emulateViewport(win,1366,768);
     await load(win,'tri_de_cheville.html');
     let bar=await barSnapshot(win);
     assertBar(bar,'Tri initial');
@@ -218,9 +199,8 @@ async function testTri(){
 }
 
 async function testMailAndStock(){
-  const win=createWindow();
+  const win=createWindow(1366,768);
   try{
-    await emulateViewport(win,1366,768);
     await load(win,'nvmail.html');
     let bar=await barSnapshot(win);
     assertBar(bar,'E-mail');
@@ -256,9 +236,8 @@ async function testMailAndStock(){
 }
 
 async function testFractions1200AndFinal(){
-  const win=createWindow();
+  const win=createWindow(1200,800);
   try{
-    await emulateViewport(win,1200,800);
     await load(win,'qcmv1.0.html',{query:{page:'4'},hash:'page4'});
     let bar=await barSnapshot(win);
     assertBar(bar,'Fractions 1200x800');
