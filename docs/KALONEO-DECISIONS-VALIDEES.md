@@ -2239,3 +2239,58 @@ Les listes ordinaires des exercices, scénarios, consignes et règles utilisent 
 
 Les petits points, triangles, tirets et autres variantes de puces ordinaires ne doivent plus être introduits dans les nouveaux tests.
 
+
+
+---
+
+## 62. PILOTE 15 — barre basse KALONÉO stable type Windows 11
+
+**Statut : VALIDÉ EN TEST ELECTRON — à confirmer en test réel Windows**
+
+Le système dynamique du PILOTE 14 est abandonné.
+
+### 62.1 Architecture
+
+La barre KALONÉO :
+- est créée **une seule fois** ;
+- ne clone plus les boutons de la page ;
+- n’utilise **aucun MutationObserver** pour fabriquer ou dupliquer des actions ;
+- possède un nombre fixe d’emplacements d’action ;
+- déclenche les commandes existantes afin de conserver leurs ID, barèmes, validations et déroulements ;
+- ne peut donc plus produire plusieurs exemplaires d’un même bouton `Suivant`.
+
+### 62.2 Présentation
+
+- hauteur fixe : **52 px** ;
+- place réservée dans la page par le gabarit ;
+- fond bleu-gris très clair, légèrement translucide ;
+- fine séparation supérieure bleu-gris ;
+- aucune grosse ombre ;
+- petit repère **KALONÉO** à gauche ;
+- actions de l’exercice au centre ;
+- **Afficher l’écran d’accueil** à droite lorsqu’il est disponible ;
+- heure et date à l’extrême droite, au format local `HH:mm` et `JJ/MM/AAAA` ;
+- tous les boutons ont une hauteur commune de **36 px**.
+
+### 62.3 Actions
+
+L’ordre de la zone centrale est :
+1. Abandonner l’exercice, lorsqu’il est disponible ;
+2. Recommencer, si l’exercice le prévoit ;
+3. Vérifier ou Valider, si nécessaire ;
+4. Suivant / Page suivante lorsque le déroulement l’autorise.
+
+Les pages à étapes n’affichent qu’une action pertinente à la fois lorsque c’est possible :
+- Planning : Valider puis Suivant ;
+- Genre et nombre : Vérifier puis Suivant ;
+- Tri : Voir les résultats, puis Valider l’autoévaluation, puis Suivant ;
+- Briques : Valider le modèle, puis Valider l’autoévaluation ;
+- Paronymes : Vérifier puis Suivant.
+
+### 62.4 Puces
+
+La règle de puce unique `•` reste applicable aux listes ordinaires.
+
+Exception explicite :
+- la liste des fichiers proposés dans la fenêtre de pièce jointe de **Rédaction d’un e-mail** ne reçoit **aucune puce de liste**.
+
