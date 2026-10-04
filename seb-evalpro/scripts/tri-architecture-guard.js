@@ -36,11 +36,11 @@ for (const token of protectedText) {
 }
 
 for (const token of [
-  'Démarrer le chronomètre',
-  'Arrêter le chronomètre',
+  'Démarrer le compteur',
+  'Arrêter le compteur',
   'Le temps est automatiquement reporté dans les cases Minutes et Secondes.',
   'Le curseur se place ensuite dans la case <strong>Erreurs</strong>',
-  'Après la saisie des erreurs, le chronomètre revient à <strong>00:00</strong>',
+  'Après la saisie des erreurs, le compteur revient à <strong>00:00</strong>',
   'Effectuez entre <strong>3 et 5 tris</strong>',
   'Voir les résultats'
 ]) {
@@ -61,6 +61,7 @@ for (let i = 1; i <= 5; i += 1) {
 }
 
 if (!html.includes('<script src="js/seb-parcours.js"></script>') ||
+    !html.includes('<script src="js/kaloneo-chrono.js"></script>') ||
     !html.includes('<script src="js/tri-page.js"></script>')) {
   fail('scripts modulaires Tri absents');
 }
@@ -75,6 +76,8 @@ for (const token of [
   "const LIVE_KEY = 'seb_evalpro_tri_live_chrono';",
   'const MIN_TRIS = 3;',
   'const MAX_TRIS = 5;',
+  'function installChronoController()',
+  'window.KaloneoChrono?.create',
   'function startChrono()',
   'function stopChrono()',
   'awaitingError = currentTri;',
