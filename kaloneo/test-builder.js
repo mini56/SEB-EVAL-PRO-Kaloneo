@@ -386,7 +386,9 @@
         ['text','Texte'],['number','Nombre'],['number-unit','Nombre + unité'],['duration','Durée / horaire'],
         ['single-choice','Choix unique'],['multiple-choice','Choix multiple'],['boolean','Vrai / Faux'],['select','Liste déroulante']
       ],value=>{q.responseType=value;changed();renderBlocks();}),
-      inputField('Réponse(s) attendue(s)',q.acceptedAnswers,value=>{q.acceptedAnswers=value;changed();},{placeholder:'Séparer par ;',title:'Entrez la ou les réponses correctes. Séparez plusieurs réponses acceptées par un point-virgule ;'}),
+      q.responseType==='duration'
+        ? inputField('Durée attendue — minutes',q.acceptedMinutes,value=>{q.acceptedMinutes=Math.max(0,Number(value)||0);changed();},{type:'number',min:0,title:'Valeur de référence en minutes. Le candidat peut saisir 9h15, 9 heures 15 min, etc.'})
+        : inputField('Réponse(s) attendue(s)',q.acceptedAnswers,value=>{q.acceptedAnswers=value;changed();},{placeholder:'Séparer par ;',title:'Entrez la ou les réponses correctes. Séparez plusieurs réponses acceptées par un point-virgule ;'}),
       inputField('Points',q.example?0:q.points,value=>{if(!q.example)q.points=Math.max(0,Number(value)||0);changed();},{type:'number',min:0,readOnly:Boolean(q.example),title:'Nombre de points attribués. Une question d’exemple reste automatiquement à 0.'})
     );
     body.appendChild(row2);
@@ -1021,7 +1023,11 @@
       add(Boolean(String(q.prompt||'').trim()),'Question '+qi+' : texte renseigné');
       if(m.scored&&!q.example) {
         add((Number(q.points)||0)>0,'Question '+qi+' : points > 0');
-        add(splitValues(q.acceptedAnswers).length>0,'Question '+qi+' : réponse attendue renseignée');
+        if(q.responseType==='duration') {
+          add(Number.isFinite(Number(q.acceptedMinutes))&&Number(q.acceptedMinutes)>=0,'Question '+qi+' : durée attendue renseignée');
+        } else {
+          add(splitValues(q.acceptedAnswers).length>0,'Question '+qi+' : réponse attendue renseignée');
+        }
       }
     });
 
