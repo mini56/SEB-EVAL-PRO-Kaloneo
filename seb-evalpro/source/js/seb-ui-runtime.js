@@ -573,6 +573,8 @@
       });
       document.body.appendChild(button);
     }
+    const navCenter = document.getElementById('kaloneo-nav-center');
+    if (navCenter && button.parentElement !== navCenter) navCenter.insertBefore(button, navCenter.firstChild);
     return button;
   }
 
@@ -1353,7 +1355,7 @@
       try{document.querySelectorAll(sel).forEach(node=>node.classList.add('seb-kaloneo-owned-nav-source'))}catch(_){}
     });
     refresh();
-    [40,160,500].forEach(ms=>setTimeout(refresh,ms));
+    [40,160,500,1000,1600].forEach(ms=>setTimeout(refresh,ms));
     ['click','input','change','drop'].forEach(type=>{
       document.addEventListener(type,function(){setTimeout(scheduleRefresh,0)},true);
     });
