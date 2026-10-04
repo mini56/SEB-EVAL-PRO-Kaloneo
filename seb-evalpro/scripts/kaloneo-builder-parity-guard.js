@@ -67,6 +67,11 @@ for(const token of [
 if(!prepare.includes("copyTree(kaloneoBuilderDir,path.join(outputDir,'kaloneo-builder'))")) {
   fail('prepare:web ne compile pas le générateur KALONÉO');
 }
+for(const compiled of ['test-builder.html','test-builder.js','builder-core.js','kaloneo-capabilities.json']){
+  if(!fs.existsSync(path.join(sebRoot,'app','web','kaloneo-builder',compiled))) {
+    fail('fichier KALONÉO absent du produit compilé: '+compiled);
+  }
+}
 if(!admin.includes('open-kaloneo-builder')||!adminJs.includes("kaloneo-builder/test-builder.html")) {
   fail('Tests / Parcours n’ouvre pas KALONÉO');
 }
