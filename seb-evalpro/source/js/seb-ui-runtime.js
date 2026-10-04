@@ -1121,7 +1121,16 @@
       body.seb-kaloneo-nav-active[data-kaloneo-page="tri"] .footer:has(#seb-tri-next),
       body.seb-kaloneo-nav-active[data-kaloneo-page="tri"] .footer:has(#seb-tri-auto-validate),
       body.seb-kaloneo-nav-active[data-kaloneo-page="dictee"] footer.card.footer{
-        display:none!important;
+        display:flex!important;
+        height:0!important;
+        min-height:0!important;
+        max-height:0!important;
+        margin:0!important;
+        padding:0!important;
+        border:0!important;
+        background:transparent!important;
+        box-shadow:none!important;
+        overflow:visible!important;
       }
       body.seb-kaloneo-nav-active .kaltest-footer{
         min-height:0!important;
