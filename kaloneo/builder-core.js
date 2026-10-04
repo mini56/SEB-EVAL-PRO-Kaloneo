@@ -293,8 +293,8 @@
       target.prompt=built.prompt;
       target.response=built.response;
       target.acceptedAnswers=built.acceptedAnswers;
-      target.points=built.points;
-      target.example=built.example;
+      if(Object.prototype.hasOwnProperty.call(target,'points') || built.points!==1) target.points=built.points;
+      if(Object.prototype.hasOwnProperty.call(target,'example') || built.example) target.example=built.example;
       if(built.acceptedUnits) target.acceptedUnits=built.acceptedUnits;
       if(Object.prototype.hasOwnProperty.call(built,'unitInput')) target.unitInput=built.unitInput;
       if(Object.prototype.hasOwnProperty.call(built,'unitScored')) target.unitScored=built.unitScored;
