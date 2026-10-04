@@ -1185,7 +1185,7 @@
   function schedule(){
     if(scheduled) return;
     scheduled=true;
-    requestAnimationFrame(refresh);
+    setTimeout(refresh,0);
   }
 
   function resolveSource(value){
