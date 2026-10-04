@@ -2386,3 +2386,76 @@ Cette règle concerne le futur créateur de pages. Elle **ne migre pas automatiq
 - Paronymes conserve son rendu pleine largeur validé.
 
 L'objectif est de simplifier la création future sans provoquer de régression sur les gabarits déjà contrôlés en Electron réel.
+
+
+---
+
+## 64. Retour réel PILOTE 17 — finitions PILOTE 18
+
+**Statut : VALIDÉ FONCTIONNELLEMENT — 4 octobre 2026**
+
+Le test réel du PILOTE 17 confirme un nouveau gain de stabilité de la barre basse. Son architecture de 52 px reste la référence et ne doit pas être remplacée.
+
+### 64.1 Barre basse
+
+- l'icône KALONÉO reste à l'extrême gauche ;
+- elle est maintenant posée dans un carré **36 × 36 px**, de la même hauteur que les boutons ;
+- ce carré utilise un bleu légèrement plus clair que la barre, avec des angles légèrement arrondis ;
+- l'icône reste centrée dans ce carré ;
+- **Abandonner l'exercice** reste fixé immédiatement après l'icône ;
+- les actions de l'exercice restent au centre ;
+- **Afficher l'écran d'accueil** et l'horloge restent à droite.
+
+Aucune modification de cette finition ne doit réintroduire les instabilités des anciennes barres.
+
+### 64.2 Libellé de progression
+
+Pour un passage normal à l'exercice suivant, le libellé candidat officiel est :
+
+**Suivant**
+
+Les variantes anciennes **Exercice suivant**, **Page suivante**, **Étape suivante** et équivalentes ne doivent plus apparaître dans la barre commune. Elles sont normalisées visuellement en **Suivant** sans modifier l'action fonctionnelle d'origine.
+
+### 64.3 Tri de chevilles
+
+Le bouton **Démarrer le compteur** doit conserver une identité verte dans tous ses états visibles :
+- normal ;
+- survol ;
+- focus ;
+- actif ;
+- désactivé pendant le comptage.
+
+Aucun contour, halo ou ancien style orange ne doit réapparaître.
+
+Le bouton **Arrêter le compteur** reste rouge selon les mêmes règles.
+
+### 64.4 Planning
+
+Ordre visuel obligatoire :
+1. Scénario sur 100 % de la largeur ;
+2. Consigne sur 100 % de la largeur ;
+3. dessous seulement, tableau de planning à gauche et bloc Instructions à droite.
+
+La Consigne ne doit plus être enfermée uniquement dans la colonne de gauche.
+
+### 64.5 Consignes LEGO / Briques
+
+Les puces de la Consigne sont recalées :
+- retrait unique ;
+- même espace entre la puce et le texte ;
+- deuxième ligne alignée sous le texte ;
+- aucune puce parasite.
+
+L'image du bloc gauche est agrandie pour utiliser davantage la hauteur disponible, tout en conservant ses proportions et sans recadrage.
+
+### 64.6 Fractions et proportions
+
+Le gabarit 40/60 reste inchangé.
+
+Dans le bloc image de gauche, l'illustration peut utiliser davantage la hauteur disponible. Elle reste entièrement visible, sans déformation ni recadrage.
+
+### 64.7 Texte à trous
+
+Le gabarit 40/60 reste inchangé.
+
+Une ligne vide est ajoutée entre chaque phrase afin d'aérer la lecture, sans modifier les mots, les réponses attendues, les champs ou le barème.
