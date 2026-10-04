@@ -32,8 +32,9 @@ for(const token of [
   'background:linear-gradient(180deg,rgba(248,251,253,.97),rgba(231,238,245,.97))',
   'border-top:1px solid rgba(0,78,112,.34)',
   'box-shadow:none!important',
-  "center.insertBefore(abandon,center.firstChild)",
-  "rightSlot.appendChild(home)",
+  'id="kaloneo-nav-abandon"',
+  'id="kaloneo-nav-home"',
+  'seb-kaloneo-global-source',
   "setInterval(updateClock,60000)",
   'content:"•  "',
   '#modalFichier ul>li::marker'
