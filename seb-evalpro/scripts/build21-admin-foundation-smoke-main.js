@@ -345,7 +345,7 @@ app.whenReady().then(async () => {
 
     await win.webContents.executeJavaScript("document.getElementById('open-kaloneo-builder').click();true");
     await wait(550);
-    const builderPage=await win.webContents.executeJavaScript("(()=>{const tpl=document.getElementById('block-template');return{title:String(document.querySelector('h1')?.textContent||'').trim(),hasCore:!!window.KaloneoBuilderCore,hasImport:!!document.getElementById('import-json'),hasGrid:!!tpl&&[...tpl.content.querySelectorAll('.block-type option')].some(o=>o.value==='table-grid'),hasFreeLayout:[...document.querySelectorAll('#test-layout option')].some(o=>o.value==='chars-rest'),hasRenderedBlock:!!document.querySelector('#blocks-editor .exercise-block'),hasBack:!!document.getElementById('back-tests')}})())");
+    const builderPage=await win.webContents.executeJavaScript("(()=>{const tpl=document.getElementById('block-template');return{title:String(document.querySelector('h1')?.textContent||'').trim(),hasCore:!!window.KaloneoBuilderCore,hasImport:!!document.getElementById('import-json'),hasGrid:!!tpl&&[...tpl.content.querySelectorAll('.block-type option')].some(o=>o.value==='table-grid'),hasFreeLayout:[...document.querySelectorAll('#test-layout option')].some(o=>o.value==='chars-rest'),hasRenderedBlock:!!document.querySelector('#blocks-editor .exercise-block'),hasBack:!!document.getElementById('back-tests')}})()");
     if (!/KALONÉO/.test(builderPage.title)||!builderPage.hasCore||!builderPage.hasImport||!builderPage.hasGrid||!builderPage.hasFreeLayout||!builderPage.hasRenderedBlock||!builderPage.hasBack) {
       die('Builder KALONÉO intégré non conforme', builderPage);
       return;
