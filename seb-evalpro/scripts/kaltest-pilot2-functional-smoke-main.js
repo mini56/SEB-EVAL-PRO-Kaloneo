@@ -222,7 +222,7 @@ app.whenReady().then(async () => {
       if (testId === 'horaires_reception_controle' && visualContract.durationPlaceholders) {
         throw new Error('Réception / contrôle : exemples de réponses encore affichés dans les champs.');
       }
-      if (testId === 'texte_a_trous_stage_logistique' && visualContract.textGapBreaks !== 7) {
+      if (testId === 'texte_a_trous_stage_logistique' && visualContract.textGapBreaks !== 14) {
         throw new Error('Texte à trous : retours à la ligne de fin de phrase incorrects : ' + JSON.stringify(visualContract));
       }
       if (testId === 'genre_nombre' && visualContract.genreTables !== 2) {
