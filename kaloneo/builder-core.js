@@ -33,6 +33,8 @@
     return String(value||'').split(';').map(v=>v.trim()).filter(Boolean);
   }
   function layoutFromDefinition(def){
+    const direct=def?.presentation?.layout;
+    if(typeof direct==='string'&&LAYOUTS.has(direct)) return direct;
     const ratio=def?.presentation?.kaloneoLayout?.ratio||def?.presentation?.layout?.ratio;
     if(ratio==='50/50') return '50-50';
     if(ratio==='40/60') return '40-60';
@@ -281,9 +283,9 @@
           def.presentation?.inlineFlow?'inline-flow':
           'generic'
         ),
-        block1WidthChars:'',
-        block2WidthChars:'',
-        lastBlockRemainder:true
+        block1WidthChars:def.presentation?.blockSizing?.blocks?.[0]?.widthChars||'',
+        block2WidthChars:def.presentation?.blockSizing?.blocks?.[1]?.widthChars||'',
+        lastBlockRemainder:def.presentation?.blockSizing?.blocks?.[1]?.remainder!==false
       },
       blocks
     };
