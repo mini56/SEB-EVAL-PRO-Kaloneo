@@ -18,6 +18,7 @@
     'text','number','number-unit','duration','single-choice','multiple-choice','boolean','select'
   ]);
   const LAYOUTS=new Set(['single','50-50','40-60','60-40','chars-rest']);
+  const LEGACY_LAYOUTS=new Set(['single-block']);
   const BUILDER_CONTENT_TYPES=new Set([
     'text','html','html-js','image','audio','video','question',
     'response-table','table-grid','inline-flow','table-definition'
@@ -558,7 +559,7 @@
     }
 
     const presentation=def?.presentation||{};
-    if(typeof presentation.layout==='string'&&!LAYOUTS.has(presentation.layout)) {
+    if(typeof presentation.layout==='string'&&!LAYOUTS.has(presentation.layout)&&!LEGACY_LAYOUTS.has(presentation.layout)) {
       errors.push('layout Builder non supporté: '+presentation.layout);
     }
     const ratio=presentation?.kaloneoLayout?.ratio||presentation?.layout?.ratio;
