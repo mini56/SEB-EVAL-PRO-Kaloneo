@@ -510,18 +510,48 @@
         });
         td.appendChild(kind);
 
-        if(cell.kind==='fixed-text'||cell.kind==='image'||cell.kind==='audio'||cell.kind==='video'||cell.kind==='choice-option') {
+        if(cell.kind==='fixed-text'||cell.kind==='choice-option') {
           const value=document.createElement('input');
           value.type='text';
-          value.placeholder=cell.kind==='fixed-text'?'Texte affiché':cell.kind==='choice-option'?'Option affichée':'Ressource / texte';
+          value.placeholder=cell.kind==='fixed-text'?'Texte affiché':'Option affichée';
           value.value=cell.value||'';
           value.addEventListener('input',()=>{cell.value=value.value;changed();});
           td.appendChild(value);
         }
 
+        if(['image','audio','video'].includes(cell.kind)) {
+          const media=document.createElement('input');
+          media.type='file';
+          media.accept=cell.kind==='image'?'image/*':cell.kind==='audio'?'audio/*':'video/*';
+          media.title='La ressource est embarquée dans le test pour fonctionner hors ligne.';
+          media.addEventListener('change',async()=>{
+            const file=media.files&&media.files[0];
+            if(!file)return;
+            cell.mediaName=file.name;
+            cell.mediaType=file.type||'';
+            cell.value=await readFileAsDataUrl(file);
+            changed();
+            renderBlocks();
+          });
+          td.appendChild(media);
+          const status=document.createElement('div');
+          status.className='file-preview-name';
+          status.textContent=cell.mediaName?'Embarqué : '+cell.mediaName:(cell.value?'Ressource embarquée':'Aucune ressource');
+          td.appendChild(status);
+          if(cell.kind==='image') {
+            const alt=document.createElement('input');
+            alt.type='text';
+            alt.placeholder='Texte alternatif';
+            alt.value=cell.alt||'';
+            alt.addEventListener('input',()=>{cell.alt=alt.value;changed();});
+            td.appendChild(alt);
+          }
+        }
+
         if(['candidate-answer','select','choice-option','unit'].includes(cell.kind)) {
           const qid=document.createElement('input');
           qid.type='text';qid.placeholder='ID réponse';qid.value=cell.questionId||'';
+          qid.title='ID stable de la réponse. Pour un choix unique en ligne, les cellules options peuvent partager le même ID.';
           qid.addEventListener('input',()=>{cell.questionId=Core.cleanId(qid.value);changed();});
           td.appendChild(qid);
 
