@@ -157,8 +157,8 @@ app.whenReady().then(async () => {
     const initial = await inspect(win);
     if (initial.chronoButtons !== 2) throw new Error('Nombre de boutons chrono attendu: 2, obtenu: '+initial.chronoButtons);
     if (initial.resetExists) throw new Error('Ancien troisième bouton chrono encore présent.');
-    if (initial.startText !== 'Démarrer le chronomètre') throw new Error('Libellé Démarrer incorrect.');
-    if (initial.stopText !== 'Arrêter le chronomètre') throw new Error('Libellé Arrêter incorrect.');
+    if (initial.startText !== 'Démarrer le compteur') throw new Error('Libellé Démarrer incorrect.');
+    if (initial.stopText !== 'Arrêter le compteur') throw new Error('Libellé Arrêter incorrect.');
     if (initial.startDisabled || !initial.stopDisabled) throw new Error('État initial des boutons incorrect.');
 
     await performTri(win, 1, 0);
