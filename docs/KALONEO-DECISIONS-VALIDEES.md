@@ -2530,3 +2530,20 @@ Le mode libre reste disponible et constitue la règle souple pour les nouvelles 
 - l’utilisateur du Builder n’a pas à manipuler directement les unités CSS %, fr ou ch.
 
 Principe : **les ratios sont des raccourcis de mise en page ; le dimensionnement en caractères + reste disponible est le mode flexible du Builder.**
+
+## 67. PILOTE 21 R1 — protection des blocs lors du remplacement d’un média
+
+Retour de test réel du PILOTE 21 :
+
+- dans une présentation 50/50, supprimer ou remplacer l’image d’un bloc média ne doit **jamais** supprimer le bloc lui-même ;
+- l’action **Retirer l’image / l’audio / la vidéo** vide uniquement les données du média et conserve :
+  - le bloc ;
+  - sa zone gauche/droite ;
+  - le ratio de mise en page ;
+  - tous les autres blocs et exercices de la page ;
+- choisir un nouveau fichier remplace uniquement le média du bloc concerné ;
+- le bouton de destruction structurelle est renommé **Supprimer le bloc** ;
+- **Supprimer le bloc** demande une confirmation explicite avant toute suppression ;
+- une garde de compilation bloque désormais toute régression de ce comportement.
+
+Cette règle s’applique à tous les blocs média KALONÉO (image, audio, vidéo).

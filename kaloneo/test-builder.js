@@ -664,26 +664,46 @@
   }
 
   function renderMediaEditor(block,body) {
+    const kindLabel=block.type==='image'?'image':block.type==='audio'?'audio':'vidéo';
+    const articleLabel=block.type==='image'?'l’image':block.type==='audio'?'l’audio':'la vidéo';
+
     const label=document.createElement('label');
-    label.textContent=block.type==='image'?'Fichier image':block.type==='audio'?'Fichier audio':'Fichier vidéo';
+    label.textContent='Fichier '+kindLabel;
     const input=document.createElement('input');
     input.type='file';
     input.accept=block.type==='image'?'image/*':block.type==='audio'?'audio/*':'video/*';
+    input.title='Choisir un fichier remplace uniquement le média de ce bloc.';
     input.addEventListener('change',async()=>{
       const file=input.files&&input.files[0];
       if(!file)return;
       block.mediaName=file.name;
       block.mediaType=file.type||'';
       block.mediaData=await readFileAsDataUrl(file);
+      block.mediaPlaceholder='';
       changed();renderBlocks();
     });
     label.appendChild(input);
     body.appendChild(label);
     body.appendChild(inputField('Texte alternatif',block.mediaAlt||'',value=>{block.mediaAlt=value;changed();}));
+
     const name=document.createElement('div');
     name.className='file-preview-name';
     name.textContent=block.mediaName?'Embarqué : '+block.mediaName:(block.mediaPlaceholder||'Aucun fichier sélectionné');
     body.appendChild(name);
+
+    const remove=document.createElement('button');
+    remove.type='button';
+    remove.className='mini-btn danger remove-media';
+    remove.textContent='Retirer '+articleLabel;
+    remove.disabled=!Boolean(block.mediaData||block.mediaName||block.mediaPlaceholder);
+    remove.title='Retire uniquement le média. Le bloc, sa zone et les autres contenus de la page sont conservés.';
+    remove.addEventListener('click',()=>{
+      if(!confirm('Retirer uniquement '+articleLabel+' ? Le bloc et les autres contenus seront conservés.')) return;
+      Core.clearMediaBlock(block);
+      changed();
+      renderBlocks();
+    });
+    body.appendChild(remove);
   }
 
   function insertQuestionAtCursor(block,index,textarea) {
@@ -786,6 +806,7 @@
         changed();renderBlocks();
       });
       frag.querySelector('.remove-block').addEventListener('click',()=>{
+        if(!confirm('Supprimer le bloc complet '+(index+1)+' ? Tout le contenu de ce bloc sera perdu.')) return;
         state.blocks.splice(index,1);changed();renderBlocks();
       });
 

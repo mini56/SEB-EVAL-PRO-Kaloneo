@@ -33,6 +33,15 @@
     if(Array.isArray(value)) return value.map(v=>String(v)).filter(Boolean);
     return String(value||'').split(';').map(v=>v.trim()).filter(Boolean);
   }
+  function clearMediaBlock(block){
+    if(!block||!['image','audio','video'].includes(block.type)) return block;
+    block.mediaName='';
+    block.mediaType='';
+    block.mediaData='';
+    block.mediaAlt='';
+    block.mediaPlaceholder='';
+    return block;
+  }
   function layoutFromDefinition(def){
     const direct=def?.presentation?.layout;
     if(typeof direct==='string'&&LAYOUTS.has(direct)) return direct;
@@ -629,6 +638,6 @@
   return Object.freeze({
     VERSION,SUPPORTED_FEATURES:[...SUPPORTED_FEATURES],RESPONSE_TYPES:[...RESPONSE_TYPES],LAYOUTS:[...LAYOUTS],
     BUILDER_CONTENT_TYPES:[...BUILDER_CONTENT_TYPES],
-    clone,cleanId,splitValues,createGridBlock,definitionToModel,modelToDefinition,analyzeDefinition,canRoundTrip
+    clone,cleanId,splitValues,clearMediaBlock,createGridBlock,definitionToModel,modelToDefinition,analyzeDefinition,canRoundTrip
   });
 });

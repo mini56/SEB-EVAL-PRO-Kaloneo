@@ -38,6 +38,21 @@ const capabilities=json(capabilitiesPath);
 const archetypeRegistry=json(archetypeRegistryPath);
 const Core=require(corePath);
 
+if(typeof Core.clearMediaBlock!=='function') fail('opération Retirer le média absente du Builder Core');
+const mediaProof={
+  uid:'media_block_keep',type:'image',zone:'left',
+  mediaName:'ancienne.png',mediaType:'image/png',mediaData:'data:image/png;base64,AA==',
+  mediaAlt:'ancienne image',mediaPlaceholder:'Image verticale',
+  unrelated:'doit-rester'
+};
+Core.clearMediaBlock(mediaProof);
+if(mediaProof.uid!=='media_block_keep'||mediaProof.type!=='image'||mediaProof.zone!=='left'||mediaProof.unrelated!=='doit-rester') {
+  fail('retirer un média modifie la structure du bloc');
+}
+if(mediaProof.mediaName||mediaProof.mediaType||mediaProof.mediaData||mediaProof.mediaAlt||mediaProof.mediaPlaceholder) {
+  fail('retirer un média ne vide pas uniquement les données média');
+}
+
 if(capabilities.compiledWithSebEvalPro!==true) fail('la compilation commune KALONÉO / SEB EvalPro n’est pas déclarée');
 if(capabilities.tables?.gridMode!==true) fail('bloc Tableau / Grille absent');
 if(capabilities.tables?.questionCellAcceptedAnswers!==true) fail('réponse attendue par cellule absente');
@@ -70,7 +85,8 @@ for(const token of [
 
 for(const token of [
   "Core.createGridBlock(6,6)","acceptedAnswers=answers","response-table","inline-flow","multiple-tables",
-  "Core.modelToDefinition","Core.analyzeDefinition"
+  "Core.modelToDefinition","Core.analyzeDefinition","Core.clearMediaBlock","remove-media",
+  "Retirer uniquement","Supprimer le bloc complet"
 ]) if(!builderJs.includes(token)) fail('Builder V2 incomplet: '+token);
 
 if(!prepare.includes("copyTree(kaloneoBuilderDir,path.join(outputDir,'kaloneo-builder'))")) {
