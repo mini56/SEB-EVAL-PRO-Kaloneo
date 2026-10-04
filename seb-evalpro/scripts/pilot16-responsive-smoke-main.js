@@ -222,12 +222,13 @@ async function testMailAndStock(){
         bg:s.backgroundImage,
         color:s.color,
         border:s.borderTopColor,
+        borderWidth:s.borderTopWidth,
         listType:li?getComputedStyle(li.parentElement).listStyleType:'',
         marker:li?getComputedStyle(li,'::marker').content:''
       };
     })()`);
     if(mail.bg!=='none') fail('E-mail: la confirmation doit rester un message intégré sans fond',mail);
-    if(!/rgba\(0, 0, 0, 0\)|transparent/.test(mail.border)) fail('E-mail: la confirmation ne doit plus être encadrée',mail);
+    if(parseFloat(mail.borderWidth||'0')>0) fail('E-mail: la confirmation ne doit plus être encadrée',mail);
     if(mail.listType!=='none' || String(mail.marker).includes('•')) fail('E-mail: puces encore présentes devant les fichiers',mail);
 
     await load(win,'stock.html');
