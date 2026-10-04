@@ -2478,3 +2478,32 @@ Décision :
 
 Principe de non-régression :
 **une correction de texte ne doit plus modifier l'architecture ou la logique de détection de la barre stable.**
+
+
+---
+
+## 66. Retour réel PILOTE 19 — corrections locales Gratte-ciel / Tri
+
+**Statut : DÉCISION VALIDÉE — 4 octobre 2026**
+
+La barre basse du PILOTE 19 est conservée telle quelle : aucune nouvelle modification globale du moteur de barre.
+
+### 66.1 Gratte-ciel
+
+- le bloc supérieur existant devient le vrai composant **Scénario KALONÉO** ;
+- le contenu du scénario est conservé ;
+- le bouton local **Page suivante** devient **Suivant** ;
+- la consigne qui cite ce bouton utilise également le mot **Suivant** ;
+- aucune logique globale de navigation n'est modifiée.
+
+### 66.2 Tri de chevilles
+
+- le compteur reste le **compteur KALONÉO commun**, avec ses chiffres à **44 px** ;
+- sa taille n'est pas agrandie localement ;
+- Scénario et Consigne sont alignés proprement sur le haut de leur contenu ;
+- l'illustration de la Consigne utilise davantage l'espace restant du panneau gauche, sans recadrage ;
+- le bouton local **Étape suivante** devient **Suivant** ;
+- le fonctionnement 3 à 5 tris, la saisie des erreurs, la moyenne et l'autoévaluation restent inchangés.
+
+Principe de non-régression :
+**les corrections de libellé se font à la source de la page concernée, jamais en modifiant la barre commune validée.**
