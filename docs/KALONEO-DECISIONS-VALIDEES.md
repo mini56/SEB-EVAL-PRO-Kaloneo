@@ -2459,3 +2459,22 @@ Dans le bloc image de gauche, l'illustration peut utiliser davantage la hauteur 
 Le gabarit 40/60 reste inchangé.
 
 Une ligne vide est ajoutée entre chaque phrase afin d'aérer la lecture, sans modifier les mots, les réponses attendues, les champs ou le barème.
+
+
+---
+
+## 65. PILOTE 18 ROUGE — retour à la barre stable du PILOTE 17
+
+**Statut : DÉCISION VALIDÉE — 4 octobre 2026**
+
+Le test réel du PILOTE 18 a montré une régression bloquante dès la prise en main candidat : le bouton central de navigation n'apparaissait plus.
+
+Décision :
+- le carré bleu ajouté derrière l'icône KALONÉO est abandonné ;
+- la logique globale ajoutée dans le PILOTE 18 pour normaliser les variantes de « Suivant » dans le moteur de barre est retirée ;
+- la barre basse doit être restaurée **exactement au code du PILOTE 17**, déjà validé en parcours réel ;
+- les autres corrections du PILOTE 18 sont conservées : Planning, Texte à trous, Tri, images et puces ;
+- le libellé isolé « Exercice suivant » devra être corrigé à sa source lorsqu'il sera identifié, sans modifier le moteur commun de la barre.
+
+Principe de non-régression :
+**une correction de texte ne doit plus modifier l'architecture ou la logique de détection de la barre stable.**
