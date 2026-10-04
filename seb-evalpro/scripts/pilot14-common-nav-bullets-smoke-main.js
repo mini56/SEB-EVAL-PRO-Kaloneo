@@ -26,7 +26,13 @@ async function snapshot(win){
       left:visible('left'),
       center:visible('center'),
       right:visible('right'),
-      bodyPadding:getComputedStyle(document.body).paddingBottom
+      bodyPadding:getComputedStyle(document.body).paddingBottom,
+      abandonSource:(() => {
+        const b=document.getElementById('seb-evalpro-abandon-fixed');
+        if(!b) return {exists:false};
+        const s=getComputedStyle(b);
+        return {exists:true,display:s.display,visibility:s.visibility,hidden:b.hidden,title:b.title,className:b.className,ariaHidden:b.getAttribute('aria-hidden')};
+      })()
     };
   })()`);
 }
