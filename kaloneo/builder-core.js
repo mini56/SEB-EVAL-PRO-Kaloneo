@@ -184,13 +184,49 @@
     };
   }
 
+  function builderContentToBlocks(def){
+    const byId=new Map((def.questions||[]).map(q=>[q.id,q]));
+    return (def.presentation?.builderContent||[]).map((item,index)=>{
+      const type=String(item?.type||'text');
+      const zone=item?.zone||'left';
+      if(type==='question'){
+        const q=byId.get(item.questionId)||{id:item.questionId||'',prompt:'',response:{type:'text'},acceptedAnswers:[],points:1};
+        return questionToBlock(q,zone);
+      }
+      if(type==='text') return {uid:'content_'+index,type,zone,text:item.text||''};
+      if(type==='html') return {uid:'content_'+index,type,zone,html:item.html||''};
+      if(type==='html-js') return {uid:'content_'+index,type,zone,html:item.html||'',js:item.script||''};
+      if(['image','audio','video'].includes(type)){
+        const r=item.resource||{};
+        return {
+          uid:'content_'+index,type,zone,
+          mediaName:r.name||'',mediaType:r.mime||'',mediaData:r.data||'',
+          mediaAlt:r.alt||'',mediaPlaceholder:r.placeholder||''
+        };
+      }
+      if(type==='response-table') return {uid:'content_'+index,type,zone,responseTable:clone(item.definition||{})};
+      if(type==='inline-flow') return {
+        uid:'content_'+index,type,zone,wordBank:clone(item.wordBank||[]),flow:clone(item.flow||[])
+      };
+      if(type==='table-definition') return {
+        uid:'content_'+index,type:'multiple-tables',zone,tableDefinition:clone(item.definition||{})
+      };
+      if(type==='table-grid') return {
+        uid:'content_'+index,type,zone,table:clone(item.table||{})
+      };
+      return {uid:'content_'+index,type,zone,config:clone(item.config||{})};
+    });
+  }
+
   function definitionToModel(definition){
     const def=clone(definition);
     const blocks=[];
     const visual=visualBlock(def);
     if(visual) blocks.push(visual);
 
-    if(Array.isArray(def.presentation?.inlineFlow)){
+    if(Array.isArray(def.presentation?.builderContent)){
+      blocks.push(...builderContentToBlocks(def));
+    } else if(Array.isArray(def.presentation?.inlineFlow)){
       blocks.push(inlineToBlock(def));
     } else if(def.presentation?.choiceTable){
       blocks.push(choiceToGrid(def));
@@ -407,7 +443,25 @@
       }
       if(Array.isArray(m.outputs)) def.outputs=clone(m.outputs);
       if(Array.isArray(m.bilanContributions)) def.bilanContributions=clone(m.bilanContributions);
-      updateImportedQuestions(def,model);
+
+      if(Array.isArray(def.presentation?.builderContent)){
+        const generated=genericPresentation(model);
+        def.presentation=Object.assign({},def.presentation||{},generated);
+        const existing=new Map((def.questions||[]).map(q=>[q.id,q]));
+        const rebuilt=[];
+        let questionIndex=0;
+        for(const block of model.blocks||[]){
+          if(block.type==='question') rebuilt.push(blockQuestion(block,questionIndex++));
+          if(block.type==='table-grid'){
+            const qs=gridQuestions(block,questionIndex);
+            rebuilt.push(...qs);
+            questionIndex+=qs.length;
+          }
+        }
+        def.questions=rebuilt.map(q=>Object.assign({},existing.get(q.id)||{},q));
+      } else {
+        updateImportedQuestions(def,model);
+      }
       return def;
     }
 
