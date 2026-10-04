@@ -247,7 +247,10 @@
     "searchable": true,
     "selectedIconStoredInKaltest": true,
     "exactHistoricalLibraryRestoredFrom": "kaloneo_test_builder_v5.html",
-    "exactHistoricalNamesRecovered": true
+    "exactHistoricalNamesRecovered": true,
+    "targetCount": 80,
+    "currentInstalledCount": 70,
+    "historicalExactCount": 70
   },
   "validatedArchetypes": {
     "calculs_commandes_atelier": [
@@ -357,5 +360,14 @@
     "automaticStableQuestionIds": true,
     "autoGrowingTextareas": true,
     "contextualHelp": true
+  },
+  "archetypeRegistry": "archetype-registry.json",
+  "allValidatedArchetypesMustCompile": true,
+  "validatedArchetypeCount": 19,
+  "codeQuality": {
+    "noCssMaskingAsImplementation": true,
+    "generatedPagesUseDeclaredComponents": true,
+    "commonComponentsSharedWithSebEvalPro": true,
+    "sourceAndBuilderParityBlocking": true
   }
 }
