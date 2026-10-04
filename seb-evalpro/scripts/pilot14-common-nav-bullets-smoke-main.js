@@ -94,7 +94,7 @@ app.whenReady().then(async()=>{
     if(!bullet || bullet.type!=='disc' || !String(bullet.marker).includes('•')) fail('Puzzle: gros point unique absent',bullet);
     if(/^[•●▪◦‣‧·]/u.test(bullet.text)) fail('Puzzle: ancienne puce texte encore dupliquée',bullet);
 
-    if(typeof (await js(win,'typeof window.KaloneoNavigation.declare'))!=='string') fail('API KALONÉO navigation inaccessible');
+    if((await js(win,'typeof window.KaloneoNavigation.declare'))!=='function') fail('API KALONÉO navigation inaccessible');
 
     console.log('PILOT14_COMMON_NAV_BULLETS: OK');
     console.log(JSON.stringify({stock,planning,qcm,dictee,puzzle,bullet,dicteeList}));
