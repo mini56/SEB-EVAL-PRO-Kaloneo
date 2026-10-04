@@ -800,6 +800,7 @@
       if (!unlocked) button.tabIndex = -1;
       else if (button.tabIndex < 0) button.removeAttribute('tabindex');
     });
+    try { window.KaloneoNavigation?.refresh?.(); } catch (_) {}
   }
 
   function schedule(){
@@ -872,107 +873,187 @@
 })();
 
 
-// KALONEO_COMMON_NAVIGATION_AND_BULLETS
+// KALONEO_STABLE_BOTTOM_BAR_V15
 (function(){
   'use strict';
 
-  const ACTION_SELECTORS = [
-    '#seb-evalpro-abandon-fixed',
-    '#identity-next','#intro-next','#kaltest-next',
-    '#page2Next','#page2_1Next','#page3Next','#texteTrousNext','#page4Next','#page5Next','#page5_1Next','#page6Next',
-    '#autoEvalBtn','#validBtn',
-    '#stockActionBtn',
-    '#btnValider','#btnSuivant',
-    '[id="btnCheck"]','#btnNextGenreNombre',
-    '#seb-dictee-action',
-    '#calc','#seb-tri-auto-validate','#seb-tri-next',
-    '#btn-score',
-    '#nvmail-next',
-    '#autoeval1-validate','#autoeval1-next',
-    '#autoeval2-validate',
-    '#carre-reset','#btnValidate','#btnNext',
-    '[data-kaloneo-nav-slot]'
-  ];
-
-  const CENTER_IDS = new Set([
-    'identity-next','intro-next','kaltest-next',
-    'page2Next','page2_1Next','page3Next','texteTrousNext','page4Next','page5Next','page5_1Next','page6Next',
-    'autoEvalBtn','validBtn','stockActionBtn','btnValider','btnSuivant','btnCheck','btnNextGenreNombre',
-    'seb-dictee-action','calc','seb-tri-auto-validate','seb-tri-next','btn-score','nvmail-next',
-    'autoeval1-validate','autoeval1-next','autoeval2-validate','carre-reset','btnValidate','btnNext'
-  ]);
-
-  const EXERCISE_SURFACES = new Set([
+  const ELIGIBLE_FILES=new Set([
     'kaltest-pilot2.html','qcmv1.0.html','brique.html','stock.html','planning.html','genrenombres.html',
     'dictee.html','tri_de_cheville.html','nwtexte.html','nvmail.html','autoeval1.html','autoeval2.html',
     'paronymes.html','carre.html'
   ]);
 
-  const sourceToProxy = new Map();
-  const declared = new Map();
-  let scheduled = false;
+  const QCM_NEXT_BY_PAGE=Object.freeze({
+    page2:'#page2Next',
+    page2_1:'#page2_1Next',
+    page3:'#page3Next',
+    pageTexteTrous:'#texteTrousNext',
+    page4:'#page4Next',
+    page5:'#page5Next',
+    page5_1:'#page5_1Next',
+    page6:'#page6Next',
+    page11:'.suivant'
+  });
+
+  const OWNED_SOURCE_SELECTORS=[
+    '#identity-next','#intro-next','#kaltest-next',
+    '#page2Next','#page2_1Next','#page3Next','#texteTrousNext','#page4Next','#page5Next','#page5_1Next','#page6Next','#page11 .suivant',
+    '#autoEvalBtn','#validBtn','#stockActionBtn','#btnValider','#btnSuivant','#btnCheck','#btnNextGenreNombre',
+    '#seb-dictee-action','#calc','#seb-tri-auto-validate','#seb-tri-next','#btn-score','#nvmail-next',
+    '#autoeval1-validate','#autoeval1-next','#autoeval2-validate','#btnNextParonymes',
+    '#carre-reset','#btnValidate','#btnNext'
+  ];
+
+  let currentActions=[];
+  let refreshScheduled=false;
+  let clockTimer=null;
 
   function fileName(){
-    try { return decodeURIComponent((window.location.pathname.split('/').pop() || '').toLowerCase()); }
-    catch (_) { return ''; }
+    try{return decodeURIComponent((window.location.pathname.split('/').pop()||'').toLowerCase())}
+    catch(_){return ''}
   }
 
-  function clean(value){
-    return String(value || '').replace(/\s+/g,' ').trim();
+  function clean(value){return String(value||'').replace(/\s+/g,' ').trim()}
+
+  function isEligible(){return ELIGIBLE_FILES.has(fileName())}
+
+  function visibleSource(source){
+    if(!source||!source.isConnected||source.hidden) return false;
+    if(source.getAttribute('aria-hidden')==='true' && source.classList.contains('seb-exercise-nav-locked')) return false;
+    let node=source;
+    try{
+      while(node&&node.nodeType===1){
+        const style=getComputedStyle(node);
+        if(style.display==='none'||style.visibility==='hidden') return false;
+        if(node===document.body) break;
+        node=node.parentElement;
+      }
+    }catch(_){return false}
+    return true;
+  }
+
+  function source(selector,scope){
+    try{return (scope||document).querySelector(selector)}
+    catch(_){return null}
+  }
+
+  function visiblePage(){
+    return Array.from(document.querySelectorAll('.page')).find(node=>node.classList.contains('visible'))||null;
   }
 
   function ensureStyle(){
-    if(document.getElementById('kaloneo-common-navigation-style')) return;
+    if(document.getElementById('kaloneo-stable-bottom-bar-style')) return;
     const style=document.createElement('style');
-    style.id='kaloneo-common-navigation-style';
+    style.id='kaloneo-stable-bottom-bar-style';
     style.textContent=`
-      :root{--kaloneo-nav-height:62px}
+      :root{--kaloneo-bottom-bar-height:52px}
       #kaloneo-common-navigation{
         position:fixed!important;
         left:0!important;
         right:0!important;
         bottom:0!important;
-        height:var(--kaloneo-nav-height)!important;
+        height:var(--kaloneo-bottom-bar-height)!important;
         z-index:2147482500!important;
         display:grid!important;
-        grid-template-columns:minmax(220px,1fr) minmax(320px,2fr) minmax(220px,1fr)!important;
+        grid-template-columns:minmax(145px,190px) minmax(0,1fr) minmax(300px,390px)!important;
         align-items:center!important;
         gap:12px!important;
-        padding:7px 18px 8px!important;
+        padding:6px 15px!important;
         box-sizing:border-box!important;
-        border-top:1px solid rgba(0,78,112,.28)!important;
-        background:rgba(248,251,253,.72)!important;
-        backdrop-filter:blur(4px)!important;
-        -webkit-backdrop-filter:blur(4px)!important;
+        border-top:1px solid rgba(0,78,112,.34)!important;
+        background:linear-gradient(180deg,rgba(248,251,253,.97),rgba(231,238,245,.97))!important;
+        backdrop-filter:blur(5px)!important;
+        -webkit-backdrop-filter:blur(5px)!important;
         box-shadow:none!important;
-        pointer-events:none!important;
       }
       #kaloneo-common-navigation[hidden]{display:none!important}
-      .kaloneo-nav-slot{
+      #kaloneo-nav-brand{
+        min-width:0;
+        display:flex;
+        align-items:center;
+        gap:8px;
+        color:#004E70;
+        font:700 13px Calibri,"Segoe UI",Arial,sans-serif;
+        white-space:nowrap;
+      }
+      #kaloneo-nav-logo{
+        width:34px;
+        height:34px;
+        flex:0 0 34px;
+        display:grid;
+        place-items:center;
+        position:relative;
+        border:1px solid rgba(0,78,112,.28);
+        border-radius:9px;
+        background:rgba(255,255,255,.82);
+        overflow:hidden;
+      }
+      #kaloneo-nav-logo::before{
+        content:"K";
+        color:#004E70;
+        font:800 21px Calibri,"Segoe UI",Arial,sans-serif;
+        transform:translateX(-2px);
+      }
+      #kaloneo-nav-logo::after{
+        content:"";
+        position:absolute;
+        width:5px;
+        height:30px;
+        background:#F28C18;
+        transform:rotate(28deg);
+        left:18px;
+        top:2px;
+        border-radius:4px;
+      }
+      #kaloneo-nav-brand-name{letter-spacing:.35px}
+      #kaloneo-nav-center{
         min-width:0;
         display:flex!important;
         align-items:center!important;
-        gap:10px!important;
-        pointer-events:none!important;
+        justify-content:center!important;
+        gap:9px!important;
       }
-      #kaloneo-nav-left{justify-content:flex-start!important}
-      #kaloneo-nav-center{justify-content:center!important}
-      #kaloneo-nav-right{justify-content:flex-end!important}
-      .kaloneo-nav-slot>.seb-action-btn{
-        pointer-events:auto!important;
+      #kaloneo-nav-right{
+        min-width:0;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:flex-end!important;
+        gap:11px!important;
+      }
+      #kaloneo-common-navigation button{
+        min-height:36px!important;
+        height:36px!important;
+        max-height:36px!important;
         margin:0!important;
         position:static!important;
-        transform:none;
-        min-height:42px!important;
+        transform:none!important;
+        box-sizing:border-box!important;
       }
-      .kaloneo-nav-slot>.seb-action-btn:hover:not(:disabled){transform:translateY(-1px)!important}
-      .kaloneo-nav-slot>.seb-action-btn:active:not(:disabled){transform:translateY(1px)!important}
-      html body button.seb-kaloneo-nav-source{
+      #kaloneo-common-navigation button:hover:not(:disabled){transform:translateY(-1px)!important}
+      #kaloneo-common-navigation button:active:not(:disabled){transform:translateY(0)!important}
+      #kaloneo-nav-abandon,
+      #kaloneo-nav-home{
+        min-height:36px!important;
+        height:36px!important;
+        max-height:36px!important;
+        margin:0!important;
+        position:static!important;
+        transform:none!important;
+        box-sizing:border-box!important;
+        white-space:nowrap!important;
+      }
+      #kaloneo-nav-home{
+        padding:7px 12px!important;
+        border-radius:8px!important;
+        box-shadow:none!important;
+      }
+      html body #seb-evalpro-abandon-fixed.seb-kaloneo-global-source,
+      html body #seb-evalpro-privacy-toggle.seb-kaloneo-global-source{
         position:fixed!important;
-        left:-10000px!important;
+        left:0!important;
+        top:0!important;
         right:auto!important;
-        top:auto!important;
-        bottom:-10000px!important;
+        bottom:auto!important;
         width:1px!important;
         min-width:0!important;
         max-width:1px!important;
@@ -985,34 +1066,51 @@
         opacity:0!important;
         overflow:hidden!important;
         pointer-events:none!important;
-        transform:none!important;
         box-shadow:none!important;
-      }
-      #seb-evalpro-abandon-fixed.seb-kaloneo-nav-source,
-      #seb-dictee-action.seb-kaloneo-nav-source{
-        position:fixed!important;
-        left:-10000px!important;
-        right:auto!important;
-        top:auto!important;
-        bottom:-10000px!important;
         transform:none!important;
+        clip-path:inset(50%)!important;
       }
-      .seb-kaloneo-legacy-actions-empty{
+      #kaloneo-nav-clock{
+        width:76px;
+        flex:0 0 76px;
+        display:flex;
+        flex-direction:column;
+        align-items:flex-end;
+        justify-content:center;
+        color:#27313A;
+        font-family:Calibri,"Segoe UI",Arial,sans-serif;
+        line-height:1.05;
+        user-select:none;
+      }
+      #kaloneo-nav-time{font-size:13px;font-weight:700}
+      #kaloneo-nav-date{font-size:11px;margin-top:3px}
+      button.seb-kaloneo-owned-nav-source{
+        position:fixed!important;
+        left:0!important;
+        top:0!important;
+        width:1px!important;
+        min-width:0!important;
+        max-width:1px!important;
+        height:1px!important;
         min-height:0!important;
-        height:0!important;
+        max-height:1px!important;
         padding:0!important;
         margin:0!important;
         border:0!important;
-        background:transparent!important;
+        opacity:0!important;
+        overflow:hidden!important;
+        pointer-events:none!important;
         box-shadow:none!important;
-        overflow:visible!important;
+        transform:none!important;
+        clip-path:inset(50%)!important;
       }
       body.seb-kaloneo-nav-active{
-        padding-bottom:var(--kaloneo-nav-height)!important;
+        padding-bottom:var(--kaloneo-bottom-bar-height)!important;
+        scroll-padding-bottom:var(--kaloneo-bottom-bar-height)!important;
         box-sizing:border-box!important;
       }
 
-      /* Une seule puce officielle KALONÉO : le gros point. */
+      /* Une seule puce ordinaire KALONÉO : le gros point. */
       body.seb-kaloneo-bullet-scope ul:not(.seb-kaloneo-no-bullets){
         list-style-type:disc!important;
         list-style-position:outside!important;
@@ -1027,8 +1125,10 @@
         font-weight:900;
       }
       body.seb-kaloneo-bullet-scope #modalFichier ul,
-      body.seb-kaloneo-bullet-scope #modalFichier ul>li{
+      body.seb-kaloneo-bullet-scope #modalFichier li,
+      body.seb-kaloneo-bullet-scope #modalFichier ul>li::marker{
         list-style:none!important;
+        content:""!important;
         padding-left:0!important;
       }
     `;
@@ -1040,117 +1140,205 @@
     if(bar) return bar;
     bar=document.createElement('nav');
     bar.id='kaloneo-common-navigation';
-    bar.setAttribute('aria-label','Navigation du parcours');
-    bar.innerHTML='<div id="kaloneo-nav-left" class="kaloneo-nav-slot"></div><div id="kaloneo-nav-center" class="kaloneo-nav-slot"></div><div id="kaloneo-nav-right" class="kaloneo-nav-slot"></div>';
+    bar.setAttribute('aria-label','Barre de navigation KALONÉO');
+    bar.innerHTML=`
+      <div id="kaloneo-nav-brand" aria-label="KALONÉO">
+        <span id="kaloneo-nav-logo" aria-hidden="true"></span>
+        <span id="kaloneo-nav-brand-name">KALONÉO</span>
+      </div>
+      <div id="kaloneo-nav-center">
+        <button id="kaloneo-nav-abandon" type="button" class="seb-action-btn seb-btn-danger" hidden>⏹ Abandonner l’exercice</button>
+      </div>
+      <div id="kaloneo-nav-right">
+        <button id="kaloneo-nav-home" type="button" class="seb-action-btn seb-btn-tool" hidden>⌂ Afficher l’écran d’accueil</button>
+        <span id="kaloneo-nav-clock" aria-label="Date et heure">
+          <span id="kaloneo-nav-time"></span>
+          <span id="kaloneo-nav-date"></span>
+        </span>
+      </div>
+    `;
     document.body.appendChild(bar);
+
+    bar.querySelector('#kaloneo-nav-abandon')?.addEventListener('click',function(event){
+      event.preventDefault();
+      const source=document.getElementById('seb-evalpro-abandon-fixed');
+      if(source&&!source.disabled) source.click();
+    });
+    bar.querySelector('#kaloneo-nav-home')?.addEventListener('click',function(event){
+      event.preventDefault();
+      const source=document.getElementById('seb-evalpro-privacy-toggle');
+      if(source&&!source.disabled) source.click();
+    });
+
+    const center=bar.querySelector('#kaloneo-nav-center');
+    for(let i=0;i<3;i++){
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='seb-action-btn kaloneo-nav-action';
+      button.dataset.kaloneoActionIndex=String(i);
+      button.hidden=true;
+      button.addEventListener('click',function(event){
+        event.preventDefault();
+        const action=currentActions[i];
+        const target=action&&action.source;
+        if(!target||target.disabled||target.getAttribute('aria-disabled')==='true') return;
+        try{target.click()}catch(_){}
+        scheduleRefresh();
+        setTimeout(scheduleRefresh,45);
+      });
+      center.appendChild(button);
+    }
     return bar;
   }
 
-  function slotName(source){
-    const declaredSlot=clean(source?.dataset?.kaloneoNavSlot).toLowerCase();
-    if(['left','center','right'].includes(declaredSlot)) return declaredSlot;
-    const manual=declared.get(source);
-    if(manual && ['left','center','right'].includes(manual.slot)) return manual.slot;
-    if(source?.id==='seb-evalpro-abandon-fixed') return 'left';
-    if(CENTER_IDS.has(source?.id||'')) return 'center';
-    return '';
-  }
-
-  function sourceVisible(source){
-    if(!source || !source.isConnected || source.hidden) return false;
-    if(source.getAttribute('aria-hidden')==='true' && source.classList.contains('seb-exercise-nav-locked')) return false;
-    let node=source;
-    try{
-      while(node && node.nodeType===1){
-        const style=getComputedStyle(node);
-        if(style.display==='none' || style.visibility==='hidden') return false;
-        if(node===document.body) break;
-        node=node.parentElement;
-      }
-    }catch(_){return false}
-    return true;
-  }
-
-  function copyButtonStyle(source,proxy){
-    const keep=['seb-btn-nav','seb-btn-confirm','seb-btn-tool','seb-btn-functional','seb-btn-calculator','seb-btn-danger','seb-btn-timer-start','seb-btn-timer-stop','seb-btn-solid'];
-    const classes=['seb-action-btn'];
-    keep.forEach(cls=>{if(source.classList.contains(cls)) classes.push(cls)});
-    const label=clean(source.textContent);
-    if(classes.length===1){
-      const lower=label.toLowerCase();
-      if(/abandon|annuler|quitter|fermer/.test(lower)) classes.push('seb-btn-danger');
-      else if(/calculatrice/.test(lower)) classes.push('seb-btn-calculator');
-      else if(/suivant|étape suivante|etape suivante|page suivante|continuer|commencer/.test(lower)) classes.push('seb-btn-nav');
-      else classes.push('seb-btn-functional');
+  function syncGlobalButtons(){
+    const bar=ensureBar();
+    const abandonSource=document.getElementById('seb-evalpro-abandon-fixed');
+    const abandonButton=bar.querySelector('#kaloneo-nav-abandon');
+    if(abandonSource) abandonSource.classList.add('seb-kaloneo-global-source');
+    if(abandonButton){
+      const visible=!!abandonSource&&visibleSource(abandonSource);
+      abandonButton.hidden=!visible;
+      abandonButton.disabled=!abandonSource||!!abandonSource.disabled;
+      abandonButton.title=abandonSource?.title||'';
     }
-    const desired=classes.join(' ');
-    if(proxy.className!==desired) proxy.className=desired;
+
+    const homeSource=document.getElementById('seb-evalpro-privacy-toggle');
+    const homeButton=bar.querySelector('#kaloneo-nav-home');
+    if(homeSource) homeSource.classList.add('seb-kaloneo-global-source');
+    if(homeButton){
+      homeButton.hidden=!homeSource;
+      homeButton.disabled=!homeSource||!!homeSource.disabled;
+      homeButton.title=homeSource?.title||'';
+    }
   }
 
-  function makeProxy(source,slot){
-    let proxy=sourceToProxy.get(source);
-    if(proxy) return proxy;
-    proxy=document.createElement('button');
-    proxy.type='button';
-    proxy.className='seb-action-btn';
-    proxy.dataset.kaloneoProxyFor=source.id||'anonymous';
-    proxy.addEventListener('click',function(event){
-      event.preventDefault();
-      if(source.disabled || source.getAttribute('aria-disabled')==='true') return;
-      try{source.click();}catch(_){}
-      setTimeout(schedule,0);
-    });
-    sourceToProxy.set(source,proxy);
-    source.classList.add('seb-kaloneo-nav-source');
-    const target=document.getElementById('kaloneo-nav-'+slot);
-    if(target) target.appendChild(proxy);
-    return proxy;
+  function sourceAction(selector,scope){
+    const node=source(selector,scope);
+    if(!node||!visibleSource(node)) return null;
+    node.classList.add('seb-kaloneo-owned-nav-source');
+    return {source:node,label:clean(node.textContent)};
   }
 
-  function syncProxy(source,proxy,slot){
-    const target=document.getElementById('kaloneo-nav-'+slot);
-    if(target && proxy.parentElement!==target) target.appendChild(proxy);
-    const text=source.textContent||'';
-    const title=source.title||'';
-    const disabled=!!source.disabled || source.getAttribute('aria-disabled')==='true';
-    const hidden=!sourceVisible(source);
-    if(proxy.textContent!==text) proxy.textContent=text;
-    if(proxy.title!==title) proxy.title=title;
-    if(proxy.disabled!==disabled) proxy.disabled=disabled;
-    if(proxy.hidden!==hidden) proxy.hidden=hidden;
-    copyButtonStyle(source,proxy);
-    const aria=hidden?'true':'false';
-    if(proxy.getAttribute('aria-hidden')!==aria) proxy.setAttribute('aria-hidden',aria);
+  function chooseNextOrPrimary(nextSelector,primarySelector){
+    const next=sourceAction(nextSelector);
+    if(next) return [next];
+    const primary=sourceAction(primarySelector);
+    return primary?[primary]:[];
   }
 
-  function findSources(){
-    const found=[];
-    ACTION_SELECTORS.forEach(selector=>{
-      try{document.querySelectorAll(selector).forEach(node=>{if(node.tagName==='BUTTON' && !found.includes(node)) found.push(node)})}catch(_){}
-    });
-    declared.forEach((_,node)=>{if(node?.isConnected && !found.includes(node)) found.push(node)});
-    return found;
+  function resolveActions(){
+    const file=fileName();
+
+    if(file==='kaltest-pilot2.html'){
+      return ['#identity-next','#intro-next','#kaltest-next'].map(sel=>sourceAction(sel)).filter(Boolean);
+    }
+
+    if(file==='qcmv1.0.html'){
+      const page=visiblePage();
+      if(!page) return [];
+      const selector=QCM_NEXT_BY_PAGE[page.id];
+      if(!selector) return [];
+      const action=sourceAction(selector,page);
+      return action?[action]:[];
+    }
+
+    if(file==='brique.html'){
+      const auto=sourceAction('#autoEvalBtn');
+      if(auto) return [auto];
+      const validate=sourceAction('#validBtn');
+      return validate?[validate]:[];
+    }
+
+    if(file==='stock.html'){
+      const action=sourceAction('#stockActionBtn');
+      return action?[action]:[];
+    }
+
+    if(file==='planning.html') return chooseNextOrPrimary('#btnSuivant','#btnValider');
+    if(file==='genrenombres.html') return chooseNextOrPrimary('#btnNextGenreNombre','#btnCheck');
+
+    if(file==='dictee.html'){
+      const action=sourceAction('#seb-dictee-action');
+      return action?[action]:[];
+    }
+
+    if(file==='tri_de_cheville.html'){
+      const next=sourceAction('#seb-tri-next');
+      if(next) return [next];
+      const auto=sourceAction('#seb-tri-auto-validate');
+      if(auto) return [auto];
+      const results=sourceAction('#calc');
+      return results?[results]:[];
+    }
+
+    if(file==='nwtexte.html'){
+      const action=sourceAction('#btn-score');
+      return action?[action]:[];
+    }
+
+    if(file==='nvmail.html'){
+      const action=sourceAction('#nvmail-next');
+      return action?[action]:[];
+    }
+
+    if(file==='autoeval1.html'){
+      const action=sourceAction('#autoeval1-validate');
+      return action?[action]:[];
+    }
+
+    if(file==='autoeval2.html'){
+      const action=sourceAction('#autoeval2-validate');
+      return action?[action]:[];
+    }
+
+    if(file==='paronymes.html') return chooseNextOrPrimary('#btnNextParonymes','#btnCheck');
+
+    if(file==='carre.html'){
+      return ['#carre-reset','#btnValidate','#btnNext'].map(sel=>sourceAction(sel)).filter(Boolean);
+    }
+
+    return [];
   }
 
-  function updateLegacyContainers(){
-    const parents=new Set();
-    sourceToProxy.forEach((_,source)=>{if(source?.parentElement) parents.add(source.parentElement)});
-    parents.forEach(parent=>{
-      if(parent.closest('#kaloneo-common-navigation')) return;
-      const clone=parent.cloneNode(true);
-      clone.querySelectorAll('button,script,style').forEach(node=>node.remove());
-      const meaningful=clean(clone.textContent);
-      const buttons=Array.from(parent.querySelectorAll('button'));
-      const hasVisibleNonNav=buttons.some(button=>!button.classList.contains('seb-kaloneo-nav-source') && sourceVisible(button));
-      parent.classList.toggle('seb-kaloneo-legacy-actions-empty',!meaningful && !hasVisibleNonNav);
+  function styleActionButton(button,action){
+    const label=clean(action?.label);
+    const lower=label.toLowerCase();
+    let cls='seb-action-btn kaloneo-nav-action ';
+    if(/suivant|page suivante|étape suivante|etape suivante|commencez l'évaluation|commencer l'évaluation|continuer/.test(lower)) cls+='seb-btn-nav';
+    else if(/recommencer/.test(lower)) cls+='seb-btn-tool';
+    else cls+='seb-btn-functional';
+    if(button.className!==cls) button.className=cls;
+  }
+
+  function renderActions(){
+    const bar=ensureBar();
+    currentActions=resolveActions().slice(0,3);
+    const buttons=Array.from(bar.querySelectorAll('.kaloneo-nav-action'));
+
+    buttons.forEach((button,index)=>{
+      const action=currentActions[index];
+      if(!action){
+        button.hidden=true;
+        button.textContent='';
+        button.disabled=false;
+        return;
+      }
+      const src=action.source;
+      button.hidden=false;
+      button.textContent=action.label;
+      button.disabled=!!src.disabled||src.getAttribute('aria-disabled')==='true';
+      button.title=src.title||'';
+      styleActionButton(button,action);
     });
   }
 
   function normalizeBulletText(){
-    document.querySelectorAll('body.seb-kaloneo-bullet-scope ul:not(.seb-kaloneo-no-bullets)>li').forEach(li=>{
+    if(!document.body.classList.contains('seb-kaloneo-bullet-scope')) return;
+    document.querySelectorAll('ul:not(.seb-kaloneo-no-bullets)>li').forEach(li=>{
       if(li.closest('#modalFichier')) return;
       for(const node of Array.from(li.childNodes)){
-        if(node.nodeType!==Node.TEXT_NODE || !node.nodeValue || !node.nodeValue.trim()) continue;
+        if(node.nodeType!==Node.TEXT_NODE||!node.nodeValue||!node.nodeValue.trim()) continue;
         const next=node.nodeValue.replace(/^\s*(?:[•●▪◦‣‧·]\s*)+/u,'');
         if(next!==node.nodeValue) node.nodeValue=next;
         break;
@@ -1158,78 +1346,58 @@
     });
   }
 
+  function updateClock(){
+    const bar=ensureBar();
+    const now=new Date();
+    const time=now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const date=now.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const timeNode=bar.querySelector('#kaloneo-nav-time');
+    const dateNode=bar.querySelector('#kaloneo-nav-date');
+    if(timeNode&&timeNode.textContent!==time) timeNode.textContent=time;
+    if(dateNode&&dateNode.textContent!==date) dateNode.textContent=date;
+  }
+
   function refresh(){
-    scheduled=false;
+    refreshScheduled=false;
     ensureStyle();
     const bar=ensureBar();
-    const file=fileName();
-    const candidateSurface=EXERCISE_SURFACES.has(file) || document.body?.dataset?.sebKaltestExercise==='1';
-    document.body.classList.toggle('seb-kaloneo-bullet-scope',candidateSurface);
-
-    const active=new Set();
-    findSources().forEach(source=>{
-      const slot=slotName(source);
-      if(!slot) return;
-      const proxy=makeProxy(source,slot);
-      syncProxy(source,proxy,slot);
-      active.add(source);
-    });
-
-    sourceToProxy.forEach((proxy,source)=>{
-      if(!source.isConnected || !active.has(source)){
-        proxy.remove();
-        sourceToProxy.delete(source);
-      }
-    });
-
+    const eligible=isEligible();
+    document.body.classList.toggle('seb-kaloneo-nav-active',eligible);
+    document.body.classList.toggle('seb-kaloneo-bullet-scope',eligible);
+    bar.hidden=!eligible;
+    if(!eligible) return;
+    syncGlobalButtons();
+    renderActions();
     normalizeBulletText();
-    updateLegacyContainers();
-
-    const visible=Array.from(bar.querySelectorAll('.kaloneo-nav-slot>button')).some(button=>!button.hidden);
-    if(bar.hidden===visible) bar.hidden=!visible;
-    document.body.classList.toggle('seb-kaloneo-nav-active',visible);
+    updateClock();
   }
 
-  function schedule(){
-    if(scheduled) return;
-    scheduled=true;
+  function scheduleRefresh(){
+    if(refreshScheduled) return;
+    refreshScheduled=true;
     setTimeout(refresh,0);
   }
-
-  function resolveSource(value){
-    if(value instanceof Element) return value;
-    if(typeof value==='string'){
-      try{return document.querySelector(value)}catch(_){return null}
-    }
-    return null;
-  }
-
-  window.KaloneoNavigation=Object.freeze({
-    declare(config){
-      const entries=Array.isArray(config)?config:(config?.buttons||[config]);
-      entries.filter(Boolean).forEach(entry=>{
-        const source=resolveSource(entry.source||entry.selector||entry.element);
-        if(!source) return;
-        const slot=clean(entry.slot||'center').toLowerCase();
-        declared.set(source,{slot:['left','center','right'].includes(slot)?slot:'center'});
-        source.dataset.kaloneoNavSlot=declared.get(source).slot;
-      });
-      schedule();
-    },
-    refresh:schedule,
-    bar(){return ensureBar()}
-  });
 
   function init(){
     ensureStyle();
     ensureBar();
-    refresh();
-    new MutationObserver(schedule).observe(document.body,{
-      childList:true,subtree:true,characterData:true,attributes:true,
-      attributeFilter:['class','style','hidden','disabled','aria-hidden','aria-disabled']
+    OWNED_SOURCE_SELECTORS.forEach(sel=>{
+      try{document.querySelectorAll(sel).forEach(node=>node.classList.add('seb-kaloneo-owned-nav-source'))}catch(_){}
     });
-    ['click','input','change'].forEach(type=>document.addEventListener(type,schedule,true));
+    refresh();
+    [40,160,500,1000,1600].forEach(ms=>setTimeout(refresh,ms));
+    ['click','input','change','drop'].forEach(type=>{
+      document.addEventListener(type,function(){setTimeout(scheduleRefresh,0)},true);
+    });
+    document.addEventListener('seb:kaloneo-navigation-refresh',scheduleRefresh);
+    clearInterval(clockTimer);
+    clockTimer=setInterval(updateClock,60000);
   }
+
+  window.KaloneoNavigation=Object.freeze({
+    refresh:scheduleRefresh,
+    bar:ensureBar
+  });
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();

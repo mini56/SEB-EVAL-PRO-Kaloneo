@@ -13,34 +13,48 @@ function read(rel){
 }
 
 const runtime=read('app/web/js/seb-ui-runtime.js');
+const marker='// KALONEO_STABLE_BOTTOM_BAR_V15';
+const markerIndex=runtime.indexOf(marker);
+if(markerIndex<0) fail('barre stable V15 absente');
+const stable=runtime.slice(markerIndex);
 
 for(const token of [
-  '// KALONEO_COMMON_NAVIGATION_AND_BULLETS',
-  "window.KaloneoNavigation=Object.freeze",
-  "id='kaloneo-common-navigation'",
-  "Navigation du parcours",
-  "grid-template-columns:minmax(220px,1fr) minmax(320px,2fr) minmax(220px,1fr)",
-  "border-top:1px solid rgba(0,78,112,.28)",
-  "background:rgba(248,251,253,.72)",
-  "box-shadow:none!important",
-  "source.click()",
-  "data-kaloneo-nav-slot",
-  "content:\"•  \""
-]) if(!runtime.includes(token)) fail('contrat commun absent: '+token);
+  '--kaloneo-bottom-bar-height:52px',
+  'Barre de navigation KALONÉO',
+  'id="kaloneo-nav-brand"',
+  'id="kaloneo-nav-logo"',
+  'KALONÉO',
+  'id="kaloneo-nav-center"',
+  'id="kaloneo-nav-right"',
+  'id="kaloneo-nav-time"',
+  'id="kaloneo-nav-date"',
+  'grid-template-columns:minmax(145px,190px) minmax(0,1fr) minmax(300px,390px)',
+  'background:linear-gradient(180deg,rgba(248,251,253,.97),rgba(231,238,245,.97))',
+  'border-top:1px solid rgba(0,78,112,.34)',
+  'box-shadow:none!important',
+  'id="kaloneo-nav-abandon"',
+  'id="kaloneo-nav-home"',
+  'seb-kaloneo-global-source',
+  "setInterval(updateClock,60000)",
+  'content:"•  "',
+  '#modalFichier ul>li::marker'
+]) if(!stable.includes(token)) fail('contrat stable absent: '+token);
+
+for(const forbidden of [
+  'sourceToProxy',
+  'makeProxy(',
+  'data-kaloneo-proxy-for',
+  'new MutationObserver(',
+  "document.querySelectorAll('button').forEach"
+]) if(stable.includes(forbidden)) fail('ancien mécanisme dynamique encore présent dans la barre: '+forbidden);
 
 for(const id of [
-  'stockActionBtn','btnValider','btnSuivant','btnNextGenreNombre','seb-dictee-action',
-  'seb-tri-auto-validate','seb-tri-next','btn-score','nvmail-next',
-  'autoeval1-validate','autoeval2-validate','btnValidate','btnNext'
-]) if(!runtime.includes("'"+id+"'") && !runtime.includes('"'+id+'"')) fail('bouton courant non déclaré: '+id);
+  'page4Next','stockActionBtn','btnValider','btnSuivant','btnNextGenreNombre','seb-dictee-action',
+  'seb-tri-auto-validate','seb-tri-next','btn-score','nvmail-next','autoeval1-validate',
+  'autoeval2-validate','btnNextParonymes','btnValidate','btnNext'
+]) if(!stable.includes(id)) fail('action courante non déclarée: '+id);
 
-if(!runtime.includes("if(source?.id==='seb-evalpro-abandon-fixed') return 'left'")) {
-  fail('Abandonner n’est pas fixé dans la zone gauche');
-}
-if(!runtime.includes("return 'center'")) fail('zone centrale absente');
-if(!runtime.includes("['left','center','right']")) fail('déclaration des trois zones absente');
-
-const protectedButtons = {
+const protectedButtons={
   'app/web/stock.html':['id="stockActionBtn"','Vérifier'],
   'app/web/planning.html':['id="btnValider"','id="btnSuivant"'],
   'app/web/genrenombres.html':['id="btnCheck"','id="btnNextGenreNombre"'],
@@ -55,4 +69,7 @@ for(const [file,tokens] of Object.entries(protectedButtons)){
   for(const token of tokens) if(!html.includes(token)) fail('fonction de parcours supprimée dans '+file+': '+token);
 }
 
-console.log('SEB EvalPro garde navigation KALONÉO: barre commune, fonctions conservées et puce unique — OK.');
+const mail=read('app/web/nvmail.html');
+if(!mail.includes('<ul class="seb-kaloneo-no-bullets">')) fail('liste des pièces jointes non protégée contre les puces');
+
+console.log('SEB EvalPro garde navigation KALONÉO: barre stable 52 px, logo, horloge, actions uniques et puce fichier retirée — OK.');
