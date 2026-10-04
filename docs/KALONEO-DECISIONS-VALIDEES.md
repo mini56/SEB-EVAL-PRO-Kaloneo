@@ -2507,3 +2507,26 @@ La barre basse du PILOTE 19 est conservée telle quelle : aucune nouvelle modifi
 
 Principe de non-régression :
 **les corrections de libellé se font à la source de la page concernée, jamais en modifiant la barre commune validée.**
+
+
+---
+
+## 67. Builder KALONÉO — préréglages et largeur libre
+
+**Statut : DÉCISION VALIDÉE — 4 octobre 2026**
+
+Le Builder peut proposer des préréglages simples afin de reproduire rapidement les gabarits déjà validés :
+- 50 / 50 — exemple : Genre et nombre ;
+- 40 / 60 — exemple : Texte à trous ;
+- 60 / 40 — exemple : Conversions ;
+- pleine largeur — exemple : Paronymes / Gratte-ciel.
+
+Ces préréglages ne constituent pas une contrainte générale du générateur.
+
+Le mode libre reste disponible et constitue la règle souple pour les nouvelles pages :
+- les premiers blocs peuvent recevoir une largeur en **nombre de caractères** ;
+- plusieurs blocs peuvent être utilisés ;
+- le **dernier bloc prend le reste de la place disponible** ;
+- l’utilisateur du Builder n’a pas à manipuler directement les unités CSS %, fr ou ch.
+
+Principe : **les ratios sont des raccourcis de mise en page ; le dimensionnement en caractères + reste disponible est le mode flexible du Builder.**
