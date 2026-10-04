@@ -1073,16 +1073,18 @@
 
   function copyButtonStyle(source,proxy){
     const keep=['seb-btn-nav','seb-btn-confirm','seb-btn-tool','seb-btn-functional','seb-btn-calculator','seb-btn-danger','seb-btn-timer-start','seb-btn-timer-stop','seb-btn-solid'];
-    proxy.className='seb-action-btn';
-    keep.forEach(cls=>{if(source.classList.contains(cls)) proxy.classList.add(cls)});
+    const classes=['seb-action-btn'];
+    keep.forEach(cls=>{if(source.classList.contains(cls)) classes.push(cls)});
     const label=clean(source.textContent);
-    if(!keep.some(cls=>proxy.classList.contains(cls))){
+    if(classes.length===1){
       const lower=label.toLowerCase();
-      if(/abandon|annuler|quitter|fermer/.test(lower)) proxy.classList.add('seb-btn-danger');
-      else if(/calculatrice/.test(lower)) proxy.classList.add('seb-btn-calculator');
-      else if(/suivant|étape suivante|etape suivante|page suivante|continuer|commencer/.test(lower)) proxy.classList.add('seb-btn-nav');
-      else proxy.classList.add('seb-btn-functional');
+      if(/abandon|annuler|quitter|fermer/.test(lower)) classes.push('seb-btn-danger');
+      else if(/calculatrice/.test(lower)) classes.push('seb-btn-calculator');
+      else if(/suivant|étape suivante|etape suivante|page suivante|continuer|commencer/.test(lower)) classes.push('seb-btn-nav');
+      else classes.push('seb-btn-functional');
     }
+    const desired=classes.join(' ');
+    if(proxy.className!==desired) proxy.className=desired;
   }
 
   function makeProxy(source,slot){
@@ -1108,12 +1110,17 @@
   function syncProxy(source,proxy,slot){
     const target=document.getElementById('kaloneo-nav-'+slot);
     if(target && proxy.parentElement!==target) target.appendChild(proxy);
-    proxy.textContent=source.textContent;
-    proxy.title=source.title||'';
-    proxy.disabled=!!source.disabled || source.getAttribute('aria-disabled')==='true';
-    proxy.hidden=!sourceVisible(source);
+    const text=source.textContent||'';
+    const title=source.title||'';
+    const disabled=!!source.disabled || source.getAttribute('aria-disabled')==='true';
+    const hidden=!sourceVisible(source);
+    if(proxy.textContent!==text) proxy.textContent=text;
+    if(proxy.title!==title) proxy.title=title;
+    if(proxy.disabled!==disabled) proxy.disabled=disabled;
+    if(proxy.hidden!==hidden) proxy.hidden=hidden;
     copyButtonStyle(source,proxy);
-    proxy.setAttribute('aria-hidden',proxy.hidden?'true':'false');
+    const aria=hidden?'true':'false';
+    if(proxy.getAttribute('aria-hidden')!==aria) proxy.setAttribute('aria-hidden',aria);
   }
 
   function findSources(){
@@ -1144,7 +1151,8 @@
       if(li.closest('#modalFichier')) return;
       for(const node of Array.from(li.childNodes)){
         if(node.nodeType!==Node.TEXT_NODE || !node.nodeValue || !node.nodeValue.trim()) continue;
-        node.nodeValue=node.nodeValue.replace(/^\s*(?:[•●▪◦‣‧·]\s*)+/u,'');
+        const next=node.nodeValue.replace(/^\s*(?:[•●▪◦‣‧·]\s*)+/u,'');
+        if(next!==node.nodeValue) node.nodeValue=next;
         break;
       }
     });
@@ -1178,7 +1186,7 @@
     updateLegacyContainers();
 
     const visible=Array.from(bar.querySelectorAll('.kaloneo-nav-slot>button')).some(button=>!button.hidden);
-    bar.hidden=!visible;
+    if(bar.hidden===visible) bar.hidden=!visible;
     document.body.classList.toggle('seb-kaloneo-nav-active',visible);
   }
 
