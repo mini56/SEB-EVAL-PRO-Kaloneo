@@ -2,8 +2,10 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..');
+const repoRoot = path.resolve(root, '..');
 const sourceDir = path.join(root, 'source');
 const overridesDir = path.join(root, 'overrides');
+const kaloneoBuilderDir = path.join(repoRoot, 'kaloneo');
 const outputDir = path.join(root, 'app', 'web');
 
 function fail(message) {
@@ -59,6 +61,8 @@ fs.rmSync(outputDir,{recursive:true,force:true});
 fs.mkdirSync(outputDir,{recursive:true});
 copyTree(sourceDir,outputDir,new Set(['QCM.lnk','README.md']));
 copyTree(overridesDir,outputDir);
+if (!fs.existsSync(kaloneoBuilderDir)) fail('générateur KALONÉO canonique absent: kaloneo/');
+copyTree(kaloneoBuilderDir,path.join(outputDir,'kaloneo-builder'));
 assertCleanHtml(outputDir,'app/web');
 
-console.log('SEB EvalPro: app/web reconstruit par copie des sources canoniques, sans patch fonctionnel.');
+console.log('SEB EvalPro: app/web reconstruit par copie des sources canoniques + générateur KALONÉO compilé, sans patch fonctionnel.');
