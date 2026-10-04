@@ -1,5 +1,5 @@
 name: Build Windows KALTEST Pilot 20 puzzle tri polish
-# Windows smoke isolation v4
+# Windows smoke isolation v5
 
 on:
   workflow_dispatch:
