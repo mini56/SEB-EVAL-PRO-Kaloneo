@@ -312,6 +312,7 @@
       document.querySelectorAll('.page').forEach((scope) => {
         if (!scope.id || !QCM_EXERCISE_IDS.has(scope.id)) return;
         scope.querySelectorAll('button').forEach((button) => {
+          if (button.closest('#kaloneo-common-navigation') || button.dataset.kaloneoProxyFor) return;
           if (!isPassButton(button)) return;
           button.dataset.sebLegacyPasser = '1';
           button.hidden = true;
@@ -322,6 +323,7 @@
     }
     if (!EXERCISE_FILES.has(file)) return;
     document.querySelectorAll('button').forEach((button) => {
+      if (button.closest('#kaloneo-common-navigation') || button.dataset.kaloneoProxyFor) return;
       if (!isPassButton(button) || button.id === 'seb-evalpro-abandon-fixed') return;
       button.dataset.sebLegacyPasser = '1';
       button.hidden = true;
