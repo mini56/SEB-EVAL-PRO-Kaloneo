@@ -951,6 +951,13 @@
       add(m.lastBlockRemainder||Number(m.block2WidthChars)>=3,'Dernier bloc : reste disponible ou largeur ≥ 3');
     }
 
+    if(m.chronoEnabled) {
+      add(m.chronoMinMeasures>=1,'Compteur : nombre minimum de mesures ≥ 1');
+      add(m.chronoMaxMeasures>=m.chronoMinMeasures,'Compteur : maximum ≥ minimum');
+    }
+    if(m.adminIntervention) add(Boolean(m.adminInstructions),'Intervention Administrateur : besoin décrit');
+    if(m.externalMaterial) add(Boolean(m.externalMaterialText),'Matériel extérieur : matériel décrit');
+
     let qi=0;
     state.blocks.filter(b=>b.type==='question').forEach(block=>{
       qi++;
@@ -973,6 +980,11 @@
 
     state.blocks.filter(b=>['image','audio','video'].includes(b.type)).forEach((b,i)=>{
       add(Boolean(b.mediaData||b.mediaPlaceholder||state.sourceDefinition),'Média '+(i+1)+' embarqué ou emplacement défini');
+    });
+    state.blocks.filter(b=>b.type==='table-grid').forEach((b,bi)=>{
+      (b.table?.cells||[]).flat().filter(cell=>['image','audio','video'].includes(cell.kind)).forEach((cell,mi)=>{
+        add(Boolean(cell.value&&String(cell.value).startsWith('data:')),'Grille '+(bi+1)+' média '+(mi+1)+' réellement embarqué');
+      });
     });
 
     const model=currentModel();
@@ -1077,7 +1089,7 @@
         for(let c=1;c<=4;c++) {
           const cell=grid.table.cells[r][c];
           cell.kind='candidate-answer';
-          cell.questionId='gratte_ciel_r'+r+'_c'+c;
+          cell.questionId=nextQuestionId();
           cell.acceptedAnswers=answers[r-1][c-1];
           cell.responseType='number';
           cell.points=1;
@@ -1087,6 +1099,7 @@
     }
 
     $('custom-sizing-row').hidden=$('test-layout').value!=='chars-rest';
+    syncCapabilityOptions();
     changed();renderBlocks();
   }
 
@@ -1173,20 +1186,29 @@
     [
       'test-version','test-category','test-scored','test-layout',
       'test-scenario','test-instruction','calculator-compatible','chrono-enabled',
-      'admin-intervention','autoevaluation-enabled','external-material',
+      'chrono-mode','chrono-min-measures','chrono-max-measures','chrono-auto-reset',
+      'chrono-focus-after-stop','chrono-show-time',
+      'admin-intervention','admin-instructions','autoevaluation-enabled',
+      'external-material','external-material-text',
       'block1-width-chars','block2-width-chars','last-block-remainder'
     ].forEach(id=>{
       $(id).addEventListener('input',()=>{
         if(id==='test-layout') {
           $('custom-sizing-row').hidden=$('test-layout').value!=='chars-rest';
           renderBlocks();
-        } else changed();
+        } else {
+          if(['chrono-enabled','admin-intervention','external-material'].includes(id)) syncCapabilityOptions();
+          changed();
+        }
       });
       $(id).addEventListener('change',()=>{
         if(id==='test-layout') {
           $('custom-sizing-row').hidden=$('test-layout').value!=='chars-rest';
           renderBlocks();
-        } else changed();
+        } else {
+          if(['chrono-enabled','admin-intervention','external-material'].includes(id)) syncCapabilityOptions();
+          changed();
+        }
       });
     });
 
