@@ -2589,3 +2589,93 @@ body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-
   padding:1px 4px!important;
   font-size:14px!important;
 }
+
+
+/* KALONÉO Builder V2 — rendu générique commun des tests générés. */
+.kaltest-builder-runtime-layout{
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  display:grid;
+  gap:12px;
+  overflow:hidden;
+}
+.kaltest-builder-runtime-zone{
+  min-width:0;
+  min-height:0;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.kaltest-builder-content-item{
+  min-width:0;
+}
+.kaltest-builder-question{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(12ch,22ch);
+  gap:10px;
+  align-items:center;
+}
+.kaltest-builder-question>span{
+  line-height:1.25;
+}
+.kaltest-builder-media{
+  width:100%;
+  height:100%;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.kaltest-builder-media img,
+.kaltest-builder-media video{
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+}
+.kaltest-builder-media audio{
+  width:100%;
+}
+.kaltest-builder-grid-wrap{
+  width:100%;
+  max-height:100%;
+  overflow:auto;
+}
+.kaltest-builder-grid{
+  width:100%;
+  height:auto;
+  table-layout:auto;
+}
+.kaltest-builder-grid td,
+.kaltest-builder-grid th{
+  vertical-align:middle;
+}
+.kaltest-builder-grid .kaltest-choice{
+  cursor:pointer;
+  user-select:none;
+}
+.kaltest-builder-grid .kaltest-choice.selected{
+  outline:2px solid var(--seb-blue-100,#004E70);
+  outline-offset:-2px;
+  background:#EAF5FB;
+}
+.kaltest-builder-html{
+  width:100%;
+  min-height:160px;
+  border:1px solid #C1C9D6;
+  border-radius:8px;
+  background:#fff;
+}
+.kaltest-multiple-choice{
+  display:grid;
+  gap:5px;
+}
+.kaltest-multiple-choice label{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
