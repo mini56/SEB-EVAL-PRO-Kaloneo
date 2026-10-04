@@ -878,6 +878,8 @@
   'use strict';
 
   const BAR_HEIGHT=52;
+  /* Icône officielle fournie pour KALONÉO, rasterisée à 40 px pour éviter toute dépendance de chemin dans le Setup. */
+  const KALONEO_BAR_ICON_DATA='data:image/png;base64,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';
   const ELIGIBLE_FILES=new Set([
     'kaltest-pilot2.html','qcmv1.0.html','brique.html','stock.html','planning.html','genrenombres.html',
     'dictee.html','tri_de_cheville.html','nwtexte.html','nvmail.html','autoeval1.html','autoeval2.html',
@@ -902,7 +904,7 @@
     '#seb-dictee-action','#calc','#seb-tri-auto-validate','#seb-tri-next','#btn-score','#nvmail-next',
     '#autoeval1-validate','#autoeval1-next','#autoeval2-validate','#btnNextParonymes',
     '#carre-reset','#btnValidate','#btnNext',
-    'button[data-seb-action="open-calculator"]'
+    'button[data-seb-action="open-calculator"]:not(#pilot2-calculator-test-open)'
   ];
 
   let currentActions=[];
@@ -968,7 +970,7 @@
         height:var(--kaloneo-bottom-bar-height)!important;
         z-index:2147482500!important;
         display:grid!important;
-        grid-template-columns:minmax(92px,150px) minmax(0,1fr) minmax(310px,390px)!important;
+        grid-template-columns:minmax(285px,320px) minmax(0,1fr) minmax(295px,340px)!important;
         align-items:center!important;
         gap:12px!important;
         padding:5px 14px!important;
@@ -979,8 +981,17 @@
       }
       #kaloneo-common-navigation[hidden],
       #kaloneo-common-navigation button[hidden]{display:none!important}
-      #kaloneo-nav-brand{
+      #kaloneo-nav-left{
         min-width:0;
+        height:100%;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:flex-start!important;
+        gap:10px!important;
+      }
+      #kaloneo-nav-brand{
+        width:42px;
+        flex:0 0 42px;
         height:100%;
         display:flex;
         align-items:center;
@@ -988,13 +999,13 @@
       }
       #kaloneo-nav-logo-img{
         display:block;
-        width:auto;
-        height:42px;
-        max-width:86px;
+        width:40px;
+        height:40px;
+        max-width:40px;
         object-fit:contain;
         border-radius:7px;
-        background:#fff;
-        box-shadow:0 1px 4px rgba(0,0,0,.16);
+        background:transparent;
+        box-shadow:none;
       }
       #kaloneo-nav-center{
         min-width:0;
@@ -1022,7 +1033,13 @@
       }
       #kaloneo-common-navigation button:hover:not(:disabled){transform:translateY(-1px)!important}
       #kaloneo-common-navigation button:active:not(:disabled){transform:translateY(0)!important}
-      #kaloneo-nav-home{white-space:nowrap!important}
+      #kaloneo-nav-home{
+        --seb-button-color:#003B57!important;
+        color:#003B57!important;
+        font-weight:800!important;
+        white-space:nowrap!important;
+        background:linear-gradient(180deg,#FFFFFF 0%,#EAF5FB 100%)!important;
+      }
       #kaloneo-nav-clock{
         width:76px;
         flex:0 0 76px;
@@ -1162,12 +1179,13 @@
 
       @media(max-width:1240px){
         #kaloneo-common-navigation{
-          grid-template-columns:minmax(78px,110px) minmax(0,1fr) minmax(270px,330px)!important;
+          grid-template-columns:minmax(255px,285px) minmax(0,1fr) minmax(285px,315px)!important;
           gap:8px!important;
           padding-left:9px!important;
           padding-right:9px!important;
         }
-        #kaloneo-nav-logo-img{height:38px;max-width:68px}
+        #kaloneo-nav-brand{width:38px;flex-basis:38px}
+        #kaloneo-nav-logo-img{width:36px;height:36px;max-width:36px}
         #kaloneo-common-navigation button{padding-left:12px!important;padding-right:12px!important;font-size:14px!important}
       }
     `;
@@ -1181,12 +1199,13 @@
     bar.id='kaloneo-common-navigation';
     bar.setAttribute('aria-label','Barre de navigation KALONÉO');
     bar.innerHTML=`
-      <div id="kaloneo-nav-brand" aria-label="KALONÉO">
-        <img id="kaloneo-nav-logo-img" alt="KALONÉO" src="assets/kaloneo-logo-bar.svg">
-      </div>
-      <div id="kaloneo-nav-center">
+      <div id="kaloneo-nav-left">
+        <div id="kaloneo-nav-brand" aria-label="KALONÉO">
+          <img id="kaloneo-nav-logo-img" alt="KALONÉO">
+        </div>
         <button id="kaloneo-nav-abandon" type="button" class="seb-action-btn seb-btn-danger" hidden>⏹ Abandonner l’exercice</button>
       </div>
+      <div id="kaloneo-nav-center"></div>
       <div id="kaloneo-nav-right">
         <button id="kaloneo-nav-home" type="button" class="seb-action-btn seb-btn-tool" hidden>⌂ Afficher l’écran d’accueil</button>
         <span id="kaloneo-nav-clock" aria-label="Date et heure">
@@ -1195,6 +1214,8 @@
         </span>
       </div>
     `;
+    const logo=bar.querySelector('#kaloneo-nav-logo-img');
+    if(logo) logo.src=KALONEO_BAR_ICON_DATA;
     document.body.appendChild(bar);
 
     bar.querySelector('#kaloneo-nav-abandon')?.addEventListener('click',function(event){
