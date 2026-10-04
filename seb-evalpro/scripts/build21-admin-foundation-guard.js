@@ -109,9 +109,11 @@ assert(main.includes("admin-tests-parcours.html"), 'page Tests / Parcours non r�
 
 const testsPage = read('overrides/admin-tests-parcours.html');
 const testsScript = read('source/js/admin-tests-parcours.js');
-assert((testsPage.match(/<button\b/gi) || []).length === 1, 'la page Tests / Parcours doit contenir un seul bouton.');
+assert((testsPage.match(/<button\b/gi) || []).length === 2, 'la page Tests / Parcours doit contenir exactement Ouvrir KALONÉO + Fermer.');
+assert(testsPage.includes('id="open-kaloneo-builder"') && testsPage.includes('Créer / modifier un test KALONÉO'), 'bouton d’ouverture du Builder KALONÉO absent.');
 assert(testsPage.includes('id="close-tests-parcours"') && testsPage.includes('>Fermer</button>'), 'bouton Fermer de Tests / Parcours absent.');
-assert(!/Importer|Exporter|Créer|Dupliquer|Supprimer/i.test(testsPage), 'la page Tests / Parcours contient déjà des fonctions non validées.');
+assert(!/Importer|Exporter|Dupliquer|Supprimer/i.test(testsPage), 'la page Tests / Parcours expose une fonction non validée hors Builder.');
+assert(testsScript.includes("kaloneo-builder/test-builder.html"), 'navigation vers le Builder KALONÉO non câblée.');
 assert(testsScript.includes('closeTestsParcours'), 'action Fermer de Tests / Parcours non câblée.');
 
 const bilanPage = read('overrides/admin-bilan.html');
