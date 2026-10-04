@@ -262,6 +262,104 @@ assert.deepStrictEqual(
   }
 );
 
+
+const BuilderCore = require('../../kaloneo/builder-core.js');
+
+const generatedGrid = BuilderCore.createGridBlock(6, 6);
+const expectedGrid = [
+  ['4','3','1','2'],
+  ['2','4','3','1'],
+  ['3','1','2','4'],
+  ['1','2','4','3']
+];
+for (let row = 1; row <= 4; row += 1) {
+  for (let col = 1; col <= 4; col += 1) {
+    const cell = generatedGrid.table.cells[row][col];
+    cell.kind = 'candidate-answer';
+    cell.questionId = 'ID' + (((row - 1) * 4) + col) + '_gratte_ciel';
+    cell.acceptedAnswers = expectedGrid[row - 1][col - 1];
+    cell.responseType = 'number';
+    cell.points = 1;
+  }
+}
+[
+  ['', '1', '2', '3', '2', ''],
+  ['1', '', '', '', '', '3'],
+  ['2', '', '', '', '', '3'],
+  ['2', '', '', '', '', '1'],
+  ['3', '', '', '', '', '2'],
+  ['', '3', '2', '1', '2', '']
+].forEach((row,rowIndex) => row.forEach((value,colIndex) => {
+  if (rowIndex >= 1 && rowIndex <= 4 && colIndex >= 1 && colIndex <= 4) return;
+  const cell = generatedGrid.table.cells[rowIndex][colIndex];
+  cell.kind = value ? 'fixed-text' : 'empty';
+  cell.value = value;
+}));
+
+const generatedGridTest = BuilderCore.modelToDefinition({
+  meta: {
+    id:'gratte_ciel_builder',
+    version:'1.0.0',
+    title:'Puzzle Gratte-ciel',
+    category:'raisonnement',
+    scored:true,
+    layout:'single',
+    scenario:'Situation de cohésion.',
+    instruction:'Complétez la grille.',
+    calculatorCompatible:false,
+    calculatorDefaultEnabled:false,
+    chronoEnabled:false,
+    adminIntervention:false,
+    autoevaluation:false,
+    externalMaterial:false,
+    icon:null
+  },
+  blocks:[generatedGrid]
+});
+assert.deepStrictEqual(
+  validateTestDefinition(generatedGridTest, catalog.definitions),
+  { ok:true, errors:[] }
+);
+assert.strictEqual(generatedGridTest.questions.length, 16);
+assert.strictEqual(generatedGridTest.presentation.builderContent[0].type, 'table-grid');
+
+const generatedTypesTest = BuilderCore.modelToDefinition({
+  meta: {
+    id:'types_builder',
+    version:'1.0.0',
+    title:'Types Builder',
+    category:'test',
+    scored:true,
+    layout:'single',
+    scenario:'Test.',
+    instruction:'Répondez.',
+    calculatorCompatible:false,
+    calculatorDefaultEnabled:false,
+    chronoEnabled:false,
+    adminIntervention:false,
+    autoevaluation:false,
+    externalMaterial:false,
+    icon:null
+  },
+  blocks:[
+    {uid:'n',type:'question',zone:'left',question:{id:'ID1_types_builder',prompt:'Nombre et unité',responseType:'number-unit',acceptedAnswers:'2,5',units:'kg',points:1,example:false,options:'',unitInput:true,unitScored:false,supplementalFields:[]}},
+    {uid:'s',type:'question',zone:'left',question:{id:'ID2_types_builder',prompt:'Sélection',responseType:'select',acceptedAnswers:'B',points:1,example:false,options:'A; B; C',unitInput:false,unitScored:false,supplementalFields:[]}},
+    {uid:'m',type:'question',zone:'left',question:{id:'ID3_types_builder',prompt:'Choix multiples',responseType:'multiple-choice',acceptedAnswers:'A; C',points:1,example:false,options:'A; B; C',unitInput:false,unitScored:false,supplementalFields:[]}},
+    {uid:'d',type:'question',zone:'left',question:{id:'ID4_types_builder',prompt:'Durée',responseType:'duration',acceptedMinutes:75,normalizer:'duration-fr',points:1,example:false,options:'',unitInput:false,unitScored:false,supplementalFields:[]}}
+  ]
+});
+assert.deepStrictEqual(validateTestDefinition(generatedTypesTest, catalog.definitions), {ok:true,errors:[]});
+assert.strictEqual(evaluateQuestion(generatedTypesTest.questions[0], '2,5'), true);
+assert.strictEqual(evaluateQuestion(generatedTypesTest.questions[1], 'B'), true);
+assert.strictEqual(evaluateQuestion(generatedTypesTest.questions[2], ['C','A']), true);
+assert.strictEqual(evaluateQuestion(generatedTypesTest.questions[3], '1h15'), true);
+
+const unsupportedBuilderTest = JSON.parse(JSON.stringify(generatedGridTest));
+unsupportedBuilderTest.presentation.builderContent[0].table.cells[0][0].kind = 'future-cell';
+const unsupportedBuilderResult = validateTestDefinition(unsupportedBuilderTest, catalog.definitions);
+assert.strictEqual(unsupportedBuilderResult.ok, false);
+assert.ok(unsupportedBuilderResult.errors.some(error => error.message.includes('type de cellule KALONÉO inconnu')));
+
 console.log('BILAN_CATALOG_BUILD20: OK — 10 définitions / 17 lignes');
 console.log('KALTEST_FIRST_SIMPLE_MIGRATION: OK — calculs_commandes_atelier 1.0.0');
 console.log('KALTEST_SECOND_SIMPLE_MIGRATION: OK — calculs_poids_volumes 1.0.0');
@@ -271,6 +369,9 @@ console.log('KALTEST_INLINE_GAPS_MIGRATION: OK — texte_a_trous_stage_logistiqu
 console.log('KALTEST_SUPPLEMENTAL_FIELDS_MIGRATION: OK — conversions_atelier_expedition 1.0.0');
 console.log('KALTEST_SINGLE_CHOICE_TABLE_MIGRATION: OK — paronymes_rapport 1.0.0');
 console.log('KALTEST_SHARED_EVALUATOR: OK');
+console.log('KALONEO_BUILDER_GRID_6X6: OK — 16 réponses attendues');
+console.log('KALONEO_BUILDER_RESPONSE_TYPES: OK — number-unit/select/multiple-choice/duration');
+console.log('KALONEO_UNSUPPORTED_COMPONENT_GATE: OK — build blocker');
 console.log('KALTEST_TRANSITION_MEDIA_CONTRACT: OK');
 console.log('KALTEST_SEB_COMPATIBILITY_GATE: OK');
 console.log('MULTI_TEST_AGGREGATION: OK — sommes score / score_max');
