@@ -438,13 +438,19 @@
       }
       if(m.adminIntervention||Object.prototype.hasOwnProperty.call(def,'adminIntervention')) {
         if(typeof def.adminIntervention==='object'||m.adminInstructions) {
-          def.adminIntervention={enabled:Boolean(m.adminIntervention),instructions:m.adminInstructions||''};
+          const admin=Object.assign({},typeof def.adminIntervention==='object'?def.adminIntervention:{});
+          admin.enabled=Boolean(m.adminIntervention);
+          if(m.adminInstructions||Object.prototype.hasOwnProperty.call(admin,'instructions')) admin.instructions=m.adminInstructions||'';
+          def.adminIntervention=admin;
         } else def.adminIntervention=Boolean(m.adminIntervention);
       }
       if(m.autoevaluation||Object.prototype.hasOwnProperty.call(def,'autoevaluation')) def.autoevaluation=Boolean(m.autoevaluation);
       if(m.externalMaterial||Object.prototype.hasOwnProperty.call(def,'externalMaterial')) {
         if(typeof def.externalMaterial==='object'||m.externalMaterialText) {
-          def.externalMaterial={enabled:Boolean(m.externalMaterial),material:m.externalMaterialText||''};
+          const external=Object.assign({},typeof def.externalMaterial==='object'?def.externalMaterial:{});
+          external.enabled=Boolean(m.externalMaterial);
+          if(m.externalMaterialText||Object.prototype.hasOwnProperty.call(external,'material')) external.material=m.externalMaterialText||'';
+          def.externalMaterial=external;
         } else def.externalMaterial=Boolean(m.externalMaterial);
       }
       if(Array.isArray(m.outputs)) def.outputs=clone(m.outputs);
