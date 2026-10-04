@@ -535,3 +535,29 @@ body{
   }
 }
 
+
+
+/* PILOTE 18 — à 1366×768, gagner quelques lignes utiles pour l'image sans réduire la lisibilité. */
+@media(max-height:800px){
+  .kaloneo-practical-page{
+    padding-top:4px!important;
+    padding-bottom:4px!important;
+    gap:3px!important;
+  }
+  .kaloneo-info-card{
+    padding-top:4px!important;
+    padding-bottom:4px!important;
+  }
+  .kaloneo-consigne{
+    padding-top:3px!important;
+    padding-bottom:4px!important;
+  }
+  .kaloneo-consigne .kaloneo-context-details{
+    margin-top:3px!important;
+  }
+  .kaloneo-consigne li{
+    margin:2px 0!important;
+    line-height:1.08!important;
+  }
+}
+
