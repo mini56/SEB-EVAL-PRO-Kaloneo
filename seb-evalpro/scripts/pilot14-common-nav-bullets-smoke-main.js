@@ -26,6 +26,7 @@ async function snapshot(win){
       left:visible('left'),
       center:visible('center'),
       right:visible('right'),
+      innerHeight:window.innerHeight,
       bodyPadding:getComputedStyle(document.body).paddingBottom,
       abandonSource:(() => {
         const b=document.getElementById('seb-evalpro-abandon-fixed');
@@ -46,7 +47,7 @@ async function snapshot(win){
 function assertBar(s,label){
   if(!s.bar || s.bar.hidden) fail(label+': barre absente',s);
   if(Math.abs(s.bar.height-62)>2) fail(label+': hauteur barre incorrecte',s);
-  if(Math.abs(s.bar.bottom-768)>3) fail(label+': barre pas alignée en bas',s);
+  if(Math.abs(s.bar.bottom-s.innerHeight)>3) fail(label+': barre pas alignée en bas',s);
   if(!s.left.some(x=>/Abandonner/i.test(x.text))) fail(label+': bouton Abandonner absent à gauche',s);
   const all=[...s.left,...s.center,...s.right];
   all.forEach(b=>{ if(Math.abs(b.bottom-(s.bar.bottom-8))>14) fail(label+': boutons à des hauteurs incohérentes',s); });

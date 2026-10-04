@@ -1,4 +1,4 @@
-name: Build Windows KALTEST Pilot 14 common navigation
+name: Build Windows KALTEST Pilot 14 common navigation\n# Viewport-aware navigation smoke
 
 on:
   workflow_dispatch:
