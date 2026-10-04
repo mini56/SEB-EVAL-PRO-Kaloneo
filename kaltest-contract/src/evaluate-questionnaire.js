@@ -72,7 +72,7 @@ function evaluateQuestion(question, value) {
     return actual !== null && Number.isInteger(expected) && actual === expected;
   }
 
-  if (type === 'number') {
+  if (type === 'number' || type === 'number-unit') {
     const actual = normalizeNumber(value);
     return actual !== null && (question.acceptedAnswers || []).some(answer => {
       const expected = normalizeNumber(answer);
