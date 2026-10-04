@@ -2435,7 +2435,13 @@ body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] .kaltest-word-bank sp
   margin:0!important;
 }
 #page-exercise .kaltest-footer .pilot2-actions{
-  display:none!important;
+  display:flex!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
 }
 #page-exercise .kaltest-footer .pilot2-status{
   min-height:0!important;
