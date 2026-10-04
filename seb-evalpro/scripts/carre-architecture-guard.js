@@ -18,7 +18,8 @@ const parcours = read('app/web/js/seb-parcours.js');
 const qcm = read('app/web/qcmv1.0.html') + '\n' + read('app/web/js/qcm-runtime.js') + '\n' + read('app/web/js/qcm-runtime-ui.js') + '\n' + read('app/web/js/qcm-runtime-tail.js');
 
 const protectedText = [
-  '🏙️ Puzzle Gratte-ciel',
+  'kaloneo-context-scenario carre-scenario',
+  '<strong class="kaloneo-context-label">Scénario :</strong>',
   "C'est la journée de cohésion d'équipe. Régulièrement, l'équipe est invitée à se retrouver pour partager un moment convivial.",
   "À cette occasion, la cheffe d'équipe a préparé un petit défi ! Elle propose à chacun une grille à compléter.",
   '📋 Règles du jeu',
@@ -26,11 +27,14 @@ const protectedText = [
   'Chaque chiffre doit apparaître <strong>une seule fois</strong> par ligne et par colonne',
   'Pour la rangée <strong>[2, 4, 3, 1]</strong>',
   'Cliquez sur <strong>"Valider"</strong> pour vérifier votre réponse',
-  'Une fois terminé, cliquez sur <strong>"Page suivante"</strong>'
+  'Une fois terminé, cliquez sur <strong>"Suivant"</strong>'
 ];
 for (const token of protectedText) {
   if (!html.includes(token)) fail('contenu validé modifié: ' + token);
 }
+
+if (!html.includes('<link rel="stylesheet" href="css/kaloneo-context.css">')) fail('composant contexte KALONÉO absent du Carré');
+if (!html.includes('<button class="btn btn-next" id="btnNext" type="button">Suivant</button>')) fail('bouton Suivant local du Carré absent');
 
 if (!html.includes('<script src="js/seb-parcours.js"></script>') ||
     !html.includes('<script src="js/carre-page.js"></script>')) {
