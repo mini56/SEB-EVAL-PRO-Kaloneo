@@ -830,6 +830,331 @@
   }
 
 
+
+  function renderBuilderMedia(item) {
+    const wrap = document.createElement('div');
+    wrap.className = 'kaltest-builder-media';
+    const resource = item.resource || {};
+    if (item.type === 'image') {
+      if (resource.data || resource.name) {
+        const img = document.createElement('img');
+        img.src = resource.data || resource.name;
+        img.alt = resource.alt || resource.name || '';
+        img.className = 'seb-media-image';
+        wrap.appendChild(img);
+      }
+      return wrap;
+    }
+    if (item.type === 'audio') {
+      const audio = document.createElement('audio');
+      audio.controls = true;
+      audio.src = resource.data || resource.name || '';
+      wrap.appendChild(audio);
+      return wrap;
+    }
+    if (item.type === 'video') {
+      const video = document.createElement('video');
+      video.controls = true;
+      video.src = resource.data || resource.name || '';
+      video.className = 'seb-media-video';
+      wrap.appendChild(video);
+      return wrap;
+    }
+    return wrap;
+  }
+
+  function applyBuilderColumn(cell, definition) {
+    if (!cell || !definition) return;
+    const widthChars = Number(definition.widthChars);
+    if (Number.isFinite(widthChars) && widthChars >= 3) {
+      cell.style.width = widthChars + 'ch';
+      cell.style.minWidth = widthChars + 'ch';
+      cell.style.maxWidth = widthChars + 'ch';
+    }
+    if (definition.align === 'left' || definition.align === 'center') {
+      cell.style.textAlign = definition.align;
+    }
+  }
+
+  function renderBuilderGrid(test, item) {
+    const definition = item.table || {};
+    const wrapper = document.createElement('div');
+    wrapper.className = 'kaltest-table-wrap kaltest-builder-grid-wrap';
+
+    if (definition.title) {
+      const title = document.createElement('h3');
+      title.textContent = definition.title;
+      wrapper.appendChild(title);
+    }
+
+    const table = document.createElement('table');
+    table.className = 'kaltest-table kaltest-builder-grid';
+
+    if (Array.isArray(definition.headers) && definition.headers.length) {
+      const thead = document.createElement('thead');
+      const row = document.createElement('tr');
+      definition.headers.forEach((label, index) => {
+        const th = document.createElement('th');
+        th.textContent = String(label || '');
+        applyBuilderColumn(th, definition.columns?.[index]);
+        row.appendChild(th);
+      });
+      thead.appendChild(row);
+      table.appendChild(thead);
+    }
+
+    const tbody = document.createElement('tbody');
+    const testState = testStateFor(test);
+
+    for (const rowDefinition of definition.cells || []) {
+      const tr = document.createElement('tr');
+
+      for (let columnIndex = 0; columnIndex < rowDefinition.length; columnIndex += 1) {
+        const cellDefinition = rowDefinition[columnIndex] || {};
+        const td = document.createElement('td');
+        applyBuilderColumn(td, definition.columns?.[columnIndex]);
+
+        const rowSpan = Math.max(1, Number(cellDefinition.rowSpan) || 1);
+        const colSpan = Math.max(1, Number(cellDefinition.colSpan) || 1);
+        if (rowSpan > 1) td.rowSpan = rowSpan;
+        if (colSpan > 1) td.colSpan = colSpan;
+
+        if (cellDefinition.kind === 'fixed-text') {
+          td.textContent = String(cellDefinition.value || '');
+        } else if (cellDefinition.kind === 'candidate-answer' ||
+                   cellDefinition.kind === 'select' ||
+                   cellDefinition.kind === 'unit') {
+          const question = questionById(test, cellDefinition.questionId);
+          if (question) td.appendChild(makeInput(test, question, { compact:true }));
+        } else if (cellDefinition.kind === 'choice-option') {
+          const question = questionById(test, cellDefinition.questionId);
+          const option = String(cellDefinition.value || '');
+          td.className = 'kaltest-choice';
+          td.textContent = option;
+          if (question && normalizeText(testState.answers[question.id]) === normalizeText(option)) td.classList.add('selected');
+          if (question) {
+            td.tabIndex = 0;
+            td.setAttribute('role', 'button');
+            const choose = () => {
+              Array.from(tr.querySelectorAll('.kaltest-choice')).forEach(node => node.classList.remove('selected'));
+              td.classList.add('selected');
+              saveAnswer(test, question.id, option);
+            };
+            td.addEventListener('click', choose);
+            td.addEventListener('keydown', event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                choose();
+              }
+            });
+          }
+        } else if (cellDefinition.kind === 'image') {
+          const img = document.createElement('img');
+          img.src = String(cellDefinition.value || '');
+          img.alt = cellDefinition.alt || '';
+          img.className = 'seb-media-image';
+          td.appendChild(img);
+        } else if (cellDefinition.kind === 'audio') {
+          const audio = document.createElement('audio');
+          audio.controls = true;
+          audio.src = String(cellDefinition.value || '');
+          td.appendChild(audio);
+        } else if (cellDefinition.kind === 'video') {
+          const video = document.createElement('video');
+          video.controls = true;
+          video.src = String(cellDefinition.value || '');
+          video.className = 'seb-media-video';
+          td.appendChild(video);
+        }
+
+        tr.appendChild(td);
+      }
+
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+    wrapper.appendChild(table);
+    return wrapper;
+  }
+
+  function renderBuilderInlineFlow(test, item) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'kaltest-inline-work';
+
+    const bank = document.createElement('div');
+    bank.className = 'kaltest-word-bank';
+    for (const word of item.wordBank || []) {
+      const span = document.createElement('span');
+      span.textContent = String(word);
+      bank.appendChild(span);
+    }
+    wrapper.appendChild(bank);
+
+    const flow = document.createElement('div');
+    flow.className = 'kaltest-inline-flow';
+    for (const part of item.flow || []) {
+      if (part.type === 'text') {
+        flow.appendChild(document.createTextNode(part.text || ''));
+        if (part.breakAfterSentence === true) {
+          flow.appendChild(document.createElement('br'));
+          flow.appendChild(document.createElement('br'));
+        }
+      } else if (part.type === 'question') {
+        const question = questionById(test, part.questionId);
+        if (question) flow.appendChild(makeInput(test, question, { compact:true }));
+      }
+    }
+    wrapper.appendChild(flow);
+    return wrapper;
+  }
+
+  function renderBuilderResponseTable(test, item) {
+    const definition = item.definition || {};
+    const wrapper = document.createElement('div');
+    wrapper.className = 'kaltest-table-wrap';
+
+    const table = document.createElement('table');
+    table.className = 'kaltest-table';
+
+    const headers = definition.headers || ['Question N°','Réponse','Unités'];
+    const columns = definition.columns || [];
+    const thead = document.createElement('thead');
+    const head = document.createElement('tr');
+
+    headers.forEach((label, index) => {
+      const th = document.createElement('th');
+      th.textContent = label;
+      applyBuilderColumn(th, columns[index]);
+      head.appendChild(th);
+    });
+    thead.appendChild(head);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    (test.questions || []).forEach((question, index) => {
+      const tr = document.createElement('tr');
+      headers.forEach((_header, columnIndex) => {
+        const td = document.createElement('td');
+        applyBuilderColumn(td, columns[columnIndex]);
+        if (columnIndex === 0) {
+          td.textContent = String(index + 1);
+        } else if (columnIndex === 1) {
+          td.appendChild(makeInput(test, question, { compact:true }));
+        } else if (columnIndex === 2) {
+          td.appendChild(makeUnitInput(test, question));
+        } else {
+          const field = question.supplementalFields?.[columnIndex - 3];
+          if (field) td.appendChild(makeSupplementalInput(test, question, field));
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    wrapper.appendChild(table);
+    return wrapper;
+  }
+
+  function renderBuilderContentItem(test, item) {
+    const wrap = document.createElement('div');
+    wrap.className = 'kaltest-builder-content-item';
+
+    if (item.type === 'text') {
+      wrap.textContent = item.text || '';
+      return wrap;
+    }
+    if (item.type === 'html' || item.type === 'html-js') {
+      const frame = document.createElement('iframe');
+      frame.className = 'kaltest-builder-html';
+      frame.setAttribute('sandbox', item.type === 'html-js' ? 'allow-scripts' : '');
+      const script = item.type === 'html-js' && item.script
+        ? '<script>' + String(item.script).replace(/<\/script/gi, '<\\/script') + '<\/script>'
+        : '';
+      frame.srcdoc = '<!doctype html><html><body>' + (item.html || '') + script + '</body></html>';
+      wrap.appendChild(frame);
+      return wrap;
+    }
+    if (['image','audio','video'].includes(item.type)) return renderBuilderMedia(item);
+    if (item.type === 'question') {
+      const question = questionById(test, item.questionId);
+      if (question) {
+        const label = document.createElement('label');
+        label.className = 'kaltest-builder-question';
+        const title = document.createElement('span');
+        title.textContent = question.prompt || '';
+        label.append(title, makeInput(test, question));
+        wrap.appendChild(label);
+      }
+      return wrap;
+    }
+    if (item.type === 'response-table') return renderBuilderResponseTable(test, item);
+    if (item.type === 'inline-flow') return renderBuilderInlineFlow(test, item);
+    if (item.type === 'table-grid') return renderBuilderGrid(test, item);
+    if (item.type === 'table-definition') {
+      const definition = item.definition || {};
+      const title = document.createElement('h3');
+      title.textContent = definition.title || '';
+      wrap.appendChild(title);
+      for (const id of definition.questionIds || []) {
+        const question = questionById(test, id);
+        if (!question) continue;
+        const row = document.createElement('div');
+        row.className = 'kaltest-builder-question';
+        const label = document.createElement('span');
+        label.textContent = question.prompt || id;
+        row.append(label, makeInput(test, question, { compact:true }));
+        wrap.appendChild(row);
+      }
+      return wrap;
+    }
+
+    return wrap;
+  }
+
+  function renderBuilderContent(test, host) {
+    const content = test.presentation?.builderContent;
+    if (!Array.isArray(content)) return false;
+
+    const layout = String(test.presentation?.layout || 'single');
+    const shell = document.createElement('div');
+    shell.className = 'kaltest-builder-runtime-layout';
+
+    if (layout === 'single') {
+      shell.style.gridTemplateColumns = 'minmax(0,1fr)';
+    } else if (layout === '50-50') {
+      shell.style.gridTemplateColumns = 'minmax(0,1fr) minmax(0,1fr)';
+    } else if (layout === '40-60') {
+      shell.style.gridTemplateColumns = 'minmax(0,40fr) minmax(0,60fr)';
+    } else if (layout === '60-40') {
+      shell.style.gridTemplateColumns = 'minmax(0,60fr) minmax(0,40fr)';
+    } else if (layout === 'chars-rest') {
+      const sizing = test.presentation?.blockSizing?.blocks || [];
+      const first = Number(sizing[0]?.widthChars);
+      const second = Number(sizing[1]?.widthChars);
+      shell.style.gridTemplateColumns =
+        (Number.isFinite(first) && first >= 3 ? first + 'ch' : 'minmax(0,1fr)') + ' ' +
+        (sizing[1]?.remainder === true ? 'minmax(0,1fr)' :
+          (Number.isFinite(second) && second >= 3 ? second + 'ch' : 'minmax(0,1fr)'));
+    }
+
+    const left = document.createElement('section');
+    left.className = 'kaltest-builder-runtime-zone';
+    const right = document.createElement('section');
+    right.className = 'kaltest-builder-runtime-zone';
+
+    for (const item of content) {
+      const node = renderBuilderContentItem(test, item);
+      (item.zone === 'right' ? right : left).appendChild(node);
+    }
+
+    shell.appendChild(left);
+    if (layout !== 'single') shell.appendChild(right);
+    host.appendChild(shell);
+    return true;
+  }
+
   function parseStorageObject(key) {
     try {
       const value = JSON.parse(sessionStorage.getItem(key) || '{}');
@@ -975,7 +1300,9 @@
     const host = document.getElementById('kaltest-content');
     host.innerHTML = '';
 
-    if (Array.isArray(test.presentation?.inlineFlow)) {
+    if (renderBuilderContent(test, host)) {
+      // Les tests générés par KALONÉO passent par le rendu générique commun.
+    } else if (Array.isArray(test.presentation?.inlineFlow)) {
       renderInlineGaps(test, host);
     } else if (test.presentation?.choiceTable) {
       renderChoiceTable(test, host);
