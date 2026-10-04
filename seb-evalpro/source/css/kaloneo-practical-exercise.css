@@ -402,7 +402,10 @@ body{
 /* PILOTE 13 — LEGO : consignes verticales, image contenue et chrono plus aéré. */
 .kaloneo-consigne{
   display:flex!important;
-  align-items:center!important;
+  align-items:flex-start!important;
+}
+.kaloneo-consigne>img{
+  margin-top:0!important;
 }
 .kaloneo-consigne .kaloneo-context-body{
   width:100%;
@@ -410,8 +413,12 @@ body{
 .kaloneo-consigne ul{
   display:block!important;
   columns:1!important;
-  margin:4px 0 0 18px!important;
-  padding-left:18px!important;
+  margin:5px 0 0 0!important;
+  padding-left:1.35em!important;
+  list-style-position:outside!important;
+}
+.kaloneo-consigne li{
+  padding-left:.12em!important;
 }
 .kaloneo-consigne li{
   margin:3px 0!important;
