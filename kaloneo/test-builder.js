@@ -504,7 +504,7 @@
         kind.addEventListener('change',()=>{
           cell.kind=kind.value;
           if(['candidate-answer','select','choice-option','unit'].includes(cell.kind)&&!cell.questionId) {
-            cell.questionId='grid_r'+(rowIndex+1)+'_c'+(colIndex+1);
+            cell.questionId=nextQuestionId();
           }
           changed();renderBlocks();
         });
@@ -608,10 +608,52 @@
     body.appendChild(name);
   }
 
-  function renderBlockBody(block,body) {
+  function insertQuestionAtCursor(block,index,textarea) {
+    const position=typeof textarea.selectionStart==='number'?textarea.selectionStart:String(block.text||'').length;
+    const source=String(block.text||'');
+    const before=source.slice(0,position);
+    const after=source.slice(position);
+    block.text=before;
+
+    const questionBlock=baseBlock('question');
+    questionBlock.zone=block.zone||'left';
+    questionBlock.question.id=nextQuestionId();
+
+    const additions=[questionBlock];
+    if(after) {
+      const tail=baseBlock('text');
+      tail.zone=block.zone||'left';
+      tail.text=after;
+      additions.push(tail);
+    }
+    state.sourceDefinition=null;
+    state.blocks.splice(index+1,0,...additions);
+    changed();
+    renderBlocks();
+
+    requestAnimationFrame(()=>{
+      const target=document.querySelector('[data-uid="'+questionBlock.uid+'"] textarea');
+      target?.focus();
+    });
+  }
+
+  function renderBlockBody(block,body,index) {
     body.innerHTML='';
     if(block.type==='text') {
-      body.appendChild(inputField('Texte',block.text,value=>{block.text=value;changed();},{multiline:true,placeholder:'Texte affiché au candidat'}));
+      const field=inputField('Texte',block.text,value=>{block.text=value;changed();},{
+        multiline:true,
+        placeholder:'Texte affiché au candidat',
+        title:'Écrivez le contenu librement. Placez le curseur puis utilisez « Insérer une Question au curseur ».'
+      });
+      body.appendChild(field);
+      const textarea=field.querySelector('textarea');
+      const insert=document.createElement('button');
+      insert.type='button';
+      insert.className='mini-btn insert-question-at-cursor';
+      insert.textContent='+ Insérer une Question au curseur';
+      insert.title='Coupe le texte à la position du curseur et insère ici un bloc Question avec un ID automatique stable.';
+      insert.addEventListener('click',()=>insertQuestionAtCursor(block,index,textarea));
+      body.appendChild(insert);
       return;
     }
     if(block.type==='html'||block.type==='html-js') {
@@ -669,7 +711,7 @@
         state.blocks.splice(index,1);changed();renderBlocks();
       });
 
-      renderBlockBody(block,frag.querySelector('.block-body'));
+      renderBlockBody(block,frag.querySelector('.block-body'),index);
       host.appendChild(frag);
     });
 
