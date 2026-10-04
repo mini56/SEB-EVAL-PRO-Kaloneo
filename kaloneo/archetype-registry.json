@@ -1,0 +1,369 @@
+{
+  "version": 1,
+  "sourceOfTruth": "docs/KALONEO-DECISIONS-VALIDEES.md",
+  "common": {
+    "context": {
+      "scenario": "100%",
+      "instruction": "100%",
+      "sameLineAfterLabel": true
+    },
+    "navigation": {
+      "sharedBottomBar": true,
+      "heightPx": 52,
+      "nextLabel": "Suivant",
+      "globalRelabelForbidden": true
+    },
+    "chrono": {
+      "sharedEngine": "js/kaloneo-chrono.js",
+      "displayFontSizePx": 44,
+      "start": "Démarrer le compteur",
+      "stop": "Arrêter le compteur"
+    },
+    "sizing": {
+      "characterWidths": true,
+      "lastBlockCanUseRemainder": true
+    },
+    "media": {
+      "keepAspectRatio": true,
+      "noCropByDefault": true
+    },
+    "noPatchMasking": true
+  },
+  "archetypes": [
+    {
+      "id": "calculs_commandes_atelier",
+      "source": [
+        "tests/fixtures/kaltests/calculs-commandes-atelier/1.0.0/test.json"
+      ],
+      "proof": "fixture",
+      "blocks": [
+        "question",
+        "response-table",
+        "image"
+      ],
+      "layout": "60-40",
+      "capabilities": [
+        "calculator"
+      ]
+    },
+    {
+      "id": "calculs_poids_volumes",
+      "source": [
+        "tests/fixtures/kaltests/calculs-poids-volumes/1.0.0/test.json"
+      ],
+      "proof": "fixture",
+      "blocks": [
+        "question",
+        "response-table",
+        "image"
+      ],
+      "layout": "60-40",
+      "capabilities": [
+        "calculator"
+      ]
+    },
+    {
+      "id": "horaires_reception_controle",
+      "source": [
+        "tests/fixtures/kaltests/horaires-reception-controle/1.0.0/test.json"
+      ],
+      "proof": "fixture",
+      "blocks": [
+        "table-grid",
+        "image",
+        "question"
+      ],
+      "layout": "40-60",
+      "capabilities": [
+        "calculator",
+        "duration"
+      ]
+    },
+    {
+      "id": "texte_a_trous_stage_logistique",
+      "source": [
+        "tests/fixtures/kaltests/texte-a-trous-stage-logistique/1.0.0/test.json"
+      ],
+      "proof": "fixture",
+      "blocks": [
+        "image",
+        "inline-flow"
+      ],
+      "layout": "40-60",
+      "rules": [
+        "ligne vide entre chaque phrase"
+      ]
+    },
+    {
+      "id": "conversions_atelier_expedition",
+      "source": [
+        "tests/fixtures/kaltests/conversions-atelier-expedition/1.0.0/test.json"
+      ],
+      "proof": "fixture",
+      "blocks": [
+        "question",
+        "response-table",
+        "image"
+      ],
+      "layout": "60-40",
+      "capabilities": [
+        "calculator"
+      ],
+      "rules": [
+        "colonnes 5ch / 14ch / 12ch / reste"
+      ]
+    },
+    {
+      "id": "genre_nombre",
+      "source": [
+        "tests/fixtures/kaltests/genre-nombre/1.0.0/test.json"
+      ],
+      "proof": "fixture",
+      "blocks": [
+        "multiple-tables"
+      ],
+      "layout": "50-50"
+    },
+    {
+      "id": "paronymes_rapport",
+      "source": [
+        "tests/fixtures/kaltests/paronymes-rapport/1.0.0/test.json"
+      ],
+      "proof": "fixture",
+      "blocks": [
+        "table-grid"
+      ],
+      "layout": "single",
+      "rules": [
+        "tableau pleine largeur",
+        "aucune image latérale"
+      ]
+    },
+    {
+      "id": "fractions_proportions",
+      "source": [
+        "seb-evalpro/source/qcmv1.0.html",
+        "seb-evalpro/source/js/qcm-page4.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "image",
+        "question"
+      ],
+      "layout": "40-60",
+      "rules": [
+        "image gauche",
+        "exercice droite",
+        "image entière sans recadrage"
+      ]
+    },
+    {
+      "id": "organisation_activite",
+      "source": [
+        "seb-evalpro/source/qcmv1.0.html",
+        "seb-evalpro/source/js/qcm-page5.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "image",
+        "table-grid"
+      ],
+      "layout": "50-50",
+      "rules": [
+        "image déménagement gauche",
+        "ordonnancement droite"
+      ]
+    },
+    {
+      "id": "gestes_postures",
+      "source": [
+        "seb-evalpro/source/qcmv1.0.html",
+        "seb-evalpro/source/js/qcm-page5-1.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "image",
+        "table-grid"
+      ],
+      "layout": "50-50"
+    },
+    {
+      "id": "autoevaluation",
+      "source": [
+        "seb-evalpro/source/autoeval1.html",
+        "seb-evalpro/source/autoeval2.html"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "question",
+        "image"
+      ],
+      "layout": "50-50",
+      "capabilities": [
+        "autoevaluation"
+      ],
+      "rules": [
+        "aucun scroll horizontal"
+      ]
+    },
+    {
+      "id": "briques_lego",
+      "source": [
+        "seb-evalpro/source/brique.html",
+        "seb-evalpro/source/js/brique-page.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "image",
+        "html-js",
+        "question"
+      ],
+      "layout": "50-50",
+      "capabilities": [
+        "chrono",
+        "admin-intervention",
+        "autoevaluation",
+        "external-material"
+      ],
+      "rules": [
+        "compteur commun uniquement"
+      ]
+    },
+    {
+      "id": "stock",
+      "source": [
+        "seb-evalpro/source/stock.html",
+        "seb-evalpro/source/js/stock-page.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "html-js"
+      ],
+      "layout": "single",
+      "rules": [
+        "Comment ça fonctionne avant Consigne",
+        "deux consignes empilées"
+      ]
+    },
+    {
+      "id": "planning",
+      "source": [
+        "seb-evalpro/source/planning.html",
+        "seb-evalpro/source/js/planning-page.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "table-grid",
+        "text"
+      ],
+      "layout": "50-50",
+      "rules": [
+        "Scénario 100%",
+        "Consigne 100%",
+        "exercice dessous"
+      ]
+    },
+    {
+      "id": "dictee",
+      "source": [
+        "seb-evalpro/source/dictee.html",
+        "seb-evalpro/source/js/dictee-page.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "audio",
+        "html-js"
+      ],
+      "layout": "40-60",
+      "rules": [
+        "audio commun",
+        "action Dictée terminée",
+        "correction au passage suivant"
+      ]
+    },
+    {
+      "id": "tri_chevilles",
+      "source": [
+        "seb-evalpro/source/tri_de_cheville.html",
+        "seb-evalpro/source/js/tri-page.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "table-grid",
+        "image",
+        "question"
+      ],
+      "layout": "50-50",
+      "capabilities": [
+        "chrono",
+        "autoevaluation",
+        "external-material"
+      ],
+      "rules": [
+        "3 à 5 tris",
+        "remise à zéro automatique",
+        "focus Erreurs",
+        "compteur 44px"
+      ]
+    },
+    {
+      "id": "traitement_texte",
+      "source": [
+        "seb-evalpro/source/nwtexte.html",
+        "seb-evalpro/source/js/nwtexte-page.js",
+        "seb-evalpro/source/js/nwtexte-quill-engine.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "text",
+        "html-js"
+      ],
+      "layout": "50-50",
+      "rules": [
+        "Scénario 100%",
+        "Consigne 100%",
+        "éditeur complet droite"
+      ]
+    },
+    {
+      "id": "redaction_email",
+      "source": [
+        "seb-evalpro/source/nvmail.html",
+        "seb-evalpro/source/js/nvmail-page.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "text",
+        "html-js"
+      ],
+      "layout": "50-50",
+      "rules": [
+        "Scénario 100%",
+        "consigne gauche",
+        "formulaire droite",
+        "Parcourir style KALONÉO",
+        "message envoyé intégré"
+      ]
+    },
+    {
+      "id": "gratte_ciel",
+      "source": [
+        "seb-evalpro/source/carre.html",
+        "seb-evalpro/source/js/carre-page.js"
+      ],
+      "proof": "builder-archetype",
+      "blocks": [
+        "table-grid"
+      ],
+      "layout": "single",
+      "rules": [
+        "grille 6x6",
+        "4 coins vides",
+        "contour valeurs fixes",
+        "centre 4x4 réponses attendues",
+        "Scénario KALONÉO en haut",
+        "Suivant"
+      ]
+    }
+  ]
+}
