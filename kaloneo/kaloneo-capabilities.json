@@ -1,0 +1,340 @@
+{
+  "kaloneoCapabilitiesVersion": "2.0.0",
+  "status": "validated-decisions-synchronized",
+  "compiledWithSebEvalPro": true,
+  "sourceOfTruth": "docs/KALONEO-DECISIONS-VALIDEES.md",
+  "compatibility": {
+    "kaltestFormat": 1,
+    "minimumSebEvalPro": "0.3.10",
+    "backwardCompatibleMinorVersions": true,
+    "rejectUnknownOrUnsupportedCapabilities": true,
+    "nonDestructiveUpdates": true
+  },
+  "context": {
+    "scenarioFullWidth": true,
+    "instructionFullWidth": true,
+    "scenarioLabel": "Scénario :",
+    "instructionLabel": "Consigne :",
+    "textStartsOnSameLine": true,
+    "sharedInstitutionalIcons": true,
+    "localStyleOverrideForbidden": true
+  },
+  "layouts": {
+    "fixed": [
+      "single",
+      "50-50",
+      "40-60",
+      "60-40"
+    ],
+    "custom": {
+      "widthUnit": "characters",
+      "minimumCharacters": 3,
+      "lastBlockMayUseRemainder": true,
+      "singleNestedLevelOnly": true
+    },
+    "validatedPageTemplates": [
+      "questions-table-visual-60-40",
+      "visual-inline-gaps-40-60",
+      "work-visual-60-40",
+      "two-tables-50-50",
+      "visual-schedule-40-60",
+      "full-width-choice-table",
+      "practical-context-50-50",
+      "grid-full-width"
+    ]
+  },
+  "contentBlocks": [
+    "text",
+    "html",
+    "html-js",
+    "image",
+    "audio",
+    "video",
+    "question",
+    "table-grid",
+    "response-table",
+    "word-bank",
+    "inline-flow",
+    "multiple-tables"
+  ],
+  "questionResponseTypes": [
+    "text",
+    "number",
+    "number-unit",
+    "duration",
+    "single-choice",
+    "multiple-choice",
+    "boolean",
+    "select"
+  ],
+  "questionRules": {
+    "automaticStableId": true,
+    "acceptedAnswers": true,
+    "acceptedUnits": true,
+    "points": true,
+    "exampleQuestionZeroPoints": true,
+    "supplementalUnscoredFields": true
+  },
+  "tables": {
+    "insertable": true,
+    "addRows": true,
+    "removeRows": true,
+    "addColumns": true,
+    "removeColumns": true,
+    "mergeCells": true,
+    "cellTypes": [
+      "empty",
+      "fixed-text",
+      "candidate-answer",
+      "unit",
+      "select",
+      "image",
+      "audio",
+      "video"
+    ],
+    "questionCellAcceptedAnswers": true,
+    "columnWidthCharacters": true,
+    "columnAlignment": [
+      "left",
+      "center"
+    ],
+    "lastColumnUsesRemainder": true,
+    "multipleTables": true,
+    "gridMode": true
+  },
+  "media": {
+    "offlineEmbedded": true,
+    "image": true,
+    "audio": true,
+    "video": true,
+    "keepAspectRatio": true,
+    "noCropByDefault": true,
+    "portraitVisualPanel": true,
+    "automaticVideoTransition": true,
+    "mediaFailureFallback": true
+  },
+  "calculator": {
+    "testDeclaresCompatibility": true,
+    "parcoursControlsActivation": true,
+    "singleHostCalculator": true,
+    "neverEmbedPerTestCalculator": true,
+    "closeOnIncompatibleExercise": true
+  },
+  "chrono": {
+    "singleCommonEngine": "js/kaloneo-chrono.js",
+    "displayFontSizePx": 44,
+    "startLabel": "Démarrer le compteur",
+    "stopLabel": "Arrêter le compteur",
+    "startColorRole": "green",
+    "stopColorRole": "red",
+    "perTestLocalTimerForbidden": true
+  },
+  "navigation": {
+    "commonBottomBarHeightPx": 52,
+    "leftZone": [
+      "kaloneo-icon",
+      "abandon"
+    ],
+    "centerZone": [
+      "exercise-actions"
+    ],
+    "rightZone": [
+      "home",
+      "time",
+      "date"
+    ],
+    "normalNextLabel": "Suivant",
+    "verifyNeverForced": true,
+    "stableBarGlobalRelabelingForbidden": true,
+    "sourceLocalLabelCorrectionOnly": true
+  },
+  "abandon": {
+    "commonComponent": true,
+    "partialPointsPreserved": true,
+    "adminMayMarkNotEvaluated": true,
+    "replayPreserved": true
+  },
+  "autoevaluation": {
+    "supported": true,
+    "mayReplacePreviousPanel": true,
+    "noEmptyTopGap": true
+  },
+  "adminIntervention": {
+    "supported": true,
+    "commonHostMechanism": true
+  },
+  "externalMaterial": {
+    "supported": true
+  },
+  "scoring": {
+    "scoredAndUnscoredTests": true,
+    "blockingValidationBeforeCatalog": true,
+    "outputs": [
+      "score",
+      "score_max",
+      "pourcentage",
+      "temps",
+      "tempsMoyen",
+      "erreurs",
+      "moyenneErreurs",
+      "nombreEssais",
+      "status"
+    ],
+    "complexGenericResultsContract": "deferred"
+  },
+  "persistence": {
+    "save": true,
+    "restore": true,
+    "draftResume": true,
+    "replay": true,
+    "historicalVersionPreservation": true
+  },
+  "bilan": {
+    "manualAndAutomaticLines": true,
+    "multipleLinesPerTest": true,
+    "multipleTestsPerLine": true,
+    "levels": [
+      "NE",
+      "I",
+      "II",
+      "III"
+    ],
+    "automaticThresholds": {
+      "I_min": 70,
+      "II_min": 45,
+      "III_min": 0
+    },
+    "sixColumns": [
+      "Modules",
+      "NE",
+      "I",
+      "II",
+      "III",
+      "Commentaires"
+    ]
+  },
+  "packages": {
+    "kaltest": true,
+    "kalparcours": true,
+    "offlineAutonomous": true,
+    "integrityRequired": true,
+    "candidateDataExcluded": true
+  },
+  "responsive": {
+    "referenceViewports": [
+      "1366x768",
+      "1200x800"
+    ],
+    "noGlobalPageScrollWhenTemplateRequiresFixedViewport": true,
+    "imagesUseAvailableZone": true
+  },
+  "iconLibrary": {
+    "selectorSupported": true,
+    "targetCount": 80,
+    "historicallyDocumentedCount": 70,
+    "exactHistoricalNamesRecovered": false,
+    "institutionalScenarioAndInstructionIconsAutomatic": true
+  },
+  "validatedArchetypes": {
+    "calculs_commandes_atelier": [
+      "questions-table-visual-60-40",
+      "calculator"
+    ],
+    "calculs_poids_volumes": [
+      "questions-table-visual-60-40",
+      "calculator"
+    ],
+    "horaires_reception_controle": [
+      "visual-schedule-40-60",
+      "table-grid",
+      "duration",
+      "calculator"
+    ],
+    "texte_a_trous_stage_logistique": [
+      "visual-inline-gaps-40-60",
+      "word-bank",
+      "inline-flow"
+    ],
+    "conversions_atelier_expedition": [
+      "work-visual-60-40",
+      "response-table",
+      "widthChars",
+      "calculator"
+    ],
+    "genre_nombre": [
+      "two-tables-50-50",
+      "multiple-tables"
+    ],
+    "paronymes_rapport": [
+      "full-width-choice-table",
+      "single-choice"
+    ],
+    "fractions_proportions": [
+      "40-60",
+      "image-left"
+    ],
+    "organisation_activite": [
+      "50-50",
+      "image-left"
+    ],
+    "gestes_postures": [
+      "image-exercise"
+    ],
+    "autoevaluation": [
+      "50-50",
+      "image-right"
+    ],
+    "briques_lego": [
+      "practical-context-50-50",
+      "chrono",
+      "admin-intervention",
+      "autoevaluation"
+    ],
+    "stock": [
+      "context-stacked-instructions",
+      "interactive-exercise"
+    ],
+    "planning": [
+      "scenario-100",
+      "instruction-100",
+      "exercise-below"
+    ],
+    "dictee": [
+      "audio",
+      "text-entry",
+      "single-finish-action"
+    ],
+    "tri_chevilles": [
+      "chrono",
+      "table-grid",
+      "autoevaluation",
+      "3-to-5-trials"
+    ],
+    "traitement_texte": [
+      "scenario-100",
+      "instruction-100",
+      "50-50",
+      "editor"
+    ],
+    "redaction_email": [
+      "scenario-100",
+      "50-50",
+      "file-picker",
+      "status-message"
+    ],
+    "gratte_ciel": [
+      "grid-full-width",
+      "6x6",
+      "fixed-empty-answer-cells"
+    ]
+  },
+  "fixtureIdsRequiredInCi": [
+    "calculs_commandes_atelier",
+    "calculs_poids_volumes",
+    "horaires_reception_controle",
+    "texte_a_trous_stage_logistique",
+    "conversions_atelier_expedition",
+    "genre_nombre",
+    "paronymes_rapport"
+  ]
+}
