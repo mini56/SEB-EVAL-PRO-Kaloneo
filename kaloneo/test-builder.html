@@ -88,6 +88,21 @@
         </label>
       </div>
 
+      <div class="icon-library-panel">
+        <div class="section-title-row">
+          <div>
+            <h2>Icône du test</h2>
+            <p class="muted">Bibliothèque KALONÉO validée — 70 icônes. L’icône choisie est enregistrée dans le test.</p>
+          </div>
+          <button id="clear-icon" class="mini-btn" type="button">Aucune icône</button>
+        </div>
+        <label>Rechercher une icône
+          <input id="icon-search" type="text" placeholder="Ex. stock, calculs, sécurité…">
+        </label>
+        <input id="selected-icon-id" type="hidden">
+        <div id="icon-picker" class="icon-picker" aria-label="Bibliothèque d’icônes KALONÉO"></div>
+      </div>
+
       <div id="custom-sizing-row" class="form-grid cols-3" hidden>
         <label>Bloc 1 — largeur en caractères
           <input id="block1-width-chars" type="number" min="3" placeholder="Ex. 15">
@@ -240,6 +255,7 @@
     </article>
   </template>
 
+  <script src="icon-library.js"></script>
   <script src="builder-core.js"></script>
   <script src="test-builder.js"></script>
 </body>
