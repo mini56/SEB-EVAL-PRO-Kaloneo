@@ -232,6 +232,8 @@
         autoevaluation:Boolean(def.autoevaluation)||def.features?.includes('host.autoevaluation'),
         externalMaterial:Boolean(def.externalMaterial?.enabled ?? def.externalMaterial)||def.features?.includes('host.external-material'),
         externalMaterialText:typeof def.externalMaterial==='object'?(def.externalMaterial.material||''):'',
+        outputs:clone(def.outputs||[]),
+        bilanContributions:clone(def.bilanContributions||[]),
         template:def.presentation?.kaloneoLayout?.type||(
           def.presentation?.choiceTable?'full-width-choice-table':
           def.presentation?.tables?'two-tables-50-50':
@@ -403,6 +405,8 @@
           def.externalMaterial={enabled:Boolean(m.externalMaterial),material:m.externalMaterialText||''};
         } else def.externalMaterial=Boolean(m.externalMaterial);
       }
+      if(Array.isArray(m.outputs)) def.outputs=clone(m.outputs);
+      if(Array.isArray(m.bilanContributions)) def.bilanContributions=clone(m.bilanContributions);
       updateImportedQuestions(def,model);
       return def;
     }
@@ -464,10 +468,10 @@
       navigation:{next:'host',abandon:'host-common'},
       runtime:{start:true,save:true,restore:true,finish:true},
       questions,
-      outputs:[
+      outputs:Array.isArray(m.outputs)&&m.outputs.length?clone(m.outputs):[
         {id:'score',type:'number'},{id:'score_max',type:'number'},{id:'pourcentage',type:'number'},{id:'status',type:'string'}
       ],
-      bilanContributions:[]
+      bilanContributions:Array.isArray(m.bilanContributions)?clone(m.bilanContributions):[]
     };
   }
 
