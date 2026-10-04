@@ -317,12 +317,54 @@
 
   function makeInput(test, question, options = {}) {
     const testState = testStateFor(test);
+    const type = question.response?.type || 'text';
+
+    if (type === 'single-choice' || type === 'select' || type === 'boolean') {
+      const select = document.createElement('select');
+      select.className = 'step';
+      select.dataset.questionId = question.id;
+      const empty = document.createElement('option');
+      empty.value = '';
+      empty.textContent = 'Choisir…';
+      select.appendChild(empty);
+      const values = type === 'boolean' ? ['Vrai','Faux'] : (question.response?.options || []);
+      for (const value of values) {
+        const option = document.createElement('option');
+        option.value = String(value);
+        option.textContent = String(value);
+        select.appendChild(option);
+      }
+      select.value = String(testState.answers[question.id] ?? '');
+      select.addEventListener('change', () => saveAnswer(test, question.id, select.value));
+      return select;
+    }
+
+    if (type === 'multiple-choice') {
+      const group = document.createElement('div');
+      group.className = 'kaltest-multiple-choice';
+      const selected = new Set(Array.isArray(testState.answers[question.id]) ? testState.answers[question.id] : []);
+      for (const value of question.response?.options || []) {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = String(value);
+        checkbox.checked = selected.has(String(value));
+        checkbox.addEventListener('change', () => {
+          const values = Array.from(group.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
+          saveAnswer(test, question.id, values);
+        });
+        label.append(checkbox, document.createTextNode(' ' + String(value)));
+        group.appendChild(label);
+      }
+      return group;
+    }
+
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'step';
     input.dataset.questionId = question.id;
     input.value = String(testState.answers[question.id] ?? '');
-    if (question.response?.type === 'number') input.inputMode = 'decimal';
+    if (type === 'number' || type === 'number-unit') input.inputMode = 'decimal';
     input.placeholder = '';
     input.addEventListener('input', () => saveAnswer(test, question.id, input.value));
     return input;
