@@ -51,7 +51,7 @@
 
     const observer = new MutationObserver(() => {
       if (page.classList.contains('visible')) {
-        requestAnimationFrame(playOnce);
+        setTimeout(playOnce, 0);
       }
     });
     observer.observe(page, { attributes:true, attributeFilter:['class'] });
