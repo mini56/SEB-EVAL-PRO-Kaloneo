@@ -406,3 +406,122 @@ textarea {
     grid-template-columns: auto 1fr;
   }
 }
+
+
+/* Builder V2 — composants générables KALONÉO */
+.inline-checkbox{
+  flex-direction:row;
+  align-items:center;
+  gap:6px;
+}
+.column-editor,
+.grid-columns-editor{
+  display:grid;
+  gap:6px;
+  margin:10px 0;
+}
+.column-editor-row{
+  display:grid;
+  grid-template-columns:minmax(120px,1fr) minmax(90px,.55fr) minmax(100px,.55fr) minmax(110px,.7fr);
+  gap:8px;
+  align-items:center;
+  padding:6px 8px;
+  border:1px solid #D8DEE8;
+  border-radius:8px;
+  background:#fff;
+}
+.grid-editor-scroll{
+  margin-top:10px;
+  overflow:auto;
+  max-width:100%;
+  border:1px solid #C1C9D6;
+  border-radius:9px;
+  background:#F8FAFC;
+}
+.cell-grid-editor{
+  width:max-content;
+  min-width:100%;
+  border-collapse:collapse;
+}
+.cell-grid-editor td{
+  min-width:190px;
+  vertical-align:top;
+  padding:6px;
+  border:1px solid #D8DEE8;
+  background:#fff;
+}
+.cell-grid-editor select,
+.cell-grid-editor input{
+  margin-bottom:4px;
+  font-size:13px;
+  padding:5px 6px;
+}
+.cell-span-editor{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  color:#5D6B75;
+  font-size:11px;
+}
+.cell-span-editor input{
+  width:48px;
+  margin:0;
+}
+.preview-grid-wrap{
+  max-width:100%;
+  overflow:auto;
+}
+.preview-grid-wrap h3{
+  margin:0 0 7px;
+  color:#004E70;
+}
+.preview-grid-table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:auto;
+  background:#fff;
+}
+.preview-grid-table th{
+  padding:6px;
+  border:1px solid rgba(0,78,112,.30);
+  background:#EAF4F8;
+  color:#004E70;
+}
+.preview-grid-table td{
+  min-width:45px;
+  height:38px;
+  padding:4px;
+  border:1px solid #C1C9D6;
+}
+.preview-grid-table input,
+.preview-grid-table select{
+  width:100%;
+  min-width:0;
+  padding:5px;
+}
+.preview-word-bank{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-bottom:8px;
+  padding:7px;
+  border:1px solid #B8D3DF;
+  border-radius:8px;
+  background:#EAF4F8;
+}
+.preview-word-bank span{
+  padding:3px 7px;
+  border-radius:7px;
+  background:#fff;
+}
+.preview-inline-flow{
+  line-height:1.6;
+}
+.preview-inline-flow input{
+  width:12ch;
+  margin:0 3px;
+  padding:4px 5px;
+}
+#custom-sizing-row[hidden]{
+  display:none!important;
+}
