@@ -7,6 +7,7 @@ const sebRoot=path.resolve(__dirname,'..');
 const repoRoot=path.resolve(sebRoot,'..');
 const builderRoot=path.join(repoRoot,'kaloneo');
 const capabilitiesPath=path.join(builderRoot,'kaloneo-capabilities.json');
+const archetypeRegistryPath=path.join(builderRoot,'archetype-registry.json');
 const corePath=path.join(builderRoot,'builder-core.js');
 
 function fail(message,detail){
@@ -34,6 +35,7 @@ function normalize(value){
 }
 
 const capabilities=json(capabilitiesPath);
+const archetypeRegistry=json(archetypeRegistryPath);
 const Core=require(corePath);
 
 if(capabilities.compiledWithSebEvalPro!==true) fail('la compilation commune KALONÉO / SEB EvalPro n’est pas déclarée');
@@ -46,6 +48,12 @@ if(capabilities.chrono?.displayFontSizePx!==44) fail('taille commune du compteur
 if(capabilities.navigation?.normalNextLabel!=='Suivant') fail('libellé Suivant non canonique');
 if(capabilities.navigation?.stableBarGlobalRelabelingForbidden!==true) fail('protection de la barre stable absente');
 if(capabilities.context?.textStartsOnSameLine!==true) fail('règle Scénario/Consigne sur la même ligne absente');
+if(capabilities.allValidatedArchetypesMustCompile!==true) fail('la parité de tous les archétypes validés n’est pas bloquante');
+if(capabilities.codeQuality?.noCssMaskingAsImplementation!==true) fail('interdiction du masquage CSS non enregistrée');
+if(capabilities.codeQuality?.commonComponentsSharedWithSebEvalPro!==true) fail('composants communs non déclarés partagés avec SEB EvalPro');
+if(archetypeRegistry.common?.noPatchMasking!==true) fail('registre archétypes: masquage/patch non interdit');
+if(archetypeRegistry.common?.navigation?.heightPx!==52) fail('registre archétypes: barre commune différente de 52 px');
+if(archetypeRegistry.common?.chrono?.displayFontSizePx!==44) fail('registre archétypes: compteur commun différent de 44 px');
 
 const builderHtml=read(path.join(builderRoot,'test-builder.html'));
 const builderJs=read(path.join(builderRoot,'test-builder.js'));
@@ -67,7 +75,7 @@ for(const token of [
 if(!prepare.includes("copyTree(kaloneoBuilderDir,path.join(outputDir,'kaloneo-builder'))")) {
   fail('prepare:web ne compile pas le générateur KALONÉO');
 }
-for(const compiled of ['test-builder.html','test-builder.js','builder-core.js','kaloneo-capabilities.json']){
+for(const compiled of ['test-builder.html','test-builder.js','builder-core.js','kaloneo-capabilities.json','archetype-registry.json']){
   if(!fs.existsSync(path.join(sebRoot,'app','web','kaloneo-builder',compiled))) {
     fail('fichier KALONÉO absent du produit compilé: '+compiled);
   }
@@ -77,6 +85,111 @@ if(!admin.includes('open-kaloneo-builder')||!adminJs.includes("kaloneo-builder/t
 }
 if(!main.includes("isAdminKaloneoBuilderPage")||!main.includes("'test-builder.html'")) {
   fail('le Builder KALONÉO n’est pas protégé comme page Administrateur');
+}
+
+
+const builderBlockOptions=new Set(Array.from(builderHtml.matchAll(/<option\s+value="([^"]+)"/g)).map(match=>match[1]));
+const declaredBlocks=new Set(capabilities.contentBlocks||[]);
+const blockAliases=new Map([['multiple-tables','multiple-tables'],['table-definition','multiple-tables']]);
+
+function capabilityAvailable(name){
+  if(name==='calculator') return capabilities.calculator?.singleHostCalculator===true;
+  if(name==='chrono') return capabilities.chrono?.singleCommonEngine==='js/kaloneo-chrono.js';
+  if(name==='autoevaluation') return capabilities.autoevaluation?.supported===true;
+  if(name==='admin-intervention') return capabilities.adminIntervention?.supported===true;
+  if(name==='external-material') return capabilities.externalMaterial?.supported===true;
+  if(name==='duration') return (capabilities.questionResponseTypes||[]).includes('duration');
+  return true;
+}
+
+function proofBlock(type,index){
+  const zone=index%2===0?'left':'right';
+  if(type==='text') return {uid:'proof_text_'+index,type,zone,text:'Contenu de contrôle KALONÉO'};
+  if(type==='html') return {uid:'proof_html_'+index,type,zone,html:'<p>Contenu KALONÉO</p>'};
+  if(type==='html-js') return {uid:'proof_htmljs_'+index,type,zone,html:'<button id="proof">Exercice</button>',js:'document.getElementById("proof").dataset.ready="1";'};
+  if(type==='image') return {uid:'proof_img_'+index,type,zone,mediaName:'preuve.svg',mediaType:'image/svg+xml',mediaData:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiLz4=',mediaAlt:'Illustration',mediaPlaceholder:''};
+  if(type==='audio') return {uid:'proof_audio_'+index,type,zone,mediaName:'preuve.wav',mediaType:'audio/wav',mediaData:'data:audio/wav;base64,UklGRg==',mediaAlt:'Audio'};
+  if(type==='video') return {uid:'proof_video_'+index,type,zone,mediaName:'preuve.webm',mediaType:'video/webm',mediaData:'data:video/webm;base64,GkXf',mediaAlt:'Vidéo'};
+  if(type==='question') return {uid:'proof_q_'+index,type,zone,question:{id:'ID'+(index+1)+'_preuve',prompt:'Question de contrôle '+(index+1),responseType:'text',normalizer:'',acceptedAnswers:'ok',acceptedMinutes:'',units:'',points:1,example:false,options:'',unitInput:false,unitScored:false,supplementalFields:[]}};
+  if(type==='response-table') return {uid:'proof_response_'+index,type,zone,responseTable:{headers:['N°','Réponse','Unités'],columns:[{id:'number',widthChars:5,align:'center'},{id:'answer',widthChars:14,align:'center'},{id:'unit',align:'left'}]}};
+  if(type==='inline-flow') return {uid:'proof_inline_'+index,type,zone,wordBank:['mot'],flow:[{type:'text',text:'Phrase de contrôle.',breakAfterSentence:true}]};
+  if(type==='multiple-tables') return {uid:'proof_multitable_'+index,type,zone,tableDefinition:{id:'table_'+index,title:'Tableau',headers:['A','B'],questionIds:[]}};
+  if(type==='table-grid'){
+    const block=Core.createGridBlock(2,2);
+    block.uid='proof_grid_'+index;
+    block.zone=zone;
+    block.table.cells[0][0].kind='fixed-text';
+    block.table.cells[0][0].value='Repère';
+    block.table.cells[0][1].kind='candidate-answer';
+    block.table.cells[0][1].questionId='ID'+(index+1)+'_grille';
+    block.table.cells[0][1].acceptedAnswers='1';
+    block.table.cells[0][1].responseType='number';
+    block.table.cells[0][1].points=1;
+    return block;
+  }
+  fail('type de bloc sans preuve de génération: '+type);
+}
+
+function proofModel(entry){
+  const capabilitiesList=new Set(entry.capabilities||[]);
+  const blocks=(entry.blocks||[]).map(proofBlock);
+  return {
+    idLocked:true,
+    sourceDefinition:null,
+    meta:{
+      title:'Preuve '+entry.id,id:entry.id,version:'1.0.0',category:'technique',scored:true,icon:null,
+      layout:entry.layout||'single',template:'generic',
+      scenario:'Scénario de contrôle '+entry.id,
+      instruction:'Consigne de contrôle '+entry.id,
+      calculatorCompatible:capabilitiesList.has('calculator'),calculatorDefaultEnabled:false,
+      chronoEnabled:capabilitiesList.has('chrono'),chronoMode:entry.id==='tri_chevilles'?'repeated':'simple',
+      chronoMinMeasures:entry.id==='tri_chevilles'?3:1,chronoMaxMeasures:entry.id==='tri_chevilles'?5:1,
+      chronoAutoReset:entry.id==='tri_chevilles',chronoFocusAfterStop:entry.id==='tri_chevilles',chronoShowTime:true,
+      adminIntervention:capabilitiesList.has('admin-intervention'),adminInstructions:capabilitiesList.has('admin-intervention')?'Intervention Administrateur explicite':'',
+      autoevaluation:capabilitiesList.has('autoevaluation'),
+      externalMaterial:capabilitiesList.has('external-material'),externalMaterialText:capabilitiesList.has('external-material')?'Matériel extérieur':'',
+      block1WidthChars:'15',block2WidthChars:'',lastBlockRemainder:true,outputs:[],bilanContributions:[]
+    },
+    blocks
+  };
+}
+
+const registryIds=new Set();
+const archetypeProofReport=[];
+for(const entry of archetypeRegistry.archetypes||[]){
+  if(!entry?.id) fail('registre archétypes: entrée sans ID');
+  if(registryIds.has(entry.id)) fail('registre archétypes: ID dupliqué '+entry.id);
+  registryIds.add(entry.id);
+
+  for(const rel of entry.source||[]){
+    const full=path.join(repoRoot,rel);
+    if(!fs.existsSync(full)) fail('archétype '+entry.id+': source de référence absente '+rel);
+  }
+  for(const rawType of entry.blocks||[]){
+    const type=blockAliases.get(rawType)||rawType;
+    if(!declaredBlocks.has(type)) fail('archétype '+entry.id+': bloc non déclaré dans KALONÉO '+type);
+    if(!builderBlockOptions.has(type)) fail('archétype '+entry.id+': bloc absent de l’interface Builder '+type);
+  }
+  for(const cap of entry.capabilities||[]){
+    if(!capabilityAvailable(cap)) fail('archétype '+entry.id+': capacité indisponible '+cap);
+  }
+
+  if(entry.proof==='builder-archetype'){
+    const model=proofModel(entry);
+    const def=Core.modelToDefinition(model);
+    const analysis=Core.analyzeDefinition(def);
+    if(!analysis.ok) fail('archétype '+entry.id+' non générable par KALONÉO',analysis.errors.join('\n'));
+    const imported=Core.definitionToModel(def);
+    const rebuilt=Core.modelToDefinition(imported);
+    if(JSON.stringify(normalize(def))!==JSON.stringify(normalize(rebuilt))) {
+      fail('archétype '+entry.id+' perd des données après import/regénération');
+    }
+    archetypeProofReport.push(entry.id);
+  }
+}
+
+if(registryIds.size!==Number(capabilities.validatedArchetypeCount)) {
+  fail('nombre d’archétypes du registre incohérent: '+registryIds.size+' / '+capabilities.validatedArchetypeCount);
 }
 
 const fixtureRoot=path.join(repoRoot,'tests','fixtures','kaltests');
@@ -134,6 +247,7 @@ const requiredArchetypes=[
 ];
 for(const id of requiredArchetypes){
   if(!capabilities.validatedArchetypes?.[id]) fail('archétype validé absent de KALONÉO: '+id);
+  if(!registryIds.has(id)) fail('archétype validé absent du registre exécutable: '+id);
 }
 
 console.log('KALONEO_BUILDER_PARITY: OK');
@@ -141,5 +255,8 @@ console.log('KALONEO_COMPILED_WITH_SEB_EVALPRO=YES');
 console.log('KALONEO_FIXTURES_REALISABLES='+report.length+'/'+fixtureFiles.length);
 console.log('KALONEO_FIXTURE_IDS='+report.join(','));
 console.log('KALONEO_VALIDATED_ARCHETYPES='+requiredArchetypes.length);
+console.log('KALONEO_ARCHETYPES_PROVED_BY_BUILDER='+archetypeProofReport.length);
+console.log('KALONEO_ARCHETYPE_REGISTRY='+registryIds.size+'/'+requiredArchetypes.length);
+console.log('KALONEO_NO_CSS_MASKING_AS_IMPLEMENTATION=YES');
 console.log('KALONEO_TABLE_GRID=FIXED_EMPTY_ANSWER_MEDIA_MERGE');
 console.log('KALONEO_BUILD_BLOCKS_ON_UNSUPPORTED_TEST=YES');
