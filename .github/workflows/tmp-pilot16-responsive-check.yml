@@ -36,9 +36,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          xvfb-run -a npx electron --no-sandbox scripts/pilot16-responsive-smoke-main.js 2>&1 | tee /tmp/pilot16-responsive.log
-          grep -q "PILOT16_RESPONSIVE_SMOKE: OK" /tmp/pilot16-responsive.log
-          if grep -q "PILOT16_RESPONSIVE_SMOKE: FAIL" /tmp/pilot16-responsive.log; then exit 2; fi
+          for size in 1366x768 1200x800 1280x720 1920x1080; do
+            w="${size%x*}"
+            h="${size#*x}"
+            log="/tmp/pilot16-${size}.log"
+            PILOT16_WIDTH="$w" PILOT16_HEIGHT="$h" \
+              xvfb-run -a -s "-screen 0 2200x1400x24" \
+              npx electron --no-sandbox scripts/pilot16-viewport-smoke-main.js 2>&1 | tee "$log"
+            grep -q "PILOT16_VIEWPORT_${size}: OK" "$log"
+            if grep -q "PILOT16_VIEWPORT_${size}: FAIL" "$log"; then exit 2; fi
+          done
 
       - name: KALTEST functional
         run: xvfb-run -a npx electron --no-sandbox scripts/kaltest-pilot2-functional-smoke-main.js
