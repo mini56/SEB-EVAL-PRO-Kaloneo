@@ -525,3 +525,86 @@ textarea {
 #custom-sizing-row[hidden]{
   display:none!important;
 }
+
+
+/* Bibliothèque d’icônes V5 restaurée et options de capacités communes. */
+.icon-library-panel{
+  margin:14px 0;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#FBFDFF;
+}
+.icon-picker{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:7px;
+  margin-top:8px;
+  max-height:286px;
+  overflow:auto;
+}
+.icon-choice{
+  min-height:88px;
+  padding:6px;
+  border:1px solid #CBD8E4;
+  border-radius:9px;
+  background:#fff;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  text-align:center;
+}
+.icon-choice:hover{
+  border-color:#7AA9D4;
+  background:#F7FBFF;
+}
+.icon-choice.selected{
+  outline:3px solid #6CA3D4;
+  border-color:#346B98;
+  background:#EEF6FD;
+}
+.icon-choice img{
+  width:52px;
+  height:52px;
+  object-fit:contain;
+}
+.icon-choice span{
+  font-size:10px;
+  line-height:1.1;
+}
+.preview-title-with-icon{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+.preview-test-icon{
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  object-fit:contain;
+  border-radius:8px;
+}
+.capability-options{
+  margin:9px 0;
+  padding:10px;
+  border:1px solid #D7E3EE;
+  border-radius:9px;
+  background:#F8FBFE;
+}
+.capability-options[hidden]{
+  display:none!important;
+}
+.option-row.compact{
+  margin-top:8px;
+}
+.insert-question-at-cursor{
+  margin-top:7px;
+  width:max-content;
+}
+@media(max-width:1100px){
+  .icon-picker{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
