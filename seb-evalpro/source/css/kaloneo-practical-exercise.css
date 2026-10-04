@@ -500,3 +500,38 @@ body{
   .fr-checkbox-group{margin:4px 0!important}
   #autoComment{min-height:76px!important;max-height:105px!important;resize:none!important}
 }
+
+
+/* PILOTE 18 — lisibilité des consignes et image LEGO agrandie. */
+.kaloneo-consigne .kaloneo-context-details{
+  margin-top:5px!important;
+}
+.kaloneo-consigne ul{
+  margin:0!important;
+  padding-left:1.15em!important;
+  list-style-position:outside!important;
+}
+.kaloneo-consigne li{
+  margin:4px 0!important;
+  padding-left:.22em!important;
+}
+.kaloneo-image-phase{
+  max-height:none!important;
+  margin-bottom:0!important;
+  align-items:stretch!important;
+}
+.kaloneo-practical-image{
+  max-height:none!important;
+}
+.kaloneo-practical-image img{
+  max-height:none!important;
+  object-fit:contain!important;
+}
+@media(max-height:800px){
+  .kaloneo-image-phase,
+  .kaloneo-practical-image,
+  .kaloneo-practical-image img{
+    max-height:none!important;
+  }
+}
+
