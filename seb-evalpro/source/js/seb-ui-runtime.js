@@ -800,6 +800,7 @@
       if (!unlocked) button.tabIndex = -1;
       else if (button.tabIndex < 0) button.removeAttribute('tabindex');
     });
+    try { window.KaloneoNavigation?.refresh?.(); } catch (_) {}
   }
 
   function schedule(){
@@ -891,7 +892,7 @@
     page5:'#page5Next',
     page5_1:'#page5_1Next',
     page6:'#page6Next',
-    page11:'#page11 .suivant'
+    page11:'.suivant'
   });
 
   const OWNED_SOURCE_SELECTORS=[
