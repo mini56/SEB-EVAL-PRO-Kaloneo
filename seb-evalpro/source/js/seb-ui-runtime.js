@@ -1056,11 +1056,17 @@
 
   function sourceVisible(source){
     if(!source || !source.isConnected || source.hidden) return false;
-    let style;
-    try{style=getComputedStyle(source);}catch(_){return false}
-    if(style.display==='none') return false;
     if(source.getAttribute('aria-hidden')==='true' && source.classList.contains('seb-exercise-nav-locked')) return false;
-    return source.getClientRects().length>0;
+    let node=source;
+    try{
+      while(node && node.nodeType===1){
+        const style=getComputedStyle(node);
+        if(style.display==='none' || style.visibility==='hidden') return false;
+        if(node===document.body) break;
+        node=node.parentElement;
+      }
+    }catch(_){return false}
+    return true;
   }
 
   function copyButtonStyle(source,proxy){
