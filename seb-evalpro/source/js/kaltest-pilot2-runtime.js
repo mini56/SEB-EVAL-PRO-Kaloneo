@@ -910,8 +910,15 @@
     const calculator = document.getElementById('kaltest-calculator');
     const calculatorEnabled = test.calculator?.compatible === true && test.calculator?.defaultEnabled !== false;
     calculator.hidden = !calculatorEnabled;
-    if (calculatorEnabled) calculator.style.removeProperty('display');
-    else calculator.style.setProperty('display', 'none', 'important');
+    if (calculatorEnabled) {
+      calculator.style.removeProperty('display');
+    } else {
+      calculator.style.setProperty('display', 'none', 'important');
+      try { window.closeCalculator?.(); } catch (_) {}
+      requestAnimationFrame(() => {
+        try { window.closeCalculator?.(); } catch (_) {}
+      });
+    }
 
     const next = document.getElementById('kaltest-next');
     const isLastActiveTest = state.testIndex === ACTIVE_TESTS.length - 1;
