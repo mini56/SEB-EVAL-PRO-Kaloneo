@@ -64,7 +64,8 @@ const main=read(path.join(sebRoot,'src','main.js'));
 
 for(const token of [
   'builder-core.js','Importer test.json','table-grid','Gratte-ciel 6 × 6',
-  'Largeurs en caractères + reste disponible','Démarrer le compteur','Arrêter le compteur'
+  'value="chars-rest"','id="block1-width-chars"','id="last-block-remainder"',
+  'Démarrer le compteur','Arrêter le compteur'
 ]) if(!builderHtml.includes(token)) fail('Builder UI incomplet: '+token);
 
 for(const token of [
