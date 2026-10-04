@@ -46,6 +46,7 @@
         responseType:String(q.response?.type||'text'),
         normalizer:q.response?.normalizer||'',
         acceptedAnswers:(q.acceptedAnswers||[]).join('; '),
+        acceptedMinutes:Number.isInteger(q.acceptedMinutes)?q.acceptedMinutes:'',
         units:(q.acceptedUnits||q.units||[]).join('; '),
         points:Number(q.points==null?1:q.points),
         example:Boolean(q.example),
@@ -255,10 +256,14 @@
       id,
       prompt:q.prompt||'',
       response,
-      acceptedAnswers:splitValues(q.acceptedAnswers),
       points:q.example?0:Math.max(0,Number(q.points)||0),
       example:Boolean(q.example)
     };
+    if(response.type==='duration'){
+      out.acceptedMinutes=Math.max(0,Number(q.acceptedMinutes)||0);
+    } else {
+      out.acceptedAnswers=splitValues(q.acceptedAnswers);
+    }
     const units=splitValues(q.units);
     if(units.length) out.acceptedUnits=units;
     if(q.unitInput===true) out.unitInput=true;
@@ -301,7 +306,13 @@
       if(!target) continue;
       target.prompt=built.prompt;
       target.response=built.response;
-      target.acceptedAnswers=built.acceptedAnswers;
+      if(built.response?.type==='duration'){
+        target.acceptedMinutes=built.acceptedMinutes;
+        if(Object.prototype.hasOwnProperty.call(target,'acceptedAnswers')) delete target.acceptedAnswers;
+      } else {
+        target.acceptedAnswers=built.acceptedAnswers;
+        if(Object.prototype.hasOwnProperty.call(target,'acceptedMinutes')) delete target.acceptedMinutes;
+      }
       if(Object.prototype.hasOwnProperty.call(target,'points') || built.points!==1) target.points=built.points;
       if(Object.prototype.hasOwnProperty.call(target,'example') || built.example) target.example=built.example;
       if(built.acceptedUnits) target.acceptedUnits=built.acceptedUnits;
@@ -420,12 +431,12 @@
     return {
       kaltestFormat:1,
       minSebEvalPro:'0.3.10',
-      builderVersion:'kaloneo-test-builder-2.0.0',
+      builderVersion:'2.0.0',
       id:m.id||cleanId(m.title),
       version:m.version||'1.0.0',
       title:m.title||'',
       category:m.category||'',
-      kind:'exercise',
+      kind:'questionnaire',
       scored:m.scored!==false,
       icon:m.icon?clone(m.icon):undefined,
       features:[...new Set(features)],
@@ -451,7 +462,8 @@
       questions,
       outputs:[
         {id:'score',type:'number'},{id:'score_max',type:'number'},{id:'pourcentage',type:'number'},{id:'status',type:'string'}
-      ]
+      ],
+      bilanContributions:[]
     };
   }
 
