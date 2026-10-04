@@ -756,7 +756,13 @@ body[data-kaloneo-page="planning"] #right{
   overflow:hidden!important;
 }
 body[data-kaloneo-page="planning"] #left>div:has(#btnValider,#btnSuivant){
-  display:none!important;
+  display:flex!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
 }
 
 /* Dictée : le footer historique vide disparaît, le workspace reçoit toute la hauteur disponible. */
@@ -765,7 +771,14 @@ body[data-kaloneo-page="dictee"] .workspace{
   flex:1 1 auto!important;
 }
 body[data-kaloneo-page="dictee"] footer.card.footer{
-  display:none!important;
+  display:flex!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  overflow:visible!important;
 }
 
 /* Tri : aucune page longue. Le panneau autoévaluation remplace le panneau consigne dans la même zone. */
@@ -816,7 +829,14 @@ body[data-kaloneo-page="tri"] #autoComment{
 }
 body[data-kaloneo-page="tri"] .footer:has(#seb-tri-next),
 body[data-kaloneo-page="tri"] .footer:has(#seb-tri-auto-validate){
-  display:none!important;
+  display:flex!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  overflow:visible!important;
 }
 
 /* Traitement de texte / Mail : 50/50 réels dans la hauteur utile. */
