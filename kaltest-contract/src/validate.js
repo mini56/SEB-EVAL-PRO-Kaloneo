@@ -15,7 +15,7 @@ const OUTPUT_TYPES = new Set([
 const MODES = new Set(['manual', 'automatic']);
 const DIRECTIONS = new Set(['higher-is-better', 'lower-is-better']);
 const AGGREGATIONS = new Set(['direct', 'sum-score', 'average']);
-const QUESTION_TYPES = new Set(['number', 'text', 'duration', 'single-choice', 'multiple-choice', 'boolean']);
+const QUESTION_TYPES = new Set(['number', 'number-unit', 'text', 'duration', 'single-choice', 'multiple-choice', 'boolean', 'select']);
 const { validateManifest, validateMediaDescriptor, validateLayoutDefinition } = require('./compatibility');
 
 function isObject(value) {
@@ -97,7 +97,7 @@ function validateQuestions(test, errors) {
     if (!isObject(question.response) || !QUESTION_TYPES.has(question.response.type)) {
       push(errors, `${p}.response.type`, 'type de réponse non reconnu');
     } else {
-      if (question.response.type === 'single-choice' || question.response.type === 'multiple-choice') {
+      if (question.response.type === 'single-choice' || question.response.type === 'multiple-choice' || question.response.type === 'select') {
         if (!Array.isArray(question.response.options) || question.response.options.length < 2 ||
             question.response.options.some(option => typeof option !== 'string' || !option.trim())) {
           push(errors, `${p}.response.options`, 'au moins deux choix texte sont obligatoires');
@@ -124,6 +124,10 @@ function validateQuestions(test, errors) {
     if (question.example !== true && test.scored !== false && question.response?.type !== 'duration') {
       if (!Array.isArray(question.acceptedAnswers) || question.acceptedAnswers.length === 0) {
         push(errors, `${p}.acceptedAnswers`, 'au moins une réponse attendue est obligatoire');
+      } else if (question.response?.type === 'multiple-choice') {
+        if (!question.acceptedAnswers.every(set => Array.isArray(set) && set.length > 0 && set.every(value => typeof value === 'string' && value.trim()))) {
+          push(errors, `${p}.acceptedAnswers`, 'pour choix multiple, chaque réponse attendue doit être un ensemble de choix texte');
+        }
       }
     }
 
@@ -165,6 +169,138 @@ function validateQuestions(test, errors) {
 
     if (question.unitScored !== undefined && typeof question.unitScored !== 'boolean') {
       push(errors, `${p}.unitScored`, 'booléen attendu');
+    }
+  });
+}
+
+function validateEmbeddedResource(resource, errors, path) {
+  if (!isObject(resource)) {
+    push(errors, path, 'ressource embarquée obligatoire');
+    return;
+  }
+  if (typeof resource.data !== 'string' || !resource.data.startsWith('data:')) {
+    push(errors, `${path}.data`, 'ressource hors-ligne embarquée attendue sous forme data:');
+  }
+  if (resource.name !== undefined && typeof resource.name !== 'string') {
+    push(errors, `${path}.name`, 'nom de ressource invalide');
+  }
+}
+
+function validateBuilderContent(test, errors) {
+  const BUILDER_CONTENT_TYPES = new Set([
+    'text','html','html-js','image','audio','video','question',
+    'response-table','inline-flow','table-definition','table-grid'
+  ]);
+  const GRID_CELL_TYPES = new Set([
+    'empty','fixed-text','candidate-answer','select','choice-option','unit','image','audio','video'
+  ]);
+  const content = test.presentation?.builderContent;
+  if (content === undefined) return;
+  if (!Array.isArray(content) || content.length === 0) {
+    push(errors, 'presentation.builderContent', 'au moins un bloc généré est obligatoire');
+    return;
+  }
+  const questions = new Set((test.questions || []).map(question => question.id));
+  const layout = test.presentation?.layout;
+  if (layout === 'chars-rest') {
+    const sizing = test.presentation?.blockSizing;
+    if (!isObject(sizing) || sizing.mode !== 'characters-and-remainder' || !Array.isArray(sizing.blocks)) {
+      push(errors, 'presentation.blockSizing', 'largeurs en caractères + reste disponibles obligatoires');
+    } else {
+      const first = Number(sizing.blocks[0]?.widthChars);
+      if (!Number.isFinite(first) || first < 3) push(errors, 'presentation.blockSizing.blocks[0].widthChars', 'largeur minimale : 3 caractères');
+      const second = sizing.blocks[1] || {};
+      if (second.remainder !== true) {
+        const width = Number(second.widthChars);
+        if (!Number.isFinite(width) || width < 3) push(errors, 'presentation.blockSizing.blocks[1]', 'largeur ≥ 3 ou remainder=true obligatoire');
+      }
+    }
+  }
+  content.forEach((item,index) => {
+    const p = `presentation.builderContent[${index}]`;
+    if (!isObject(item) || !BUILDER_CONTENT_TYPES.has(item.type)) {
+      push(errors, `${p}.type`, 'type de bloc KALONÉO inconnu');
+      return;
+    }
+    if (item.zone !== undefined && !['left','right'].includes(item.zone)) push(errors, `${p}.zone`, 'zone attendue : left ou right');
+    if (['image','audio','video'].includes(item.type)) validateEmbeddedResource(item.resource, errors, `${p}.resource`);
+    if (item.type === 'question') {
+      if (!requireId(errors, item.questionId, `${p}.questionId`)) return;
+      if (!questions.has(item.questionId)) push(errors, `${p}.questionId`, 'question référencée absente');
+    }
+    if (item.type === 'response-table') {
+      const definition = item.definition;
+      if (!isObject(definition) || !Array.isArray(definition.headers) || definition.headers.length < 2) {
+        push(errors, `${p}.definition`, 'tableau de réponses invalide');
+      } else if (definition.columns !== undefined) {
+        if (!Array.isArray(definition.columns)) push(errors, `${p}.definition.columns`, 'tableau de colonnes attendu');
+        else definition.columns.forEach((column,columnIndex) => {
+          const cp = `${p}.definition.columns[${columnIndex}]`;
+          if (!isObject(column)) return push(errors, cp, 'colonne obligatoire');
+          if (column.widthChars !== undefined && column.widthChars !== '' &&
+              (!Number.isFinite(Number(column.widthChars)) || Number(column.widthChars) < 3)) push(errors, `${cp}.widthChars`, 'largeur minimale : 3 caractères');
+          if (column.align !== undefined && !['left','center'].includes(column.align)) push(errors, `${cp}.align`, 'alignement attendu : left ou center');
+        });
+      }
+    }
+    if (item.type === 'inline-flow') {
+      if (!Array.isArray(item.flow)) push(errors, `${p}.flow`, 'flux texte obligatoire');
+      else item.flow.forEach((part,partIndex) => {
+        const pp = `${p}.flow[${partIndex}]`;
+        if (!isObject(part) || !['text','question'].includes(part.type)) push(errors, `${pp}.type`, 'type attendu : text ou question');
+        else if (part.type === 'question' && !questions.has(part.questionId)) push(errors, `${pp}.questionId`, 'question référencée absente');
+      });
+    }
+    if (item.type === 'table-definition') {
+      const definition = item.definition;
+      if (!isObject(definition) || !Array.isArray(definition.questionIds)) push(errors, `${p}.definition`, 'définition de tableau invalide');
+      else definition.questionIds.forEach((id,qIndex) => {
+        if (!questions.has(id)) push(errors, `${p}.definition.questionIds[${qIndex}]`, 'question référencée absente');
+      });
+    }
+    if (item.type === 'table-grid') {
+      const table = item.table;
+      if (!isObject(table) || !Number.isInteger(Number(table.rows)) || Number(table.rows) < 1 ||
+          !Number.isInteger(Number(table.cols)) || Number(table.cols) < 1) {
+        push(errors, `${p}.table`, 'dimensions de grille invalides');
+        return;
+      }
+      if (!Array.isArray(table.cells) || table.cells.length !== Number(table.rows)) {
+        push(errors, `${p}.table.cells`, 'nombre de lignes incohérent');
+        return;
+      }
+      table.cells.forEach((row,rowIndex) => {
+        if (!Array.isArray(row) || row.length !== Number(table.cols)) {
+          push(errors, `${p}.table.cells[${rowIndex}]`, 'nombre de colonnes incohérent');
+          return;
+        }
+        row.forEach((cell,columnIndex) => {
+          const cp = `${p}.table.cells[${rowIndex}][${columnIndex}]`;
+          if (!isObject(cell) || !GRID_CELL_TYPES.has(cell.kind)) {
+            push(errors, `${cp}.kind`, 'type de cellule KALONÉO inconnu');
+            return;
+          }
+          const rowSpan = Number(cell.rowSpan || 1);
+          const colSpan = Number(cell.colSpan || 1);
+          if (!Number.isInteger(rowSpan) || rowSpan < 1 || !Number.isInteger(colSpan) || colSpan < 1) push(errors, cp, 'fusion de cellule invalide');
+          if (['candidate-answer','select','choice-option','unit'].includes(cell.kind)) {
+            if (!requireId(errors, cell.questionId, `${cp}.questionId`)) return;
+            if (!questions.has(cell.questionId)) push(errors, `${cp}.questionId`, 'question de cellule absente');
+          }
+          if (['image','audio','video'].includes(cell.kind) && (typeof cell.value !== 'string' || !cell.value.startsWith('data:'))) {
+            push(errors, `${cp}.value`, 'média de cellule hors-ligne non embarqué');
+          }
+        });
+      });
+      if (table.columns !== undefined) {
+        if (!Array.isArray(table.columns) || table.columns.length !== Number(table.cols)) push(errors, `${p}.table.columns`, 'définition des colonnes incohérente');
+        else table.columns.forEach((column,columnIndex) => {
+          const cp = `${p}.table.columns[${columnIndex}]`;
+          if (column.widthChars !== undefined && column.widthChars !== '' &&
+              (!Number.isFinite(Number(column.widthChars)) || Number(column.widthChars) < 3)) push(errors, `${cp}.widthChars`, 'largeur minimale : 3 caractères');
+          if (column.align !== undefined && !['left','center'].includes(column.align)) push(errors, `${cp}.align`, 'alignement attendu : left ou center');
+        });
+      }
     }
   });
 }
@@ -473,6 +609,7 @@ function validateTestDefinition(test, bilanDefinitions = []) {
       for (const issue of layoutResult.errors) push(errors, issue.path, issue.message);
     }
   }
+  validateBuilderContent(test, errors);
 
   if (test.media !== undefined) {
     if (!Array.isArray(test.media)) {
