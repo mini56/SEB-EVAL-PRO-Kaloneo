@@ -19,7 +19,8 @@ if(markerIndex<0) fail('barre stable V16 absente');
 const stable=runtime.slice(markerIndex);
 
 for(const token of [
-  '--kaloneo-bottom-bar-height:52px',
+  'const BAR_HEIGHT=52;',
+  '--kaloneo-bottom-bar-height:${BAR_HEIGHT}px',
   'Barre de navigation KALONÉO',
   'id="kaloneo-nav-brand"',
   'id="kaloneo-nav-logo-img"',
