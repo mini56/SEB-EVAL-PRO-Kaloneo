@@ -328,7 +328,7 @@ app.whenReady().then(async () => {
       return;
     }
 
-    // 6. Tests / Parcours : page volontairement vide avec Fermer.
+    // 6. Tests / Parcours : KALONÉO intégré + retour Fermer.
     await win.webContents.executeJavaScript("document.getElementById('seb-evalpro-tests-parcours').click();true");
     await wait(100);
     if (openTestsParcoursCalls!==1) {
@@ -337,11 +337,22 @@ app.whenReady().then(async () => {
     }
     await win.loadFile(path.join(web,'admin-tests-parcours.html'));
     await wait(550);
-    const testsPage=await win.webContents.executeJavaScript("(()=>{const main=document.querySelector('main');const buttons=main?[...main.querySelectorAll('button')]:[];return{title:String(main?.querySelector('h1')?.textContent||'').trim(),buttonCount:buttons.length,closeText:String(document.getElementById('close-tests-parcours')?.textContent||'').trim()};})()");
-    if (testsPage.title!=='Tests / Parcours'||testsPage.buttonCount!==1||testsPage.closeText!=='Fermer') {
+    const testsPage=await win.webContents.executeJavaScript("(()=>{const main=document.querySelector('main');const buttons=main?[...main.querySelectorAll('button')]:[];return{title:String(main?.querySelector('h1')?.textContent||'').trim(),buttonCount:buttons.length,builderText:String(document.getElementById('open-kaloneo-builder')?.textContent||'').trim(),closeText:String(document.getElementById('close-tests-parcours')?.textContent||'').trim()};})()");
+    if (testsPage.title!=='Tests / Parcours'||testsPage.buttonCount!==2||!/KALONÉO/.test(testsPage.builderText)||testsPage.closeText!=='Fermer') {
       die('page Tests / Parcours non conforme', testsPage);
       return;
     }
+
+    await win.webContents.executeJavaScript("document.getElementById('open-kaloneo-builder').click();true");
+    await wait(550);
+    const builderPage=await win.webContents.executeJavaScript("(()=>({title:String(document.querySelector('h1')?.textContent||'').trim(),hasImport:!!document.getElementById('import-json'),hasGrid:[...document.querySelectorAll('.block-type option')].some(o=>o.value==='table-grid'),hasFreeLayout:[...document.querySelectorAll('#test-layout option')].some(o=>o.value==='chars-rest'),hasBack:!!document.getElementById('back-tests')}))()");
+    if (!/KALONÉO/.test(builderPage.title)||!builderPage.hasImport||!builderPage.hasGrid||!builderPage.hasFreeLayout||!builderPage.hasBack) {
+      die('Builder KALONÉO intégré non conforme', builderPage);
+      return;
+    }
+
+    await win.webContents.executeJavaScript("document.getElementById('back-tests').click();true");
+    await wait(450);
     await win.webContents.executeJavaScript("document.getElementById('close-tests-parcours').click();true");
     await wait(100);
     if (closeTestsParcoursCalls!==1) {
@@ -386,7 +397,7 @@ app.whenReady().then(async () => {
     }
 
     console.log('BUILD21_ADMIN_ELECTRON_SMOKE: OK');
-    console.log(JSON.stringify({lockedInitial,unlockedActive,noActive,homeState,privacyShown,privacyHidden,testsPage,bilanButtons,endBilanCalls,returnCandidateCalls}));
+    console.log(JSON.stringify({lockedInitial,unlockedActive,noActive,homeState,privacyShown,privacyHidden,testsPage,builderPage,bilanButtons,endBilanCalls,returnCandidateCalls}));
 
     clearTimeout(timeout);
     win.destroy();
