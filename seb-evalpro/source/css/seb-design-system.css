@@ -139,6 +139,26 @@ h2,
   --seb-button-color: var(--seb-red);
 }
 
+/* Compteur commun KALONÉO — même lecture et mêmes actions sur toutes les pages. */
+.seb-chrono-display {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  font-size: 44px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums !important;
+  color: var(--seb-blue-100) !important;
+  text-align: center !important;
+}
+
+.seb-action-btn.seb-btn-timer-start,
+.seb-action-btn.seb-btn-timer-stop {
+  min-width: 178px;
+  min-height: 38px;
+  padding: 7px 12px;
+  white-space: nowrap;
+}
+
 .seb-action-btn.seb-btn-solid {
   color: #fff;
   border-color: var(--seb-button-color);
