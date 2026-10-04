@@ -85,6 +85,7 @@
       version:'1.0.0',
       category:'mathematiques',
       scored:true,
+      icon:null,
       layout:'single',
       template:'generic',
       scenario:'',
@@ -116,6 +117,7 @@
       version:$('test-version').value.trim() || '1.0.0',
       category:$('test-category').value,
       scored:$('test-scored').value === 'true',
+      icon:selectedIcon(),
       layout:$('test-layout').value,
       template:$('test-template').value,
       scenario:$('test-scenario').value.trim(),
@@ -147,6 +149,7 @@
     $('test-version').value=m.version;
     $('test-category').value=m.category;
     $('test-scored').value=String(m.scored !== false);
+    $('selected-icon-id').value=m.icon?.id||'';
     $('test-layout').value=Core.LAYOUTS.includes(m.layout)?m.layout:'single';
     $('test-template').value=Array.from($('test-template').options).some(o=>o.value===m.template)?m.template:'generic';
     $('test-scenario').value=m.scenario;
@@ -175,6 +178,49 @@
     $('chrono-options').hidden=!$('chrono-enabled').checked;
     $('admin-options').hidden=!$('admin-intervention').checked;
     $('material-options').hidden=!$('external-material').checked;
+  }
+
+
+  function iconLibrary() {
+    return Array.isArray(window.KaloneoIconLibrary?.icons) ? window.KaloneoIconLibrary.icons : [];
+  }
+
+  function selectedIcon() {
+    const id=$('selected-icon-id')?.value||'';
+    const icon=iconLibrary().find(item=>item.id===id);
+    return icon ? {id:icon.id,label:icon.label,data:icon.data} : null;
+  }
+
+  function renderIconPicker() {
+    const host=$('icon-picker');
+    if(!host) return;
+    host.innerHTML='';
+    const filter=String($('icon-search')?.value||'')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+    const selected=$('selected-icon-id')?.value||'';
+
+    iconLibrary().forEach(icon=>{
+      const searchable=(icon.id+' '+icon.label).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      if(filter&&!searchable.includes(filter)) return;
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='icon-choice';
+      button.classList.toggle('selected',icon.id===selected);
+      button.title=icon.label;
+      button.dataset.iconId=icon.id;
+      const img=document.createElement('img');
+      img.src=icon.data;
+      img.alt='';
+      const span=document.createElement('span');
+      span.textContent=icon.label;
+      button.append(img,span);
+      button.addEventListener('click',()=>{
+        $('selected-icon-id').value=icon.id;
+        renderIconPicker();
+        changed();
+      });
+      host.appendChild(button);
+    });
   }
 
   function currentModel() {
@@ -907,6 +953,16 @@
     const m=collectMeta();
     $('preview-title').textContent=m.title||'Nouveau test';
     $('preview-version').textContent='v'+m.version;
+    const previewIcon=$('preview-test-icon');
+    if(m.icon?.data) {
+      previewIcon.src=m.icon.data;
+      previewIcon.alt=m.icon.label||'';
+      previewIcon.hidden=false;
+    } else {
+      previewIcon.removeAttribute('src');
+      previewIcon.alt='';
+      previewIcon.hidden=true;
+    }
     $('preview-scenario').textContent=m.scenario||'Le scénario apparaîtra ici.';
     $('preview-instruction').textContent=m.instruction||'Les consignes apparaîtront ici.';
     $('preview-calculator').hidden=!m.calculatorCompatible;
@@ -1114,6 +1170,7 @@
     state.sourceDefinition=model.sourceDefinition;
     state.blocks=model.blocks;
     applyMeta(model.meta);
+    renderIconPicker();
     $('test-template').value=model.meta.template && Array.from($('test-template').options).some(o=>o.value===model.meta.template)
       ? model.meta.template : 'generic';
     saveDraft(false);
@@ -1161,6 +1218,17 @@
       applyMeta(defaultMeta());
       state.blocks=[baseBlock('text')];
     }
+
+    if(window.KaloneoIconLibrary?.count!==70) {
+      alert('Bibliothèque d’icônes KALONÉO incomplète : 70 icônes attendues.');
+    }
+    renderIconPicker();
+    $('icon-search').addEventListener('input',renderIconPicker);
+    $('clear-icon').addEventListener('click',()=>{
+      $('selected-icon-id').value='';
+      renderIconPicker();
+      changed();
+    });
 
     $('back-tests').addEventListener('click',()=>{ window.location.href='../admin-tests-parcours.html'; });
     $('import-json').addEventListener('click',()=>$('import-json-file').click());
