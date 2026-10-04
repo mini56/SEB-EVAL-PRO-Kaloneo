@@ -74,94 +74,127 @@ function assertCommon(s,label){
 
 app.commandLine.appendSwitch('disable-gpu');
 
-app.whenReady().then(async()=>{
-  const win=new BrowserWindow({
-    show:false,width:1366,height:768,useContentSize:true,
-    webPreferences:{contextIsolation:true,nodeIntegration:false,sandbox:false,devTools:false,spellcheck:false}
+function createWindow(){
+  return new BrowserWindow({
+    show:false,
+    width:1366,
+    height:768,
+    useContentSize:true,
+    webPreferences:{
+      contextIsolation:true,
+      nodeIntegration:false,
+      sandbox:false,
+      devTools:false,
+      spellcheck:false
+    }
   });
+}
 
+async function withPage(file,options,callback){
+  const win=createWindow();
   try{
-    await load(win,'qcmv1.0.html',{query:{page:'4'},hash:'page4'});
-    let frac=await navSnapshot(win);
-    assertCommon(frac,'Fractions');
-    if(frac.actionTexts.length>1) fail('Fractions: plusieurs actions Suivant dès l’ouverture',frac);
-    await js(win,`document.querySelector('#page4 .item')?.click();true`);
-    await wait(260);
-    frac=await navSnapshot(win);
-    assertCommon(frac,'Fractions après réponse');
-    if(frac.actionTexts.length!==1 || !/Suivant/i.test(frac.actionTexts[0])) fail('Fractions: exactement un seul Suivant attendu',frac);
+    await load(win,file,options);
+    return await callback(win);
+  } finally {
+    try{ if(!win.isDestroyed()) win.destroy(); }catch(_){}
+    await wait(90);
+  }
+}
 
-    const fracSources=await js(win,`(() => ({
-      owned:Array.from(document.querySelectorAll('#page4 button.seb-kaloneo-owned-nav-source')).map(b=>b.id||b.className),
-      visibleOriginal:Array.from(document.querySelectorAll('#page4 button.seb-kaloneo-owned-nav-source')).filter(b=>{const r=b.getBoundingClientRect();return r.width>2&&r.height>2&&getComputedStyle(b).opacity!=='0'}).length
-    }))()`);
-    if(fracSources.visibleOriginal!==0) fail('Fractions: ancien bouton encore visible dans la page',fracSources);
+app.whenReady().then(async()=>{
+  try{
+    const frac=await withPage('qcmv1.0.html',{query:{page:'4'},hash:'page4'},async(win)=>{
+      let snap=await navSnapshot(win);
+      assertCommon(snap,'Fractions');
+      if(snap.actionTexts.length>1) fail('Fractions: plusieurs actions Suivant dès l’ouverture',snap);
+      await js(win,`document.querySelector('#page4 .item')?.click();true`);
+      await wait(260);
+      snap=await navSnapshot(win);
+      assertCommon(snap,'Fractions après réponse');
+      if(snap.actionTexts.length!==1 || !/Suivant/i.test(snap.actionTexts[0])) fail('Fractions: exactement un seul Suivant attendu',snap);
+      const sources=await js(win,`(() => ({
+        owned:Array.from(document.querySelectorAll('#page4 button.seb-kaloneo-owned-nav-source')).map(b=>b.id||b.className),
+        visibleOriginal:Array.from(document.querySelectorAll('#page4 button.seb-kaloneo-owned-nav-source')).filter(b=>{const r=b.getBoundingClientRect();return r.width>2&&r.height>2&&getComputedStyle(b).opacity!=='0'}).length
+      }))()`);
+      if(sources.visibleOriginal!==0) fail('Fractions: ancien bouton encore visible dans la page',sources);
+      return {snap,sources};
+    });
 
-    await load(win,'planning.html');
-    const planning=await navSnapshot(win);
-    assertCommon(planning,'Planning');
-    if(planning.actionTexts.length!==1 || !/Valider mon planning/i.test(planning.actionTexts[0])) fail('Planning: une seule action Valider attendue',planning);
+    const planning=await withPage('planning.html',null,async(win)=>{
+      const snap=await navSnapshot(win);
+      assertCommon(snap,'Planning');
+      if(snap.actionTexts.length!==1 || !/Valider mon planning/i.test(snap.actionTexts[0])) fail('Planning: une seule action Valider attendue',snap);
+      return snap;
+    });
 
-    await load(win,'brique.html');
-    const brique=await navSnapshot(win);
-    assertCommon(brique,'Briques');
-    const briqueLayout=await js(win,`(() => {
-      const title=document.querySelector('h1');
-      const scenario=document.querySelector('.kaloneo-context-scenario');
-      const consigne=document.querySelector('.kaloneo-context-consigne');
-      return {
-        titleTop:title?.getBoundingClientRect().top ?? null,
-        scenarioTop:scenario?.getBoundingClientRect().top ?? null,
-        consigneTop:consigne?.getBoundingClientRect().top ?? null,
-        scrollY:window.scrollY
-      };
-    })()`);
-    if(briqueLayout.titleTop!==null && briqueLayout.titleTop<-1) fail('Briques: titre décalé hors écran',briqueLayout);
-    if(briqueLayout.scenarioTop!==null && briqueLayout.scenarioTop<-1) fail('Briques: scénario décalé hors écran',briqueLayout);
-    if(briqueLayout.consigneTop!==null && briqueLayout.consigneTop<-1) fail('Briques: consigne décalée hors écran',briqueLayout);
+    const brique=await withPage('brique.html',null,async(win)=>{
+      const snap=await navSnapshot(win);
+      assertCommon(snap,'Briques');
+      const layout=await js(win,`(() => {
+        const title=document.querySelector('h1');
+        const scenario=document.querySelector('.kaloneo-context-scenario');
+        const consigne=document.querySelector('.kaloneo-context-consigne');
+        return {
+          titleTop:title?.getBoundingClientRect().top ?? null,
+          scenarioTop:scenario?.getBoundingClientRect().top ?? null,
+          consigneTop:consigne?.getBoundingClientRect().top ?? null,
+          scrollY:window.scrollY
+        };
+      })()`);
+      if(layout.titleTop!==null && layout.titleTop<-1) fail('Briques: titre décalé hors écran',layout);
+      if(layout.scenarioTop!==null && layout.scenarioTop<-1) fail('Briques: scénario décalé hors écran',layout);
+      if(layout.consigneTop!==null && layout.consigneTop<-1) fail('Briques: consigne décalée hors écran',layout);
+      return {snap,layout};
+    });
 
-    await load(win,'tri_de_cheville.html');
-    const tri=await navSnapshot(win);
-    assertCommon(tri,'Tri');
-    if(tri.actionTexts.length>1) fail('Tri: plusieurs actions concurrentes au démarrage',tri);
+    const tri=await withPage('tri_de_cheville.html',null,async(win)=>{
+      const snap=await navSnapshot(win);
+      assertCommon(snap,'Tri');
+      if(snap.actionTexts.length>1) fail('Tri: plusieurs actions concurrentes au démarrage',snap);
+      return snap;
+    });
 
-    await load(win,'dictee.html');
-    const dictee=await navSnapshot(win);
-    assertCommon(dictee,'Dictée');
-    if(dictee.actionTexts.length!==1 || !/Dictée terminée|Suivant/i.test(dictee.actionTexts[0])) fail('Dictée: action unique attendue',dictee);
+    const dictee=await withPage('dictee.html',null,async(win)=>{
+      const snap=await navSnapshot(win);
+      assertCommon(snap,'Dictée');
+      if(snap.actionTexts.length!==1 || !/Dictée terminée|Suivant/i.test(snap.actionTexts[0])) fail('Dictée: action unique attendue',snap);
+      return snap;
+    });
 
-    await load(win,'nvmail.html');
-    const mail=await navSnapshot(win);
-    assertCommon(mail,'E-mail');
-    await js(win,`document.getElementById('nvmail-file-picker')?.click();true`);
-    await wait(120);
-    const attachment=await js(win,`(() => {
-      const ul=document.querySelector('#modalFichier ul');
-      const li=document.querySelector('#modalFichier li');
-      return {
-        className:ul?.className||'',
-        type:ul?getComputedStyle(ul).listStyleType:'',
-        marker:li?getComputedStyle(li,'::marker').content:''
-      };
-    })()`);
-    if(attachment.type!=='none' || String(attachment.marker).includes('•')) fail('E-mail: puce encore présente devant les fichiers',attachment);
+    const mail=await withPage('nvmail.html',null,async(win)=>{
+      const snap=await navSnapshot(win);
+      assertCommon(snap,'E-mail');
+      await js(win,`document.getElementById('nvmail-file-picker')?.click();true`);
+      await wait(120);
+      const attachment=await js(win,`(() => {
+        const ul=document.querySelector('#modalFichier ul');
+        const li=document.querySelector('#modalFichier li');
+        return {
+          className:ul?.className||'',
+          type:ul?getComputedStyle(ul).listStyleType:'',
+          marker:li?getComputedStyle(li,'::marker').content:''
+        };
+      })()`);
+      if(attachment.type!=='none' || String(attachment.marker).includes('•')) fail('E-mail: puce encore présente devant les fichiers',attachment);
+      return {snap,attachment};
+    });
 
-    await load(win,'carre.html');
-    const puzzle=await navSnapshot(win);
-    assertCommon(puzzle,'Puzzle');
-    if(puzzle.actionTexts.length<2 || puzzle.actionTexts.length>3) fail('Puzzle: nombre d’actions centrales incohérent',puzzle);
-    if(new Set(puzzle.actionTexts).size!==puzzle.actionTexts.length) fail('Puzzle: action dupliquée',puzzle);
+    const puzzle=await withPage('carre.html',null,async(win)=>{
+      const snap=await navSnapshot(win);
+      assertCommon(snap,'Puzzle');
+      if(snap.actionTexts.length<2 || snap.actionTexts.length>3) fail('Puzzle: nombre d’actions centrales incohérent',snap);
+      if(new Set(snap.actionTexts).size!==snap.actionTexts.length) fail('Puzzle: action dupliquée',snap);
+      return snap;
+    });
 
     console.log('PILOT15_STABLE_BOTTOM_BAR: OK');
-    console.log(JSON.stringify({frac,planning,brique,tri,dictee,mail,puzzle,attachment,briqueLayout}));
-    win.destroy();
+    console.log(JSON.stringify({frac,planning,brique,tri,dictee,mail,puzzle}));
     app.exit(0);
   }catch(error){
     console.error('PILOT15_STABLE_BOTTOM_BAR: FAIL — '+(error?.message||error));
     if(error?.stack) console.error(error.stack);
-    try{win.destroy();}catch(_){}
     app.exit(2);
   }
 }).catch(error=>{console.error(error);app.exit(2)});
 
-setTimeout(()=>{console.error('PILOT15_STABLE_BOTTOM_BAR: TIMEOUT');app.exit(3)},70000);
+setTimeout(()=>{console.error('PILOT15_STABLE_BOTTOM_BAR: TIMEOUT');app.exit(3)},90000);
