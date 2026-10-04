@@ -199,7 +199,7 @@
     const value = label.toLowerCase();
     if (/abandon|supprim|effacer|réinitial|reinitial|remise à zéro|remise a zero|annuler|fermer|quitter/.test(value)) return 'danger';
     if (/calculatrice/.test(value)) return 'calculator';
-    if (/^suivant|^exercice suivant|^précédent|^precedent|^retour|^page suivante|^étape suivante|^etape suivante|^continuer|^commencer|^terminez?|^terminer/.test(value)) return 'nav';
+    if (/^suivant|^précédent|^precedent|^retour|^page suivante|^étape suivante|^etape suivante|^continuer|^commencer|^terminez?|^terminer/.test(value)) return 'nav';
     return 'functional';
   }
 
@@ -216,7 +216,7 @@
     if (/^imprimer/.test(value)) return '⬇ ' + clean;
     if (/^voir les résultats|^voir les resultats/.test(value)) return '📊 Voir les résultats';
     if (/^retour/.test(value)) return '← ' + clean;
-    if (/^suivant|^exercice suivant|^page suivante|^étape suivante|^etape suivante|^continuer/.test(value)) return '➜ Suivant';
+    if (/^suivant|^page suivante|^étape suivante|^etape suivante|^continuer/.test(value)) return '➜ ' + clean;
     if (/^stop|^arrêter|^arreter/.test(value)) return '■ ' + clean;
     if (/^fermer/.test(value)) return '✕ ' + clean;
     if (/^annuler/.test(value)) return '✕ ' + clean;
@@ -990,23 +990,20 @@
         gap:10px!important;
       }
       #kaloneo-nav-brand{
-        width:36px;
-        flex:0 0 36px;
-        height:36px;
+        width:42px;
+        flex:0 0 42px;
+        height:100%;
         display:flex;
         align-items:center;
-        justify-content:center;
-        border-radius:7px;
-        background:#3B819C;
-        box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);
+        justify-content:flex-start;
       }
       #kaloneo-nav-logo-img{
         display:block;
-        width:28px;
-        height:28px;
-        max-width:28px;
+        width:40px;
+        height:40px;
+        max-width:40px;
         object-fit:contain;
-        border-radius:5px;
+        border-radius:7px;
         background:transparent;
         box-shadow:none;
       }
@@ -1187,8 +1184,8 @@
           padding-left:9px!important;
           padding-right:9px!important;
         }
-        #kaloneo-nav-brand{width:36px;flex-basis:36px;height:36px}
-        #kaloneo-nav-logo-img{width:28px;height:28px;max-width:28px}
+        #kaloneo-nav-brand{width:38px;flex-basis:38px}
+        #kaloneo-nav-logo-img{width:36px;height:36px;max-width:36px}
         #kaloneo-common-navigation button{padding-left:12px!important;padding-right:12px!important;font-size:14px!important}
       }
     `;
@@ -1276,17 +1273,11 @@
     }
   }
 
-  function canonicalBarLabel(value){
-    const raw=stripActionIcon(value);
-    const lower=raw.toLowerCase();
-    if(/^(?:exercice suivant|page suivante|étape suivante|etape suivante|suivant|continuer)\b/.test(lower)) return '➜ Suivant';
-    return clean(value);
-  }
   function sourceAction(selector,scope){
     const node=source(selector,scope);
     if(!node||!visibleSource(node)) return null;
     node.classList.add('seb-kaloneo-owned-nav-source');
-    return {source:node,label:canonicalBarLabel(node.textContent)};
+    return {source:node,label:clean(node.textContent)};
   }
   function chooseNextOrPrimary(nextSelector,primarySelector){
     const next=sourceAction(nextSelector);
@@ -1377,7 +1368,7 @@
     const lower=label.toLowerCase();
     let cls='seb-action-btn kaloneo-nav-action ';
     if(/calculatrice/.test(lower)) cls+='seb-btn-calculator';
-    else if(/suivant|exercice suivant|page suivante|étape suivante|etape suivante|commencez l'évaluation|commencer l'évaluation|continuer/.test(lower)) cls+='seb-btn-nav';
+    else if(/suivant|page suivante|étape suivante|etape suivante|commencez l'évaluation|commencer l'évaluation|continuer/.test(lower)) cls+='seb-btn-nav';
     else if(/recommencer/.test(lower)) cls+='seb-btn-tool';
     else cls+='seb-btn-functional';
     if(button.className!==cls) button.className=cls;
