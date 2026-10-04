@@ -1,4 +1,5 @@
 name: Build Windows KALTEST Pilot 15 stable bottom bar
+# Windows smoke isolation v2
 
 on:
   workflow_dispatch:
