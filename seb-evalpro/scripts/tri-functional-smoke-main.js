@@ -225,7 +225,9 @@ app.whenReady().then(async () => {
 
     if (!ready.ready || ready.readyKey !== '1') throw new Error('Navigation Tri non déverrouillée après autoévaluation.');
     if (!ready.auto || !ready.auto.selections.includes('ease')) throw new Error('Autoévaluation Tri non sauvegardée.');
-    if (ready.nextLocked) throw new Error('Bouton Étape suivante encore verrouillé.');
+    if (ready.nextLocked) throw new Error('Bouton Suivant encore verrouillé.');
+    const nextLabel = await win.webContents.executeJavaScript("(document.getElementById('seb-tri-next')?.textContent||'').trim()", true);
+    if (nextLabel !== 'Suivant') throw new Error('Libellé Tri attendu: Suivant, obtenu: '+nextLabel);
     if (ready.route !== 'nwtexte.html') throw new Error('Route Tri -> nwtexte incorrecte: '+ready.route);
 
     await win.reload();
