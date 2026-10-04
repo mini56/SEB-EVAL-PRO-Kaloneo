@@ -10,6 +10,7 @@ const DEFAULT_SUPPORTED_FEATURES = Object.freeze([
   'runtime.basic',
   'questionnaire.basic',
   'questionnaire.table',
+  'questionnaire.grid',
   'questionnaire.inline-gaps',
   'questionnaire.duration-fr',
   'questionnaire.supplemental-fields',
@@ -19,8 +20,18 @@ const DEFAULT_SUPPORTED_FEATURES = Object.freeze([
   'layout.nested-one-level',
   'image.auto-fit',
   'calculator.host',
+  'host.calculator',
+  'host.chrono',
+  'host.admin-intervention',
+  'host.autoevaluation',
+  'host.external-material',
+  'media.image',
+  'media.audio',
+  'media.video',
   'media.audio-player',
   'media.video-player',
+  'content.html',
+  'content.html-js',
   'transition.manual',
   'transition.auto-media',
   'bilan.bindings'
@@ -42,6 +53,7 @@ const VIDEO_CONTAINERS = Object.freeze({
 });
 
 const LAYOUT_TYPES = new Set(['single-block', 'split', 'lateral']);
+const BUILDER_LAYOUTS = new Set(['single', '50-50', '40-60', '60-40', 'chars-rest']);
 const SPLIT_RATIOS = new Set(['50/50', '40/60', '60/40']);
 const TRANSITION_MODES = new Set(['manual', 'automatic']);
 
@@ -221,7 +233,9 @@ function validateLayoutDefinition(layout, path = 'presentation.layout') {
   const errors = [];
 
   if (typeof layout === 'string') {
-    if (!LAYOUT_TYPES.has(layout)) errors.push(error(path, 'type de mise en page inconnu'));
+    if (!LAYOUT_TYPES.has(layout) && !BUILDER_LAYOUTS.has(layout)) {
+      errors.push(error(path, 'type de mise en page inconnu'));
+    }
     return { ok: errors.length === 0, errors };
   }
 
@@ -312,6 +326,7 @@ module.exports = {
   MEDIA_MAX_BYTES,
   PACKAGE_MAX_BYTES,
   DEFAULT_SUPPORTED_FEATURES,
+  BUILDER_LAYOUTS,
   parseSemver,
   compareSemver,
   validateManifest,
