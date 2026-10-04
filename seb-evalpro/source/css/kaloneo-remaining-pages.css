@@ -990,3 +990,60 @@ body[data-kaloneo-page="nvmail"] #resultatScore:not(:empty){
   font-weight:700!important;
   line-height:1.2!important;
 }
+
+
+/* PILOTE 18 — finitions issues du parcours réel du 4 octobre 2026. */
+
+/* Planning : Scénario puis Consigne occupent chacun toute la largeur. */
+body[data-kaloneo-page="planning"] .consigne-header{
+  width:100%!important;
+  flex:0 0 auto!important;
+  margin:0!important;
+  padding:6px 9px!important;
+}
+body[data-kaloneo-page="planning"] .main-content{
+  width:100%!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+}
+
+/* Fractions : l'image gauche utilise réellement la hauteur disponible du bloc 40 %. */
+#page4 .k-qcm-visual{
+  padding:6px!important;
+}
+#page4 .k-qcm-visual img{
+  max-height:none!important;
+}
+
+/* Tri : aucun état focus/active/disabled ne doit réintroduire un contour orange. */
+body[data-kaloneo-page="tri"] #startBtn,
+body[data-kaloneo-page="tri"] #startBtn:hover,
+body[data-kaloneo-page="tri"] #startBtn:active,
+body[data-kaloneo-page="tri"] #startBtn:focus,
+body[data-kaloneo-page="tri"] #startBtn:focus-visible,
+body[data-kaloneo-page="tri"] #startBtn:disabled{
+  --seb-button-color:var(--k-green)!important;
+  color:var(--k-green)!important;
+  border-color:var(--k-green)!important;
+}
+body[data-kaloneo-page="tri"] #startBtn:focus,
+body[data-kaloneo-page="tri"] #startBtn:focus-visible{
+  outline:2px solid rgba(25,135,84,.28)!important;
+  outline-offset:2px!important;
+}
+body[data-kaloneo-page="tri"] #stopBtn,
+body[data-kaloneo-page="tri"] #stopBtn:hover,
+body[data-kaloneo-page="tri"] #stopBtn:active,
+body[data-kaloneo-page="tri"] #stopBtn:focus,
+body[data-kaloneo-page="tri"] #stopBtn:focus-visible,
+body[data-kaloneo-page="tri"] #stopBtn:disabled{
+  --seb-button-color:var(--k-red)!important;
+  color:var(--k-red)!important;
+  border-color:var(--k-red)!important;
+}
+body[data-kaloneo-page="tri"] #stopBtn:focus,
+body[data-kaloneo-page="tri"] #stopBtn:focus-visible{
+  outline:2px solid rgba(198,40,40,.24)!important;
+  outline-offset:2px!important;
+}
+
