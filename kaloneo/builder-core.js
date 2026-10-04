@@ -18,6 +18,10 @@
     'text','number','number-unit','duration','single-choice','multiple-choice','boolean','select'
   ]);
   const LAYOUTS=new Set(['single','50-50','40-60','60-40','chars-rest']);
+  const BUILDER_CONTENT_TYPES=new Set([
+    'text','html','html-js','image','audio','video','question',
+    'response-table','table-grid','inline-flow','table-definition'
+  ]);
 
   function clone(value){ return JSON.parse(JSON.stringify(value==null?null:value)); }
   function cleanId(value){
@@ -535,22 +539,72 @@
     for(const feature of def?.features||[]){
       if(!SUPPORTED_FEATURES.has(feature)) errors.push('fonction non supportée: '+feature);
     }
-    for(const q of def?.questions||[]){
+    const questions=def?.questions||[];
+    const questionIds=new Set();
+    for(const q of questions){
       const type=q?.response?.type||'text';
       if(!RESPONSE_TYPES.has(type)) errors.push('type de réponse non supporté: '+type);
+      if(!q?.id) errors.push('question sans ID');
+      else if(questionIds.has(q.id)) errors.push('ID de question dupliqué: '+q.id);
+      else questionIds.add(q.id);
     }
-    const ratio=def?.presentation?.kaloneoLayout?.ratio||def?.presentation?.layout?.ratio;
+
+    const presentation=def?.presentation||{};
+    if(typeof presentation.layout==='string'&&!LAYOUTS.has(presentation.layout)) {
+      errors.push('layout Builder non supporté: '+presentation.layout);
+    }
+    const ratio=presentation?.kaloneoLayout?.ratio||presentation?.layout?.ratio;
     if(ratio&&!['50/50','40/60','60/40','100/100'].includes(ratio)) errors.push('ratio non supporté: '+ratio);
-    const ktype=def?.presentation?.kaloneoLayout?.type;
+    const ktype=presentation?.kaloneoLayout?.type;
     if(ktype&&![
       'questions-table-visual','visual-inline-gaps','work-visual','visual-schedule',
       'full-width-choice-table','visual-choice-table'
     ].includes(ktype)) errors.push('gabarit KALONÉO non supporté: '+ktype);
-    const columns=def?.presentation?.responseTable?.columns||[];
+
+    const columns=presentation?.responseTable?.columns||[];
     columns.forEach((col,index)=>{
       if(col.widthChars!=null&&Number(col.widthChars)<3) errors.push('colonne '+(index+1)+': widthChars < 3');
       if(col.align&&!['left','center'].includes(col.align)) errors.push('colonne '+(index+1)+': alignement non supporté');
     });
+
+    if(Array.isArray(presentation.builderContent)){
+      presentation.builderContent.forEach((item,index)=>{
+        const type=String(item?.type||'');
+        if(!BUILDER_CONTENT_TYPES.has(type)) {
+          errors.push('bloc Builder non supporté '+(index+1)+': '+type);
+          return;
+        }
+        if(type==='question'&&!questionIds.has(item.questionId)) {
+          errors.push('bloc Question sans questionId valide: '+String(item.questionId||''));
+        }
+        if(['image','audio','video'].includes(type)){
+          const resource=item.resource||{};
+          if(!resource.data&&!resource.name) errors.push('média Builder sans ressource: bloc '+(index+1));
+        }
+        if(type==='table-grid'){
+          const table=item.table||{};
+          if(!Number(table.rows)||!Number(table.cols)) errors.push('grille Builder sans dimensions valides');
+          const cells=Array.isArray(table.cells)?table.cells:[];
+          if(cells.length!==Number(table.rows)) errors.push('grille Builder: nombre de lignes incohérent');
+          cells.forEach((row,rowIndex)=>{
+            if(!Array.isArray(row)||row.length!==Number(table.cols)) errors.push('grille Builder: ligne '+(rowIndex+1)+' incohérente');
+            (row||[]).forEach(cell=>{
+              if(cell&&['candidate-answer','select','unit','choice-option'].includes(cell.kind)&&!questionIds.has(cell.questionId)) {
+                errors.push('grille Builder: questionId inconnu '+String(cell.questionId||''));
+              }
+            });
+          });
+        }
+      });
+    }
+
+    if(def?.chrono?.enabled===true&&def?.chrono?.engine!=='seb-common') {
+      errors.push('chronomètre local interdit: moteur seb-common requis');
+    }
+    if(def?.navigation){
+      if(def.navigation.next&&def.navigation.next!=='host') errors.push('navigation suivante doit être fournie par l’hôte');
+      if(def.navigation.abandon&&def.navigation.abandon!=='host-common') errors.push('abandon doit utiliser le composant commun');
+    }
     return {ok:errors.length===0,errors};
   }
 
@@ -565,6 +619,7 @@
 
   return Object.freeze({
     VERSION,SUPPORTED_FEATURES:[...SUPPORTED_FEATURES],RESPONSE_TYPES:[...RESPONSE_TYPES],LAYOUTS:[...LAYOUTS],
+    BUILDER_CONTENT_TYPES:[...BUILDER_CONTENT_TYPES],
     clone,cleanId,splitValues,createGridBlock,definitionToModel,modelToDefinition,analyzeDefinition,canRoundTrip
   });
 });
