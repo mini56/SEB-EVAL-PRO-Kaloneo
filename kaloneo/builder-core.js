@@ -286,18 +286,19 @@
     const byId=new Map((def.questions||[]).map(q=>[q.id,q]));
     let index=0;
     for(const block of model.blocks||[]){
-      if(block.type==='question'){
-        const built=blockQuestion(block,index++);
-        const target=byId.get(built.id);
-        if(target) Object.assign(target,built);
-      }
-      if(block.type==='table-grid'){
-        for(const q of gridQuestions(block,index)){
-          index++;
-          const target=byId.get(q.id);
-          if(target) Object.assign(target,q);
-        }
-      }
+      if(block.type!=='question') continue;
+      const built=blockQuestion(block,index++);
+      const target=byId.get(built.id);
+      if(!target) continue;
+      target.prompt=built.prompt;
+      target.response=built.response;
+      target.acceptedAnswers=built.acceptedAnswers;
+      target.points=built.points;
+      target.example=built.example;
+      if(built.acceptedUnits) target.acceptedUnits=built.acceptedUnits;
+      if(Object.prototype.hasOwnProperty.call(built,'unitInput')) target.unitInput=built.unitInput;
+      if(Object.prototype.hasOwnProperty.call(built,'unitScored')) target.unitScored=built.unitScored;
+      if(built.supplementalFields) target.supplementalFields=built.supplementalFields;
     }
   }
 
