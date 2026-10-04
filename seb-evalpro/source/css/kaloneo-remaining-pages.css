@@ -936,3 +936,57 @@ body[data-kaloneo-page="planning"] .plats-box .puce::before{
   font-weight:900!important;
   line-height:1!important;
 }
+
+
+/* PILOTE 17 — corrections issues du parcours réel du 4 octobre 2026. */
+
+/* Planning : consigne multi-ligne alignée en haut, une seule puce maîtrisée. */
+body[data-kaloneo-page="planning"] .consigne-header{
+  align-items:flex-start!important;
+}
+body[data-kaloneo-page="planning"] .consigne-header>img{
+  margin-top:0!important;
+}
+body[data-kaloneo-page="planning"] .planning-guide{
+  position:relative;
+  margin:5px 0 0!important;
+  padding-left:1.35em!important;
+  color:#27313A!important;
+  font-size:15.5px!important;
+  font-weight:400!important;
+  line-height:1.2!important;
+}
+body[data-kaloneo-page="planning"] .planning-guide::before{
+  content:"•";
+  position:absolute;
+  left:.10em;
+  top:-.02em;
+  color:var(--k-blue);
+  font-size:1.25em;
+  font-weight:900;
+  line-height:1;
+}
+
+/* Tri : une fois l'autoévaluation affichée, l'ancienne consigne quitte réellement le flux. */
+body[data-kaloneo-page="tri"] #consigne.tri-consigne-replaced{
+  display:none!important;
+}
+body[data-kaloneo-page="tri"] #autoEvalPart.visible{
+  justify-content:flex-start!important;
+  align-self:stretch!important;
+}
+
+/* Mail : confirmation discrète intégrée à la page, jamais un panneau coloré autonome. */
+body[data-kaloneo-page="nvmail"] #resultatScore:not(:empty){
+  display:block!important;
+  margin:8px 0 0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:var(--k-green)!important;
+  font-size:16px!important;
+  font-weight:700!important;
+  line-height:1.2!important;
+}
