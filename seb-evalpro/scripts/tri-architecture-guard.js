@@ -52,6 +52,7 @@ if (!chronoBlock) fail('bloc boutons chrono absent');
 const chronoButtons = chronoBlock[1].match(/<button\b/g) || [];
 if (chronoButtons.length !== 2) fail('le chronomètre doit avoir exactement 2 boutons, trouvé: ' + chronoButtons.length);
 if (!html.includes('id="startBtn"') || !html.includes('id="stopBtn"')) fail('boutons Démarrer/Arrêter absents');
+if (!html.includes('<button type="button" id="seb-tri-next" class="seb-exercise-nav-locked">Suivant</button>')) fail('bouton Suivant local du Tri absent');
 if (html.includes('id="resetBtn"')) fail('ancien troisième bouton chrono réintroduit');
 
 for (let i = 1; i <= 5; i += 1) {
