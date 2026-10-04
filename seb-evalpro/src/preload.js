@@ -1839,6 +1839,8 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   // Le bouton de confidentialité appartient aux pages candidat, jamais à la barre Admin.
   function placePrivacyToggleForAdminHome(button){
     if (!button) return button;
+    const slot = document.getElementById('kaloneo-home-slot');
+    if (slot && button.parentElement !== slot) slot.appendChild(button);
     return button;
   }
 
