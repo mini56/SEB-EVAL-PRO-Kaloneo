@@ -59,7 +59,11 @@ async function runScenario(win) {
       assert(reset.style.display==='none','Recommencer encore visible.');
       assert(validate.disabled===true,'Valider non verrouillé.');
       assert(validate.style.display==='none','Valider encore visible.');
-      assert(next.classList.contains('show'),'Page suivante non affichée.');
+      assert(next.classList.contains('show'),'Suivant non affiché.');
+      assert((next.textContent||'').trim()==='Suivant','Libellé du bouton Carré attendu: Suivant.');
+      const scenario=document.querySelector('.carre-scenario.kaloneo-context-scenario');
+      assert(Boolean(scenario),'Scénario KALONÉO absent du haut de Gratte-ciel.');
+      assert(Boolean(scenario.querySelector('.kaloneo-context-label')),'Libellé Scénario KALONÉO absent.');
       assert(Array.from(document.querySelectorAll('.cell')).every((cell)=>cell.disabled),'Cases non verrouillées.');
 
       window.sebCarre.resetPuzzle();
