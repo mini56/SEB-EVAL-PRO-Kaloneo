@@ -360,8 +360,13 @@ function isAdminTestsParcoursPage(pageName) {
   return String(pageName || '').toLowerCase() === 'admin-tests-parcours.html';
 }
 
+function isAdminKaloneoBuilderPage(pageName) {
+  return String(pageName || '').toLowerCase() === 'test-builder.html';
+}
+
 function isAdminNavigationPage(pageName) {
-  return isAdminBilanPage(pageName) || isAdminCandidatePage(pageName) || isAdminTestsParcoursPage(pageName);
+  return isAdminBilanPage(pageName) || isAdminCandidatePage(pageName) ||
+    isAdminTestsParcoursPage(pageName) || isAdminKaloneoBuilderPage(pageName);
 }
 
 function existingWebPage(pageName) {
