@@ -2192,3 +2192,50 @@ Le composant est chargé par KALTEST, QCM historiques utilisés dans le parcours
 - image à droite ;
 - système de largeur de colonnes en caractères conservé.
 
+
+
+---
+
+## 61. Barre de navigation basse commune et puce unique KALONÉO
+
+**Statut : VALIDÉ FONCTIONNELLEMENT — à confirmer visuellement par test réel**
+
+### 61.1 Barre de navigation commune
+
+Les boutons de progression et de validation ne doivent plus être positionnés librement page par page.
+
+KALONÉO fournit une barre basse commune :
+- fond transparent ou très légèrement translucide ;
+- fine séparation supérieure gris-bleu ;
+- aucune ombre lourde ;
+- boutons au style KALONÉO existant ;
+- hauteur et position identiques sur toutes les pages ;
+- zone gauche destinée notamment à **Abandonner l’exercice** ;
+- zone centrale destinée aux actions de l’exercice : **Suivant**, **Valider**, **Vérifier**, **Dictée terminée**, **Recommencer**, etc. ;
+- zone droite disponible pour une action de navigation générale lorsqu’elle est déclarée.
+
+La barre reprend les boutons existants sans réécrire leur logique : les commandes d’origine restent présentes hors écran et la barre les déclenche. Les ID, événements, validations, verrouillages et données existants restent donc inchangés.
+
+Pour les futurs tests, une page peut simplement déclarer les boutons nécessaires et leur emplacement via le composant de navigation KALONÉO. Le Test Builder ne doit pas avoir à définir leur position graphique.
+
+### 61.2 Vérifier n’est jamais imposé
+
+Le bouton **Vérifier** n’est pas ajouté automatiquement.
+
+Un exercice peut demander :
+- **Suivant** : sauvegarder puis poursuivre ;
+- **Valider** : enregistrer ou verrouiller une étape sans révéler la correction ;
+- **Vérifier** : uniquement lorsqu’un retour immédiat est volontairement souhaité.
+
+Un bouton Vérifier existant ne doit jamais être supprimé sans audit de sa fonction, car il peut participer au déroulement, au calcul, au verrouillage ou à l’apparition de l’étape suivante.
+
+### 61.3 Puce unique
+
+Les listes ordinaires des exercices, scénarios, consignes et règles utilisent une seule puce officielle :
+- **le gros point `•`** ;
+- même taille ;
+- même retrait ;
+- même espace entre la puce et le texte.
+
+Les petits points, triangles, tirets et autres variantes de puces ordinaires ne doivent plus être introduits dans les nouveaux tests.
+
