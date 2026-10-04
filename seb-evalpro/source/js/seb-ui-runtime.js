@@ -805,7 +805,7 @@
   function schedule(){
     if (scheduled) return;
     scheduled = true;
-    requestAnimationFrame(enforce);
+    setTimeout(enforce, 0);
   }
 
   function markFromEvent(event){
