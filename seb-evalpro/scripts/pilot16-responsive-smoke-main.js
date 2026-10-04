@@ -24,8 +24,18 @@ function createWindow(width,height){
 }
 
 async function load(win,file,options){
-  await win.loadFile(path.join(web,file),options||{});
-  await wait(650);
+  let lastError=null;
+  for(let attempt=0;attempt<3;attempt+=1){
+    try{
+      await win.loadFile(path.join(web,file),options||{});
+      await wait(650);
+      return;
+    }catch(error){
+      lastError=error;
+      await wait(220);
+    }
+  }
+  throw lastError;
 }
 
 async function js(win,code){ return win.webContents.executeJavaScript(code,true); }
@@ -88,6 +98,9 @@ async function testConversions(width,height){
     await waitKaltest(win,'conversions_atelier_expedition');
     await wait(250);
     const bar=await barSnapshot(win);
+    if(Math.abs(bar.innerWidth-width)>3 || Math.abs(bar.innerHeight-height)>3){
+      fail(`Conversions: viewport réel différent de ${width}x${height}`,bar);
+    }
     assertBar(bar,`Conversions ${width}x${height}`);
     if(!bar.actions.some(a=>/calculatrice/i.test(a.text))) fail('Conversions: calculatrice absente de la barre',bar);
     if(!bar.actions.some(a=>/suivant/i.test(a.text))) fail('Conversions: Suivant absent de la barre',bar);
@@ -116,7 +129,7 @@ async function testConversions(width,height){
     if(!metrics.last || !metrics.content || metrics.last.bottom>metrics.content.bottom+2) fail('Conversions: dernière ligne hors zone utile',metrics);
     if(metrics.calcRect && metrics.calcRect.width>2 && metrics.calcOpacity!=='0') fail('Conversions: bouton calculatrice encore visible dans la page',metrics);
     return {bar,metrics};
-  } finally { try{win.destroy()}catch(_){} }
+  } finally { try{win.destroy()}catch(_){} await wait(180); }
 }
 
 async function testIdentification1200(){
@@ -139,7 +152,7 @@ async function testIdentification1200(){
     if(m.bodyOverflow>2) fail('Identification 1200x800: débordement horizontal',m);
     if(m.grid && m.shell && (m.grid.left<m.shell.left-2 || m.grid.right>m.shell.right+2)) fail('Identification 1200x800: grille hors écran',m);
     return {bar,m};
-  } finally { try{win.destroy()}catch(_){} }
+  } finally { try{win.destroy()}catch(_){} await wait(180); }
 }
 
 async function testTri(){
@@ -182,7 +195,7 @@ async function testTri(){
     if(auto.auto.bottom>auto.bar.top+2) fail('Tri autoévaluation: contenu derrière la barre',auto);
     if(auto.autoScroll>auto.autoClient+3) fail('Tri autoévaluation: scroll interne inutile',auto);
     return {bar,initial,auto};
-  } finally { try{win.destroy()}catch(_){} }
+  } finally { try{win.destroy()}catch(_){} await wait(180); }
 }
 
 async function testMailAndStock(){
@@ -219,7 +232,7 @@ async function testMailAndStock(){
     })()`);
     if(!String(stock.content).includes('•') || (stock.bg&&stock.bg!=='none')) fail('Stock: ancienne puce image encore présente',stock);
     return {mail,stock};
-  } finally { try{win.destroy()}catch(_){} }
+  } finally { try{win.destroy()}catch(_){} await wait(180); }
 }
 
 async function testFractions1200AndFinal(){
@@ -240,7 +253,7 @@ async function testFractions1200AndFinal(){
     assertBar(bar,'Fin évaluation');
     if(bar.abandonVisible) fail('Fin évaluation: Abandonner encore visible',bar);
     return bar;
-  } finally { try{win.destroy()}catch(_){} }
+  } finally { try{win.destroy()}catch(_){} await wait(180); }
 }
 
 app.commandLine.appendSwitch('disable-gpu');
