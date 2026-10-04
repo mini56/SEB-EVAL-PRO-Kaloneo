@@ -45,7 +45,9 @@
         prompt:String(q.prompt||''),
         responseType:String(q.response?.type||'text'),
         normalizer:q.response?.normalizer||'',
-        acceptedAnswers:(q.acceptedAnswers||[]).join('; '),
+        acceptedAnswers:q.response?.type==='multiple-choice'
+          ? ((Array.isArray(q.acceptedAnswers?.[0])?q.acceptedAnswers[0]:q.acceptedAnswers)||[]).join('; ')
+          : (q.acceptedAnswers||[]).join('; '),
         acceptedMinutes:Number.isInteger(q.acceptedMinutes)?q.acceptedMinutes:'',
         units:(q.acceptedUnits||q.units||[]).join('; '),
         points:Number(q.points==null?1:q.points),
@@ -261,6 +263,8 @@
     };
     if(response.type==='duration'){
       out.acceptedMinutes=Math.max(0,Number(q.acceptedMinutes)||0);
+    } else if(response.type==='multiple-choice'){
+      out.acceptedAnswers=[splitValues(q.acceptedAnswers)];
     } else {
       out.acceptedAnswers=splitValues(q.acceptedAnswers);
     }
