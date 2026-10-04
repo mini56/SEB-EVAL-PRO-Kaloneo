@@ -1,11 +1,13 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const os = require('os');
 
 const width=Number(process.env.PILOT16_WIDTH||1366);
 const height=Number(process.env.PILOT16_HEIGHT||768);
 const pageName=String(process.env.PILOT16_PAGE||'conversions');
 const root=path.resolve(__dirname,'..');
 const web=path.join(root,'app','web');
+app.setPath('userData',path.join(os.tmpdir(),`seb-pilot16-${width}x${height}-${pageName}-${process.pid}`));
 
 function wait(ms){return new Promise(r=>setTimeout(r,ms));}
 function fail(message,data){throw new Error(message+(data?' — '+JSON.stringify(data):''));}
@@ -35,6 +37,7 @@ async function base(win,label){
       actions:actions.map(b=>(b.textContent||'').trim()),
       empty:actions.filter(b=>!(b.textContent||'').trim()).length,
       abandonVisible:(()=>{const b=document.getElementById('kaloneo-nav-abandon');return !!b&&!b.hidden&&getComputedStyle(b).display!=='none'})(),
+      url:location.href,
       logo:(()=>{const i=document.getElementById('kaloneo-nav-logo-img');return i?{naturalWidth:i.naturalWidth,naturalHeight:i.naturalHeight,src:i.src}:null})()
     };
   })()`);
