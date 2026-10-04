@@ -129,8 +129,9 @@
 
     const resultat = document.getElementById('resultatScore');
     if (resultat) {
-      resultat.innerHTML = '<h3 style="text-align: left; margin-top: 20px; padding: 15px; background: #1a73e8; color: white; border-radius: 6px;">Message envoyé ! 👍</h3>';
-      resultat.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      resultat.textContent = 'Message envoyé !';
+      resultat.setAttribute('role', 'status');
+      resultat.setAttribute('aria-live', 'polite');
     }
     return false;
   }
