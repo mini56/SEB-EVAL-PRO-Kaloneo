@@ -196,7 +196,7 @@ app.whenReady().then(async()=>{
         next:window.sebParcours?.nextFile('autoeval1')||''
       })
     `,true);
-    if(!auto.parcours || auto.next!=='introbrique.html?fullParcours=1'){
+    if(!auto.parcours || auto.next!=='introbrique.html'){
       throw new Error('Autoévaluation ne mène pas à introbrique.html: '+JSON.stringify(auto));
     }
 
@@ -229,7 +229,7 @@ app.whenReady().then(async()=>{
         next:window.sebParcours?.nextFile('brique')||''
       })
     `,true);
-    if(lego.exercise!=='brique' || !lego.chrono || lego.next!=='stock.html?fullParcours=1'){
+    if(lego.exercise!=='brique' || !lego.chrono || lego.next!=='stock.html'){
       throw new Error('Page LEGO/Briques invalide: '+JSON.stringify(lego));
     }
 
