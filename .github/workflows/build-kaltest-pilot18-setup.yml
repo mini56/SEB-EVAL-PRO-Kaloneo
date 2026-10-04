@@ -1,5 +1,5 @@
 name: Build Windows KALTEST Pilot 18 real test polish
-# Windows smoke isolation v2
+# Windows smoke isolation v3
 
 on:
   workflow_dispatch:
