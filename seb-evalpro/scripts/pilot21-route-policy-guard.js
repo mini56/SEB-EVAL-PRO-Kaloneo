@@ -68,7 +68,10 @@ if(!preload.includes('isAdminKaloneoBuilderPage'))fail('le Builder Admin peut en
 const main=fs.readFileSync(path.join(root,'src','main.js'),'utf8');
 if(!main.includes('loadSavedCandidateEvaluation'))fail('le démarrage n’utilise pas la politique de reprise KALONÉO');
 if(!main.includes('kaloneoFullParcoursRoute.resolveStateRoute'))fail('l’ancien point d’entrée peut encore être restauré sans filtrage');
+if(!main.includes("const initialPage = 'kaltest-pilot2.html'"))fail('le démarrage candidat par défaut n’est pas KALTEST');
+if(!main.includes('const initialRoute = kaloneoFullParcoursRoute.INITIAL_ROUTE'))fail('la route candidat initiale n’est pas la route KALONÉO');
+if(main.includes("loadEvaluationFile(existingWebPage(state.lastEvaluationPage || state.lastPage))"))fail('un fallback candidat vers les anciennes pages est encore actif');
 
 console.log('PILOT21_ROUTE_POLICY: OK');
-console.log('LEGACY_STANDALONE_PARCOURS=DISABLED_IN_PILOT21');
+console.log('LEGACY_STANDALONE_PARCOURS=DISABLED');
 console.log('KALONEO_EXACT_RESUME_ROUTE=FILE_QUERY_HASH');
