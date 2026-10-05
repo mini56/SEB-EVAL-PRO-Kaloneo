@@ -143,7 +143,7 @@ app.whenReady().then(async () => {
     }
 
     // Ajout par bouton : le test doit disparaître de la bibliothèque.
-    await win.webContents.executeJavaScript(`document.querySelector('.library-card .card-add').click();true`);
+    await win.webContents.executeJavaScript(`(()=>{const card=[...document.querySelectorAll('.library-card')].find(c=>c.querySelector('.card-title')?.textContent==='Test Alpha');card?.querySelector('.card-add')?.click();return true;})()`);
     await wait(120);
     const afterAdd = await win.webContents.executeJavaScript(`(()=>({
       sequence:document.querySelectorAll('#tests-dropzone .sequence-card').length,
