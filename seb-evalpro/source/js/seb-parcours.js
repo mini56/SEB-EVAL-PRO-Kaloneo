@@ -268,7 +268,10 @@
       ...legacyStep('genrenombres'),
       file:'kaltest-pilot2.html'
     }, { segment:'genre-nombre' }),
-    fullParcoursStep(legacyStep('dictee')),
+    fullParcoursStep({
+      ...legacyStep('dictee'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'dictee' }),
     fullParcoursStep(legacyStep('tri-de-cheville')),
     fullParcoursStep(legacyStep('nwtexte')),
     fullParcoursStep({
