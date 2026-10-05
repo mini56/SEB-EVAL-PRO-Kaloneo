@@ -256,7 +256,10 @@
     }, { segment:'autoeval1' }),
     fullParcoursStep(legacyStep('introbrique')),
     fullParcoursStep(legacyStep('brique')),
-    fullParcoursStep(legacyStep('stock')),
+    fullParcoursStep({
+      ...legacyStep('stock'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'stock' }),
     fullParcoursStep({
       ...legacyStep('planning'),
       file:'kaltest-pilot2.html'
