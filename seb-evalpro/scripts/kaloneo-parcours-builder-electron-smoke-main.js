@@ -60,6 +60,8 @@ async function pointerDrag(win, sourceSelector, targetSelector) {
     if(!source||!target) return null;
     if(source.closest('.library-sections')) {
       source.scrollIntoView({block:'center',inline:'nearest'});
+    } else if(source.closest('.sequence-scroll') && target.closest('.library-panel')) {
+      source.scrollIntoView({block:'center',inline:'nearest'});
     }
     window.__sebDragTrace={down:0,move:0,up:0,downTarget:'',moveTarget:'',upTarget:''};
     if(!window.__sebDragTraceInstalled){
@@ -154,8 +156,10 @@ app.whenReady().then(async()=>{
     afterPointer=await win.webContents.executeJavaScript(`({sequence:document.querySelectorAll('.sequence-card').length,library:document.querySelectorAll('.library-card').length,gamma:!![...document.querySelectorAll('.library-card')].find(x=>x.dataset.id==='test_gamma')})`);
     if(!drag.ok||afterPointer.sequence!==0||afterPointer.library!==3||!afterPointer.gamma)return fail('drag souris Parcours -> Bibliothèque incorrect',{drag,afterPointer});
 
-    // Construire trois tests puis réordonner par pointer drag.
+    // Construire trois tests puis réordonner par vrai drag souris.
     await win.webContents.executeJavaScript(`(()=>{
+      const scroller=document.querySelector('.sequence-scroll');
+      if(scroller) scroller.scrollTop=0;
       const add=t=>[...document.querySelectorAll('.library-card')].find(c=>c.querySelector('.card-title')?.textContent===t)?.querySelector('.card-add')?.click();
       add('Test Alpha');add('Test Bêta');add('Test Gamma');return true;
     })()`);await wait(120);
