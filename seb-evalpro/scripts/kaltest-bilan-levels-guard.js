@@ -66,6 +66,10 @@ for (const step of matrix.steps || []) {
 const expected = {
   fractions_preparation_lots:'bilan.savoirs_fondamentaux.mathematiques.resoudre_problemes',
   organisation_demenagement:'bilan.competences_techniques.planning.repartition_taches',
+  construction_briques:[
+    'bilan.competences_techniques.briques.identifier_schema',
+    'bilan.competences_techniques.briques.manipuler_assembler'
+  ],
   ranger_stock:'bilan.competences_techniques.gestion_logistique.classement_multicritere',
   planning_cantine:'bilan.competences_techniques.planning.repartition_taches',
   dictee_professionnelle:'bilan.savoirs_fondamentaux.expression_ecrite.maitrise',
