@@ -70,13 +70,18 @@ async function perfectResult(win) {
 
 async function fillOneAnswer(win) {
   const mode = await win.webContents.executeJavaScript(
-    "({choice:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.choiceTable),fractions:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.fractionSelection)})",
+    "({choice:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.choiceTable),fractions:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.fractionSelection),autoeval:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.autoevaluationForm)})",
     true
   );
 
   if (mode.fractions) {
     await win.webContents.executeJavaScript(
       "document.querySelector('.kaltest-fraction-item')?.click();true",
+      true
+    );
+  } else if (mode.autoeval) {
+    await win.webContents.executeJavaScript(
+      "document.querySelector('.kaltest-autoeval-choice input')?.click();true",
       true
     );
   } else if (mode.choice) {
@@ -124,7 +129,7 @@ app.whenReady().then(async () => {
     );
 
     if (initial.page !== 'page-identification') throw new Error('Le parcours ne démarre pas par Identification.');
-    if (initial.tests !== 11) throw new Error('Le moteur doit contenir les 11 migrations KALTEST validées.');
+    if (initial.tests !== 13) throw new Error('Le moteur doit contenir les 13 migrations KALTEST validées.');
     if (!initial.introVideo) throw new Error('Mini vidéo/animation d’introduction absente.');
     if (initial.introLegacyImage) throw new Error('L’ancienne image de couverture est encore présente sur Introduction.');
     if (initial.introCalculatorGuide) throw new Error('Le doublon de test calculatrice est encore présent sur Introduction.');
@@ -200,8 +205,10 @@ app.whenReady().then(async () => {
       'organisation_demenagement',
       'gestes_postures',
       'conversions_atelier_expedition',
+      'autoevaluation_savoirs',
       'planning_cantine',
       'genre_nombre',
+      'autoevaluation_tic',
       'paronymes_rapport'
     ];
 
