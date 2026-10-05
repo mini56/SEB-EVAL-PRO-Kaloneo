@@ -142,8 +142,8 @@ app.whenReady().then(async()=>{
 
     const expectedPilotIds=[
       'kaltest-initial','qcm-4','qcm-5','qcm-5_1','qcm-6',
-      'autoeval1','introbrique','brique','stock','planning','genrenombres','dictee',
-      'tri-de-cheville','nwtexte','nvmail','autoeval2','paronymes','carre','qcm-11','qcm-finale'
+      'autoeval1','transition-video-f1','brique','stock','planning','genrenombres','dictee',
+      'tri-de-cheville','nwtexte','nvmail','autoeval2','paronymes','carre','qcm-11'
     ];
     const page4Location=locationInfo(win);
     if(page4.current!=='fractions_preparation_lots' || page4.mode!=='pilot11' || page4Location.search.indexOf('fullParcours=1')<0 ||
@@ -203,15 +203,16 @@ app.whenReady().then(async()=>{
     await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='autoeval1', 'Autoévaluation 1 KALTEST');
     await sleep(300);
 
-    // 4. Autoévaluation KALTEST -> vraie introduction vidéo Briques -> LEGO -> Stock.
+    // 4. Autoévaluation KALTEST -> Transition vidéo F1 KALTEST -> Briques KALTEST -> Stock.
     const auto=await win.webContents.executeJavaScript(`
       ({
         current:window.sebKaltestPilot2.currentTest()?.id||'',
         choices:document.querySelectorAll('.kaltest-autoeval-choice input').length,
-        next:window.sebParcours?.nextFile('autoeval1')||''
+        next:window.sebParcours?.nextUrl('autoeval1')||''
       })
     `,true);
-    if(auto.current!=='autoevaluation_savoirs' || auto.choices!==5 || auto.next!=='introbrique.html'){
+    if(auto.current!=='autoevaluation_savoirs' || auto.choices!==5 ||
+       auto.next!=='kaltest-pilot2.html?fullParcours=1&segment=transition-video-f1'){
       throw new Error('Autoévaluation 1 KALTEST invalide: '+JSON.stringify(auto));
     }
 
@@ -219,39 +220,52 @@ app.whenReady().then(async()=>{
       "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
       true
     );
-    await waitForFile(win,'introbrique.html');
-    await sleep(350);
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='transition-video-f1', 'Transition vidéo F1');
+    await sleep(300);
 
     const video=await win.webContents.executeJavaScript(`
       (() => {
-        const v=document.getElementById('introVideo');
-        const src=v?.querySelector('source')?.getAttribute('src')||'';
-        return {exists:Boolean(v),src,autoplay:Boolean(v?.autoplay),muted:Boolean(v?.muted)};
+        const v=document.querySelector('.kaltest-transition-video');
+        return {
+          current:window.sebKaltestPilot2.currentTest()?.id||'',
+          exists:Boolean(v),
+          src:v?.getAttribute('src')||'',
+          autoplay:Boolean(v?.autoplay),
+          muted:Boolean(v?.muted),
+          next:window.sebParcours?.nextUrl('transition-video-f1')||''
+        };
       })()
     `,true);
-    if(!video.exists || !/video_brique\.mp4$/.test(video.src) || !video.autoplay){
-      throw new Error('Vidéo Briques réelle absente/invalide: '+JSON.stringify(video));
+    if(video.current!=='transition_video_f1' || !video.exists || !/video_brique\.mp4$/.test(video.src) ||
+       !video.autoplay || video.next!=='kaltest-pilot2.html?fullParcours=1&segment=brique'){
+      throw new Error('Transition vidéo F1 KALTEST invalide: '+JSON.stringify(video));
     }
 
     await win.webContents.executeJavaScript(
-      "document.getElementById('introVideo').dispatchEvent(new Event('ended')); true;",
+      "document.querySelector('.kaltest-transition-video').dispatchEvent(new Event('ended')); true;",
       true
     );
-    await waitForFile(win,'brique.html',5000);
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='brique', 'Briques KALTEST', 6000);
     await sleep(300);
 
     const lego=await win.webContents.executeJavaScript(`
       ({
-        exercise:document.body.dataset.kaloneoExercise||'',
+        current:window.sebKaltestPilot2.currentTest()?.id||'',
         chrono:Boolean(document.getElementById('startBtn')&&document.getElementById('stopBtn')),
-        next:window.sebParcours?.nextFile('brique')||''
+        errors:Boolean(document.getElementById('nivDiff')),
+        admin:Boolean(document.getElementById('secretCode')&&document.getElementById('validBtn')),
+        next:window.sebParcours?.nextUrl('brique')||''
       })
     `,true);
-    if(lego.exercise!=='brique' || !lego.chrono || lego.next!=='stock.html'){
-      throw new Error('Page LEGO/Briques invalide: '+JSON.stringify(lego));
+    if(lego.current!=='construction_briques' || !lego.chrono || !lego.errors || !lego.admin ||
+       lego.next!=='kaltest-pilot2.html?fullParcours=1&segment=stock'){
+      throw new Error('Briques KALTEST invalide: '+JSON.stringify(lego));
     }
 
-    await win.webContents.executeJavaScript("window.sebParcours.goNext('brique'); true;",true);
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
     await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='stock', 'Stock KALTEST');
     await sleep(350);
 
@@ -334,7 +348,7 @@ app.whenReady().then(async()=>{
       })
     `,true);
     if(middle.dictee!=='kaltest-pilot2.html?fullParcours=1&segment=tri' ||
-       middle.tri!=='nwtexte.html?fullParcours=1' ||
+       middle.tri!=='kaltest-pilot2.html?fullParcours=1&segment=nwtexte' ||
        middle.nwtexte!=='kaltest-pilot2.html?fullParcours=1&segment=mail' ||
        middle.nvmail!=='kaltest-pilot2.html?fullParcours=1&segment=autoeval2' ||
        middle.auto2!=='kaltest-pilot2.html?fullParcours=1&segment=paronymes'){
@@ -352,11 +366,30 @@ app.whenReady().then(async()=>{
       true
     );
     if(tri.current!=='tri_chevilles' || tri.rows!==5 || tri.buttons!==2 ||
-       tri.next!=='nwtexte.html?fullParcours=1'){
+       tri.next!=='kaltest-pilot2.html?fullParcours=1&segment=nwtexte'){
       throw new Error('Tri KALTEST invalide: '+JSON.stringify(tri));
     }
 
-    await win.webContents.executeJavaScript("window.sebParcours.goTo('nvmail'); true;",true);
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='nwtexte', 'Traitement de texte KALTEST');
+    await sleep(450);
+    const nwtexte=await win.webContents.executeJavaScript(
+      "({current:window.sebKaltestPilot2.currentTest()?.id||'',editor:Boolean(document.querySelector('.kaltest-text-editor-tool .ql-editor')),file:Boolean(document.getElementById('nw-file-menu-button')),image:Boolean(document.getElementById('nw-image-button')),next:window.sebParcours?.nextUrl('nwtexte')||''})",
+      true
+    );
+    if(nwtexte.current!=='traitement_texte_bureautique' || !nwtexte.editor || !nwtexte.file || !nwtexte.image ||
+       nwtexte.next!=='kaltest-pilot2.html?fullParcours=1&segment=mail'){
+      throw new Error('Traitement de texte KALTEST invalide: '+JSON.stringify(nwtexte));
+    }
+
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='mail', 'Mail KALTEST');
     await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='mail', 'Mail KALTEST');
     await sleep(300);
     const mail=await win.webContents.executeJavaScript(
@@ -414,7 +447,7 @@ app.whenReady().then(async()=>{
       })
     `,true);
     if(carre.current!=='gratte_ciel' || carre.inputs!==16 ||
-       carre.next!=='qcmv1.0.html?fullParcours=1&page=11#page11'){
+       carre.next!=='kaltest-pilot2.html?fullParcours=1&segment=fin'){
       throw new Error('Gratte-ciel KALTEST invalide: '+JSON.stringify(carre));
     }
 
@@ -422,38 +455,42 @@ app.whenReady().then(async()=>{
       "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
       true
     );
-    await waitForLocation(win, current=>current.file==='qcmv1.0.html' && current.page==='11', 'Page 11');
-    await sleep(250);
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='fin', 'Fin de parcours KALTEST');
+    await sleep(300);
 
     const ending=await win.webContents.executeJavaScript(`
       ({
+        current:window.sebKaltestPilot2.currentTest()?.id||'',
+        congrats:/Félicitations/.test(document.querySelector('.kaltest-terminal-page')?.textContent||''),
         afterCarre:window.sebParcours?.nextUrl('carre')||'',
-        after11:window.sebParcours?.nextUrl('qcm-11')||''
+        after11:window.sebParcours?.nextUrl('qcm-11')
       })
     `,true);
-    if(ending.afterCarre!=='qcmv1.0.html?fullParcours=1&page=11#page11' ||
-       ending.after11!=='qcmv1.0.html?fullParcours=1&page=finale#pageFinale'){
-      throw new Error('Fin du parcours PILOTE 11 incorrecte: '+JSON.stringify(ending));
+    if(ending.current!=='fin_parcours' || !ending.congrats ||
+       ending.afterCarre!=='kaltest-pilot2.html?fullParcours=1&segment=fin' ||
+       ending.after11!==null){
+      throw new Error('Fin du parcours KALTEST incorrecte: '+JSON.stringify(ending));
     }
 
     console.log('FULL_PILOT_JOURNEY_SMOKE: OK');
     console.log('PILOT11_INITIAL_KALTESTS='+expectedInitial.join(','));
     console.log('PILOT11_KALTEST_4_5_5_1=Fractions,Organisation,Postures');
     console.log('PILOT11_CONVERSIONS_AT_CORRECT_POSITION=OK');
-    console.log('BRIQUE_VIDEO='+video.src);
-    console.log('LEGO_PAGE=OK');
+    console.log('PILOT11_TRANSITION_VIDEO_F1='+video.src);
+    console.log('PILOT11_BRIQUE_KALTEST=OK');
     console.log('PILOT11_STOCK_KALTEST=OK pots='+stock.pots+' cases='+stock.cases);
     console.log('PILOT11_AUTOEVAL1_KALTEST=OK');
     console.log('PILOT11_PLANNING_KALTEST=OK');
     console.log('PILOT11_DICTEE_KALTEST=OK');
     console.log('PILOT11_TRI_KALTEST=OK');
+    console.log('PILOT11_NWTEXTE_KALTEST=OK');
     console.log('PILOT11_MAIL_KALTEST=OK');
     console.log('PILOT11_AUTOEVAL2_KALTEST=OK');
     console.log('PILOT11_GENRE_NOMBRE_AT_CORRECT_POSITION=OK');
     console.log('PILOT11_PARONYMES_AT_CORRECT_POSITION=OK');
     console.log('PILOT11_CARRE_KALTEST=OK');
     console.log('PILOT11_NO_DUPLICATE_MIGRATED_PAGES=OK');
-    console.log('PILOT11_FINAL_ROUTE=carre KALTEST -> qcm11 -> finale');
+    console.log('PILOT11_FINAL_ROUTE=carre KALTEST -> fin KALTEST');
 
     win.destroy();
     app.exit(0);
