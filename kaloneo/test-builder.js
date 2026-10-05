@@ -1358,7 +1358,7 @@
 
     [
       'test-version','test-category','test-scored','test-layout',
-      'test-scenario','test-instruction','calculator-compatible','chrono-enabled',
+      'test-scenario','test-instruction','calculator-compatible','calculator-brand','chrono-enabled',
       'chrono-mode','chrono-min-measures','chrono-max-measures','chrono-auto-reset',
       'chrono-focus-after-stop','chrono-show-time',
       'admin-intervention','admin-instructions','autoevaluation-enabled',
@@ -1370,7 +1370,7 @@
           $('custom-sizing-row').hidden=$('test-layout').value!=='chars-rest';
           renderBlocks();
         } else {
-          if(['chrono-enabled','admin-intervention','external-material'].includes(id)) syncCapabilityOptions();
+          if(['calculator-compatible','chrono-enabled','admin-intervention','external-material'].includes(id)) syncCapabilityOptions();
           changed();
         }
       });
@@ -1379,7 +1379,7 @@
           $('custom-sizing-row').hidden=$('test-layout').value!=='chars-rest';
           renderBlocks();
         } else {
-          if(['chrono-enabled','admin-intervention','external-material'].includes(id)) syncCapabilityOptions();
+          if(['calculator-compatible','chrono-enabled','admin-intervention','external-material'].includes(id)) syncCapabilityOptions();
           changed();
         }
       });
