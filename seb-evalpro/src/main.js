@@ -1103,7 +1103,7 @@ ipcMain.handle('kaloneo-builder:close-preview', () => {
   const target = path.join(__dirname, '..', 'app', 'web', 'kaloneo-builder', 'test-builder.html');
   if (!fs.existsSync(target)) return false;
   kaloneoBuilderPreviewDefinition = null;
-  mainWindow.loadFile(target);
+  mainWindow.loadFile(target, { query:{ resume:'preview' } });
   return true;
 });
 
