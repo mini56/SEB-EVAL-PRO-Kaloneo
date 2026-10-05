@@ -1,0 +1,462 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "id": "planning_cantine",
+  "version": "1.0.0",
+  "title": "Planification — Le restaurant",
+  "category": "organisation",
+  "description": "Construire le planning hebdomadaire de la cantine en respectant les contraintes de personnel et de menus.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "planning.html",
+    "sourceScript": "source/js/planning-page.js",
+    "legacyParcoursId": "planning"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "Le service des ressources humaines vous confie la gestion du planning hebdomadaire de la cantine de l'entreprise. Deux cuisinières, Katell et Lizig, assurent le service du lundi au vendredi. Plusieurs collaborateurs ont émis des demandes particulières pour leurs repas. À vous de coordonner l'équipe et d'établir les menus en tenant compte de toutes les contraintes !",
+  "instruction": "Renseignez les menus pour chaque jour et chaque catégorie en utilisant les listes déroulantes du tableau. La colonne de droite vous guide pour remplir correctement le tableau.",
+  "presentation": {
+    "layout": {
+      "type": "split",
+      "ratio": "60/40",
+      "blocks": [
+        {
+          "id": "planning"
+        },
+        {
+          "id": "aide"
+        }
+      ]
+    },
+    "planningGrid": {
+      "headers": [
+        "Planning",
+        "Lundi",
+        "Mardi",
+        "Mercredi",
+        "Jeudi",
+        "Vendredi"
+      ],
+      "rows": [
+        {
+          "label": "Serveuse",
+          "questionIds": [
+            "planning_q1",
+            "planning_q2",
+            "planning_q3",
+            "planning_q4",
+            "planning_q5"
+          ]
+        },
+        {
+          "label": "Plats",
+          "questionIds": [
+            "planning_q6",
+            "planning_q7",
+            "planning_q8",
+            "planning_q9",
+            "planning_q10"
+          ]
+        },
+        {
+          "label": "Desserts",
+          "questionIds": [
+            "planning_q11",
+            "planning_q12",
+            "planning_q13",
+            "planning_q14",
+            "planning_q15"
+          ]
+        }
+      ],
+      "dishList": [
+        "Galettes au blé noir",
+        "Spaghettis",
+        "Assiette de fruits de mer",
+        "Pavé de saumon",
+        "Kig-Ha-Farz"
+      ],
+      "dessertList": [
+        "Profiteroles",
+        "Kouign-Amann",
+        "Tarte au citron",
+        "Crumble aux fruits rouges",
+        "Crème brûlée"
+      ],
+      "guide": [
+        "L'équipe de maintenance viendra déguster un plat de spaghettis et des profiteroles au chocolat.",
+        "Lizig travaille deux matinées dont le lundi.",
+        "Katell ne travaille pas le mercredi.",
+        "C'est Lizig qui préparera le pavé de saumon et la tarte au citron.",
+        "C'est Katell qui préparera le Kig-Ha-Farz.",
+        "Katell fera les galettes au blé noir le jeudi.",
+        "Jean le livreur veut un Kouign-Amann vendredi.",
+        "Jacqueline la comptable veut une assiette de fruits de mer et une crème brûlée comme tous les lundis."
+      ],
+      "backgroundImage": "imageqcm/cantine.PNG"
+    }
+  },
+  "behavior": {
+    "validateBeforeAdvance": true,
+    "validationLabel": "Valider mon planning"
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "planning_q1",
+      "prompt": "Serveuse — Lundi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Katell👩🏻‍🦱",
+          "Lizig👱🏼‍♀️",
+          "👩🏻‍🦱👱‍♀️Katell/Lizig",
+          "Lizig/Katell👱‍♀️👩🏻‍🦱"
+        ]
+      },
+      "acceptedAnswers": [
+        "Lizig👱🏼‍♀️"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q2",
+      "prompt": "Serveuse — Mardi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Katell👩🏻‍🦱",
+          "Lizig👱🏼‍♀️",
+          "👩🏻‍🦱👱‍♀️Katell/Lizig",
+          "Lizig/Katell👱‍♀️👩🏻‍🦱"
+        ]
+      },
+      "acceptedAnswers": [
+        "Katell👩🏻‍🦱"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q3",
+      "prompt": "Serveuse — Mercredi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Katell👩🏻‍🦱",
+          "Lizig👱🏼‍♀️",
+          "👩🏻‍🦱👱‍♀️Katell/Lizig",
+          "Lizig/Katell👱‍♀️👩🏻‍🦱"
+        ]
+      },
+      "acceptedAnswers": [
+        "Lizig👱🏼‍♀️"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q4",
+      "prompt": "Serveuse — Jeudi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Katell👩🏻‍🦱",
+          "Lizig👱🏼‍♀️",
+          "👩🏻‍🦱👱‍♀️Katell/Lizig",
+          "Lizig/Katell👱‍♀️👩🏻‍🦱"
+        ]
+      },
+      "acceptedAnswers": [
+        "Katell👩🏻‍🦱"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q5",
+      "prompt": "Serveuse — Vendredi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Katell👩🏻‍🦱",
+          "Lizig👱🏼‍♀️",
+          "👩🏻‍🦱👱‍♀️Katell/Lizig",
+          "Lizig/Katell👱‍♀️👩🏻‍🦱"
+        ]
+      },
+      "acceptedAnswers": [
+        "Katell👩🏻‍🦱"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q6",
+      "prompt": "Plat — Lundi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Galettes au blé noir",
+          "Spaghettis",
+          "Assiette de fruits de mer",
+          "Pavé de saumon",
+          "Kig-Ha-Farz",
+          "Profiteroles",
+          "Kouign-Amann",
+          "Tarte au citron",
+          "Crumble aux fruits rouges",
+          "Crème brûlée"
+        ]
+      },
+      "acceptedAnswers": [
+        "Assiette de fruits de mer"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q7",
+      "prompt": "Plat — Mardi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Galettes au blé noir",
+          "Spaghettis",
+          "Assiette de fruits de mer",
+          "Pavé de saumon",
+          "Kig-Ha-Farz",
+          "Profiteroles",
+          "Kouign-Amann",
+          "Tarte au citron",
+          "Crumble aux fruits rouges",
+          "Crème brûlée"
+        ]
+      },
+      "acceptedAnswers": [
+        "Spaghettis"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q8",
+      "prompt": "Plat — Mercredi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Galettes au blé noir",
+          "Spaghettis",
+          "Assiette de fruits de mer",
+          "Pavé de saumon",
+          "Kig-Ha-Farz",
+          "Profiteroles",
+          "Kouign-Amann",
+          "Tarte au citron",
+          "Crumble aux fruits rouges",
+          "Crème brûlée"
+        ]
+      },
+      "acceptedAnswers": [
+        "Pavé de saumon"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q9",
+      "prompt": "Plat — Jeudi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Galettes au blé noir",
+          "Spaghettis",
+          "Assiette de fruits de mer",
+          "Pavé de saumon",
+          "Kig-Ha-Farz",
+          "Profiteroles",
+          "Kouign-Amann",
+          "Tarte au citron",
+          "Crumble aux fruits rouges",
+          "Crème brûlée"
+        ]
+      },
+      "acceptedAnswers": [
+        "Galettes au blé noir"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q10",
+      "prompt": "Plat — Vendredi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Galettes au blé noir",
+          "Spaghettis",
+          "Assiette de fruits de mer",
+          "Pavé de saumon",
+          "Kig-Ha-Farz",
+          "Profiteroles",
+          "Kouign-Amann",
+          "Tarte au citron",
+          "Crumble aux fruits rouges",
+          "Crème brûlée"
+        ]
+      },
+      "acceptedAnswers": [
+        "Kig-Ha-Farz"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q11",
+      "prompt": "Dessert — Lundi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Profiteroles",
+          "Kouign-Amann",
+          "Tarte au citron",
+          "Crumble aux fruits rouges",
+          "Crème brûlée",
+          "Galettes au blé noir",
+          "Spaghettis",
+          "Assiette de fruits de mer",
+          "Pavé de saumon",
+          "Kig-Ha-Farz"
+        ]
+      },
+      "acceptedAnswers": [
+        "Crème brûlée"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q12",
+      "prompt": "Dessert — Mardi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Profiteroles",
+          "Kouign-Amann",
+          "Tarte au citron",
+          "Crumble aux fruits rouges",
+          "Crème brûlée",
+          "Galettes au blé noir",
+          "Spaghettis",
+          "Assiette de fruits de mer",
+          "Pavé de saumon",
+          "Kig-Ha-Farz"
+        ]
+      },
+      "acceptedAnswers": [
+        "Profiteroles"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q13",
+      "prompt": "Dessert — Mercredi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Profiteroles",
+          "Kouign-Amann",
+          "Tarte au citron",
+          "Crumble aux fruits rouges",
+          "Crème brûlée",
+          "Galettes au blé noir",
+          "Spaghettis",
+          "Assiette de fruits de mer",
+          "Pavé de saumon",
+          "Kig-Ha-Farz"
+        ]
+      },
+      "acceptedAnswers": [
+        "Tarte au citron"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q14",
+      "prompt": "Dessert — Jeudi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Profiteroles",
+          "Kouign-Amann",
+          "Tarte au citron",
+          "Crumble aux fruits rouges",
+          "Crème brûlée",
+          "Galettes au blé noir",
+          "Spaghettis",
+          "Assiette de fruits de mer",
+          "Pavé de saumon",
+          "Kig-Ha-Farz"
+        ]
+      },
+      "acceptedAnswers": [
+        "Crumble aux fruits rouges"
+      ],
+      "points": 1
+    },
+    {
+      "id": "planning_q15",
+      "prompt": "Dessert — Vendredi",
+      "response": {
+        "type": "select",
+        "options": [
+          "Profiteroles",
+          "Kouign-Amann",
+          "Tarte au citron",
+          "Crumble aux fruits rouges",
+          "Crème brûlée",
+          "Galettes au blé noir",
+          "Spaghettis",
+          "Assiette de fruits de mer",
+          "Pavé de saumon",
+          "Kig-Ha-Farz"
+        ]
+      },
+      "acceptedAnswers": [
+        "Kouign-Amann"
+      ],
+      "points": 1
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.competences_techniques.planning.repartition_taches",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ],
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "questionnaire.table",
+    "layout.split",
+    "bilan.bindings"
+  ]
+}
