@@ -140,7 +140,9 @@
       "id": "tri-de-cheville",
       "file": "tri_de_cheville.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "tri_chevilles",
+      "fixturePath": "tests/fixtures/kaltests/tri-chevilles/1.0.0/test.json"
     },
     {
       "id": "nwtexte",
