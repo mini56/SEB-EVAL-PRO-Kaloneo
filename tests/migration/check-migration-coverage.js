@@ -33,6 +33,9 @@ const expectedMigrated = [
   'qcm-2_1',
   'qcm-3',
   'qcm-texte-trous',
+  'qcm-4',
+  'qcm-5',
+  'qcm-5_1',
   'qcm-6',
   'genrenombres',
   'paronymes'
