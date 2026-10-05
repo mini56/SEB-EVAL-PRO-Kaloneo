@@ -51,6 +51,9 @@ if (new Set(pilot11Ids).size !== pilot11Ids.length) fail('identifiant PILOTE 11 
 const pilot11ById = new Map(Array.from(api.pilot11Steps, step => [String(step.id), step]));
 const expectedPilotRoutes = {
   'kaltest-initial':'kaltest-pilot2.html?fullParcours=1',
+  'qcm-4':'kaltest-pilot2.html?fullParcours=1&segment=fractions',
+  'qcm-5':'kaltest-pilot2.html?fullParcours=1&segment=organisation',
+  'qcm-5_1':'kaltest-pilot2.html?fullParcours=1&segment=postures',
   'qcm-6':'kaltest-pilot2.html?fullParcours=1&segment=conversions',
   'genrenombres':'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre',
   'paronymes':'kaltest-pilot2.html?fullParcours=1&segment=paronymes'
