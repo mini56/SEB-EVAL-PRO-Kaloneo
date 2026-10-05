@@ -20,7 +20,8 @@ const testPaths = [
   'seb-evalpro/source/kaltest/tests/planning-cantine/1.0.0/test.json',
   'tests/fixtures/kaltests/genre-nombre/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/autoevaluation-tic/1.0.0/test.json',
-  'tests/fixtures/kaltests/paronymes-rapport/1.0.0/test.json'
+  'tests/fixtures/kaltests/paronymes-rapport/1.0.0/test.json',
+  'seb-evalpro/source/kaltest/tests/gratte-ciel/1.0.0/test.json'
 ];
 
 const tests = testPaths.map(relative => {
