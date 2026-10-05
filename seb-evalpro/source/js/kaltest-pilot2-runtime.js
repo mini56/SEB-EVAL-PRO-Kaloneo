@@ -62,6 +62,11 @@
       startPhase:'exercise',
       ids:Object.freeze(['genre_nombre'])
     }),
+    mail:Object.freeze({
+      stepId:'nvmail',
+      startPhase:'exercise',
+      ids:Object.freeze(['redaction_email'])
+    }),
     autoeval2:Object.freeze({
       stepId:'autoeval2',
       startPhase:'exercise',
@@ -309,6 +314,38 @@
         detail.correct = correct;
         if (correct) seen.add(value);
       }
+    }
+
+    if (test.evaluation?.mailRules === true) {
+      const normalizeIdentity = value => String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('fr-FR')
+        .replace(/[^a-z0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      let candidate = {};
+      try { candidate = JSON.parse(sessionStorage.getItem('candidat_data') || '{}') || {}; } catch (_) {}
+      const prenom = normalizeIdentity(candidate.prenom || candidate['prénom'] || '');
+      const nom = normalizeIdentity(candidate.nom || '');
+      const message = String(testState.answers?.mail_signature ?? testState.answers?.mail_phone ?? '');
+      const messageNorm = normalizeIdentity(message);
+      const subjectNorm = normalizeIdentity(testState.answers?.mail_subject);
+      const prenomNom = (prenom + ' ' + nom).trim();
+      const nomPrenom = (nom + ' ' + prenom).trim();
+
+      if (details.mail_to) details.mail_to.correct =
+        String(testState.answers?.mail_to || '').trim() === 'conseil.perso@sauvegarde56.org';
+      if (details.mail_cc) details.mail_cc.correct =
+        String(testState.answers?.mail_cc || '').trim() === 'stage-pro@sauvegarde56.org';
+      if (details.mail_subject) details.mail_subject.correct =
+        Boolean(prenom) && subjectNorm === (prenom + ' mail seb').trim();
+      if (details.mail_file) details.mail_file.correct =
+        String(testState.answers?.mail_file || '') === 'Rapport_stage.docx';
+      if (details.mail_signature) details.mail_signature.correct =
+        Boolean(prenom && nom && messageNorm) && (messageNorm.includes(prenomNom) || messageNorm.includes(nomPrenom));
+      if (details.mail_phone) details.mail_phone.correct =
+        /(^|[^\d])0\d(?:[\s.,\/-]?\d{2}){4}(?!\d)/.test(message);
     }
 
     let score = 0;
@@ -1182,6 +1219,115 @@
     return true;
   }
 
+  function renderMail(test, host) {
+    const definition = test.presentation?.mailComposer;
+    if (!definition || !definition.fields) return false;
+    const testState = testStateFor(test);
+    const fields = definition.fields;
+    const completed = testState.status === 'COMPLETED';
+
+    const layout = document.createElement('div');
+    layout.className = 'kaltest-mail-layout';
+
+    const left = document.createElement('section');
+    left.className = 'kaltest-mail-instructions';
+    const heading = document.createElement('h3');
+    heading.textContent = 'Consignes';
+    left.appendChild(heading);
+    const list = document.createElement('div');
+    list.className = 'kaltest-mail-instruction-list';
+    for (const line of definition.instructions || []) {
+      const p = document.createElement('p');
+      p.textContent = line;
+      list.appendChild(p);
+    }
+    left.appendChild(list);
+
+    const form = document.createElement('section');
+    form.className = 'kaltest-mail-composer';
+    const title = document.createElement('h3');
+    title.textContent = 'Nouveau message ✉';
+    form.appendChild(title);
+
+    function textField(labelText, questionId) {
+      const label = document.createElement('label');
+      label.className = 'kaltest-mail-field';
+      const span = document.createElement('span');
+      span.textContent = labelText;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'step';
+      input.dataset.questionId = questionId;
+      input.value = String(testState.answers?.[questionId] ?? '');
+      input.disabled = completed;
+      input.addEventListener('input', () => saveAnswer(test, questionId, input.value));
+      label.append(span, input);
+      form.appendChild(label);
+      return input;
+    }
+
+    textField('À :', fields.to);
+    textField('Cc :', fields.cc);
+    textField('Objet :', fields.subject);
+
+    const messageLabel = document.createElement('label');
+    messageLabel.className = 'kaltest-mail-field kaltest-mail-message';
+    const messageTitle = document.createElement('span');
+    messageTitle.textContent = 'Message :';
+    const textarea = document.createElement('textarea');
+    textarea.className = 'step';
+    textarea.rows = 7;
+    textarea.disabled = completed;
+    textarea.value = String(testState.answers?.[fields.signature] ?? testState.answers?.[fields.phone] ?? '');
+    textarea.addEventListener('input', () => {
+      saveAnswer(test, fields.signature, textarea.value);
+      saveAnswer(test, fields.phone, textarea.value);
+    });
+    messageLabel.append(messageTitle, textarea);
+    form.appendChild(messageLabel);
+
+    const attachment = document.createElement('div');
+    attachment.className = 'kaltest-mail-attachment';
+    const attachmentLabel = document.createElement('strong');
+    attachmentLabel.textContent = 'Pièce jointe :';
+    const browse = document.createElement('button');
+    browse.type = 'button';
+    browse.className = 'kaltest-mail-browse';
+    browse.textContent = '📂 Parcourir…';
+    browse.disabled = completed;
+    const selected = document.createElement('span');
+    selected.className = 'kaltest-mail-selected';
+    selected.textContent = String(testState.answers?.[fields.file] || 'Aucun fichier sélectionné');
+    attachment.append(attachmentLabel, browse, selected);
+    form.appendChild(attachment);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'kaltest-mail-overlay';
+    overlay.hidden = true;
+    const modal = document.createElement('div');
+    modal.className = 'kaltest-mail-modal';
+    const modalTitle = document.createElement('h3');
+    modalTitle.textContent = 'Sélectionnez un fichier';
+    modal.appendChild(modalTitle);
+    for (const file of definition.files || []) {
+      const choice = document.createElement('button');
+      choice.type = 'button';
+      choice.textContent = '📄 ' + file;
+      choice.addEventListener('click', () => {
+        saveAnswer(test, fields.file, String(file));
+        selected.textContent = String(file);
+        overlay.hidden = true;
+      });
+      modal.appendChild(choice);
+    }
+    overlay.appendChild(modal);
+    browse.addEventListener('click', () => { overlay.hidden = false; });
+    overlay.addEventListener('click', event => { if (event.target === overlay) overlay.hidden = true; });
+    layout.append(left, form, overlay);
+    host.appendChild(layout);
+    return true;
+  }
+
   function renderStock(test, host) {
     const definition = test.presentation?.stockBoard;
     if (!definition || !Array.isArray(definition.pots) || !Array.isArray(definition.shelves)) return false;
@@ -1792,6 +1938,25 @@
         savedAt:Date.now(),
         source:'kaltest'
       }));
+    } else if (test.id === 'redaction_email') {
+      const value = id => String(testState.answers?.[id] ?? '');
+      const detail = id => testState.result?.details?.[id]?.correct ? 1 : 0;
+      const data = {
+        page8_to:value('mail_to'),
+        page8_cc:value('mail_cc'),
+        page8_subject:value('mail_subject'),
+        page8_message:value('mail_signature') || value('mail_phone'),
+        page8_file:value('mail_file'),
+        score_to:detail('mail_to'),
+        score_cc:detail('mail_cc'),
+        score_subject:detail('mail_subject'),
+        score_file:detail('mail_file'),
+        score_signature:detail('mail_signature'),
+        score_telephone:detail('mail_phone'),
+        score_total:Number(result.score) || 0
+      };
+      sessionStorage.setItem('page8_data', JSON.stringify(data));
+      sessionStorage.setItem('seb_exercise_activity:nvmail.html', '1');
     } else if (test.id === 'autoevaluation_tic') {
       const question = questions[0];
       sessionStorage.setItem('autoEval2_resultats', JSON.stringify({
@@ -1889,6 +2054,8 @@
 
     if (renderAutoevaluation(test, host)) {
       // Autoévaluations migrées dans le moteur KALTEST commun.
+    } else if (renderMail(test, host)) {
+      // Rédaction e-mail migrée dans le moteur KALTEST commun.
     } else if (renderStock(test, host)) {
       // Ranger le stock migré dans le moteur KALTEST commun.
     } else if (renderPlanning(test, host)) {
@@ -1987,7 +2154,8 @@
         scoreMax:testState.result.scoreMax
       });
       renderCurrentTest();
-      status.textContent = 'Exercice validé : ' + testState.result.score + '/' + testState.result.scoreMax + '. Cliquez sur « Suivant » pour continuer.';
+      status.textContent = test.behavior?.validationSuccessMessage ||
+        ('Exercice validé : ' + testState.result.score + '/' + testState.result.scoreMax + '. Cliquez sur « Suivant » pour continuer.');
       return;
     }
 
