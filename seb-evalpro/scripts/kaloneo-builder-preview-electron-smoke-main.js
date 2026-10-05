@@ -73,7 +73,7 @@ app.whenReady().then(async()=>{
   });
   ipcMain.handle('kaloneo-builder:get-preview',()=>previewDefinition?{ok:true,definition:previewDefinition}:{ok:false,error:'absent'});
   ipcMain.handle('kaloneo-builder:close-preview',async()=>{
-    await win.loadFile(builder);
+    await win.loadFile(builder,{query:{resume:'preview'}});
     return true;
   });
 
@@ -90,8 +90,48 @@ app.whenReady().then(async()=>{
     await win.loadFile(builder);
     await wait(900);
 
-    const setup=await win.webContents.executeJavaScript(`(()=>{
-      localStorage.removeItem('kaloneo_test_builder_v2');
+    const initial=await win.webContents.executeJavaScript(`(()=>{
+      const title=document.getElementById('test-title');
+      const editor=document.querySelector('.builder-editor');
+      return {
+        title:title?.value||'',
+        titleDisabled:!!title?.disabled,
+        titleReadOnly:!!title?.readOnly,
+        activeId:document.activeElement?.id||'',
+        bodyOverflow:getComputedStyle(document.body).overflowY,
+        editorOverflow:getComputedStyle(editor).overflowY,
+        pageScroll:document.documentElement.scrollHeight>window.innerHeight+2,
+        editorCanScroll:editor.scrollHeight>=editor.clientHeight
+      };
+    })()`);
+    if(initial.title!==''||initial.titleDisabled||initial.titleReadOnly||initial.activeId!=='test-title'||
+       initial.bodyOverflow!=='hidden'||!['auto','scroll'].includes(initial.editorOverflow)||initial.pageScroll) {
+      return fail('entrée R3 du Builder incorrecte',initial);
+    }
+
+    const newTest=await win.webContents.executeJavaScript(`(()=>{
+      window.confirm=()=>true;
+      const title=document.getElementById('test-title');
+      title.value='Ancien brouillon';
+      title.dispatchEvent(new Event('input',{bubbles:true}));
+      document.getElementById('new-test').click();
+      return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        const current=document.getElementById('test-title');
+        current.value='Saisie immédiate';
+        current.dispatchEvent(new Event('input',{bubbles:true}));
+        resolve({
+          value:current.value,
+          disabled:current.disabled,
+          readOnly:current.readOnly,
+          activeId:document.activeElement?.id||''
+        });
+      })));
+    })()`);
+    if(newTest.value!=='Saisie immédiate'||newTest.disabled||newTest.readOnly||newTest.activeId!=='test-title') {
+      return fail('Nouveau test non saisissable immédiatement',newTest);
+    }
+
+    const setup=await win.webContents.executeJavaScript(`(async()=>{
       document.getElementById('test-title').value='Aperçu Electron Smoke';
       document.getElementById('test-title').dispatchEvent(new Event('input',{bubbles:true}));
       document.getElementById('test-scenario').value='Scénario plein écran';
@@ -104,14 +144,38 @@ app.whenReady().then(async()=>{
       document.getElementById('calculator-brand').dispatchEvent(new Event('input',{bubbles:true}));
       document.getElementById('chrono-enabled').checked=true;
       document.getElementById('chrono-enabled').dispatchEvent(new Event('change',{bubbles:true}));
+
+      const type=document.querySelector('.exercise-block .block-type');
+      type.value='image';
+      type.dispatchEvent(new Event('change',{bubbles:true}));
+      await new Promise(resolve=>setTimeout(resolve,80));
+      const mediaInput=document.querySelector('.exercise-block input[type="file"]');
+      const svg='<svg xmlns="http://www.w3.org/2000/svg" width="320" height="340"><rect width="320" height="340" fill="#dceff5"/><circle cx="160" cy="170" r="80" fill="#f9b233"/></svg>';
+      const mediaFile=new File([svg],'image-test-r3.svg',{type:'image/svg+xml'});
+      const dt=new DataTransfer();
+      dt.items.add(mediaFile);
+      mediaInput.files=dt.files;
+      mediaInput.dispatchEvent(new Event('change',{bubbles:true}));
+      await new Promise(resolve=>setTimeout(resolve,180));
+      document.getElementById('refresh-preview').click();
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      const smallImg=document.querySelector('.preview-media');
+      const smallBlock=smallImg?.closest('.preview-media-block');
+      const ir=smallImg?.getBoundingClientRect();
+      const br=smallBlock?.getBoundingClientRect();
       return {
         button:String(document.getElementById('open-electron-preview')?.textContent||'').trim(),
         title:document.getElementById('test-title').value,
         calculatorBrand:document.getElementById('calculator-brand')?.value||'',
-        calculatorOptionsHidden:document.getElementById('calculator-options')?.hidden
+        calculatorOptionsHidden:document.getElementById('calculator-options')?.hidden,
+        imagePresent:!!smallImg,
+        smallImageFits:!!(ir&&br&&ir.width<=br.width+1&&ir.height<=br.height+1),
+        smallImageSize:ir?{width:Math.round(ir.width),height:Math.round(ir.height)}:null,
+        smallBlockSize:br?{width:Math.round(br.width),height:Math.round(br.height)}:null
       };
     })()`);
-    if(!/vraie page/i.test(setup.button)||setup.title!=='Aperçu Electron Smoke'||setup.calculatorBrand!=='KALONÉO'||setup.calculatorOptionsHidden) return fail('bouton ou saisie Builder incorrecte',setup);
+    if(!/vraie page/i.test(setup.button)||setup.title!=='Aperçu Electron Smoke'||setup.calculatorBrand!=='KALONÉO'||setup.calculatorOptionsHidden||
+       !setup.imagePresent||!setup.smallImageFits) return fail('bouton, saisie ou image Builder incorrecte',setup);
 
     await win.webContents.executeJavaScript(`document.getElementById('open-electron-preview').click();true`);
     for(let i=0;i<30;i++){
@@ -131,7 +195,21 @@ app.whenReady().then(async()=>{
       calculator:String(document.querySelector('.kb-footer-center button')?.textContent||'').trim(),
       chrono:String(document.querySelector('.kb-chrono-time')?.textContent||'').trim(),
       privacy:(()=>{const p=document.getElementById('seb-evalpro-privacy-toggle');return p?getComputedStyle(p).display:'absent';})(),
-      calculatorButtonShadow:getComputedStyle(document.querySelector('.kb-footer-center button')).boxShadow
+      calculatorButtonShadow:getComputedStyle(document.querySelector('.kb-footer-center button')).boxShadow,
+      media:(()=>{
+        const img=document.querySelector('.kb-media');
+        const block=img?.closest('.kb-media-block');
+        const workspace=document.querySelector('.kb-workspace');
+        const ir=img?.getBoundingClientRect();
+        const br=block?.getBoundingClientRect();
+        return {
+          present:!!img,
+          fits:!!(ir&&br&&ir.width<=br.width+1&&ir.height<=br.height+1),
+          image:ir?{width:Math.round(ir.width),height:Math.round(ir.height)}:null,
+          block:br?{width:Math.round(br.width),height:Math.round(br.height)}:null,
+          workspaceScroll:workspace?workspace.scrollHeight>workspace.clientHeight+2:false
+        };
+      })()
     }))()`);
 
     if(!/test-preview\.html$/i.test(shown.path)||
@@ -142,7 +220,8 @@ app.whenReady().then(async()=>{
        shown.next!=='Suivant'||
        shown.calculator!=='Ouvrir la calculatrice'||
        shown.chrono!=='00:00'||
-       !['none','absent'].includes(shown.privacy)) {
+       !['none','absent'].includes(shown.privacy)||
+       !shown.media.present||!shown.media.fits||shown.media.workspaceScroll) {
       return fail('rendu plein écran incorrect',shown);
     }
 
