@@ -58,7 +58,6 @@ async function pointerDrag(win, sourceSelector, targetSelector) {
     const source=document.querySelector(${JSON.stringify(sourceSelector)});
     const target=document.querySelector(${JSON.stringify(targetSelector)});
     if(!source||!target) return null;
-    source.scrollIntoView({block:'center',inline:'nearest'});
     window.__sebDragTrace={down:0,move:0,up:0,downTarget:'',moveTarget:'',upTarget:''};
     if(!window.__sebDragTraceInstalled){
       window.__sebDragTraceInstalled=true;
