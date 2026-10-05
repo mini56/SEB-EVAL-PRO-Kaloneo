@@ -76,12 +76,15 @@ const expected = {
   redaction_email:'bilan.tic.messagerie.echanger',
   gratte_ciel:'bilan.competences_techniques.carre_magique.resolution_contraintes'
 };
-for (const [testId,lineId] of Object.entries(expected)) {
+for (const [testId,lineSpec] of Object.entries(expected)) {
   const step = (matrix.steps || []).find(item => item.targetTestId === testId);
   if (!step) fail('test migré absent de la matrice : ' + testId);
   const fixture = json(step.fixturePath);
-  if (!(fixture.bilanContributions || []).some(item => item.lineId === lineId)) {
-    fail('raccordement Bilan perdu pour ' + testId + ' -> ' + lineId);
+  const requiredLines = Array.isArray(lineSpec) ? lineSpec : [lineSpec];
+  for (const lineId of requiredLines) {
+    if (!(fixture.bilanContributions || []).some(item => item.lineId === lineId)) {
+      fail('raccordement Bilan perdu pour ' + testId + ' -> ' + lineId);
+    }
   }
 }
 
