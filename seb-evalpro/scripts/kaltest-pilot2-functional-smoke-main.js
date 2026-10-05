@@ -50,7 +50,7 @@ async function visiblePage(win) {
 
 async function assertNoOverflow(win, label) {
   const metrics = await win.webContents.executeJavaScript(
-    "({bodyScrollHeight:document.body.scrollHeight,bodyClientHeight:document.body.clientHeight,contentScrollHeight:document.getElementById('kaltest-content')?.scrollHeight||0,contentClientHeight:document.getElementById('kaltest-content')?.clientHeight||0,contentInnerHeight:document.getElementById('kaltest-content')?.firstElementChild?.getBoundingClientRect().height||0})",
+    "(()=>{const metric=(sel)=>{const el=document.querySelector(sel);return el?{scrollHeight:el.scrollHeight,clientHeight:el.clientHeight,height:el.getBoundingClientRect().height}:null};return {bodyScrollHeight:document.body.scrollHeight,bodyClientHeight:document.body.clientHeight,contentScrollHeight:document.getElementById('kaltest-content')?.scrollHeight||0,contentClientHeight:document.getElementById('kaltest-content')?.clientHeight||0,contentInnerHeight:document.getElementById('kaltest-content')?.firstElementChild?.getBoundingClientRect().height||0,stock:{layout:metric('.kaltest-stock-layout'),left:metric('.kaltest-stock-left'),source:metric('.kaltest-stock-zone'),pots:metric('.kaltest-stock-pots'),shelves:metric('.kaltest-stock-shelves'),shelf1:metric('.kaltest-stock-shelf.shelf-1'),shelf2:metric('.kaltest-stock-shelf.shelf-2'),shelf3:metric('.kaltest-stock-shelf.shelf-3')}}})()",
     true
   );
   if (metrics.bodyScrollHeight > metrics.bodyClientHeight + 2) {
