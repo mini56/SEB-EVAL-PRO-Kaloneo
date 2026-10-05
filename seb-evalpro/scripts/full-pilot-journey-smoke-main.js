@@ -263,17 +263,28 @@ app.whenReady().then(async()=>{
       throw new Error('Page Stock absente/invalide: '+JSON.stringify(stock));
     }
 
-    // 5. Planning -> Genre/Nombre KALTEST, sans passage par l'ancienne page.
+    // 5. Planning est lui aussi un KALTEST, puis mène au Genre/Nombre KALTEST.
     await win.webContents.executeJavaScript("window.sebParcours.goNext('stock'); true;",true);
-    await waitForFile(win,'planning.html');
-    await sleep(250);
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='planning', 'Planning KALTEST');
+    await sleep(350);
 
-    const planningNext=await win.webContents.executeJavaScript("window.sebParcours.nextUrl('planning')",true);
-    if(planningNext!=='kaltest-pilot2.html?fullParcours=1&segment=genre-nombre'){
-      throw new Error('Planning ne mène pas au Genre/Nombre KALTEST: '+planningNext);
+    const planning=await win.webContents.executeJavaScript(`
+      ({
+        current:window.sebKaltestPilot2.currentTest()?.id||'',
+        next:window.sebParcours?.nextUrl('planning')||'',
+        rows:document.querySelectorAll('.kaltest-planning-table tbody tr').length
+      })
+    `,true);
+    if(planning.current!=='planning_cantine' ||
+       planning.next!=='kaltest-pilot2.html?fullParcours=1&segment=genre-nombre' ||
+       planning.rows!==3){
+      throw new Error('Planning KALTEST invalide: '+JSON.stringify(planning));
     }
 
-    await win.webContents.executeJavaScript("window.sebParcours.goNext('planning'); true;",true);
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
     await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='genre-nombre', 'Genre/Nombre KALTEST');
     await sleep(450);
 
@@ -358,6 +369,7 @@ app.whenReady().then(async()=>{
     console.log('BRIQUE_VIDEO='+video.src);
     console.log('LEGO_PAGE=OK');
     console.log('STOCK_PAGE=OK pots='+stock.pots+' cases='+stock.cases);
+    console.log('PILOT11_PLANNING_KALTEST=OK');
     console.log('PILOT11_GENRE_NOMBRE_AT_CORRECT_POSITION=OK');
     console.log('PILOT11_PARONYMES_AT_CORRECT_POSITION=OK');
     console.log('PILOT11_NO_DUPLICATE_MIGRATED_PAGES=OK');
