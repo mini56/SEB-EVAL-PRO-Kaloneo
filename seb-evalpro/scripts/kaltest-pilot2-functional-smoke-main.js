@@ -98,7 +98,7 @@ async function fillOneAnswer(win) {
     );
   } else if (mode.tri) {
     await win.webContents.executeJavaScript(
-      "(function(){for(let i=0;i<3;i++){document.querySelector('.kaltest-tri-chrono-buttons .seb-btn-timer-start').click();document.querySelector('.kaltest-tri-chrono-buttons .seb-btn-timer-stop').click();const e=document.querySelectorAll('[data-tri-error]')[i];e.value=String(i);e.dispatchEvent(new Event('input',{bubbles:true}));}document.querySelector('.kaltest-tri-results-button').click();document.querySelector('.kaltest-tri-auto-choice input').click();document.querySelector('.kaltest-tri-auto-validate').click();return true;})()",
+      "(function(){const start=document.querySelector('.kaltest-tri-chrono-buttons .seb-btn-timer-start');const stop=document.querySelector('.kaltest-tri-chrono-buttons .seb-btn-timer-stop');const errors=document.querySelectorAll('[data-tri-error]');if(!start||!stop||errors.length<3)return false;for(let i=0;i<3;i++){start.click();stop.click();errors[i].value=String(i);errors[i].dispatchEvent(new Event('input',{bubbles:true}));}const results=document.querySelector('.kaltest-tri-results-button');if(results&&!results.disabled)results.click();const choice=document.querySelector('.kaltest-tri-auto-choice input');if(choice)choice.click();const validate=document.querySelector('.kaltest-tri-auto-validate');if(validate&&!validate.disabled)validate.click();return true;})()",
       true
     );
   } else if (mode.dictation) {
