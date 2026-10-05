@@ -255,6 +255,7 @@ app.whenReady().then(async () => {
         throw new Error('Ordre KALTEST incorrect : attendu ' + expectedIds[index] + ', trouvé ' + testId);
       }
 
+      console.log('PILOT2_SMOKE_SUBSTAGE=perfect-' + testId);
       const perfect = await perfectResult(win);
       const meta = await win.webContents.executeJavaScript(
         "({questionCount:(window.sebKaltestPilot2.currentTest().questions||[]).length,scored:window.sebKaltestPilot2.currentTest().scored!==false})",
@@ -275,8 +276,10 @@ app.whenReady().then(async () => {
         throw new Error(testId + ' : une autoévaluation non notée produit encore un score.');
       }
 
+      console.log('PILOT2_SMOKE_SUBSTAGE=overflow-' + testId);
       await assertNoOverflow(win, testId);
 
+      console.log('PILOT2_SMOKE_SUBSTAGE=visual-' + testId);
       const visualContract = await win.webContents.executeJavaScript(
         "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null,fractionItems:document.querySelectorAll('.kaltest-fraction-item').length,organisationRows:document.querySelectorAll('.kaltest-organisation-row').length,postureFields:document.querySelectorAll('.kaltest-postures-answer input').length,autoevalChoices:document.querySelectorAll('.kaltest-autoeval-choice input').length,stockPots:document.querySelectorAll('.kaltest-stock-pot').length,stockCases:document.querySelectorAll('.kaltest-stock-case').length,mailInputs:document.querySelectorAll('.kaltest-mail-composer input').length,mailTextarea:document.querySelectorAll('.kaltest-mail-composer textarea').length,dicteeAudio:document.querySelectorAll('.kaltest-dictee-player audio').length,dicteeTextarea:document.querySelectorAll('.kaltest-dictee-writing textarea').length,triRows:document.querySelectorAll('.kaltest-tri-row:not(.head)').length,triChronoButtons:document.querySelectorAll('.kaltest-tri-chrono-buttons button').length,transitionVideo:document.querySelectorAll('.kaltest-transition-video').length,briqueChrono:Boolean(document.getElementById('startBtn')&&document.getElementById('stopBtn')),briqueAdmin:Boolean(document.getElementById('secretCode')&&document.getElementById('validBtn')),textEditor:Boolean(document.querySelector('.kaltest-text-editor-tool .ql-editor')),textEditorFile:Boolean(document.getElementById('nw-file-menu-button')),textEditorImage:Boolean(document.getElementById('nw-image-button')),terminal:Boolean(document.querySelector('.kaltest-terminal-page')),builderGridInputs:document.querySelectorAll('.kaltest-builder-grid input[data-question-id]').length};})()",
         true
@@ -353,7 +356,9 @@ app.whenReady().then(async () => {
         break;
       }
 
+      console.log('PILOT2_SMOKE_SUBSTAGE=fill-' + testId);
       await fillOneAnswer(win);
+      console.log('PILOT2_SMOKE_SUBSTAGE=advance-' + testId);
       const validateBeforeAdvance = await win.webContents.executeJavaScript("window.sebKaltestPilot2.currentTest()?.behavior?.validateBeforeAdvance===true",true);
       await win.webContents.executeJavaScript("document.getElementById('kaltest-next').click();true",true);
       await sleep(70);
