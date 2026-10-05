@@ -11,7 +11,7 @@
   <header class="page-topbar">
     <div>
       <h1>Création de parcours</h1>
-      <p>Choisissez une introduction, ajoutez les tests dans l’ordre voulu puis choisissez une page de fin.</p>
+      <p>Choisissez l’écran de masquage, l’introduction, les tests dans l’ordre voulu puis la page de fin.</p>
     </div>
     <button id="back-tests-parcours" class="seb-action-btn seb-btn-functional" type="button">← Tests / Parcours</button>
   </header>
@@ -49,11 +49,17 @@
         <div class="panel-title">
           <div>
             <h2>Parcours en construction</h2>
-            <p>Introduction et fin sont obligatoires. Les tests intermédiaires sont libres et uniques.</p>
+            <p>L’écran de masquage est hors parcours. Introduction et fin sont obligatoires ; les tests intermédiaires sont libres et uniques.</p>
           </div>
         </div>
 
         <div class="sequence-scroll">
+        <div class="fixed-step mask-step">
+          <div class="step-label">Écran de masquage — hors parcours</div>
+          <p class="step-help">Ouvert uniquement par « Afficher l’écran d’accueil ». KALONÉO est utilisé par défaut.</p>
+          <div id="mask-slot" class="special-slot" data-role="mask-screen"></div>
+        </div>
+
         <div class="fixed-step intro-step">
           <div class="step-label">1 — Introduction de parcours</div>
           <div id="intro-slot" class="special-slot" data-role="introduction"></div>
