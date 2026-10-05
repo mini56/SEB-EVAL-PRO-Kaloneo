@@ -1,0 +1,42 @@
+name: Parcours Builder V1 checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - parcours-builder-v1
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: seb-evalpro
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Verify parcours library and business rules
+        run: npm run test:parcours-builder
+
+      - name: Rebuild real web application
+        run: npm run prepare:web
+
+      - name: Verify Admin foundation
+        run: npm run test:admin-foundation
+
+      - name: Verify existing parcours registry
+        run: npm run test:parcours
