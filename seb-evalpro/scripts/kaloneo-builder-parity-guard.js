@@ -99,7 +99,8 @@ for(const token of [
 for(const token of ['../js/seb-floating-calculator.js','id="calc-container"']){
   if(!previewHtml.includes(token)) fail('Aperçu Electron sans calculatrice commune: '+token);
 }
-if(!previewJs.includes("data-seb-action") || !previewJs.includes("setCalculatorBrand")) {
+if(!(previewJs.includes("data-seb-action") || previewJs.includes("dataset.sebAction")) ||
+   !previewJs.includes("setCalculatorBrand")) {
   fail('Aperçu Electron non raccordé à la calculatrice commune KALONÉO');
 }
 if(!sharedCalculator.includes("brand.textContent = 'KALONÉO'") ||
