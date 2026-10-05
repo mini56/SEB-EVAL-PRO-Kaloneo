@@ -1372,6 +1372,13 @@
     const data=Core.modelToDefinition(currentModel());
     const bridge=window.sebEvalPro;
     if(!bridge || typeof bridge.kaloneoSaveTest!=='function') {
+      if(options.exportJson===true) {
+        exportDefinition(data);
+        saveDraft(false);
+        $('draft-status').textContent='test.json généré — hors SEB EvalPro';
+        setTimeout(()=>$('draft-status').textContent='Brouillon local',1800);
+        return true;
+      }
       alert('L’enregistrement dans la bibliothèque est disponible depuis SEB EvalPro.');
       return false;
     }
