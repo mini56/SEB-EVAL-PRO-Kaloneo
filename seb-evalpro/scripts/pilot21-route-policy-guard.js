@@ -43,11 +43,14 @@ expect(policy.normalizeCandidateRoute('dictee.html'),policy.INITIAL_ROUTE,'ancie
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=dictee'),'kaltest-pilot2.html?fullParcours=1&segment=dictee','segment Dictée KALTEST');
 expect(policy.normalizeCandidateRoute('tri_de_cheville.html'),policy.INITIAL_ROUTE,'ancienne page Tri doit être refusée');
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=tri'),'kaltest-pilot2.html?fullParcours=1&segment=tri','segment Tri KALTEST');
+expect(policy.normalizeCandidateRoute('nwtexte.html'),policy.INITIAL_ROUTE,'ancienne page Traitement de texte doit être refusée');
+expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=nwtexte'),'kaltest-pilot2.html?fullParcours=1&segment=nwtexte','segment Traitement de texte KALTEST');
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=inconnu'),policy.INITIAL_ROUTE,'segment inconnu doit revenir à l’entrée KALONÉO');
 expect(policy.normalizeCandidateRoute('page-inconnue.html'),policy.INITIAL_ROUTE,'page inconnue doit revenir à l’entrée KALONÉO');
 
 expect(policy.resolveStateRoute({lastEvaluationPage:'qcmv1.0.html'}),policy.INITIAL_ROUTE,'ancienne reprise qcm sans page doit être neutralisée');
 expect(policy.resolveStateRoute({lastEvaluationPage:'brique.html'}),policy.INITIAL_ROUTE,'ancienne reprise Briques doit être neutralisée');
+expect(policy.resolveStateRoute({lastEvaluationPage:'nwtexte.html'}),policy.INITIAL_ROUTE,'ancienne reprise Traitement de texte doit être neutralisée');
 expect(policy.resolveStateRoute({lastEvaluationRoute:'qcmv1.0.html?page=5#page5'}),policy.INITIAL_ROUTE,'ancienne reprise page 5 doit être neutralisée après migration KALTEST');
 expect(policy.resolveStateRoute({lastEvaluationRoute:'kaltest-pilot2.html?segment=postures'}),'kaltest-pilot2.html?fullParcours=1&segment=postures','reprise exacte segment Postures');
 
