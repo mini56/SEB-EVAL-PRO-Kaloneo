@@ -51,3 +51,9 @@ body{height:100vh;padding-top:60px}
 }
 .library-panel.pointer-drop-target,.tests-dropzone.pointer-drop-target,.sequence-card.pointer-drop-target,
 .special-slot.pointer-drop-target{outline:2px solid #F9B233;outline-offset:2px;background:#fffaf1}
+
+
+/* R4 — l’écran de masquage est une configuration hors séquence, jamais une étape numérotée. */
+.mask-step{border-color:#9fc5db;background:#f5fbfe}
+.mask-step .step-label{color:#004e70}
+.step-help{margin:4px 0 9px;color:#607386;font-size:12px;line-height:1.3}
