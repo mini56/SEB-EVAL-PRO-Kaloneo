@@ -55,6 +55,8 @@ if(mediaProof.mediaName||mediaProof.mediaType||mediaProof.mediaData||mediaProof.
 
 if(capabilities.compiledWithSebEvalPro!==true) fail('la compilation commune KALONÉO / SEB EvalPro n’est pas déclarée');
 if(capabilities.tables?.gridMode!==true) fail('bloc Tableau / Grille absent');
+if(!(capabilities.questionResponseTypes||[]).includes('free-text')||capabilities.questionRules?.freeTextManualEvaluation!==true) fail('réponse texte libre / évaluation Administrateur absente');
+if(capabilities.maskScreens?.defaultId!=='kaloneo-default'||capabilities.maskScreens?.defaultWhenUnset!==true||capabilities.maskScreens?.closeLabel!=='Masquer l’écran d’accueil') fail('contrat Écrans de masquage incomplet');
 if(capabilities.tables?.questionCellAcceptedAnswers!==true) fail('réponse attendue par cellule absente');
 if(capabilities.tables?.columnWidthCharacters!==true) fail('largeur de colonne en caractères absente');
 if(capabilities.tables?.lastColumnUsesRemainder!==true) fail('dernière colonne = reste disponible absent');
@@ -86,6 +88,11 @@ const prepare=read(path.join(sebRoot,'scripts','prepare-web.js'));
 const admin=read(path.join(sebRoot,'overrides','admin-tests-parcours.html'));
 const adminJs=read(path.join(sebRoot,'source','js','admin-tests-parcours.js'));
 const main=read(path.join(sebRoot,'src','main.js'));
+const preload=read(path.join(sebRoot,'src','preload.js'));
+const kaloneoLibrary=read(path.join(sebRoot,'src','kaloneo-library-main.js'));
+const maskBuilderHtml=read(path.join(sebRoot,'overrides','admin-mask-builder.html'));
+const maskBuilderJs=read(path.join(sebRoot,'source','js','admin-mask-builder.js'));
+
 
 for(const token of [
   'builder-core.js','Importer test.json','table-grid','Gratte-ciel 6 × 6','value="text-editor"',
@@ -118,6 +125,19 @@ if(!kaltestRuntime.includes("test.calculator?.brandLabel ?? 'KALONÉO'")) {
 for(const token of ["params.get('resume') === 'preview'","focusTitleField","startNewTest"]) {
   if(!builderJs.includes(token)) fail('Test Builder R3 incomplet: '+token);
 }
+for(const token of ["Texte libre — évaluation Administrateur","saveToLibrary","kaloneoSaveTest"]) {
+  if(!builderJs.includes(token)) fail('Test Builder R4 incomplet: '+token);
+}
+for(const token of ["saveTest","listMaskScreens","saveMaskScreen","Ecrans-masquage","kaloneo-default"]) {
+  if(!kaloneoLibrary.includes(token)) fail('Bibliothèque R4 incomplète: '+token);
+}
+for(const token of ["kaloneo-library:save-test","kaloneo-library:list-mask-screens","kaloneo-library:save-mask-screen"]) {
+  if(!main.includes(token)) fail('IPC R4 absent: '+token);
+}
+for(const token of ["kaloneoSaveTest","kaloneoListMaskScreens","kaloneoSaveMaskScreen","MASK_REF_KEY"]) {
+  if(!preload.includes(token)) fail('Preload R4 absent: '+token);
+}
+if(!maskBuilderHtml.includes('Écrans de masquage')||!maskBuilderJs.includes('kaloneoSaveMaskScreen')) fail('éditeur Écrans de masquage absent');
 if(!main.includes("query:{ resume:'preview' }")) {
   fail('Retour aperçu R3 sans reprise explicite du brouillon');
 }
@@ -248,6 +268,28 @@ for(const entry of archetypeRegistry.archetypes||[]){
 
 if(registryIds.size!==Number(capabilities.validatedArchetypeCount)) {
   fail('nombre d’archétypes du registre incohérent: '+registryIds.size+' / '+capabilities.validatedArchetypeCount);
+}
+
+const freeTextProof=Core.modelToDefinition({
+  idLocked:true,sourceDefinition:null,
+  meta:{
+    title:'Preuve texte libre',id:'preuve_texte_libre',version:'1.0.0',category:'francais',scored:true,icon:null,
+    layout:'single',template:'generic',scenario:'Scénario',instruction:'Répondez librement.',
+    calculatorCompatible:false,calculatorDefaultEnabled:false,calculatorBrand:'KALONÉO',
+    chronoEnabled:false,chronoMode:'simple',chronoMinMeasures:1,chronoMaxMeasures:1,
+    chronoAutoReset:false,chronoFocusAfterStop:false,chronoShowTime:true,
+    adminIntervention:false,adminInstructions:'',autoevaluation:false,externalMaterial:false,externalMaterialText:'',
+    block1WidthChars:'',block2WidthChars:'',lastBlockRemainder:true,outputs:[],bilanContributions:[]
+  },
+  blocks:[{uid:'free_1',type:'question',zone:'left',question:{
+    id:'ID1_preuve_texte_libre',prompt:'Expliquez votre réponse',responseType:'free-text',manualEvaluation:true,
+    normalizer:'',acceptedAnswers:'',units:'',points:0,example:false,options:'',unitInput:false,unitScored:false,supplementalFields:[]
+  }}]
+});
+const freeTextAnalysis=Core.analyzeDefinition(freeTextProof);
+if(!freeTextAnalysis.ok) fail('texte libre manuel non générable',freeTextAnalysis.errors.join('\n'));
+if(freeTextProof.questions?.[0]?.response?.type!=='free-text'||freeTextProof.questions?.[0]?.manualEvaluation!==true||freeTextProof.questions?.[0]?.points!==0) {
+  fail('contrat texte libre manuel incorrect');
 }
 
 const fixtureRoot=path.join(repoRoot,'tests','fixtures','kaltests');
