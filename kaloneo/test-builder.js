@@ -22,6 +22,7 @@
       id: '',
       prompt: '',
       responseType: 'text',
+      manualEvaluation: false,
       normalizer: '',
       acceptedAnswers: '',
       units: '',
@@ -399,13 +400,20 @@
     row2.className='field-row cols-3';
     row2.append(
       selectField('Type de réponse',q.responseType,[
-        ['text','Texte'],['number','Nombre'],['number-unit','Nombre + unité'],['duration','Durée / horaire'],
+        ['text','Texte'],['free-text','Texte libre — évaluation Administrateur'],['number','Nombre'],['number-unit','Nombre + unité'],['duration','Durée / horaire'],
         ['single-choice','Choix unique'],['multiple-choice','Choix multiple'],['boolean','Vrai / Faux'],['select','Liste déroulante']
-      ],value=>{q.responseType=value;changed();renderBlocks();}),
+      ],value=>{
+        q.responseType=value;
+        q.manualEvaluation=value==='free-text';
+        if(q.manualEvaluation) { q.points=0; q.acceptedAnswers=''; }
+        changed();renderBlocks();
+      }),
       q.responseType==='duration'
         ? inputField('Durée attendue — minutes',q.acceptedMinutes,value=>{q.acceptedMinutes=Math.max(0,Number(value)||0);changed();},{type:'number',min:0,title:'Valeur de référence en minutes. Le candidat peut saisir 9h15, 9 heures 15 min, etc.'})
-        : inputField('Réponse(s) attendue(s)',q.acceptedAnswers,value=>{q.acceptedAnswers=value;changed();},{placeholder:'Séparer par ;',title:'Entrez la ou les réponses correctes. Séparez plusieurs réponses acceptées par un point-virgule ;'}),
-      inputField('Points',q.example?0:q.points,value=>{if(!q.example)q.points=Math.max(0,Number(value)||0);changed();},{type:'number',min:0,readOnly:Boolean(q.example),title:'Nombre de points attribués. Une question d’exemple reste automatiquement à 0.'})
+        : q.responseType==='free-text'
+          ? inputField('Correction','Évaluation manuelle I / II / III / NE par l’Administrateur',()=>{},{readOnly:true,title:'La réponse du candidat est conservée telle quelle. Aucun score automatique n’est calculé.'})
+          : inputField('Réponse(s) attendue(s)',q.acceptedAnswers,value=>{q.acceptedAnswers=value;changed();},{placeholder:'Séparer par ;',title:'Entrez la ou les réponses correctes. Séparez plusieurs réponses acceptées par un point-virgule ;'}),
+      inputField('Points',(q.example||q.responseType==='free-text')?0:q.points,value=>{if(!q.example&&q.responseType!=='free-text')q.points=Math.max(0,Number(value)||0);changed();},{type:'number',min:0,readOnly:Boolean(q.example||q.responseType==='free-text'),title:q.responseType==='free-text'?'La réponse libre est évaluée manuellement dans le Bilan.':'Nombre de points attribués. Une question d’exemple reste automatiquement à 0.'})
     );
     body.appendChild(row2);
 
@@ -896,6 +904,12 @@
       const choices=document.createElement('div');
       splitValues(q.options).forEach(v=>{const l=document.createElement('label');l.className='inline-checkbox';const cb=document.createElement('input');cb.type='checkbox';l.append(cb,document.createTextNode(' '+v));choices.appendChild(l);});
       wrap.appendChild(choices);
+    } else if(q.responseType==='free-text') {
+      const input=document.createElement('textarea');
+      input.rows=5;
+      input.className='preview-free-text';
+      input.placeholder='Votre réponse';
+      wrap.appendChild(input);
     } else {
       const input=document.createElement('input');
       input.type='text';
@@ -1120,7 +1134,9 @@
       qi++;
       const q=block.question||{};
       add(Boolean(String(q.prompt||'').trim()),'Question '+qi+' : texte renseigné');
-      if(m.scored&&!q.example) {
+      if(q.responseType==='free-text') {
+        add(true,'Question '+qi+' : texte libre évalué manuellement par l’Administrateur');
+      } else if(m.scored&&!q.example) {
         add((Number(q.points)||0)>0,'Question '+qi+' : points > 0');
         if(q.responseType==='duration') {
           add(Number.isFinite(Number(q.acceptedMinutes))&&Number(q.acceptedMinutes)>=0,'Question '+qi+' : durée attendue renseignée');
@@ -1284,22 +1300,57 @@
     setTimeout(()=>$('draft-status').textContent='Brouillon local',1800);
   }
 
-  function downloadJson() {
-    refreshPreview();
-    if(!validate()) {
-      alert('Le test contient encore des éléments obligatoires à corriger.');
-      return;
-    }
-    state.idLocked=true;
-    $('test-id').value=$('test-id').value||normalizeIdFromTitle();
-    const data=Core.modelToDefinition(currentModel());
+  function exportDefinition(data) {
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;
     a.download=data.id+'-'+data.version+'-test.json';
     document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }
+
+  async function saveToLibrary(options={}) {
+    refreshPreview();
+    if(!validate()) {
+      alert('Le test contient encore des éléments obligatoires à corriger.');
+      return false;
+    }
+    state.idLocked=true;
+    $('test-id').value=$('test-id').value||normalizeIdFromTitle();
+    const data=Core.modelToDefinition(currentModel());
+    const bridge=window.sebEvalPro;
+    if(!bridge || typeof bridge.kaloneoSaveTest!=='function') {
+      alert('L’enregistrement dans la bibliothèque est disponible depuis SEB EvalPro.');
+      return false;
+    }
+
+    let result;
+    try {
+      result=await bridge.kaloneoSaveTest(data,false);
+      if(result && result.ok===false && result.code==='EXISTS') {
+        const replace=confirm('Le test « '+data.title+' » existe déjà en version '+data.version+'. Remplacer cette version dans la bibliothèque ?');
+        if(!replace) return false;
+        result=await bridge.kaloneoSaveTest(data,true);
+      }
+    } catch(error) {
+      alert('Enregistrement impossible : '+String(error?.message||error));
+      return false;
+    }
+
+    if(!result || result.ok!==true) {
+      alert('Enregistrement impossible : '+String(result?.error||'erreur inconnue'));
+      return false;
+    }
+
     saveDraft(false);
+    $('draft-status').textContent='Enregistré dans la bibliothèque';
+    setTimeout(()=>$('draft-status').textContent='Brouillon local',1800);
+    if(options.exportJson===true) exportDefinition(data);
+    return true;
+  }
+
+  async function downloadJson() {
+    await saveToLibrary({exportJson:true});
   }
 
   function changed() {
@@ -1437,7 +1488,7 @@
         alert('Aperçu impossible : '+String(error?.message||error));
       }
     });
-    $('save-draft').addEventListener('click',()=>saveDraft(true));
+    $('save-draft').addEventListener('click',()=>{ saveToLibrary(); });
     $('download-json').addEventListener('click',downloadJson);
     $('new-test').addEventListener('click',reset);
 
