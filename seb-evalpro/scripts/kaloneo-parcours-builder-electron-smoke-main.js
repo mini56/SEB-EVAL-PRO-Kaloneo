@@ -54,20 +54,38 @@ const timeout=setTimeout(()=>fail('délai global dépassé'),45000);
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
 async function pointerDrag(win, sourceSelector, targetSelector) {
-  return win.webContents.executeJavaScript(`(()=>{
+  const points=await win.webContents.executeJavaScript(`(()=>{
     const source=document.querySelector(${JSON.stringify(sourceSelector)});
     const target=document.querySelector(${JSON.stringify(targetSelector)});
-    if(!source||!target||typeof PointerEvent!=='function') return {ok:false,reason:'élément/PointerEvent absent'};
-    const a=source.getBoundingClientRect(),b=target.getBoundingClientRect();
-    const sx=a.left+Math.min(a.width/2,40),sy=a.top+Math.min(a.height/2,22);
-    const tx=b.left+Math.min(Math.max(20,b.width/2),b.width-10),ty=b.top+Math.min(Math.max(20,b.height/2),b.height-10);
-    const init=(x,y,buttons)=>({bubbles:true,cancelable:true,pointerId:77,pointerType:'mouse',isPrimary:true,button:0,buttons,clientX:x,clientY:y});
-    source.dispatchEvent(new PointerEvent('pointerdown',init(sx,sy,1)));
-    document.dispatchEvent(new PointerEvent('pointermove',init(sx+10,sy+10,1)));
-    document.dispatchEvent(new PointerEvent('pointermove',init(tx,ty,1)));
-    document.dispatchEvent(new PointerEvent('pointerup',init(tx,ty,0)));
-    return {ok:true,from:[sx,sy],to:[tx,ty]};
+    if(!source||!target) return null;
+    source.scrollIntoView({block:'center',inline:'nearest'});
+    const a=source.getBoundingClientRect();
+    const b=target.getBoundingClientRect();
+    return {
+      sx:Math.round(a.left+Math.min(a.width/2,40)),
+      sy:Math.round(a.top+Math.min(a.height/2,22)),
+      tx:Math.round(b.left+Math.min(Math.max(20,b.width/2),Math.max(20,b.width-10))),
+      ty:Math.round(b.top+Math.min(Math.max(20,b.height/2),Math.max(20,b.height-10)))
+    };
   })()`);
+  if(!points) return {ok:false,reason:'élément absent'};
+
+  const send=(type,x,y,extra={})=>win.webContents.sendInputEvent({
+    type,x,y,button:'left',...extra
+  });
+  send('mouseDown',points.sx,points.sy,{clickCount:1});
+  await wait(45);
+  send('mouseMove',points.sx+12,points.sy+8,{movementX:12,movementY:8});
+  await wait(45);
+  const midX=Math.round((points.sx+points.tx)/2);
+  const midY=Math.round((points.sy+points.ty)/2);
+  send('mouseMove',midX,midY,{movementX:midX-points.sx,movementY:midY-points.sy});
+  await wait(55);
+  send('mouseMove',points.tx,points.ty,{movementX:points.tx-midX,movementY:points.ty-midY});
+  await wait(70);
+  send('mouseUp',points.tx,points.ty,{clickCount:1});
+  await wait(80);
+  return {ok:true,from:[points.sx,points.sy],to:[points.tx,points.ty]};
 }
 
 app.whenReady().then(async()=>{
