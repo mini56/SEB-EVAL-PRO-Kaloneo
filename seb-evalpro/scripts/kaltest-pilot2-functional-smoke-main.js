@@ -251,7 +251,7 @@ app.whenReady().then(async () => {
     for (let index = 0; index < expectedIds.length; index += 1) {
       console.log('PILOT2_SMOKE_STAGE=test-' + (index + 1) + '-' + expectedIds[index]);
       const currentInfo = await win.webContents.executeJavaScript(
-        "({id:window.sebKaltestPilot2.currentTest().id,status:document.getElementById('exercise-status')?.textContent||'',nextDisabled:Boolean(document.getElementById('kaltest-next')?.disabled)})",
+        "({id:window.sebKaltestPilot2.currentTest().id,status:document.getElementById('exercise-status')?.textContent||'',nextDisabled:Boolean(document.getElementById('kaltest-next')?.disabled),tri:window.sebKaltestPilot2.state.tests?.tri_chevilles?.tri||null})",
         true
       );
       const testId = currentInfo.id;
