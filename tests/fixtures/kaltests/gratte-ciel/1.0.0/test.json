@@ -1,0 +1,520 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "2.0.0",
+  "id": "gratte_ciel",
+  "version": "1.0.0",
+  "title": "Puzzle Gratte-ciel 4 × 4",
+  "category": "raisonnement",
+  "description": "Compléter une grille 4 × 4 en respectant les indices de visibilité.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "carre.html",
+    "sourceScript": "source/js/carre-page.js",
+    "legacyParcoursId": "carre"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "C'est la journée de cohésion d'équipe. Régulièrement, l'équipe est invitée à se retrouver pour partager un moment convivial. À cette occasion, la cheffe d'équipe a préparé un petit défi ! Elle propose à chacun une grille à compléter.",
+  "instruction": "Placez les chiffres 1, 2, 3 et 4 dans chaque case. Chaque chiffre doit apparaître une seule fois par ligne et par colonne. Les nombres sur les bords indiquent combien de bâtons sont visibles depuis ce point.",
+  "presentation": {
+    "layout": "50-50",
+    "builderContent": [
+      {
+        "type": "html",
+        "zone": "left",
+        "html": "<div class=\"gratte-rules\"><h3>Règles du jeu</h3><p>• Placez les chiffres <strong>1, 2, 3, 4</strong> dans chaque case.</p><p>• Chaque chiffre doit apparaître <strong>une seule fois</strong> par ligne et par colonne.</p><p>• Les nombres sur les bords indiquent combien de « bâtons » sont visibles depuis ce point.</p><p><strong>Astuce :</strong> un indice 1 place le plus grand bâton en première position ; un indice 4 impose 1, 2, 3, 4.</p></div>"
+      },
+      {
+        "type": "table-grid",
+        "zone": "right",
+        "table": {
+          "title": "",
+          "rows": 6,
+          "cols": 6,
+          "columns": [
+            {
+              "id": "c1",
+              "widthChars": 5,
+              "align": "center",
+              "remainder": false
+            },
+            {
+              "id": "c2",
+              "widthChars": 5,
+              "align": "center",
+              "remainder": false
+            },
+            {
+              "id": "c3",
+              "widthChars": 5,
+              "align": "center",
+              "remainder": false
+            },
+            {
+              "id": "c4",
+              "widthChars": 5,
+              "align": "center",
+              "remainder": false
+            },
+            {
+              "id": "c5",
+              "widthChars": 5,
+              "align": "center",
+              "remainder": false
+            },
+            {
+              "id": "c6",
+              "widthChars": 5,
+              "align": "center",
+              "remainder": true
+            }
+          ],
+          "cells": [
+            [
+              {
+                "kind": "empty",
+                "value": ""
+              },
+              {
+                "kind": "fixed-text",
+                "value": "1"
+              },
+              {
+                "kind": "fixed-text",
+                "value": "2"
+              },
+              {
+                "kind": "fixed-text",
+                "value": "3"
+              },
+              {
+                "kind": "fixed-text",
+                "value": "2"
+              },
+              {
+                "kind": "empty",
+                "value": ""
+              }
+            ],
+            [
+              {
+                "kind": "fixed-text",
+                "value": "1"
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r1c1",
+                "acceptedAnswers": "4",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r1c2",
+                "acceptedAnswers": "3",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r1c3",
+                "acceptedAnswers": "1",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r1c4",
+                "acceptedAnswers": "2",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "fixed-text",
+                "value": "3"
+              }
+            ],
+            [
+              {
+                "kind": "fixed-text",
+                "value": "2"
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r2c1",
+                "acceptedAnswers": "2",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r2c2",
+                "acceptedAnswers": "4",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r2c3",
+                "acceptedAnswers": "3",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r2c4",
+                "acceptedAnswers": "1",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "fixed-text",
+                "value": "3"
+              }
+            ],
+            [
+              {
+                "kind": "fixed-text",
+                "value": "2"
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r3c1",
+                "acceptedAnswers": "3",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r3c2",
+                "acceptedAnswers": "1",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r3c3",
+                "acceptedAnswers": "2",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r3c4",
+                "acceptedAnswers": "4",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "fixed-text",
+                "value": "1"
+              }
+            ],
+            [
+              {
+                "kind": "fixed-text",
+                "value": "3"
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r4c1",
+                "acceptedAnswers": "1",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r4c2",
+                "acceptedAnswers": "2",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r4c3",
+                "acceptedAnswers": "4",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "candidate-answer",
+                "value": "",
+                "questionId": "gratte_r4c4",
+                "acceptedAnswers": "3",
+                "responseType": "number",
+                "points": 1
+              },
+              {
+                "kind": "fixed-text",
+                "value": "2"
+              }
+            ],
+            [
+              {
+                "kind": "empty",
+                "value": ""
+              },
+              {
+                "kind": "fixed-text",
+                "value": "3"
+              },
+              {
+                "kind": "fixed-text",
+                "value": "2"
+              },
+              {
+                "kind": "fixed-text",
+                "value": "1"
+              },
+              {
+                "kind": "fixed-text",
+                "value": "2"
+              },
+              {
+                "kind": "empty",
+                "value": ""
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "behavior": {
+    "validateBeforeAdvance": true,
+    "validationLabel": "Valider"
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "gratte_r1c1",
+      "prompt": "Réponse gratte_r1c1",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r1c2",
+      "prompt": "Réponse gratte_r1c2",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "3"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r1c3",
+      "prompt": "Réponse gratte_r1c3",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "1"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r1c4",
+      "prompt": "Réponse gratte_r1c4",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r2c1",
+      "prompt": "Réponse gratte_r2c1",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r2c2",
+      "prompt": "Réponse gratte_r2c2",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r2c3",
+      "prompt": "Réponse gratte_r2c3",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "3"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r2c4",
+      "prompt": "Réponse gratte_r2c4",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "1"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r3c1",
+      "prompt": "Réponse gratte_r3c1",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "3"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r3c2",
+      "prompt": "Réponse gratte_r3c2",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "1"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r3c3",
+      "prompt": "Réponse gratte_r3c3",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r3c4",
+      "prompt": "Réponse gratte_r3c4",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r4c1",
+      "prompt": "Réponse gratte_r4c1",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "1"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r4c2",
+      "prompt": "Réponse gratte_r4c2",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r4c3",
+      "prompt": "Réponse gratte_r4c3",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "gratte_r4c4",
+      "prompt": "Réponse gratte_r4c4",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "3"
+      ],
+      "points": 1
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "erreurs",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.competences_techniques.carre_magique.resolution_contraintes",
+      "bindings": {
+        "erreurs": "erreurs"
+      }
+    }
+  ],
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "questionnaire.grid",
+    "layout.split",
+    "bilan.bindings"
+  ]
+}
