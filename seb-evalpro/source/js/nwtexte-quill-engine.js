@@ -14,6 +14,19 @@
   let savedRange = null;
   let autosaveTimer = null;
 
+  function editorContext() {
+    const value = window.sebNwtexteContext;
+    return value && typeof value === 'object' ? value : {};
+  }
+  function scopedKey(base) {
+    const prefix = String(editorContext().storagePrefix || '');
+    return prefix ? prefix + base : base;
+  }
+  function usesLegacyPage7() {
+    const context = editorContext();
+    return context.legacyPage7 !== false;
+  }
+
   // SEB_NWTEXTE_STABLE_TYPING_FORMAT_124
   // La police et la taille d'écriture ne changent que sur une action explicite
   // de l'utilisateur. Un déplacement de curseur ne réinitialise jamais l'état
@@ -324,14 +337,14 @@
     if (!quill) return;
     let restored = false;
     try {
-      const deltaRaw = sessionStorage.getItem('autosave_editor_delta');
+      const deltaRaw = sessionStorage.getItem(scopedKey('autosave_editor_delta'));
       if (deltaRaw) {
         quill.setContents(normalizeLegacyDelta(JSON.parse(deltaRaw)), 'silent');
         restored = true;
       }
     } catch (_) {}
 
-    if (!restored) {
+    if (!restored && usesLegacyPage7()) {
       try {
         const responses = JSON.parse(sessionStorage.getItem('reponses_data') || '{}');
         if (responses.page7_delta) {
@@ -345,7 +358,7 @@
     }
 
     if (!restored) {
-      const legacy = sessionStorage.getItem('autosave_editor');
+      const legacy = sessionStorage.getItem(scopedKey('autosave_editor'));
       if (legacy) {
         quill.clipboard.dangerouslyPasteHTML(cleanLegacyHtml(legacy), 'silent');
       }
@@ -363,8 +376,8 @@
     autosaveTimer = setTimeout(function () {
       if (!quill) return;
       try {
-        sessionStorage.setItem('autosave_editor_delta', JSON.stringify(quill.getContents()));
-        sessionStorage.setItem('autosave_editor', editorHtml());
+        sessionStorage.setItem(scopedKey('autosave_editor_delta'), JSON.stringify(quill.getContents()));
+        sessionStorage.setItem(scopedKey('autosave_editor'), editorHtml());
         if (window.sebEvalPro?.save) window.sebEvalPro.save();
       } catch (error) {
         console.warn('Autosauvegarde nwtexte impossible.', error);
@@ -439,7 +452,7 @@
 
   function saveCriterionOk() {
     try {
-      const state = JSON.parse(localStorage.getItem('nwtexte_save_simulation') || 'null');
+      const state = JSON.parse(localStorage.getItem(scopedKey('nwtexte_save_simulation')) || 'null');
       const candidate = JSON.parse(sessionStorage.getItem('candidat_data') || '{}');
       const nom = String(candidate.nom || candidate.Nom || '').trim();
       if (!state || !nom) return false;
@@ -514,22 +527,24 @@
   function saveEvaluation() {
     if (!quill) return null;
     const analyse = analyseDocument();
-    let responses = {};
-    let scores = {};
-    try { responses = JSON.parse(sessionStorage.getItem('reponses_data') || '{}'); } catch (_) {}
-    try { scores = JSON.parse(sessionStorage.getItem('scores_data') || '{}'); } catch (_) {}
+    if (usesLegacyPage7()) {
+      let responses = {};
+      let scores = {};
+      try { responses = JSON.parse(sessionStorage.getItem('reponses_data') || '{}'); } catch (_) {}
+      try { scores = JSON.parse(sessionStorage.getItem('scores_data') || '{}'); } catch (_) {}
 
-    responses.page7_contenu_html = analyse.html;
-    responses.page7_contenu_texte = analyse.texte;
-    responses.page7_delta = quill.getContents();
-    responses.page7_analyse = analyse;
-    scores.page7 = analyse.score.total;
-    scores.page7_detail = analyse.score;
+      responses.page7_contenu_html = analyse.html;
+      responses.page7_contenu_texte = analyse.texte;
+      responses.page7_delta = quill.getContents();
+      responses.page7_analyse = analyse;
+      scores.page7 = analyse.score.total;
+      scores.page7_detail = analyse.score;
 
-    sessionStorage.setItem('reponses_data', JSON.stringify(responses));
-    sessionStorage.setItem('scores_data', JSON.stringify(scores));
-    sessionStorage.setItem('autosave_editor_delta', JSON.stringify(quill.getContents()));
-    sessionStorage.setItem('autosave_editor', analyse.html);
+      sessionStorage.setItem('reponses_data', JSON.stringify(responses));
+      sessionStorage.setItem('scores_data', JSON.stringify(scores));
+    }
+    sessionStorage.setItem(scopedKey('autosave_editor_delta'), JSON.stringify(quill.getContents()));
+    sessionStorage.setItem(scopedKey('autosave_editor'), analyse.html);
     if (window.sebEvalPro?.save) window.sebEvalPro.save();
     console.log('SEB EvalPro nwtexte : analyse sauvegardée', analyse);
     return analyse;
@@ -646,9 +661,11 @@
     copySelection,
     cutSelection,
     pasteFromClipboard,
+    analyseDocument,
     saveEvaluation,
     editorHtml,
-    editorText
+    editorText,
+    getContents() { return quill ? quill.getContents() : null; }
   });
   window.sebNwtexteEditor = editorApi;
 
