@@ -625,3 +625,23 @@ textarea {
 .preview-text-editor-toolbar{display:flex;gap:4px;flex-wrap:wrap}.preview-text-editor-toolbar button,.preview-text-editor-toolbar select{height:28px;padding:3px 6px;border:1px solid #C1C9D6;border-radius:5px;background:#fff;color:#46515A}
 .preview-text-editor-page{flex:1;min-height:110px;padding:10px;border:1px solid #C1C9D6;border-radius:6px;background:#fff;color:#8A949D;font:14px Calibri,Arial,sans-serif}
 .preview-text-editor small{align-self:flex-end;color:#004E70;font-weight:700}
+
+/* PILOTE 22 R2 — boutons KALONÉO plats */
+.builder-topbar button,
+.builder-editor button,
+.builder-preview button,
+.modal button{
+  box-shadow:none!important;
+  transform:none!important;
+}
+.builder-topbar button:hover,
+.builder-editor button:hover,
+.builder-preview button:hover,
+.modal button:hover,
+.builder-topbar button:active,
+.builder-editor button:active,
+.builder-preview button:active,
+.modal button:active{
+  box-shadow:none!important;
+  transform:none!important;
+}
