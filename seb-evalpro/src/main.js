@@ -1043,6 +1043,54 @@ ipcMain.handle('kaloneo-library:list-tests', () => {
   }
 });
 
+ipcMain.handle('kaloneo-library:get-test', (_event, payload) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les tests pendant une évaluation active.' };
+  try {
+    return getKaloneoLibrary().getTest(payload && payload.id, payload && payload.version);
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:save-test', (_event, payload) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les tests pendant une évaluation active.' };
+  try {
+    return getKaloneoLibrary().saveTest(payload && payload.definition, { overwrite:payload && payload.overwrite === true });
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:list-mask-screens', () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les écrans de masquage pendant une évaluation active.' };
+  try {
+    return { ok:true, maskScreens:getKaloneoLibrary().listMaskScreens() };
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:get-mask-screen', (_event, ref) => {
+  try {
+    return getKaloneoLibrary().getMaskScreen(ref || null);
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:save-mask-screen', (_event, payload) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les écrans de masquage pendant une évaluation active.' };
+  try {
+    return getKaloneoLibrary().saveMaskScreen(payload && payload.maskScreen, { overwrite:payload && payload.overwrite === true });
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
 ipcMain.handle('kaloneo-library:list-parcours', () => {
   if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
   if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les parcours pendant une évaluation active.' };
