@@ -230,9 +230,21 @@
       id:'kaltest-initial',
       file:'kaltest-pilot2.html'
     }),
-    fullParcoursStep(legacyStep('qcm-4')),
-    fullParcoursStep(legacyStep('qcm-5')),
-    fullParcoursStep(legacyStep('qcm-5_1')),
+    fullParcoursStep({
+      ...legacyStep('qcm-4'),
+      file:'kaltest-pilot2.html',
+      page:null
+    }, { segment:'fractions' }),
+    fullParcoursStep({
+      ...legacyStep('qcm-5'),
+      file:'kaltest-pilot2.html',
+      page:null
+    }, { segment:'organisation' }),
+    fullParcoursStep({
+      ...legacyStep('qcm-5_1'),
+      file:'kaltest-pilot2.html',
+      page:null
+    }, { segment:'postures' }),
     fullParcoursStep({
       ...legacyStep('qcm-6'),
       file:'kaltest-pilot2.html',
