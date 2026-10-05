@@ -54,7 +54,7 @@ for (const [needle,label] of [
 for (const [needle,label] of [
   ["lower === 'kaltest-pilot2.html'", 'Replay KALTEST'],
   ['pageKey: `${file}#test:${testId}`', 'clé Replay par exercice'],
-  ['terminer le parcours', 'capture navigation finale']
+  ['captureBeforeNavigation()', 'capture navigation garantie']
 ]) must(replay, needle, label);
 
 for (const [needle,label] of [
