@@ -8,7 +8,8 @@
     introduction: null,
     fin: null,
     tests: [],
-    draggingIndex: null
+    draggingIndex: null,
+    pointerDrag: null
   };
 
   const $ = id => document.getElementById(id);
@@ -102,6 +103,148 @@
     }
   }
 
+  function clearPointerDropTargets() {
+    document.querySelectorAll('.pointer-drop-target').forEach(node => node.classList.remove('pointer-drop-target'));
+  }
+
+  function pointerDropTargetAt(x, y, payload) {
+    const node = document.elementFromPoint(x, y);
+    if (!node) return null;
+    if (payload.source === 'library' && payload.role === 'introduction') {
+      return node.closest('#intro-slot');
+    }
+    if (payload.source === 'library' && payload.role === 'fin') {
+      return node.closest('#fin-slot');
+    }
+    if (payload.role === 'test') {
+      return node.closest('.sequence-card') || node.closest('#tests-dropzone') || node.closest('.library-panel');
+    }
+    return null;
+  }
+
+  function applyPointerDrop(payload, target) {
+    if (!payload || !target) return false;
+
+    if (payload.source === 'library') {
+      const item = libraryItem(payload.id, payload.version);
+      if (!item) return false;
+      if (payload.role === 'introduction' && target.id === 'intro-slot') {
+        state.introduction = item;
+        return true;
+      }
+      if (payload.role === 'fin' && target.id === 'fin-slot') {
+        state.fin = item;
+        return true;
+      }
+      if (payload.role === 'test') {
+        if (state.tests.some(test => test.id === item.id)) return false;
+        const targetCard = target.closest?.('.sequence-card');
+        if (targetCard) {
+          const index = Math.max(0, Math.min(Number(targetCard.dataset.index) || 0, state.tests.length));
+          state.tests.splice(index, 0, item);
+        } else if (target.id === 'tests-dropzone' || target.closest?.('#tests-dropzone')) {
+          state.tests.push(item);
+        } else {
+          return false;
+        }
+        return true;
+      }
+      return false;
+    }
+
+    if (payload.source === 'sequence' && payload.role === 'test') {
+      const from = state.tests.findIndex(test => String(test.id) === String(payload.id));
+      if (from < 0) return false;
+
+      if (target.classList?.contains('library-panel') || target.closest?.('.library-panel')) {
+        state.tests.splice(from, 1);
+        return true;
+      }
+
+      const targetCard = target.closest?.('.sequence-card');
+      if (targetCard) {
+        const targetId = String(targetCard.dataset.testId || '');
+        const to = state.tests.findIndex(test => String(test.id) === targetId);
+        if (to < 0 || to === from) return false;
+        const [moved] = state.tests.splice(from, 1);
+        const adjusted = from < to ? to - 1 : to;
+        state.tests.splice(Math.max(0, adjusted), 0, moved);
+        return true;
+      }
+
+      if (target.id === 'tests-dropzone' || target.closest?.('#tests-dropzone')) {
+        const [moved] = state.tests.splice(from, 1);
+        state.tests.push(moved);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function armPointerDrag(event, payload, source, label) {
+    if (!event || event.button !== 0 || event.isPrimary === false) return;
+    if (event.target?.closest?.('button,input,select,textarea,a')) return;
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const pointerId = event.pointerId;
+    let active = false;
+    let ghost = null;
+    let target = null;
+
+    const move = moveEvent => {
+      if (moveEvent.pointerId !== pointerId) return;
+      const dx = moveEvent.clientX - startX;
+      const dy = moveEvent.clientY - startY;
+      if (!active && Math.hypot(dx, dy) < 6) return;
+      if (!active) {
+        active = true;
+        source.classList.add('pointer-dragging');
+        ghost = document.createElement('div');
+        ghost.className = 'pointer-drag-ghost';
+        ghost.textContent = label || payload.id || 'Élément';
+        document.body.appendChild(ghost);
+        try { source.setPointerCapture(pointerId); } catch (_) {}
+      }
+
+      moveEvent.preventDefault();
+      ghost.style.left = Math.min(window.innerWidth - 250, Math.max(8, moveEvent.clientX + 14)) + 'px';
+      ghost.style.top = Math.min(window.innerHeight - 48, Math.max(8, moveEvent.clientY + 14)) + 'px';
+      clearPointerDropTargets();
+      target = pointerDropTargetAt(moveEvent.clientX, moveEvent.clientY, payload);
+      if (target) target.classList.add('pointer-drop-target');
+    };
+
+    const finish = endEvent => {
+      if (endEvent.pointerId !== pointerId) return;
+      document.removeEventListener('pointermove', move, true);
+      document.removeEventListener('pointerup', finish, true);
+      document.removeEventListener('pointercancel', cancel, true);
+      clearPointerDropTargets();
+      source.classList.remove('pointer-dragging');
+      if (ghost) ghost.remove();
+      try { source.releasePointerCapture(pointerId); } catch (_) {}
+      if (!active) return;
+      endEvent.preventDefault();
+      if (applyPointerDrop(payload, target)) render();
+    };
+
+    const cancel = cancelEvent => {
+      if (cancelEvent.pointerId !== pointerId) return;
+      document.removeEventListener('pointermove', move, true);
+      document.removeEventListener('pointerup', finish, true);
+      document.removeEventListener('pointercancel', cancel, true);
+      clearPointerDropTargets();
+      source.classList.remove('pointer-dragging');
+      if (ghost) ghost.remove();
+      try { source.releasePointerCapture(pointerId); } catch (_) {}
+    };
+
+    document.addEventListener('pointermove', move, { capture:true, passive:false });
+    document.addEventListener('pointerup', finish, { capture:true, passive:false });
+    document.addEventListener('pointercancel', cancel, { capture:true, passive:false });
+  }
+
   function renderLibraryCard(item) {
     const template = $('library-card-template');
     const card = template.content.firstElementChild.cloneNode(true);
@@ -123,6 +266,9 @@
     }
     card.querySelector('.card-meta').textContent = details.join(' • ');
 
+    card.addEventListener('pointerdown', event => {
+      armPointerDrag(event, { source:'library', id:item.id, version:item.version, role:item.role }, card, item.title);
+    });
     card.addEventListener('dragstart', event => {
       card.classList.add('dragging');
       dragPayload(event, { source:'library', id:item.id, version:item.version, role:item.role });
@@ -234,6 +380,7 @@
       const template = $('sequence-card-template');
       const card = template.content.firstElementChild.cloneNode(true);
       card.dataset.index = String(index);
+      card.dataset.testId = String(item.id);
       card.querySelector('.sequence-index').textContent = String(index + 2);
       card.querySelector('.sequence-title').textContent = item.title;
       card.querySelector('.sequence-meta').textContent =
@@ -247,6 +394,9 @@
       down.addEventListener('click', () => moveTest(index, index + 1));
       card.querySelector('.remove-test').addEventListener('click', () => removeTest(index));
 
+      card.addEventListener('pointerdown', event => {
+        armPointerDrag(event, { source:'sequence', role:'test', id:item.id, version:item.version }, card, item.title);
+      });
       card.addEventListener('dragstart', event => {
         state.draggingIndex = index;
         card.classList.add('dragging');
@@ -434,6 +584,18 @@
     installSpecialDrop('intro-slot', 'introduction');
     installSpecialDrop('fin-slot', 'fin');
     installTestsDropzone();
+    const libraryPanel=document.querySelector('.library-panel');
+    libraryPanel?.addEventListener('dragover', event => {
+      const payload=readDragPayload(event);
+      if(payload?.source==='sequence'&&payload.role==='test') event.preventDefault();
+    });
+    libraryPanel?.addEventListener('drop', event => {
+      const payload=readDragPayload(event);
+      if(payload?.source!=='sequence'||payload.role!=='test') return;
+      event.preventDefault();
+      const index=state.tests.findIndex(test=>String(test.id)===String(payload.id));
+      if(index>=0){state.tests.splice(index,1);render();}
+    });
     initialize();
   }
 
