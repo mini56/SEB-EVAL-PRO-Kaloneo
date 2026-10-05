@@ -10,7 +10,8 @@
       "file": "qcmv1.0.html",
       "page": "1",
       "role": "system-page-introduction",
-      "status": "preserve"
+      "status": "retired-system",
+      "retiredReason": "Remplacée par l’entrée candidat KALONÉO/KALTEST."
     },
     {
       "id": "qcm-2",
@@ -202,7 +203,8 @@
       "file": "qcmv1.0.html",
       "page": "finale",
       "role": "system-page-final",
-      "status": "preserve"
+      "status": "retired-system",
+      "retiredReason": "Remplacée par le KALTEST fin_parcours."
     }
   ]
 }
