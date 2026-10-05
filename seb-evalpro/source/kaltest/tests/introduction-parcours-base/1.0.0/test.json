@@ -62,10 +62,11 @@
         "folderIdentity": true
       },
       {
-        "id": "date",
+        "id": "dateEvaluation",
         "label": "Date de l’évaluation",
         "inputType": "date",
-        "required": true
+        "required": true,
+        "storageKey": "date"
       }
     ],
     "parcoursField": {
