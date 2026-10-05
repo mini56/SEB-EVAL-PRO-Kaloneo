@@ -42,6 +42,11 @@
       startPhase:'exercise',
       ids:Object.freeze(['conversions_atelier_expedition'])
     }),
+    autoeval1:Object.freeze({
+      stepId:'autoeval1',
+      startPhase:'exercise',
+      ids:Object.freeze(['autoevaluation_savoirs'])
+    }),
     planning:Object.freeze({
       stepId:'planning',
       startPhase:'exercise',
@@ -51,6 +56,11 @@
       stepId:'genrenombres',
       startPhase:'exercise',
       ids:Object.freeze(['genre_nombre'])
+    }),
+    autoeval2:Object.freeze({
+      stepId:'autoeval2',
+      startPhase:'exercise',
+      ids:Object.freeze(['autoevaluation_tic'])
     }),
     paronymes:Object.freeze({
       stepId:'paronymes',
@@ -1093,6 +1103,67 @@
     return wrapper;
   }
 
+  function renderAutoevaluation(test, host) {
+    const definition = test.presentation?.autoevaluationForm;
+    if (!definition || !definition.questionId) return false;
+    const question = questionById(test, definition.questionId);
+    if (!question) return false;
+
+    const layout = document.createElement('div');
+    layout.className = 'kaltest-autoeval-layout';
+    const form = document.createElement('section');
+    form.className = 'kaltest-autoeval-form';
+    const statements = new Map((definition.statements || []).map(item => [String(item.value), item]));
+
+    function appendStatement(value) {
+      const item = statements.get(String(value));
+      if (!item) return;
+      const label = document.createElement('label');
+      label.className = 'kaltest-autoeval-choice';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.value = String(value);
+      const selected = new Set(Array.isArray(testStateFor(test).answers?.[question.id]) ? testStateFor(test).answers[question.id].map(String) : []);
+      input.checked = selected.has(String(value));
+      input.addEventListener('change', () => {
+        const current = new Set(Array.isArray(testStateFor(test).answers?.[question.id]) ? testStateFor(test).answers[question.id].map(String) : []);
+        if (input.checked) current.add(String(value)); else current.delete(String(value));
+        saveAnswer(test, question.id, Array.from(current));
+      });
+      const span = document.createElement('span');
+      span.textContent = item.label || String(value);
+      label.append(input, span);
+      form.appendChild(label);
+    }
+
+    if (Array.isArray(definition.groups) && definition.groups.length) {
+      for (const group of definition.groups) {
+        const title = document.createElement('h3');
+        title.textContent = group.title || '';
+        form.appendChild(title);
+        for (const value of group.values || []) appendStatement(value);
+      }
+    } else {
+      for (const item of definition.statements || []) appendStatement(item.value);
+    }
+
+    const comment = document.createElement('label');
+    comment.className = 'kaltest-autoeval-comment';
+    const caption = document.createElement('span');
+    caption.textContent = definition.commentLabel || 'Commentaire :';
+    const textarea = document.createElement('textarea');
+    textarea.rows = 5;
+    const fieldId = definition.commentFieldId || 'commentaire';
+    textarea.value = String(testStateFor(test).supplemental?.[question.id]?.[fieldId] ?? '');
+    textarea.addEventListener('input', () => saveSupplemental(test, question.id, fieldId, textarea.value));
+    comment.append(caption, textarea);
+    form.appendChild(comment);
+
+    layout.append(form, renderVisualPanel(definition.visual || {}));
+    host.appendChild(layout);
+    return true;
+  }
+
   function renderPlanning(test, host) {
     const definition = test.presentation?.planningGrid;
     if (!definition || !Array.isArray(definition.rows)) return false;
@@ -1494,6 +1565,12 @@
       sessionStorage.setItem('seb_evalpro_qcm_page5_1_state', JSON.stringify({ values, savedAt:Date.now(), source:'kaltest' }));
     } else if (test.id === 'conversions_atelier_expedition') {
       copyRange('page6_q', 'page6_q', 1, true, true);
+    } else if (test.id === 'autoevaluation_savoirs') {
+      const question = questions[0];
+      sessionStorage.setItem('autoEval1_resultats', JSON.stringify({
+        selections:Array.isArray(testState.answers?.[question?.id]) ? testState.answers[question.id] : [],
+        commentaire:String(testState.supplemental?.[question?.id]?.commentaire ?? '')
+      }));
     } else if (test.id === 'planning_cantine') {
       const correction = {};
       const answers = {};
@@ -1514,6 +1591,12 @@
         validated:true,
         savedAt:Date.now(),
         source:'kaltest'
+      }));
+    } else if (test.id === 'autoevaluation_tic') {
+      const question = questions[0];
+      sessionStorage.setItem('autoEval2_resultats', JSON.stringify({
+        selections:Array.isArray(testState.answers?.[question?.id]) ? testState.answers[question.id] : [],
+        commentaire:String(testState.supplemental?.[question?.id]?.commentaire ?? '')
       }));
     } else if (test.id === 'genre_nombre') {
       const answers = questions.map(question => String(testState.answers?.[question.id] ?? ''));
@@ -1596,7 +1679,9 @@
     const host = document.getElementById('kaltest-content');
     host.innerHTML = '';
 
-    if (renderPlanning(test, host)) {
+    if (renderAutoevaluation(test, host)) {
+      // Autoévaluations migrées dans le moteur KALTEST commun.
+    } else if (renderPlanning(test, host)) {
       // Planning cantine migré dans le moteur KALTEST commun.
     } else if (renderFractions(test, host)) {
       // Migration KALTEST de l'ancienne page 4.
@@ -1674,7 +1759,7 @@
       return;
     }
 
-    if (!hasActivity(test, testState)) {
+    if (!hasActivity(test, testState) && test.allowEmptyCompletion !== true) {
       status.textContent = 'Vous devez réaliser l’exercice avant de continuer. Si vous souhaitez l’arrêter, utilisez « Abandonner l’exercice ».';
       return;
     }
