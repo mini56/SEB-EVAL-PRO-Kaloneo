@@ -327,13 +327,27 @@ app.whenReady().then(async()=>{
     `,true);
     if(middle.dictee!=='tri_de_cheville.html?fullParcours=1' ||
        middle.tri!=='nwtexte.html?fullParcours=1' ||
-       middle.nwtexte!=='nvmail.html?fullParcours=1' ||
+       middle.nwtexte!=='kaltest-pilot2.html?fullParcours=1&segment=mail' ||
        middle.nvmail!=='kaltest-pilot2.html?fullParcours=1&segment=autoeval2' ||
        middle.auto2!=='kaltest-pilot2.html?fullParcours=1&segment=paronymes'){
       throw new Error('Milieu/fin de parcours PILOTE 11 incorrect: '+JSON.stringify(middle));
     }
 
-    await win.webContents.executeJavaScript("window.sebParcours.goTo('autoeval2'); true;",true);
+    await win.webContents.executeJavaScript("window.sebParcours.goTo('nvmail'); true;",true);
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='mail', 'Mail KALTEST');
+    await sleep(300);
+    const mail=await win.webContents.executeJavaScript(
+      "({current:window.sebKaltestPilot2.currentTest()?.id||'',inputs:document.querySelectorAll('.kaltest-mail-composer input').length,textarea:document.querySelectorAll('.kaltest-mail-composer textarea').length,next:window.sebParcours?.nextUrl('nvmail')||''})",
+      true
+    );
+    if(mail.current!=='redaction_email' || mail.inputs!==3 || mail.textarea!==1 ||
+       mail.next!=='kaltest-pilot2.html?fullParcours=1&segment=autoeval2'){
+      throw new Error('Mail KALTEST invalide: '+JSON.stringify(mail));
+    }
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
     await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='autoeval2', 'Autoévaluation 2 KALTEST');
     await sleep(300);
     const auto2=await win.webContents.executeJavaScript(
@@ -408,6 +422,7 @@ app.whenReady().then(async()=>{
     console.log('PILOT11_STOCK_KALTEST=OK pots='+stock.pots+' cases='+stock.cases);
     console.log('PILOT11_AUTOEVAL1_KALTEST=OK');
     console.log('PILOT11_PLANNING_KALTEST=OK');
+    console.log('PILOT11_MAIL_KALTEST=OK');
     console.log('PILOT11_AUTOEVAL2_KALTEST=OK');
     console.log('PILOT11_GENRE_NOMBRE_AT_CORRECT_POSITION=OK');
     console.log('PILOT11_PARONYMES_AT_CORRECT_POSITION=OK');
