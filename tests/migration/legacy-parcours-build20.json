@@ -88,7 +88,9 @@
       "id": "autoeval1",
       "file": "autoeval1.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "autoevaluation_savoirs",
+      "fixturePath": "tests/fixtures/kaltests/autoevaluation-savoirs/1.0.0/test.json"
     },
     {
       "id": "introbrique",
@@ -152,7 +154,9 @@
       "id": "autoeval2",
       "file": "autoeval2.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "autoevaluation_tic",
+      "fixturePath": "tests/fixtures/kaltests/autoevaluation-tic/1.0.0/test.json"
     },
     {
       "id": "paronymes",
