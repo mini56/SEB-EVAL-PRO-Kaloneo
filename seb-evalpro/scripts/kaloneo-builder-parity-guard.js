@@ -60,6 +60,9 @@ if(capabilities.tables?.columnWidthCharacters!==true) fail('largeur de colonne e
 if(capabilities.tables?.lastColumnUsesRemainder!==true) fail('dernière colonne = reste disponible absent');
 if(capabilities.chrono?.singleCommonEngine!=='js/kaloneo-chrono.js') fail('compteur commun KALONÉO non déclaré');
 if(capabilities.chrono?.displayFontSizePx!==44) fail('taille commune du compteur différente de 44 px');
+if(capabilities.textEditor?.supported!==true) fail('Éditeur de texte KALONÉO non déclaré');
+if(capabilities.textEditor?.sharedEngine!=='js/nwtexte-quill-engine.js') fail('moteur partagé de l’Éditeur de texte incorrect');
+if(capabilities.textEditor?.fileDialogsInternal!==true||capabilities.textEditor?.imageDialogsInternal!==true) fail('les dialogues Éditeur doivent rester internes à SEB EvalPro');
 if(capabilities.navigation?.normalNextLabel!=='Suivant') fail('libellé Suivant non canonique');
 if(capabilities.navigation?.stableBarGlobalRelabelingForbidden!==true) fail('protection de la barre stable absente');
 if(capabilities.context?.textStartsOnSameLine!==true) fail('règle Scénario/Consigne sur la même ligne absente');
@@ -78,13 +81,13 @@ const adminJs=read(path.join(sebRoot,'source','js','admin-tests-parcours.js'));
 const main=read(path.join(sebRoot,'src','main.js'));
 
 for(const token of [
-  'builder-core.js','Importer test.json','table-grid','Gratte-ciel 6 × 6',
+  'builder-core.js','Importer test.json','table-grid','Gratte-ciel 6 × 6','value="text-editor"',
   'value="chars-rest"','id="block1-width-chars"','id="last-block-remainder"',
   'Démarrer le compteur','Arrêter le compteur'
 ]) if(!builderHtml.includes(token)) fail('Builder UI incomplet: '+token);
 
 for(const token of [
-  "Core.createGridBlock(6,6)","acceptedAnswers=answers","response-table","inline-flow","multiple-tables",
+  "Core.createGridBlock(6,6)","acceptedAnswers=answers","response-table","inline-flow","multiple-tables","text-editor",
   "Core.modelToDefinition","Core.analyzeDefinition","Core.clearMediaBlock","remove-media",
   "Retirer uniquement","Supprimer le bloc complet"
 ]) if(!builderJs.includes(token)) fail('Builder V2 incomplet: '+token);
@@ -131,6 +134,7 @@ function proofBlock(type,index){
   if(type==='response-table') return {uid:'proof_response_'+index,type,zone,responseTable:{headers:['N°','Réponse','Unités'],columns:[{id:'number',widthChars:5,align:'center'},{id:'answer',widthChars:14,align:'center'},{id:'unit',align:'left'}]}};
   if(type==='inline-flow') return {uid:'proof_inline_'+index,type,zone,wordBank:['mot'],flow:[{type:'text',text:'Phrase de contrôle.',breakAfterSentence:true}]};
   if(type==='multiple-tables') return {uid:'proof_multitable_'+index,type,zone,tableDefinition:{id:'table_'+index,title:'Tableau',headers:['A','B'],questionIds:[]}};
+  if(type==='text-editor') return {uid:'proof_editor_'+index,type,zone,config:{fileSimulation:true,imageSimulation:true,scoringProfile:'none'}};
   if(type==='table-grid'){
     const block=Core.createGridBlock(2,2);
     block.uid='proof_grid_'+index;
