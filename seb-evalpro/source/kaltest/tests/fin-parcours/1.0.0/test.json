@@ -53,5 +53,15 @@
     "runtime.basic",
     "layout.single",
     "media.image"
-  ]
+  ],
+  "pageRole": "fin",
+  "contentRules": {
+    "questionsAllowed": false,
+    "allowedContent": [
+      "text",
+      "image",
+      "video"
+    ],
+    "terminalMechanism": true
+  }
 }
