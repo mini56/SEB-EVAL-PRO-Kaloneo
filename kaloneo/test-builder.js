@@ -1307,21 +1307,50 @@
     refreshPreview();
   }
 
-  function reset() {
-    if(!confirm('Effacer le brouillon actuel et créer un nouveau test ?')) return;
-    localStorage.removeItem(DRAFT_KEY);
+  function focusTitleField() {
+    requestAnimationFrame(() => {
+      const title = $('test-title');
+      if (!title) return;
+      title.disabled = false;
+      title.readOnly = false;
+      title.removeAttribute('aria-disabled');
+      try {
+        title.focus({ preventScroll:true });
+        title.setSelectionRange(0, title.value.length);
+      } catch (_) {
+        title.focus();
+      }
+    });
+  }
+
+  function startNewTest(options={}) {
+    const ask = options.ask !== false;
+    if (ask && !confirm('Effacer le brouillon actuel et créer un nouveau test ?')) return false;
+    if (options.clearDraft !== false) localStorage.removeItem(DRAFT_KEY);
     state.idLocked=false;
     state.sourceDefinition=null;
     state.blocks=[baseBlock('text')];
     applyMeta(defaultMeta());
+    renderIconPicker();
     renderBlocks();
+    refreshPreview();
+    focusTitleField();
+    return true;
+  }
+
+  function reset() {
+    startNewTest({ ask:true, clearDraft:true });
   }
 
   function install() {
-    const restored=restoreDraft();
-    if(!restored||state.blocks.length===0) {
-      applyMeta(defaultMeta());
+    const params = new URLSearchParams(window.location.search || '');
+    const resumeFromPreview = params.get('resume') === 'preview';
+    const restored = resumeFromPreview ? restoreDraft() : false;
+    if(!restored || state.blocks.length===0) {
+      state.idLocked=false;
+      state.sourceDefinition=null;
       state.blocks=[baseBlock('text')];
+      applyMeta(defaultMeta());
     }
 
     if(window.KaloneoIconLibrary?.count!==70) {
@@ -1392,6 +1421,7 @@
     $('refresh-preview').addEventListener('click',refreshPreview);
     $('open-electron-preview').addEventListener('click',async()=>{
       refreshPreview();
+      saveDraft(false);
       const bridge=window.sebEvalPro;
       if(!bridge || typeof bridge.kaloneoOpenPreview!=='function') {
         alert('L’aperçu Electron est disponible depuis SEB EvalPro.');
@@ -1412,6 +1442,8 @@
     $('new-test').addEventListener('click',reset);
 
     renderBlocks();
+    refreshPreview();
+    if (!resumeFromPreview) focusTitleField();
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install,{once:true});
