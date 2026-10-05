@@ -75,13 +75,18 @@ function isAdminTestsParcoursPage(page = pageName()) {
   return String(page || '').toLowerCase() === 'admin-tests-parcours.html';
 }
 
+function isAdminParcoursBuilderPage(page = pageName()) {
+  return String(page || '').toLowerCase() === 'admin-parcours-builder.html';
+}
+
 function isAdminKaloneoBuilderPage(page = pageName()) {
   return String(page || '').toLowerCase() === 'test-builder.html';
 }
 
 function isAdminNavigationPage(page = pageName()) {
   return isAdminBilanPage(page) || isAdminCandidatesPage(page) ||
-    isAdminTestsParcoursPage(page) || isAdminKaloneoBuilderPage(page);
+    isAdminTestsParcoursPage(page) || isAdminParcoursBuilderPage(page) ||
+    isAdminKaloneoBuilderPage(page);
 }
 
 function pageRoute() {
@@ -149,7 +154,7 @@ function handleSaveResult(result) {
 function saveNow(sync = false) {
   if (candidateJourneyCompleted) return sync ? { ok:true, completed:true } : Promise.resolve({ ok:true, completed:true });
   if (closingSession || adminNavigationLeaving) return null;
-  if (isAdminCandidatesPage() || isAdminTestsParcoursPage()) {
+  if (isAdminCandidatesPage() || isAdminTestsParcoursPage() || isAdminParcoursBuilderPage()) {
     const adminResult = { ok:true, adminNavigation:true };
     return sync ? adminResult : Promise.resolve(adminResult);
   }
@@ -1788,6 +1793,9 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   save: () => saveNow(false),
   captureReplay: () => replayNavigationCapture.captureNow('kaltest-explicit'),
   closeTestsParcours: () => ipcRenderer.invoke('admin:close-tests-parcours'),
+  kaloneoListTests: () => ipcRenderer.invoke('kaloneo-library:list-tests'),
+  kaloneoListParcours: () => ipcRenderer.invoke('kaloneo-library:list-parcours'),
+  kaloneoSaveParcours: (payload) => ipcRenderer.invoke('kaloneo-library:save-parcours', payload),
   closeAdminBilan: () => closeAdminBilanPage(),
   verifyAdminPassword: (password) => ipcRenderer.invoke('admin:verify-password', password),
   sebIaStatus: () => ipcRenderer.invoke('ai:status')
