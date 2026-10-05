@@ -372,7 +372,10 @@
         target.acceptedMinutes=built.acceptedMinutes;
         if(Object.prototype.hasOwnProperty.call(target,'acceptedAnswers')) delete target.acceptedAnswers;
       } else {
-        target.acceptedAnswers=built.acceptedAnswers;
+        if(Object.prototype.hasOwnProperty.call(target,'acceptedAnswers') ||
+           (Array.isArray(built.acceptedAnswers) && built.acceptedAnswers.length)) {
+          target.acceptedAnswers=built.acceptedAnswers;
+        }
         if(Object.prototype.hasOwnProperty.call(target,'acceptedMinutes')) delete target.acceptedMinutes;
       }
       if(Object.prototype.hasOwnProperty.call(target,'points') || built.points!==1) target.points=built.points;
