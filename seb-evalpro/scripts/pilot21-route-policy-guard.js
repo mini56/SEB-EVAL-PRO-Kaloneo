@@ -31,7 +31,7 @@ expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=mail'),'kalte
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=autoeval2'),'kaltest-pilot2.html?fullParcours=1&segment=autoeval2','segment Autoévaluation 2 KALTEST');
 expect(policy.normalizeCandidateRoute('carre.html'),policy.INITIAL_ROUTE,'ancienne page Gratte-ciel doit être refusée');
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=carre'),'kaltest-pilot2.html?fullParcours=1&segment=carre','segment Gratte-ciel KALTEST');
-expect(policy.normalizeCandidateRoute('qcmv1.0.html?fullParcours=1&page=finale#pageFinale'),'qcmv1.0.html?fullParcours=1&page=finale#pageFinale','page finale KALONÉO');
+expect(policy.normalizeCandidateRoute('qcmv1.0.html?fullParcours=1&page=finale#pageFinale'),policy.INITIAL_ROUTE,'ancienne page finale QCM doit être refusée');
 expect(policy.normalizeCandidateRoute('introbrique.html'),policy.INITIAL_ROUTE,'ancienne page introbrique doit être refusée');
 expect(policy.normalizeCandidateRoute('brique.html'),policy.INITIAL_ROUTE,'ancienne page Briques doit être refusée');
 expect(policy.normalizeCandidateRoute('qcmv1.0.html?page=11#page11'),policy.INITIAL_ROUTE,'ancienne page 11 doit être refusée');
