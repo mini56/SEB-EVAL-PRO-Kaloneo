@@ -86,7 +86,7 @@ async function fillOneAnswer(win) {
     );
   } else {
     await win.webContents.executeJavaScript(
-      `(function(){const test=window.sebKaltestPilot2.currentTest();const q=test.questions[0];const input=document.querySelector('[data-question-id="'+q.id+'"]');const value=q.response?.type==='duration'?q.acceptedMinutes+' min':q.acceptedAnswers[0];input.value=String(value);input.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`,
+      `(function(){const test=window.sebKaltestPilot2.currentTest();const q=test.questions[0];const input=document.querySelector('[data-question-id="'+q.id+'"]');const value=q.response?.type==='duration'?q.acceptedMinutes+' min':q.acceptedAnswers[0];input.value=String(value);input.dispatchEvent(new Event(input.tagName==='SELECT'?'change':'input',{bubbles:true}));return true;})()`,
       true
     );
   }
@@ -124,7 +124,7 @@ app.whenReady().then(async () => {
     );
 
     if (initial.page !== 'page-identification') throw new Error('Le parcours ne démarre pas par Identification.');
-    if (initial.tests !== 10) throw new Error('Le moteur doit contenir les 10 migrations KALTEST simples validées.');
+    if (initial.tests !== 11) throw new Error('Le moteur doit contenir les 11 migrations KALTEST validées.');
     if (!initial.introVideo) throw new Error('Mini vidéo/animation d’introduction absente.');
     if (initial.introLegacyImage) throw new Error('L’ancienne image de couverture est encore présente sur Introduction.');
     if (initial.introCalculatorGuide) throw new Error('Le doublon de test calculatrice est encore présent sur Introduction.');
@@ -200,6 +200,7 @@ app.whenReady().then(async () => {
       'organisation_demenagement',
       'gestes_postures',
       'conversions_atelier_expedition',
+      'planning_cantine',
       'genre_nombre',
       'paronymes_rapport'
     ];
@@ -250,8 +251,20 @@ app.whenReady().then(async () => {
       }
 
       await fillOneAnswer(win);
+      const validateBeforeAdvance = await win.webContents.executeJavaScript("window.sebKaltestPilot2.currentTest()?.behavior?.validateBeforeAdvance===true",true);
       await win.webContents.executeJavaScript("document.getElementById('kaltest-next').click();true",true);
       await sleep(70);
+      if (validateBeforeAdvance) {
+        const validated = await win.webContents.executeJavaScript(
+          "({same:window.sebKaltestPilot2.currentTest()?.id||'',label:document.getElementById('kaltest-next')?.textContent||'',score:sessionStorage.getItem('planningScore')})",
+          true
+        );
+        if (validated.same !== testId || validated.label.trim() !== 'Suivant' || validated.score === null) {
+          throw new Error(testId + ' : validation avant navigation incorrecte : ' + JSON.stringify(validated));
+        }
+        await win.webContents.executeJavaScript("document.getElementById('kaltest-next').click();true",true);
+        await sleep(70);
+      }
 
       if (index === 0) {
         const calcAfterNavigation = await win.webContents.executeJavaScript(
@@ -277,8 +290,8 @@ app.whenReady().then(async () => {
 
     console.log('KALTEST_PILOT2_FUNCTIONAL_SMOKE: OK');
     console.log('PILOT2_REAL_SEB_VISUALS=Introduction video + Scenario/Consigne icons');
-    console.log('PILOT2_DYNAMIC_TESTS=10');
-    console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + fractions + organisation + postures + supplemental fields + two tables + single choice');
+    console.log('PILOT2_DYNAMIC_TESTS=11');
+    console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + fractions + organisation + postures + planning + supplemental fields + two tables + single choice');
     console.log('PILOT2_FLOATING_CALCULATOR=OK');
     console.log('PILOT2_ABANDON_UI=4 reasons + admin password + NE');
     console.log('PILOT2_NO_VERTICAL_OVERFLOW=OK');
