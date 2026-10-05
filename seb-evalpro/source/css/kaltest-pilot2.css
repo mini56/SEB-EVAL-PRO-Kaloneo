@@ -2953,3 +2953,33 @@ body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtim
 body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-zone{min-height:0;overflow:auto}
 body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-zone:nth-child(2){overflow:hidden}
 @media(max-height:760px){.kaltest-text-editor-toolbar button,.kaltest-text-editor-toolbar select,.kaltest-text-editor-toolbar .color-picker-btn{height:28px;padding:3px 6px;font-size:12px}.kaltest-text-editor-paper{min-height:150px}}
+
+/* PILOTE 22 R3 — média généré borné dans sa zone */
+.kaltest-builder-runtime-zone{
+  height:100%;
+  min-height:0;
+}
+.kaltest-builder-runtime-zone>.kaltest-builder-media:only-child,
+.kaltest-builder-runtime-zone>.kaltest-builder-media:last-child{
+  flex:1 1 0;
+  height:auto;
+  min-height:0;
+}
+.kaltest-builder-media{
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.kaltest-builder-media img,
+.kaltest-builder-media video{
+  display:block;
+  width:auto;
+  height:auto;
+  max-width:100%;
+  max-height:100%;
+  margin:auto;
+  object-fit:contain;
+}
