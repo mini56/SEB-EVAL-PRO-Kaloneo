@@ -47,6 +47,16 @@
       startPhase:'exercise',
       ids:Object.freeze(['autoevaluation_savoirs'])
     }),
+    'transition-video-f1':Object.freeze({
+      stepId:'transition-video-f1',
+      startPhase:'exercise',
+      ids:Object.freeze(['transition_video_f1'])
+    }),
+    brique:Object.freeze({
+      stepId:'brique',
+      startPhase:'exercise',
+      ids:Object.freeze(['construction_briques'])
+    }),
     stock:Object.freeze({
       stepId:'stock',
       startPhase:'exercise',
@@ -91,6 +101,11 @@
       stepId:'carre',
       startPhase:'exercise',
       ids:Object.freeze(['gratte_ciel'])
+    }),
+    fin:Object.freeze({
+      stepId:'qcm-11',
+      startPhase:'exercise',
+      ids:Object.freeze(['fin_parcours'])
     })
   });
 
@@ -162,6 +177,8 @@
 
   let state = readState();
   let activeTriChrono = null;
+  let activeBriqueChrono = null;
+  let transitionAdvanceTimer = null;
 
   function persist() {
     sessionStorage.setItem(STATE_KEY, JSON.stringify(state));
@@ -357,6 +374,26 @@
         Boolean(prenom && nom && messageNorm) && (messageNorm.includes(prenomNom) || messageNorm.includes(nomPrenom));
       if (details.mail_phone) details.mail_phone.correct =
         /(^|[^\d])0\d(?:[\s.,\/-]?\d{2}){4}(?!\d)/.test(message);
+    }
+
+    if (test.evaluation?.bricksRules === true) {
+      const brique = testState.brique || {};
+      const seconds = Math.max(0, Math.floor(Number(brique.chronoSeconds) || 0));
+      const errors = Math.max(0, Math.floor(Number(brique.errors) || 0));
+      return {
+        score:0,
+        scoreMax:0,
+        percentage:0,
+        details,
+        bricks:{
+          temps:seconds,
+          erreurs:errors,
+          autoevaluation:{
+            selections:Array.isArray(brique.autoSelections) ? brique.autoSelections.slice() : [],
+            commentaire:String(brique.commentaire || '')
+          }
+        }
+      };
     }
 
     if (test.evaluation?.triRules === true) {
@@ -1270,6 +1307,455 @@
 
     layout.append(form, renderVisualPanel(definition.visual || {}));
     host.appendChild(layout);
+    return true;
+  }
+
+  function renderTransitionVideo(test, host) {
+    const definition = test.presentation?.transitionVideo;
+    if (!definition) return false;
+
+    document.body.classList.add('seb-kaltest-transition-video');
+    const next = document.getElementById('kaltest-next');
+    if (next) next.hidden = true;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'kaltest-transition-video-wrap';
+    const video = document.createElement('video');
+    video.className = 'kaltest-transition-video';
+    video.autoplay = definition.autoplay !== false;
+    video.muted = definition.muted !== false;
+    video.playsInline = definition.playsInline !== false;
+    video.preload = 'auto';
+    video.src = definition.src || '';
+    const fade = document.createElement('div');
+    fade.className = 'kaltest-transition-fade';
+    wrap.append(video, fade);
+    host.appendChild(wrap);
+
+    let advanced = false;
+    const complete = () => {
+      if (advanced) return;
+      advanced = true;
+      const testState = testStateFor(test);
+      testState.result = {score:0,scoreMax:0,percentage:0,details:{},status:'completed'};
+      testState.status = 'COMPLETED';
+      testState.answers.transition_complete = '1';
+      persist();
+      replay('TRANSITION_VIDEO_COMPLETED', {testId:test.id});
+      fade.classList.add('visible');
+      clearTimeout(transitionAdvanceTimer);
+      transitionAdvanceTimer = setTimeout(() => {
+        document.body.classList.remove('seb-kaltest-transition-video');
+        advance();
+      }, Math.max(0, Number(definition.fadeMs) || 0));
+    };
+
+    video.addEventListener('ended', complete, {once:true});
+    video.addEventListener('error', () => {
+      document.getElementById('exercise-status').textContent = 'La transition vidéo est indisponible. Passage à l’exercice suivant.';
+      complete();
+    }, {once:true});
+    const promise = video.play();
+    if (promise?.catch) promise.catch(() => {
+      video.muted = true;
+      video.play().catch(() => {});
+    });
+    return true;
+  }
+
+  function renderBrique(test, host) {
+    const definition = test.presentation?.bricksStation;
+    if (!definition) return false;
+    const testState = testStateFor(test);
+    if (!testState.brique || typeof testState.brique !== 'object') {
+      testState.brique = {
+        chronoSeconds:0,
+        errors:null,
+        adminValidated:false,
+        autoSelections:[],
+        commentaire:'',
+        autoValidated:false
+      };
+
+      try {
+        const legacy = JSON.parse(sessionStorage.getItem('eval_brique') || 'null');
+        if (legacy) {
+          const match = String(legacy.temps || '').match(/^(\d+):(\d{2})$/);
+          if (match) testState.brique.chronoSeconds = Number(match[1]) * 60 + Number(match[2]);
+          if (legacy.niveau !== undefined && legacy.niveau !== null && String(legacy.niveau).trim() !== '') {
+            testState.brique.errors = Math.max(0, Math.floor(Number(legacy.niveau) || 0));
+            testState.brique.adminValidated = true;
+          }
+        }
+        const legacyAuto = JSON.parse(sessionStorage.getItem('eval_brique_auto') || 'null');
+        if (legacyAuto) {
+          testState.brique.autoSelections = Array.isArray(legacyAuto.choix) ? legacyAuto.choix.slice() : [];
+          testState.brique.commentaire = String(legacyAuto.commentaire || '');
+          testState.brique.autoValidated = Boolean(legacyAuto);
+          if (testState.brique.adminValidated && testState.brique.autoValidated) testState.answers.brique_ready = '1';
+        }
+        const checkpoint = JSON.parse(sessionStorage.getItem('seb_evalpro_brique_checkpoint') || 'null');
+        if (Number(checkpoint?.chronoSeconds) > Number(testState.brique.chronoSeconds || 0)) {
+          testState.brique.chronoSeconds = Math.floor(Number(checkpoint.chronoSeconds));
+        }
+      } catch (_) {}
+    }
+
+    const brique = testState.brique;
+    if (activeBriqueChrono?.destroy) {
+      try { activeBriqueChrono.destroy(); } catch (_) {}
+      activeBriqueChrono = null;
+    }
+
+    const shell = document.createElement('div');
+    shell.className = 'kaltest-brique-layout';
+
+    const left = document.createElement('section');
+    left.className = 'kaltest-brique-left';
+
+    const imageCard = document.createElement('div');
+    imageCard.className = 'kaltest-brique-image-card';
+    const image = document.createElement('img');
+    image.src = definition.image || '';
+    image.alt = definition.imageAlt || '';
+    imageCard.appendChild(image);
+
+    const autoCard = document.createElement('div');
+    autoCard.className = 'kaltest-brique-autoeval';
+    autoCard.hidden = !brique.adminValidated;
+    const autoTitle = document.createElement('h3');
+    autoTitle.textContent = 'Autoévaluation personnelle';
+    const autoIntro = document.createElement('p');
+    autoIntro.textContent = 'Évaluez votre ressenti et votre progression pendant cette activité.';
+    autoCard.append(autoTitle, autoIntro);
+
+    const selected = new Set(Array.isArray(brique.autoSelections) ? brique.autoSelections.map(String) : []);
+    for (const item of definition.autoStatements || []) {
+      const label = document.createElement('label');
+      label.className = 'kaltest-brique-auto-choice';
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.value = String(item.value);
+      checkbox.checked = selected.has(String(item.value));
+      checkbox.disabled = testState.status === 'COMPLETED';
+      checkbox.addEventListener('change', () => {
+        brique.autoSelections = Array.from(autoCard.querySelectorAll('.kaltest-brique-auto-choice input:checked')).map(input=>input.value);
+        brique.autoValidated = false;
+        delete testState.answers.brique_ready;
+        refreshNext();
+        persist();
+      });
+      label.append(checkbox, document.createTextNode(' ' + item.label));
+      autoCard.appendChild(label);
+    }
+
+    const commentLabel = document.createElement('label');
+    commentLabel.className = 'kaltest-brique-comment';
+    commentLabel.textContent = 'Laissez un commentaire pour préciser votre ressenti :';
+    const comment = document.createElement('textarea');
+    comment.rows = 4;
+    comment.value = String(brique.commentaire || '');
+    comment.disabled = testState.status === 'COMPLETED';
+    comment.addEventListener('input', () => {
+      brique.commentaire = comment.value;
+      brique.autoValidated = false;
+      delete testState.answers.brique_ready;
+      refreshNext();
+      persist();
+    });
+    commentLabel.appendChild(comment);
+    autoCard.appendChild(commentLabel);
+
+    const autoValidate = document.createElement('button');
+    autoValidate.type = 'button';
+    autoValidate.className = 'seb-action-btn seb-btn-nav kaltest-brique-auto-validate';
+    autoValidate.textContent = brique.autoValidated ? 'Autoévaluation validée ✓' : 'Valider mon autoévaluation';
+    autoValidate.disabled = testState.status === 'COMPLETED' || brique.autoValidated;
+    autoCard.appendChild(autoValidate);
+
+    left.append(brique.adminValidated ? autoCard : imageCard);
+
+    const right = document.createElement('section');
+    right.className = 'kaltest-brique-right';
+
+    const chronoCard = document.createElement('div');
+    chronoCard.className = 'kaltest-brique-control-card';
+    const chronoTitle = document.createElement('h3');
+    chronoTitle.textContent = 'Compteur';
+    const display = document.createElement('div');
+    display.className = 'seb-chrono-display kaltest-brique-display';
+    display.textContent = window.KaloneoChrono?.format?.(Number(brique.chronoSeconds)||0) || '00:00';
+    const buttons = document.createElement('div');
+    buttons.className = 'kaltest-brique-chrono-buttons';
+    const start = document.createElement('button');
+    start.type = 'button';
+    start.className = 'seb-action-btn seb-btn-timer-start';
+    start.textContent = 'Démarrer le compteur';
+    const stop = document.createElement('button');
+    stop.type = 'button';
+    stop.className = 'seb-action-btn seb-btn-timer-stop';
+    stop.textContent = 'Arrêter le compteur';
+    stop.disabled = true;
+    buttons.append(start, stop);
+    chronoCard.append(chronoTitle, display, buttons);
+    right.appendChild(chronoCard);
+
+    const fieldsCard = document.createElement('div');
+    fieldsCard.className = 'kaltest-brique-control-card kaltest-brique-measures';
+    function measure(labelText, value, readOnly) {
+      const label = document.createElement('label');
+      const span = document.createElement('span');
+      span.textContent = labelText;
+      const input = document.createElement('input');
+      input.type = readOnly ? 'text' : 'number';
+      input.value = value;
+      input.readOnly = Boolean(readOnly);
+      if (!readOnly) {
+        input.min = String(definition.errorMin ?? 0);
+        input.max = String(definition.errorMax ?? 10);
+        input.step = '1';
+      }
+      label.append(span, input);
+      fieldsCard.appendChild(label);
+      return input;
+    }
+    const minuteInput = measure('Minutes', String(Math.floor((Number(brique.chronoSeconds)||0)/60)), true);
+    const secondInput = measure('Secondes', String((Number(brique.chronoSeconds)||0)%60), true);
+    const errorInput = measure('Nombre d’erreur(s)', brique.errors===null||brique.errors===undefined?'':String(brique.errors), false);
+    errorInput.disabled = testState.status === 'COMPLETED';
+    right.appendChild(fieldsCard);
+
+    const adminCard = document.createElement('div');
+    adminCard.className = 'kaltest-brique-control-card kaltest-brique-admin';
+    const adminTitle = document.createElement('h3');
+    adminTitle.textContent = 'Déblocage administrateur';
+    const adminHelp = document.createElement('p');
+    adminHelp.textContent = test.adminIntervention?.instructions || 'L’administrateur valide l’exercice après évaluation du modèle.';
+    const codeLabel = document.createElement('label');
+    codeLabel.className = 'kaltest-brique-code';
+    const codeText = document.createElement('span');
+    codeText.textContent = 'Code administrateur :';
+    const code = document.createElement('input');
+    code.type = 'password';
+    code.maxLength = 10;
+    code.autocomplete = 'off';
+    code.spellcheck = false;
+    code.placeholder = 'Code';
+    code.disabled = testState.status === 'COMPLETED' || brique.adminValidated;
+    codeLabel.append(codeText, code);
+    const adminValidate = document.createElement('button');
+    adminValidate.type = 'button';
+    adminValidate.className = 'seb-action-btn seb-btn-nav';
+    adminValidate.textContent = brique.adminValidated ? 'Validation administrateur ✓' : 'Valider';
+    adminValidate.disabled = testState.status === 'COMPLETED' || brique.adminValidated;
+    const adminStatus = document.createElement('div');
+    adminStatus.className = 'kaltest-brique-admin-status';
+    adminCard.append(adminTitle, adminHelp, codeLabel, adminValidate, adminStatus);
+    right.appendChild(adminCard);
+
+    function formatLegacyTime() {
+      const seconds = Math.max(0, Math.floor(Number(brique.chronoSeconds)||0));
+      return String(Math.floor(seconds/60)).padStart(2,'0') + ':' + String(seconds%60).padStart(2,'0');
+    }
+    function syncCheckpoint() {
+      sessionStorage.setItem('seb_evalpro_brique_checkpoint', JSON.stringify({
+        chronoSeconds:Math.max(0,Math.floor(Number(brique.chronoSeconds)||0)),
+        savedAt:Date.now()
+      }));
+    }
+    function refreshMeasures() {
+      const seconds = Math.max(0,Math.floor(Number(brique.chronoSeconds)||0));
+      display.textContent = window.KaloneoChrono?.format?.(seconds) || formatLegacyTime();
+      minuteInput.value = String(Math.floor(seconds/60));
+      secondInput.value = String(seconds%60);
+    }
+    function refreshNext() {
+      const next = document.getElementById('kaltest-next');
+      const ready = Boolean(brique.adminValidated && brique.autoValidated);
+      if (ready) testState.answers.brique_ready = '1';
+      else delete testState.answers.brique_ready;
+      if (next) {
+        next.disabled = !ready && testState.status !== 'COMPLETED';
+        next.classList.toggle('seb-exercise-nav-locked', !ready && testState.status !== 'COMPLETED');
+      }
+    }
+    function saveLegacyMain() {
+      sessionStorage.setItem('eval_brique', JSON.stringify({
+        temps:formatLegacyTime(),
+        niveau:brique.errors===null||brique.errors===undefined?'':String(brique.errors),
+        code:brique.adminValidated?'svg56':''
+      }));
+      syncCheckpoint();
+    }
+
+    errorInput.addEventListener('input', () => {
+      const raw = String(errorInput.value || '').trim();
+      brique.errors = /^\d+$/.test(raw) ? Math.max(0,Math.min(Number(definition.errorMax??10),Math.floor(Number(raw)))) : null;
+      brique.adminValidated = false;
+      brique.autoValidated = false;
+      delete testState.answers.brique_ready;
+      code.disabled = false;
+      adminValidate.disabled = false;
+      adminValidate.textContent = 'Valider';
+      adminStatus.textContent = '';
+      refreshNext();
+      persist();
+    });
+
+    if (!window.KaloneoChrono?.create) throw new Error('Chronomètre commun KALONÉO indisponible.');
+    activeBriqueChrono = window.KaloneoChrono.create({
+      startButton:start,
+      stopButton:stop,
+      initialSeconds:Number(brique.chronoSeconds)||0,
+      resetOnStart:false,
+      intervalMs:250,
+      bindButtons:false,
+      onRender(seconds, formatted) {
+        brique.chronoSeconds = seconds;
+        display.textContent = formatted;
+        minuteInput.value = String(Math.floor(seconds/60));
+        secondInput.value = String(seconds%60);
+      },
+      onTick(seconds) {
+        brique.chronoSeconds = seconds;
+        if (Math.floor(seconds)%1===0) {
+          syncCheckpoint();
+          persist();
+        }
+      },
+      onStop(seconds) {
+        brique.chronoSeconds = seconds;
+        refreshMeasures();
+        syncCheckpoint();
+        persist();
+      }
+    });
+    start.addEventListener('click', () => {
+      if (testState.status === 'COMPLETED' || brique.adminValidated) return;
+      activeBriqueChrono.setSeconds(Number(brique.chronoSeconds)||0);
+      if (activeBriqueChrono.start()) {
+        start.disabled = true;
+        stop.disabled = false;
+      }
+    });
+    stop.addEventListener('click', () => {
+      if (!activeBriqueChrono?.isRunning?.()) return;
+      activeBriqueChrono.stop();
+      start.disabled = false;
+      stop.disabled = true;
+      errorInput.focus();
+    });
+
+    adminValidate.addEventListener('click', () => {
+      const rawCode = String(code.value || '').trim().toLowerCase();
+      if (rawCode !== 'svg56') {
+        adminStatus.textContent = rawCode.length >= 5 ? 'Code incorrect !' : 'Saisissez le code administrateur.';
+        code.focus();
+        return;
+      }
+      if (brique.errors === null || brique.errors === undefined) {
+        adminStatus.textContent = 'Code correct — renseignez le nombre d’erreurs.';
+        errorInput.focus();
+        return;
+      }
+      brique.adminValidated = true;
+      saveLegacyMain();
+      adminStatus.textContent = 'Validation administrateur enregistrée.';
+      code.disabled = true;
+      adminValidate.disabled = true;
+      adminValidate.textContent = 'Validation administrateur ✓';
+      left.replaceChildren(autoCard);
+      autoCard.hidden = false;
+      persist();
+    });
+
+    autoValidate.addEventListener('click', () => {
+      brique.autoSelections = Array.from(autoCard.querySelectorAll('.kaltest-brique-auto-choice input:checked')).map(input=>input.value);
+      brique.commentaire = String(comment.value || '').trim();
+      brique.autoValidated = true;
+      testState.answers.brique_ready = '1';
+      sessionStorage.setItem('eval_brique_auto', JSON.stringify({
+        choix:brique.autoSelections.slice(),
+        commentaire:brique.commentaire
+      }));
+      saveLegacyMain();
+      autoValidate.textContent = 'Autoévaluation validée ✓';
+      autoValidate.disabled = true;
+      refreshNext();
+      persist();
+      document.getElementById('kaltest-next')?.focus();
+    });
+
+    if (testState.status === 'COMPLETED') {
+      start.disabled = true;
+      stop.disabled = true;
+      errorInput.disabled = true;
+      code.disabled = true;
+      adminValidate.disabled = true;
+      autoValidate.disabled = true;
+      left.replaceChildren(autoCard);
+      autoCard.hidden = false;
+    } else {
+      refreshMeasures();
+      refreshNext();
+      if (brique.adminValidated) {
+        left.replaceChildren(autoCard);
+        autoCard.hidden = false;
+        code.disabled = true;
+        adminValidate.disabled = true;
+        adminValidate.textContent = 'Validation administrateur ✓';
+      }
+    }
+
+    shell.append(left,right);
+    host.appendChild(shell);
+    return true;
+  }
+
+  function renderEndPage(test, host) {
+    const definition = test.presentation?.endPage;
+    if (!definition) return false;
+    document.body.classList.add('seb-kaltest-terminal');
+    const next = document.getElementById('kaltest-next');
+    if (next) next.hidden = true;
+    const calculator = document.getElementById('kaltest-calculator');
+    if (calculator) calculator.hidden = true;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'kaltest-terminal-page';
+    const title = document.createElement('div');
+    title.className = 'kaltest-terminal-title';
+    if (definition.image) {
+      const img = document.createElement('img');
+      img.src = definition.image;
+      img.alt = 'Avatar';
+      title.appendChild(img);
+    }
+    const heading = document.createElement('h2');
+    heading.textContent = definition.heading || 'Félicitations pour votre parcours !';
+    title.appendChild(heading);
+    wrap.appendChild(title);
+
+    for (const paragraph of definition.paragraphs || []) {
+      const p = document.createElement('p');
+      p.textContent = paragraph;
+      wrap.appendChild(p);
+    }
+    if (definition.endMessage) {
+      const end = document.createElement('div');
+      end.className = 'kaltest-terminal-message';
+      end.textContent = definition.endMessage;
+      wrap.appendChild(end);
+    }
+    host.appendChild(wrap);
+
+    const testState = testStateFor(test);
+    testState.status = 'COMPLETED';
+    testState.answers.final_seen = '1';
+    testState.result = {score:0,scoreMax:0,percentage:0,details:{},status:'completed'};
+    sessionStorage.setItem('seb_kaltest_parcours_finished','1');
+    persist();
+    try { window.sebEvalPro?.save?.(); } catch (_) {}
     return true;
   }
 
@@ -2450,6 +2936,25 @@
         selections:Array.isArray(testState.answers?.[question?.id]) ? testState.answers[question.id] : [],
         commentaire:String(testState.supplemental?.[question?.id]?.commentaire ?? '')
       }));
+    } else if (test.id === 'construction_briques') {
+      const bricks = result.bricks || {};
+      const seconds = Math.max(0,Math.floor(Number(bricks.temps)||0));
+      const time = String(Math.floor(seconds/60)).padStart(2,'0') + ':' + String(seconds%60).padStart(2,'0');
+      const errors = Math.max(0,Math.floor(Number(bricks.erreurs)||0));
+      sessionStorage.setItem('eval_brique', JSON.stringify({
+        temps:time,
+        niveau:String(errors),
+        code:testState.brique?.adminValidated ? 'svg56' : ''
+      }));
+      sessionStorage.setItem('eval_brique_auto', JSON.stringify({
+        choix:Array.isArray(testState.brique?.autoSelections)?testState.brique.autoSelections:[],
+        commentaire:String(testState.brique?.commentaire||'')
+      }));
+      sessionStorage.setItem('seb_evalpro_brique_checkpoint', JSON.stringify({
+        chronoSeconds:seconds,
+        savedAt:Date.now()
+      }));
+      sessionStorage.setItem('seb_exercise_activity:brique.html','1');
     } else if (test.id === 'ranger_stock') {
       const correct = Number(result.score) || 0;
       const total = Number(result.scoreMax) || 33;
@@ -2616,6 +3121,7 @@
 
     document.body.dataset.sebKaltestExercise = '1';
     document.body.dataset.sebKaltestId = test.id;
+    document.body.classList.remove('seb-kaltest-transition-video','seb-kaltest-terminal');
     document.body.dataset.sebKaltestLabel = test.title;
 
     document.getElementById('kaltest-title').textContent = test.title || 'Exercice';
@@ -2654,9 +3160,23 @@
       try { activeTriChrono.destroy(); } catch (_) {}
       activeTriChrono = null;
     }
+    if (activeBriqueChrono?.destroy) {
+      try { activeBriqueChrono.destroy(); } catch (_) {}
+      activeBriqueChrono = null;
+    }
+    clearTimeout(transitionAdvanceTimer);
+    transitionAdvanceTimer = null;
+    const next = document.getElementById('kaltest-next');
+    if (next) next.hidden = false;
     host.innerHTML = '';
 
-    if (renderAutoevaluation(test, host)) {
+    if (renderTransitionVideo(test, host)) {
+      // Transition vidéo F1 gérée directement par KALTEST.
+    } else if (renderEndPage(test, host)) {
+      // Page terminale du parcours gérée par KALTEST.
+    } else if (renderBrique(test, host)) {
+      // Construction à base de briques gérée par KALTEST.
+    } else if (renderAutoevaluation(test, host)) {
       // Autoévaluations migrées dans le moteur KALTEST commun.
     } else if (renderTri(test, host)) {
       // Tri de chevilles migré dans le moteur KALTEST commun.
