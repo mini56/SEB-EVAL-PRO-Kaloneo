@@ -75,6 +75,10 @@ if(archetypeRegistry.common?.chrono?.displayFontSizePx!==44) fail('registre arch
 
 const builderHtml=read(path.join(builderRoot,'test-builder.html'));
 const builderJs=read(path.join(builderRoot,'test-builder.js'));
+const previewHtml=read(path.join(builderRoot,'test-preview.html'));
+const previewJs=read(path.join(builderRoot,'test-preview.js'));
+const sharedCalculator=read(path.join(sebRoot,'source','js','seb-floating-calculator.js'));
+const kaltestRuntime=read(path.join(sebRoot,'source','js','kaltest-pilot2-runtime.js'));
 const prepare=read(path.join(sebRoot,'scripts','prepare-web.js'));
 const admin=read(path.join(sebRoot,'overrides','admin-tests-parcours.html'));
 const adminJs=read(path.join(sebRoot,'source','js','admin-tests-parcours.js'));
@@ -83,7 +87,7 @@ const main=read(path.join(sebRoot,'src','main.js'));
 for(const token of [
   'builder-core.js','Importer test.json','table-grid','Gratte-ciel 6 × 6','value="text-editor"',
   'value="chars-rest"','id="block1-width-chars"','id="last-block-remainder"',
-  'Démarrer le compteur','Arrêter le compteur'
+  'Démarrer le compteur','Arrêter le compteur','id="calculator-brand"'
 ]) if(!builderHtml.includes(token)) fail('Builder UI incomplet: '+token);
 
 for(const token of [
@@ -91,6 +95,21 @@ for(const token of [
   "Core.modelToDefinition","Core.analyzeDefinition","Core.clearMediaBlock","remove-media",
   "Retirer uniquement","Supprimer le bloc complet"
 ]) if(!builderJs.includes(token)) fail('Builder V2 incomplet: '+token);
+
+for(const token of ['../js/seb-floating-calculator.js','id="calc-container"']){
+  if(!previewHtml.includes(token)) fail('Aperçu Electron sans calculatrice commune: '+token);
+}
+if(!previewJs.includes("data-seb-action") || !previewJs.includes("setCalculatorBrand")) {
+  fail('Aperçu Electron non raccordé à la calculatrice commune KALONÉO');
+}
+if(!sharedCalculator.includes("brand.textContent = 'KALONÉO'") ||
+   !sharedCalculator.includes('window.setCalculatorBrand') ||
+   sharedCalculator.includes("brand.textContent = 'Sauvegarde 56'")) {
+  fail('Calculatrice commune: marque KALONÉO par défaut non verrouillée');
+}
+if(!kaltestRuntime.includes("test.calculator?.brandLabel ?? 'KALONÉO'")) {
+  fail('Runtime KALTEST: libellé de calculatrice configurable absent');
+}
 
 if(!prepare.includes("copyTree(kaloneoBuilderDir,path.join(outputDir,'kaloneo-builder'))")) {
   fail('prepare:web ne compile pas le générateur KALONÉO');
