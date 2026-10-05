@@ -44,7 +44,7 @@ body {
 
 .builder-shell {
   display: grid;
-  grid-template-columns: minmax(520px, .95fr) minmax(620px, 1.05fr);
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
   gap: 18px;
   padding: 18px;
   align-items: start;
@@ -398,7 +398,7 @@ textarea {
   font-size: 13px;
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 900px) {
   .builder-shell { grid-template-columns: 1fr; }
   .builder-preview { position: static; }
   .candidate-preview { height: 800px; }
@@ -734,7 +734,7 @@ body{
   object-fit:contain;
 }
 
-@media (max-width:1050px){
+@media (max-width:900px){
   html,body{height:auto;min-height:100%;overflow:auto}
   body{display:block}
   .builder-shell{height:auto;overflow:visible}
