@@ -111,12 +111,14 @@ assert(main.includes("kaloneo-library:save-parcours"), 'enregistrement des parco
 
 const testsPage = read('overrides/admin-tests-parcours.html');
 const testsScript = read('source/js/admin-tests-parcours.js');
-assert((testsPage.match(/<button\b/gi) || []).length === 3, 'la page Tests / Parcours doit contenir exactement Test KALONÉO + Parcours + Fermer.');
+assert((testsPage.match(/<button\b/gi) || []).length === 4, 'la page Tests / Parcours doit contenir Test KALONÉO + Écrans de masquage + Parcours + Fermer.');
 assert(testsPage.includes('id="open-kaloneo-builder"') && testsPage.includes('Créer / modifier un test'), 'bouton d’ouverture du Builder KALONÉO absent.');
+assert(testsPage.includes('id="open-mask-builder"') && testsPage.includes('Écrans de masquage'), 'bouton de gestion des écrans de masquage absent.');
 assert(testsPage.includes('id="open-parcours-builder"') && testsPage.includes('Créer / gérer un parcours'), 'bouton d’ouverture du créateur de parcours absent.');
 assert(testsPage.includes('id="close-tests-parcours"') && testsPage.includes('>Fermer</button>'), 'bouton Fermer de Tests / Parcours absent.');
 assert(!/Importer|Exporter|Dupliquer|Supprimer/i.test(testsPage), 'la page Tests / Parcours expose une fonction non validée hors Builder.');
 assert(testsScript.includes("kaloneo-builder/test-builder.html"), 'navigation vers le Builder KALONÉO non câblée.');
+assert(testsScript.includes("admin-mask-builder.html"), 'navigation vers les écrans de masquage non câblée.');
 assert(testsScript.includes("admin-parcours-builder.html"), 'navigation vers le créateur de parcours non câblée.');
 assert(testsScript.includes('closeTestsParcours'), 'action Fermer de Tests / Parcours non câblée.');
 
