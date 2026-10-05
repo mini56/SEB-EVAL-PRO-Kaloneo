@@ -363,7 +363,26 @@ app.whenReady().then(async()=>{
       "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
       true
     );
-    await waitForFile(win,'carre.html');
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='carre', 'Gratte-ciel KALTEST');
+    await sleep(350);
+
+    const carre=await win.webContents.executeJavaScript(`
+      ({
+        current:window.sebKaltestPilot2.currentTest()?.id||'',
+        inputs:document.querySelectorAll('.kaltest-builder-grid input[data-question-id]').length,
+        next:window.sebParcours?.nextUrl('carre')||''
+      })
+    `,true);
+    if(carre.current!=='gratte_ciel' || carre.inputs!==16 ||
+       carre.next!=='qcmv1.0.html?fullParcours=1&page=11#page11'){
+      throw new Error('Gratte-ciel KALTEST invalide: '+JSON.stringify(carre));
+    }
+
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
+    await waitForLocation(win, current=>current.file==='qcmv1.0.html' && current.page==='11', 'Page 11');
     await sleep(250);
 
     const ending=await win.webContents.executeJavaScript(`
@@ -389,8 +408,9 @@ app.whenReady().then(async()=>{
     console.log('PILOT11_AUTOEVAL2_KALTEST=OK');
     console.log('PILOT11_GENRE_NOMBRE_AT_CORRECT_POSITION=OK');
     console.log('PILOT11_PARONYMES_AT_CORRECT_POSITION=OK');
+    console.log('PILOT11_CARRE_KALTEST=OK');
     console.log('PILOT11_NO_DUPLICATE_MIGRATED_PAGES=OK');
-    console.log('PILOT11_FINAL_ROUTE=carre -> qcm11 -> finale');
+    console.log('PILOT11_FINAL_ROUTE=carre KALTEST -> qcm11 -> finale');
 
     win.destroy();
     app.exit(0);
