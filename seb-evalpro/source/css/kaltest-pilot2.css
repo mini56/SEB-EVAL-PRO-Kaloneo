@@ -2679,3 +2679,30 @@ body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-
   align-items:center;
   gap:7px;
 }
+
+
+/* PILOTE 21 — pages 4 / 5 / 5_1 migrées en KALTEST. */
+.kaltest-fractions-layout,.kaltest-organisation-layout{width:100%;height:100%;min-height:0;display:grid;gap:12px;align-items:stretch}
+.kaltest-fractions-layout{grid-template-columns:minmax(280px,2fr) minmax(0,3fr)}
+.kaltest-organisation-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.kaltest-fractions-work,.kaltest-organisation-work{min-width:0;min-height:0;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:rgba(255,255,255,.96);padding:10px}
+.kaltest-fractions-work{display:flex;flex-direction:column;justify-content:space-evenly;gap:8px}
+.kaltest-fraction-row{display:grid;grid-template-columns:145px minmax(0,1fr);gap:10px;align-items:center}
+.kaltest-fraction-title{min-height:42px;display:flex;align-items:center;justify-content:center;gap:7px;padding:5px 7px;border:1px solid rgba(0,78,112,.28);border-radius:9px;background:rgba(0,78,112,.08);color:var(--seb-blue-100,#004E70)}
+.kaltest-fraction-title img{width:34px;height:34px;object-fit:contain}
+.kaltest-fraction-items{min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.kaltest-fraction-item{width:54px;height:54px;flex:0 0 54px;border:3px solid #c5cbd2;border-radius:9px;background-size:cover;background-position:center;background-color:#fff;cursor:pointer}
+.kaltest-fraction-item.selected{border-color:var(--seb-orange-100,#F9B233);transform:scale(1.08);box-shadow:0 4px 10px rgba(0,0,0,.14)}
+.kaltest-fraction-item:focus-visible{outline:2px solid var(--seb-blue-100,#004E70);outline-offset:2px}
+body[data-seb-kaltest-id="fractions_preparation_lots"] #kaltest-content,body[data-seb-kaltest-id="organisation_demenagement"] #kaltest-content,body[data-seb-kaltest-id="gestes_postures"] #kaltest-content{padding:7px 9px}
+.kaltest-organisation-work{display:flex;flex-direction:column;justify-content:space-evenly;gap:5px}
+.kaltest-organisation-row{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:9px;padding:5px 7px;border-bottom:1px solid rgba(0,78,112,.12);font-size:16px;line-height:1.2}
+.kaltest-organisation-row:last-child{border-bottom:0}
+.kaltest-organisation-row input{width:42px;min-height:31px;padding:3px;text-align:center;font-size:16px}
+.kaltest-postures-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:9px}
+.kaltest-postures-image{min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.kaltest-postures-image img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}
+.kaltest-postures-answers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kaltest-postures-answer{display:grid;grid-template-columns:minmax(0,1fr) 46px;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(0,78,112,.20);border-radius:10px;background:#fff;font-size:15px}
+.kaltest-postures-answer input{width:42px;min-height:31px;text-align:center;font-size:16px}
+@media(max-height:760px){.kaltest-fraction-item{width:46px;height:46px;flex-basis:46px}.kaltest-fraction-row{grid-template-columns:132px minmax(0,1fr)}.kaltest-organisation-row{padding:3px 6px;font-size:15px}.kaltest-postures-answer{padding:5px 7px;font-size:14.5px}}
