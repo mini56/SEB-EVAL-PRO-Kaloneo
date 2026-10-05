@@ -67,6 +67,11 @@
       startPhase:'exercise',
       ids:Object.freeze(['dictee_professionnelle'])
     }),
+    tri:Object.freeze({
+      stepId:'tri-de-cheville',
+      startPhase:'exercise',
+      ids:Object.freeze(['tri_chevilles'])
+    }),
     mail:Object.freeze({
       stepId:'nvmail',
       startPhase:'exercise',
@@ -156,6 +161,7 @@
   }
 
   let state = readState();
+  let activeTriChrono = null;
 
   function persist() {
     sessionStorage.setItem(STATE_KEY, JSON.stringify(state));
@@ -351,6 +357,31 @@
         Boolean(prenom && nom && messageNorm) && (messageNorm.includes(prenomNom) || messageNorm.includes(nomPrenom));
       if (details.mail_phone) details.mail_phone.correct =
         /(^|[^\d])0\d(?:[\s.,\/-]?\d{2}){4}(?!\d)/.test(message);
+    }
+
+    if (test.evaluation?.triRules === true) {
+      const tri = testState.tri || {};
+      const rows = Array.isArray(tri.rows) ? tri.rows.slice(0,5) : [];
+      const completed = rows.filter(row => Number.isFinite(Number(row?.seconds)) && row?.errors !== null && row?.errors !== undefined && String(row.errors).trim() !== '');
+      const times = completed.map(row => Math.max(0, Math.floor(Number(row.seconds) || 0)));
+      const errors = completed.map(row => Math.max(0, Math.floor(Number(row.errors) || 0)));
+      const totalSeconds = times.reduce((sum,value)=>sum+value,0);
+      const totalErrors = errors.reduce((sum,value)=>sum+value,0);
+      const averageSeconds = completed.length ? Math.round(totalSeconds / completed.length) : 0;
+      const averageErrors = completed.length ? totalErrors / completed.length : 0;
+      return {
+        score:0,
+        scoreMax:0,
+        percentage:0,
+        details,
+        tri:{
+          completedCount:completed.length,
+          temps_moyen:averageSeconds,
+          temps_essais:times,
+          moyenne_erreurs:averageErrors,
+          erreurs_total:totalErrors
+        }
+      };
     }
 
     if (test.evaluation?.dictationEngine === 'seb-dictee-v3') {
@@ -1242,6 +1273,341 @@
     return true;
   }
 
+  function renderTri(test, host) {
+    const definition = test.presentation?.triStation;
+    if (!definition) return false;
+    const testState = testStateFor(test);
+    const maxTris = Number(definition.maxTris) || 5;
+    const minTris = Number(definition.minTris) || 3;
+    if (!testState.tri || !Array.isArray(testState.tri.rows)) {
+      testState.tri = {
+        rows:Array.from({length:maxTris},()=>({seconds:null,errors:null})),
+        autoSelections:[],
+        commentaire:'',
+        resultsShown:false,
+        ready:false,
+        currentTri:1,
+        awaitingError:null,
+        liveSeconds:0
+      };
+    }
+    const tri = testState.tri;
+    while (tri.rows.length < maxTris) tri.rows.push({seconds:null,errors:null});
+    if (activeTriChrono?.destroy) {
+      try { activeTriChrono.destroy(); } catch (_) {}
+      activeTriChrono = null;
+    }
+
+    const shell = document.createElement('div');
+    shell.className = 'kaltest-tri-layout';
+
+    const left = document.createElement('section');
+    left.className = 'kaltest-tri-left';
+
+    const guide = document.createElement('div');
+    guide.className = 'kaltest-tri-guide';
+    guide.innerHTML = '<h3>Comment ça fonctionne ?</h3><ul>' +
+      '<li>Démarrez le compteur au moment où vous commencez un tri.</li>' +
+      '<li>Arrêtez-le lorsque le tri est terminé : Minutes et Secondes sont remplis automatiquement.</li>' +
+      '<li>Saisissez ensuite le nombre d’erreurs, même s’il est égal à <strong>0</strong>.</li>' +
+      '<li>Le compteur revient ensuite à <strong>00:00</strong>.</li>' +
+      '<li>Effectuez entre <strong>3 et 5 tris</strong>.</li>' +
+      '<li>À partir de 3 tris complets, affichez les résultats puis complétez l’autoévaluation.</li>' +
+      '</ul>';
+    left.appendChild(guide);
+
+    const auto = document.createElement('div');
+    auto.className = 'kaltest-tri-autoeval';
+    auto.hidden = !tri.resultsShown;
+    const autoTitle = document.createElement('h3');
+    autoTitle.textContent = 'Autoévaluation personnelle';
+    const autoIntro = document.createElement('p');
+    autoIntro.textContent = 'Cochez les affirmations qui correspondent le mieux à votre expérience pendant cette activité.';
+    auto.append(autoTitle, autoIntro);
+
+    const selected = new Set(Array.isArray(tri.autoSelections) ? tri.autoSelections.map(String) : []);
+    for (const item of definition.autoStatements || []) {
+      const label = document.createElement('label');
+      label.className = 'kaltest-tri-auto-choice';
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.value = String(item.value);
+      checkbox.checked = selected.has(String(item.value));
+      checkbox.disabled = testState.status === 'COMPLETED';
+      checkbox.addEventListener('change', () => {
+        const values = Array.from(auto.querySelectorAll('.kaltest-tri-auto-choice input:checked')).map(input=>input.value);
+        tri.autoSelections = values;
+        tri.ready = false;
+        refreshReady();
+        persist();
+      });
+      label.append(checkbox, document.createTextNode(' ' + item.label));
+      auto.appendChild(label);
+    }
+
+    const commentLabel = document.createElement('label');
+    commentLabel.className = 'kaltest-tri-comment';
+    commentLabel.appendChild(document.createTextNode('Commentaire :'));
+    const comment = document.createElement('textarea');
+    comment.rows = 4;
+    comment.value = String(tri.commentaire || '');
+    comment.disabled = testState.status === 'COMPLETED';
+    comment.addEventListener('input', () => {
+      tri.commentaire = comment.value;
+      tri.ready = false;
+      refreshReady();
+      persist();
+    });
+    commentLabel.appendChild(comment);
+    auto.appendChild(commentLabel);
+
+    const autoValidate = document.createElement('button');
+    autoValidate.type = 'button';
+    autoValidate.className = 'seb-action-btn seb-btn-nav kaltest-tri-auto-validate';
+    autoValidate.textContent = tri.ready ? 'Autoévaluation validée ✓' : 'Valider mon autoévaluation';
+    autoValidate.disabled = testState.status === 'COMPLETED' || tri.ready;
+    auto.appendChild(autoValidate);
+
+    const right = document.createElement('section');
+    right.className = 'kaltest-tri-right';
+
+    const chronoCard = document.createElement('div');
+    chronoCard.className = 'kaltest-tri-chrono-card';
+    const display = document.createElement('div');
+    display.className = 'seb-chrono-display kaltest-tri-display';
+    display.textContent = window.KaloneoChrono?.format?.(Number(tri.liveSeconds)||0) || '00:00';
+    const chronoButtons = document.createElement('div');
+    chronoButtons.className = 'kaltest-tri-chrono-buttons';
+    const start = document.createElement('button');
+    start.type = 'button';
+    start.className = 'seb-action-btn seb-btn-timer-start';
+    start.textContent = 'Démarrer le compteur';
+    const stop = document.createElement('button');
+    stop.type = 'button';
+    stop.className = 'seb-action-btn seb-btn-timer-stop';
+    stop.textContent = 'Arrêter le compteur';
+    chronoButtons.append(start, stop);
+    chronoCard.append(display, chronoButtons);
+    right.appendChild(chronoCard);
+
+    const table = document.createElement('div');
+    table.className = 'kaltest-tri-table';
+    const head = document.createElement('div');
+    head.className = 'kaltest-tri-row head';
+    for (const value of ['Tri n°','Minutes','Secondes','Erreurs']) {
+      const span = document.createElement('span');
+      span.textContent = value;
+      head.appendChild(span);
+    }
+    table.appendChild(head);
+
+    const errorInputs = [];
+    for (let index=0; index<maxTris; index+=1) {
+      const row = document.createElement('div');
+      row.className = 'kaltest-tri-row';
+      const number = document.createElement('span');
+      number.textContent = String(index+1);
+      const min = document.createElement('input');
+      min.type = 'text';
+      min.readOnly = true;
+      min.value = tri.rows[index].seconds === null ? '' : String(Math.floor((Number(tri.rows[index].seconds)||0)/60));
+      const sec = document.createElement('input');
+      sec.type = 'text';
+      sec.readOnly = true;
+      sec.value = tri.rows[index].seconds === null ? '' : String((Number(tri.rows[index].seconds)||0)%60);
+      const err = document.createElement('input');
+      err.type = 'number';
+      err.min = '0';
+      err.step = '1';
+      err.value = tri.rows[index].errors === null || tri.rows[index].errors === undefined ? '' : String(tri.rows[index].errors);
+      err.disabled = testState.status === 'COMPLETED';
+      err.dataset.triError = String(index+1);
+      err.addEventListener('input', () => {
+        const raw = String(err.value || '').trim();
+        if (!/^\d+$/.test(raw)) {
+          tri.rows[index].errors = null;
+          tri.ready = false;
+          refreshReady();
+          persist();
+          return;
+        }
+        tri.rows[index].errors = Math.max(0, Math.floor(Number(raw)));
+        if (tri.rows[index].seconds !== null && Number(tri.awaitingError) === index+1) {
+          tri.awaitingError = null;
+          tri.currentTri = Math.min(maxTris+1,index+2);
+          tri.liveSeconds = 0;
+          activeTriChrono?.setSeconds?.(0);
+          display.textContent = '00:00';
+          setTimeout(()=>start.focus(),0);
+        }
+        tri.ready = false;
+        refreshResultsButton();
+        refreshReady();
+        persist();
+      });
+      errorInputs.push(err);
+      row.append(number,min,sec,err);
+      table.appendChild(row);
+    }
+    right.appendChild(table);
+
+    const resultsButton = document.createElement('button');
+    resultsButton.type = 'button';
+    resultsButton.className = 'kaltest-tri-results-button';
+    resultsButton.textContent = 'Voir les résultats';
+    right.appendChild(resultsButton);
+
+    const results = document.createElement('div');
+    results.className = 'kaltest-tri-results';
+    results.hidden = !tri.resultsShown;
+    const averageLine = document.createElement('div');
+    const errorsLine = document.createElement('div');
+    results.append(averageLine,errorsLine);
+    right.appendChild(results);
+
+    function completedRows() {
+      return tri.rows.slice(0,maxTris).filter(row =>
+        row?.seconds !== null && row?.seconds !== undefined &&
+        row?.errors !== null && row?.errors !== undefined &&
+        String(row.errors).trim() !== ''
+      );
+    }
+    function hasPartial() {
+      return tri.rows.slice(0,maxTris).some(row => {
+        const hasTime = row?.seconds !== null && row?.seconds !== undefined;
+        const hasErrors = row?.errors !== null && row?.errors !== undefined && String(row.errors).trim() !== '';
+        return hasTime !== hasErrors;
+      });
+    }
+    function stats() {
+      const rows = completedRows();
+      const totalSeconds = rows.reduce((sum,row)=>sum+Math.max(0,Number(row.seconds)||0),0);
+      const totalErrors = rows.reduce((sum,row)=>sum+Math.max(0,Number(row.errors)||0),0);
+      const averageSeconds = rows.length ? Math.round(totalSeconds/rows.length) : 0;
+      return {rows,totalSeconds,totalErrors,averageSeconds};
+    }
+    function format(seconds) {
+      const value=Math.max(0,Math.floor(Number(seconds)||0));
+      return String(Math.floor(value/60)).padStart(2,'0')+':'+String(value%60).padStart(2,'0');
+    }
+    function refreshResults() {
+      const value=stats();
+      averageLine.innerHTML='<strong>Moyenne :</strong> '+format(value.averageSeconds);
+      errorsLine.innerHTML='<strong>Total d’erreurs :</strong> '+value.totalErrors;
+    }
+    function canShowResults() {
+      return completedRows().length >= minTris && !hasPartial() && !activeTriChrono?.isRunning?.() && tri.awaitingError === null;
+    }
+    function autoAnswered() {
+      return (Array.isArray(tri.autoSelections)&&tri.autoSelections.length>0) || String(tri.commentaire||'').trim()!=='';
+    }
+    function refreshResultsButton() {
+      resultsButton.disabled = testState.status === 'COMPLETED' || !canShowResults();
+    }
+    function refreshReady() {
+      const ready = Boolean(tri.ready && canShowResults() && autoAnswered());
+      const next = document.getElementById('kaltest-next');
+      if (next) {
+        next.disabled = !ready && testState.status !== 'COMPLETED';
+        next.classList.toggle('seb-exercise-nav-locked', !ready && testState.status !== 'COMPLETED');
+      }
+      if (!ready) {
+        delete testState.answers.tri_ready;
+      } else {
+        testState.answers.tri_ready = '1';
+        testState.status = 'ACTIVE';
+      }
+    }
+
+    resultsButton.addEventListener('click', () => {
+      if (!canShowResults()) return;
+      tri.resultsShown = true;
+      auto.hidden = false;
+      results.hidden = false;
+      refreshResults();
+      persist();
+    });
+    autoValidate.addEventListener('click', () => {
+      if (!canShowResults()) return;
+      if (!autoAnswered()) {
+        document.getElementById('exercise-status').textContent = 'Complétez l’autoévaluation avant de continuer.';
+        return;
+      }
+      tri.ready = true;
+      testState.answers.tri_ready = '1';
+      testState.status = 'ACTIVE';
+      autoValidate.textContent = 'Autoévaluation validée ✓';
+      autoValidate.disabled = true;
+      refreshReady();
+      persist();
+      document.getElementById('kaltest-next')?.focus();
+    });
+
+    if (!window.KaloneoChrono?.create) throw new Error('Compteur commun KALONÉO indisponible.');
+    activeTriChrono = window.KaloneoChrono.create({
+      startButton:start,
+      stopButton:stop,
+      initialSeconds:Number(tri.liveSeconds)||0,
+      resetOnStart:false,
+      intervalMs:250,
+      bindButtons:false,
+      onRender(seconds,formatted) {
+        tri.liveSeconds = seconds;
+        display.textContent = formatted;
+      }
+    });
+
+    start.addEventListener('click', () => {
+      if (testState.status === 'COMPLETED' || Number(tri.currentTri)>maxTris || tri.awaitingError!==null) {
+        const target=errorInputs[Math.max(0,Number(tri.awaitingError||1)-1)];
+        target?.focus();
+        return;
+      }
+      activeTriChrono.setSeconds(Number(tri.liveSeconds)||0);
+      if (activeTriChrono.start()) {
+        start.disabled = true;
+        stop.disabled = false;
+        refreshResultsButton();
+      }
+    });
+    stop.addEventListener('click', () => {
+      if (!activeTriChrono?.isRunning?.()) return;
+      activeTriChrono.stop();
+      const seconds=activeTriChrono.getSeconds();
+      const index=Math.max(1,Math.min(maxTris,Number(tri.currentTri)||1))-1;
+      tri.rows[index].seconds=seconds;
+      tri.awaitingError=index+1;
+      tri.liveSeconds=seconds;
+      const row=table.querySelectorAll('.kaltest-tri-row:not(.head)')[index];
+      const fields=row?.querySelectorAll('input');
+      if(fields?.[0])fields[0].value=String(Math.floor(seconds/60));
+      if(fields?.[1])fields[1].value=String(seconds%60);
+      start.disabled=true;
+      stop.disabled=true;
+      tri.ready=false;
+      refreshResultsButton();
+      refreshReady();
+      persist();
+      setTimeout(()=>errorInputs[index]?.focus(),0);
+    });
+
+    if (testState.status === 'COMPLETED') {
+      start.disabled=true;stop.disabled=true;resultsButton.disabled=true;
+      auto.hidden=false;results.hidden=false;refreshResults();
+      const next=document.getElementById('kaltest-next');if(next){next.disabled=false;next.classList.remove('seb-exercise-nav-locked');}
+    } else {
+      if (tri.awaitingError!==null) {start.disabled=true;stop.disabled=true;}
+      else {start.disabled=Number(tri.currentTri)>maxTris;stop.disabled=true;}
+      refreshResultsButton();
+      if(tri.resultsShown){results.hidden=false;refreshResults();}
+      refreshReady();
+    }
+
+    shell.append(left,right);
+    host.appendChild(shell);
+    return true;
+  }
+
   function renderDictation(test, host) {
     const definition = test.presentation?.dictation;
     if (!definition || !definition.questionId) return false;
@@ -2119,6 +2485,35 @@
         savedAt:Date.now(),
         source:'kaltest'
       }));
+    } else if (test.id === 'tri_chevilles') {
+      const triResult = result.tri || {};
+      const rows = Array.isArray(testState.tri?.rows) ? testState.tri.rows.slice(0,5) : [];
+      const labels = new Map((test.presentation?.triStation?.autoStatements || []).map(item=>[String(item.value),String(item.label)]));
+      sessionStorage.setItem('tri_cheville_data', JSON.stringify({
+        tris:Array.from({length:5},(_,index)=>{
+          const row=rows[index]||{};
+          if(row.seconds===null||row.seconds===undefined)return {minutes:'',secondes:'',erreurs:''};
+          const seconds=Math.max(0,Math.floor(Number(row.seconds)||0));
+          return {
+            minutes:String(Math.floor(seconds/60)),
+            secondes:String(seconds%60),
+            erreurs:row.errors===null||row.errors===undefined?'':String(row.errors)
+          };
+        }),
+        moyenne:window.KaloneoChrono?.format?.(triResult.temps_moyen||0) || '00:00',
+        totalErreurs:String(triResult.erreurs_total||0),
+        auto:(testState.tri?.autoSelections||[]).map(value=>labels.get(String(value))||String(value)),
+        commentaire:String(testState.tri?.commentaire||''),
+        currentTri:Number(testState.tri?.currentTri)||1,
+        awaitingError:testState.tri?.awaitingError ?? null
+      }));
+      sessionStorage.setItem('autoEvaltri_resultats', JSON.stringify({
+        selections:Array.isArray(testState.tri?.autoSelections)?testState.tri.autoSelections:[],
+        commentaire:String(testState.tri?.commentaire||'')
+      }));
+      if (testState.tri?.ready) sessionStorage.setItem('seb_tri_navigation_ready','1');
+      sessionStorage.setItem('seb_evalpro_tri_live_chrono', String(Number(testState.tri?.liveSeconds)||0));
+      sessionStorage.setItem('seb_exercise_activity:tri_de_cheville.html','1');
     } else if (test.id === 'dictee_professionnelle') {
       const dictation = result.dictation || {};
       const status = String(testState.status || '').startsWith('ABANDONED') ? 'abandoned' : 'verified';
@@ -2255,10 +2650,16 @@
     status.textContent = '';
 
     const host = document.getElementById('kaltest-content');
+    if (activeTriChrono?.destroy) {
+      try { activeTriChrono.destroy(); } catch (_) {}
+      activeTriChrono = null;
+    }
     host.innerHTML = '';
 
     if (renderAutoevaluation(test, host)) {
       // Autoévaluations migrées dans le moteur KALTEST commun.
+    } else if (renderTri(test, host)) {
+      // Tri de chevilles migré dans le moteur KALTEST commun.
     } else if (renderDictation(test, host)) {
       // Dictée professionnelle migrée dans le moteur KALTEST commun.
     } else if (renderMail(test, host)) {
