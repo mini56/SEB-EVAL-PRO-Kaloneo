@@ -77,6 +77,7 @@ const expected = {
     'bilan.competences_techniques.tri_chevilles.temps',
     'bilan.competences_techniques.tri_chevilles.erreurs'
   ],
+  traitement_texte_bureautique:'bilan.tic.traitement_texte.presenter_travail',
   redaction_email:'bilan.tic.messagerie.echanger',
   gratte_ciel:'bilan.competences_techniques.carre_magique.resolution_contraintes'
 };
