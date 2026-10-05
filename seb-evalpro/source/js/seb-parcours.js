@@ -254,7 +254,10 @@
     fullParcoursStep(legacyStep('introbrique')),
     fullParcoursStep(legacyStep('brique')),
     fullParcoursStep(legacyStep('stock')),
-    fullParcoursStep(legacyStep('planning')),
+    fullParcoursStep({
+      ...legacyStep('planning'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'planning' }),
     fullParcoursStep({
       ...legacyStep('genrenombres'),
       file:'kaltest-pilot2.html'
