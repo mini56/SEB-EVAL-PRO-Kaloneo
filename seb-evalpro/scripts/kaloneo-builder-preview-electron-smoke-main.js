@@ -100,14 +100,18 @@ app.whenReady().then(async()=>{
       document.getElementById('test-instruction').dispatchEvent(new Event('input',{bubbles:true}));
       document.getElementById('calculator-compatible').checked=true;
       document.getElementById('calculator-compatible').dispatchEvent(new Event('change',{bubbles:true}));
+      document.getElementById('calculator-brand').value='KALONÉO';
+      document.getElementById('calculator-brand').dispatchEvent(new Event('input',{bubbles:true}));
       document.getElementById('chrono-enabled').checked=true;
       document.getElementById('chrono-enabled').dispatchEvent(new Event('change',{bubbles:true}));
       return {
         button:String(document.getElementById('open-electron-preview')?.textContent||'').trim(),
-        title:document.getElementById('test-title').value
+        title:document.getElementById('test-title').value,
+        calculatorBrand:document.getElementById('calculator-brand')?.value||'',
+        calculatorOptionsHidden:document.getElementById('calculator-options')?.hidden
       };
     })()`);
-    if(!/vraie page/i.test(setup.button)||setup.title!=='Aperçu Electron Smoke') return fail('bouton ou saisie Builder incorrecte',setup);
+    if(!/vraie page/i.test(setup.button)||setup.title!=='Aperçu Electron Smoke'||setup.calculatorBrand!=='KALONÉO'||setup.calculatorOptionsHidden) return fail('bouton ou saisie Builder incorrecte',setup);
 
     await win.webContents.executeJavaScript(`document.getElementById('open-electron-preview').click();true`);
     for(let i=0;i<30;i++){
@@ -126,7 +130,8 @@ app.whenReady().then(async()=>{
       next:String(document.querySelector('.kb-nav-btn.next')?.textContent||'').trim(),
       calculator:String(document.querySelector('.kb-footer-center button')?.textContent||'').trim(),
       chrono:String(document.querySelector('.kb-chrono-time')?.textContent||'').trim(),
-      topbarVisible:!!document.querySelector('#seb-evalpro-topbar') && getComputedStyle(document.querySelector('#seb-evalpro-topbar')).display!=='none'
+      privacy:(()=>{const p=document.getElementById('seb-evalpro-privacy-toggle');return p?getComputedStyle(p).display:'absent';})(),
+      calculatorButtonShadow:getComputedStyle(document.querySelector('.kb-footer-center button')).boxShadow
     }))()`);
 
     if(!/test-preview\.html$/i.test(shown.path)||
@@ -135,16 +140,40 @@ app.whenReady().then(async()=>{
        shown.instruction!=='Consigne plein écran'||
        shown.close!=='Fermer l’aperçu'||
        shown.next!=='Suivant'||
-       shown.calculator!=='Calculatrice'||
+       shown.calculator!=='Ouvrir la calculatrice'||
        shown.chrono!=='00:00'||
-       shown.topbarVisible) {
+       !['none','absent'].includes(shown.privacy)) {
       return fail('rendu plein écran incorrect',shown);
     }
 
     await win.webContents.executeJavaScript(`document.querySelector('.kb-footer-center button').click();true`);
-    await wait(100);
-    const calcOpen=await win.webContents.executeJavaScript(`(()=>{const p=document.querySelector('.kb-calculator');return !!p&&!p.hidden;})()`);
-    if(!calcOpen)return fail('calculatrice de l’aperçu non interactive');
+    await wait(130);
+    const calcOpen=await win.webContents.executeJavaScript(`(()=>{
+      const panel=document.getElementById('calc-container');
+      const bar=panel?.querySelector('.seb-calc-dragbar');
+      const brand=panel?.querySelector('.seb-calc-brand');
+      const labels=[...panel?.querySelectorAll('.calc-btn')||[]].map(x=>String(x.textContent||'').trim());
+      const before=panel?.getBoundingClientRect();
+      if(!panel||!bar||getComputedStyle(panel).display==='none') return {open:false};
+      const x=before.left+30,y=before.top+18;
+      const init=(cx,cy,buttons)=>({bubbles:true,cancelable:true,pointerId:91,pointerType:'mouse',isPrimary:true,button:0,buttons,clientX:cx,clientY:cy});
+      bar.dispatchEvent(new PointerEvent('pointerdown',init(x,y,1)));
+      bar.dispatchEvent(new PointerEvent('pointermove',init(x+70,y+45,1)));
+      bar.dispatchEvent(new PointerEvent('pointerup',init(x+70,y+45,0)));
+      const after=panel.getBoundingClientRect();
+      return {
+        open:true,
+        brand:String(brand?.textContent||'').trim(),
+        dragLabel:String(bar?.querySelector('span')?.textContent||'').trim(),
+        hasX:labels.includes('x'),
+        hasStar:labels.includes('*'),
+        moved:Math.abs(after.left-before.left)>20||Math.abs(after.top-before.top)>20,
+        inside:after.left>=0&&after.top>=0&&after.right<=innerWidth&&after.bottom<=innerHeight
+      };
+    })()`);
+    if(!calcOpen.open||calcOpen.brand!=='KALONÉO'||calcOpen.dragLabel!=='Calculatrice'||!calcOpen.hasX||calcOpen.hasStar||!calcOpen.moved||!calcOpen.inside){
+      return fail('calculatrice commune de l’aperçu incorrecte',calcOpen);
+    }
 
     await win.webContents.executeJavaScript(`document.querySelector('.close-preview').click();true`);
     for(let i=0;i<30;i++){
@@ -159,6 +188,7 @@ app.whenReady().then(async()=>{
       title:document.getElementById('test-title')?.value||'',
       scenario:document.getElementById('test-scenario')?.value||'',
       instruction:document.getElementById('test-instruction')?.value||'',
+      calculatorBrand:document.getElementById('calculator-brand')?.value||'',
       previewButton:String(document.getElementById('open-electron-preview')?.textContent||'').trim()
     }))()`);
 
@@ -166,6 +196,7 @@ app.whenReady().then(async()=>{
        returned.title!=='Aperçu Electron Smoke'||
        returned.scenario!=='Scénario plein écran'||
        returned.instruction!=='Consigne plein écran'||
+       returned.calculatorBrand!=='KALONÉO'||
        !/vraie page/i.test(returned.previewButton)) {
       return fail('retour au Builder avec brouillon incorrect',returned);
     }
