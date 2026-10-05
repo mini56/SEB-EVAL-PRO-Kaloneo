@@ -181,11 +181,11 @@
     return false;
   }
 
-  function armPointerDrag(event, payload, source, label) {
+  function armMouseDrag(event, payload, source, label) {
     if (!event || event.button !== 0) return;
     if (event.target?.closest?.('button,input,select,textarea,a')) return;
 
-    const pointerId = event.pointerId;
+    event.preventDefault();
     const startX = event.clientX;
     const startY = event.clientY;
     let active = false;
@@ -212,7 +212,7 @@
       const target = pointTarget(x, y);
       if (target) target.classList.add('pointer-drop-target');
 
-      const panel = target?.closest?.('.library-panel,.sequence-scroll,.saved-panel');
+      const panel = target?.closest?.('.library-sections,.sequence-scroll,.saved-parcours');
       if (panel) {
         const rect = panel.getBoundingClientRect();
         const edge = 34;
@@ -227,13 +227,12 @@
       if (ghost) ghost.remove();
       ghost = null;
       state.pointerDrag = null;
-      document.removeEventListener('pointermove', move, true);
-      document.removeEventListener('pointerup', finish, true);
-      document.removeEventListener('pointercancel', cancel, true);
+      document.removeEventListener('mousemove', move, true);
+      document.removeEventListener('mouseup', finish, true);
+      window.removeEventListener('blur', cancel, true);
     };
 
     const move = moveEvent => {
-      if (pointerId != null && moveEvent.pointerId !== pointerId) return;
       const dx = moveEvent.clientX - startX;
       const dy = moveEvent.clientY - startY;
       if (!active && Math.hypot(dx, dy) < 5) return;
@@ -243,7 +242,6 @@
     };
 
     const finish = endEvent => {
-      if (pointerId != null && endEvent.pointerId !== pointerId) return;
       if (!active) {
         cleanup();
         return;
@@ -255,14 +253,11 @@
       if (changed) render();
     };
 
-    const cancel = cancelEvent => {
-      if (pointerId != null && cancelEvent.pointerId !== pointerId) return;
-      cleanup();
-    };
+    const cancel = () => cleanup();
 
-    document.addEventListener('pointermove', move, { capture:true, passive:false });
-    document.addEventListener('pointerup', finish, { capture:true, passive:false });
-    document.addEventListener('pointercancel', cancel, { capture:true, passive:false });
+    document.addEventListener('mousemove', move, { capture:true, passive:false });
+    document.addEventListener('mouseup', finish, { capture:true, passive:false });
+    window.addEventListener('blur', cancel, { capture:true, once:true });
   }
 
   function renderLibraryCard(item) {
@@ -286,8 +281,8 @@
     }
     card.querySelector('.card-meta').textContent = details.join(' • ');
 
-    card.addEventListener('pointerdown', event => {
-      armPointerDrag(event, { source:'library', id:item.id, version:item.version, role:item.role }, card, item.title);
+    card.addEventListener('mousedown', event => {
+      armMouseDrag(event, { source:'library', id:item.id, version:item.version, role:item.role }, card, item.title);
     });
     card.addEventListener('dragstart', event => {
       card.classList.add('dragging');
@@ -414,8 +409,8 @@
       down.addEventListener('click', () => moveTest(index, index + 1));
       card.querySelector('.remove-test').addEventListener('click', () => removeTest(index));
 
-      card.addEventListener('pointerdown', event => {
-        armPointerDrag(event, { source:'sequence', role:'test', id:item.id, version:item.version }, card, item.title);
+      card.addEventListener('mousedown', event => {
+        armMouseDrag(event, { source:'sequence', role:'test', id:item.id, version:item.version }, card, item.title);
       });
       card.addEventListener('dragstart', event => {
         state.draggingIndex = index;
