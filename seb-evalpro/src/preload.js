@@ -83,13 +83,18 @@ function isAdminKaloneoBuilderPage(page = pageName()) {
   return String(page || '').toLowerCase() === 'test-builder.html';
 }
 
+function isAdminMaskBuilderPage(page = pageName()) {
+  return String(page || '').toLowerCase() === 'admin-mask-builder.html';
+}
+
 function isAdminKaloneoBuilderPreviewPage(page = pageName()) {
   return String(page || '').toLowerCase() === 'test-preview.html';
 }
 
 function isTestsParcoursWorkspacePage(page = pageName()) {
   return isAdminTestsParcoursPage(page) || isAdminParcoursBuilderPage(page) ||
-    isAdminKaloneoBuilderPage(page) || isAdminKaloneoBuilderPreviewPage(page);
+    isAdminKaloneoBuilderPage(page) || isAdminMaskBuilderPage(page) ||
+    isAdminKaloneoBuilderPreviewPage(page);
 }
 
 function isAdminNavigationPage(page = pageName()) {
@@ -162,7 +167,7 @@ function handleSaveResult(result) {
 function saveNow(sync = false) {
   if (candidateJourneyCompleted) return sync ? { ok:true, completed:true } : Promise.resolve({ ok:true, completed:true });
   if (closingSession || adminNavigationLeaving) return null;
-  if (isAdminCandidatesPage() || isAdminTestsParcoursPage() || isAdminParcoursBuilderPage()) {
+  if (isAdminCandidatesPage() || isTestsParcoursWorkspacePage()) {
     const adminResult = { ok:true, adminNavigation:true };
     return sync ? adminResult : Promise.resolve(adminResult);
   }
@@ -1824,7 +1829,15 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   const PRIVACY_KEY = 'seb_evalpro_privacy_screen';
   const MODE_TEMP = 'temporary';
   const MODE_FINAL = 'final';
+  const MASK_REF_KEY = 'seb_kaloneo_mask_screen_ref';
   let privacyMode = '';
+  let privacyMaskScreen = {
+    id:'kaloneo-default',
+    version:'1.0.0',
+    name:'KALONÉO',
+    content:{text:'KALONÉO\nAu cœur d’un nouvel élan',image:''}
+  };
+  let privacyMaskLoaded = false;
 
   function readPrivacyMode(){
     try {
@@ -1874,7 +1887,11 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
       '#seb-evalpro-privacy-toggle{position:fixed!important;right:18px!important;bottom:18px!important;z-index:2147483643!important;margin:0!important;padding:10px 17px!important;border:1.5px solid #004E70!important;border-radius:10px!important;background:linear-gradient(180deg,#fff 0%,#f5f8fc 100%)!important;color:#004E70!important;font:700 15px Calibri,\"Segoe UI\",Arial,sans-serif!important;box-shadow:0 4px 10px rgba(0,0,0,.14),inset 0 1px 0 #fff!important;cursor:pointer!important}' +
       '#seb-evalpro-privacy-toggle:hover{background:linear-gradient(180deg,#fff 0%,#eef4f8 100%)!important;transform:translateY(-1px)!important;box-shadow:0 7px 15px rgba(0,0,0,.17),inset 0 1px 0 #fff!important}' +
       '#seb-evalpro-privacy-layer{position:fixed;inset:0;background:#fff;display:none;align-items:center;justify-content:center;overflow:hidden;font-family:Arial,sans-serif}' +
-      '#seb-evalpro-privacy-layer img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;user-select:none;-webkit-user-drag:none}' +
+      '#seb-evalpro-privacy-content{position:absolute;inset:0 0 68px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:28px;box-sizing:border-box;overflow:hidden}' +
+      '#seb-evalpro-privacy-layer img{display:block;max-width:94%;max-height:72%;width:auto;height:auto;object-fit:contain;object-position:center;user-select:none;-webkit-user-drag:none}' +
+      '#seb-evalpro-privacy-text{max-width:92%;white-space:pre-wrap;text-align:center;color:#004E70;font:700 clamp(24px,4vw,54px) Calibri,"Segoe UI",Arial,sans-serif;line-height:1.2}' +
+      '#seb-evalpro-privacy-layer.seb-final-privacy #seb-evalpro-privacy-content{inset:0;padding:0}' +
+      '#seb-evalpro-privacy-layer.seb-final-privacy img{position:absolute;inset:0;max-width:none;max-height:none;width:100%;height:100%;object-fit:cover}' +
       '#seb-evalpro-privacy-hide{position:absolute!important;left:50%!important;bottom:24px!important;transform:translateX(-50%)!important;margin:0!important;padding:11px 20px!important;border:0!important;border-radius:8px!important;background:#0070c0!important;color:#fff!important;font:700 15px Arial,sans-serif!important;box-shadow:0 3px 12px rgba(0,0,0,.25)!important;cursor:pointer!important}' +
       '#seb-evalpro-final-privacy-wrap{display:flex!important;justify-content:center!important;margin:22px 0 12px!important}' +
       '#seb-evalpro-final-privacy{margin:0!important;padding:11px 20px!important;border:0!important;border-radius:8px!important;background:#0070c0!important;color:#fff!important;font:700 15px Arial,sans-serif!important;cursor:pointer!important}';
@@ -1912,10 +1929,20 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
     layer.setAttribute('role', 'dialog');
     layer.setAttribute('aria-modal', 'true');
 
+    const content = document.createElement('div');
+    content.id = 'seb-evalpro-privacy-content';
+
     const image = document.createElement('img');
-    image.src = 'imageqcm/seb-evalpro-privacy-screen.jpg';
-    image.alt = 'SEB-éval-PRO';
+    image.id = 'seb-evalpro-privacy-image';
+    image.alt = '';
     image.draggable = false;
+    image.hidden = true;
+
+    const text = document.createElement('div');
+    text.id = 'seb-evalpro-privacy-text';
+
+    content.appendChild(image);
+    content.appendChild(text);
 
     const hide = document.createElement('button');
     hide.id = 'seb-evalpro-privacy-hide';
@@ -1925,10 +1952,60 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
       if (privacyMode === MODE_TEMP) savePrivacyMode('');
     });
 
-    layer.appendChild(image);
+    layer.appendChild(content);
     layer.appendChild(hide);
     document.body.appendChild(layer);
     return layer;
+  }
+
+  function privacyMaskRef(){
+    try {
+      const raw = sessionStorage.getItem(MASK_REF_KEY) || localStorage.getItem(MASK_REF_KEY) || '';
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && parsed.id && parsed.version) return {id:String(parsed.id),version:String(parsed.version)};
+    } catch (_) {}
+    return null;
+  }
+
+  function renderPrivacyContent(layer, mode){
+    if (!layer) return;
+    const image = layer.querySelector('#seb-evalpro-privacy-image');
+    const text = layer.querySelector('#seb-evalpro-privacy-text');
+    if (mode === MODE_FINAL) {
+      layer.classList.add('seb-final-privacy');
+      if (image) {
+        image.src = 'imageqcm/seb-evalpro-privacy-screen.jpg';
+        image.alt = 'SEB-éval-PRO';
+        image.hidden = false;
+      }
+      if (text) { text.textContent=''; text.hidden=true; }
+      return;
+    }
+
+    layer.classList.remove('seb-final-privacy');
+    const value = privacyMaskScreen || {};
+    const content = value.content || {};
+    const imageValue = String(content.image || '');
+    const textValue = String(content.text || '');
+    if (image) {
+      if (imageValue) image.src=imageValue; else image.removeAttribute('src');
+      image.alt = value.name ? String(value.name) : '';
+      image.hidden = !imageValue;
+    }
+    if (text) {
+      text.textContent = textValue;
+      text.hidden = !textValue.trim();
+    }
+  }
+
+  async function loadPrivacyMask(){
+    if (privacyMaskLoaded) return;
+    privacyMaskLoaded = true;
+    try {
+      const result = await ipcRenderer.invoke('kaloneo-library:get-mask-screen', privacyMaskRef());
+      if (result && result.ok === true && result.maskScreen) privacyMaskScreen = result.maskScreen;
+    } catch (_) {}
+    try { renderPrivacyContent(document.getElementById('seb-evalpro-privacy-layer'), privacyMode); } catch (_) {}
   }
 
   function ensureFinalPrivacyButton(){
@@ -1981,12 +2058,14 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
     }
 
     if (privacyMode === MODE_TEMP) {
+      renderPrivacyContent(layer, MODE_TEMP);
       toggle.style.setProperty('display', 'none', 'important');
       layer.style.zIndex = '2147483647';
       layer.style.setProperty('display', 'flex', 'important');
       hide.style.setProperty('display', 'block', 'important');
       hide.setAttribute('aria-hidden', 'false');
     } else if (privacyMode === MODE_FINAL && !adminUnlocked) {
+      renderPrivacyContent(layer, MODE_FINAL);
       toggle.style.setProperty('display', 'none', 'important');
       layer.style.zIndex = '2147483644';
       layer.style.setProperty('display', 'flex', 'important');
@@ -2004,6 +2083,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   function startPrivacy(){
     if (!document.body) return;
     ensurePrivacyStyle();
+    loadPrivacyMask();
     refreshPrivacy();
 
     const observer = new MutationObserver(function(){
