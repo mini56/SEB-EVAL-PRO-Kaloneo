@@ -108,7 +108,9 @@
       "id": "stock",
       "file": "stock.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "ranger_stock",
+      "fixturePath": "tests/fixtures/kaltests/ranger-stock/1.0.0/test.json"
     },
     {
       "id": "planning",
