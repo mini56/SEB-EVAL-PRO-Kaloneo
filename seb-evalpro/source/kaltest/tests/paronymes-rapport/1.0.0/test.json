@@ -1,0 +1,444 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "questionnaire.table",
+    "questionnaire.single-choice-table",
+    "layout.single",
+    "bilan.bindings"
+  ],
+  "id": "paronymes_rapport",
+  "version": "1.0.0",
+  "title": "Paronymes",
+  "category": "francais",
+  "description": "Choisir pour chaque mot souligné le mot ayant le sens le plus proche parmi cinq propositions.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "paronymes.html",
+    "sourceScript": "source/js/paronymes-page.js",
+    "legacyParcoursId": "paronymes"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "Dans votre service, vous êtes chargé de relire un rapport rédigé à la hâte avant son envoi à la direction. Plusieurs mots semblent corrects au premier abord, mais leur sens ne correspond pas vraiment au contexte.",
+  "instruction": "Sélectionnez, pour chaque mot, la proposition qui a le sens le plus proche. Une seule réponse par ligne.",
+  "presentation": {
+    "layout": "single-block",
+    "choiceTable": {
+      "columns": [
+        "Mot",
+        "Proposition 1",
+        "Proposition 2",
+        "Proposition 3",
+        "Proposition 4",
+        "Proposition 5"
+      ]
+    },
+    "kaloneoLayout": {
+      "type": "full-width-choice-table",
+      "ratio": "100/100",
+      "work": {
+        "width": "100%",
+        "tableWidth": "100%"
+      }
+    }
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "apitoiement",
+      "prompt": "Apitoiement",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Pitié",
+          "Appétence",
+          "Indifférence",
+          "Capiteux",
+          "Piété"
+        ]
+      },
+      "acceptedAnswers": [
+        "Pitié"
+      ],
+      "points": 1
+    },
+    {
+      "id": "ideaux",
+      "prompt": "Idéaux",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Rêves",
+          "Idées",
+          "Pensées",
+          "Géniaux",
+          "Parfaits"
+        ]
+      },
+      "acceptedAnswers": [
+        "Parfaits"
+      ],
+      "points": 1
+    },
+    {
+      "id": "enseignent",
+      "prompt": "Enseignent",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Disent",
+          "Marquent",
+          "Saignent",
+          "Instruisent",
+          "Assignent"
+        ]
+      },
+      "acceptedAnswers": [
+        "Instruisent"
+      ],
+      "points": 1
+    },
+    {
+      "id": "arbore",
+      "prompt": "Arboré",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Abhorré",
+          "Planté",
+          "Détesté",
+          "Boisé",
+          "Orée"
+        ]
+      },
+      "acceptedAnswers": [
+        "Boisé"
+      ],
+      "points": 1
+    },
+    {
+      "id": "glorieux",
+      "prompt": "Glorieux",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Prestigieux",
+          "Ordinaire",
+          "Méritant",
+          "Glossaire",
+          "Fort"
+        ]
+      },
+      "acceptedAnswers": [
+        "Prestigieux"
+      ],
+      "points": 1
+    },
+    {
+      "id": "maugreer",
+      "prompt": "Maugréer",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Maudire",
+          "Chanter mal",
+          "Râler",
+          "Agréer",
+          "Souffrir"
+        ]
+      },
+      "acceptedAnswers": [
+        "Râler"
+      ],
+      "points": 1
+    },
+    {
+      "id": "pilier",
+      "prompt": "Pilier",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Piller",
+          "Voler",
+          "Colonne",
+          "Piler",
+          "Épiler"
+        ]
+      },
+      "acceptedAnswers": [
+        "Colonne"
+      ],
+      "points": 1
+    },
+    {
+      "id": "monopole",
+      "prompt": "Monopole",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Jeu",
+          "Exclusivité",
+          "Acropole",
+          "Un seul pôle",
+          "Solitude"
+        ]
+      },
+      "acceptedAnswers": [
+        "Exclusivité"
+      ],
+      "points": 1
+    },
+    {
+      "id": "luire",
+      "prompt": "Luire",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Nuire",
+          "Polir",
+          "Éclairer",
+          "Étoiler",
+          "Briller"
+        ]
+      },
+      "acceptedAnswers": [
+        "Briller"
+      ],
+      "points": 1
+    },
+    {
+      "id": "quittance",
+      "prompt": "Quittance",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Paye",
+          "Facture",
+          "Reçu",
+          "Prix",
+          "Quitter"
+        ]
+      },
+      "acceptedAnswers": [
+        "Reçu"
+      ],
+      "points": 1
+    },
+    {
+      "id": "proscrire",
+      "prompt": "Proscrire",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Inscrire",
+          "Déduire",
+          "Reproduire",
+          "Souscrire",
+          "Interdire"
+        ]
+      },
+      "acceptedAnswers": [
+        "Interdire"
+      ],
+      "points": 1
+    },
+    {
+      "id": "guenille",
+      "prompt": "Guenille",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Hayon",
+          "Ailleurs",
+          "Haillon",
+          "Singe",
+          "Haleur"
+        ]
+      },
+      "acceptedAnswers": [
+        "Haillon"
+      ],
+      "points": 1
+    },
+    {
+      "id": "verbal",
+      "prompt": "Verbal",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Conjugué",
+          "Éloquent",
+          "Buccal",
+          "Oral",
+          "Écrit"
+        ]
+      },
+      "acceptedAnswers": [
+        "Oral"
+      ],
+      "points": 1
+    },
+    {
+      "id": "effectif",
+      "prompt": "Effectif",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Concret",
+          "Affecté",
+          "Affectueux",
+          "Compte",
+          "Réactif"
+        ]
+      },
+      "acceptedAnswers": [
+        "Concret"
+      ],
+      "points": 1
+    },
+    {
+      "id": "abreger",
+      "prompt": "Abréger",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Abrevoir",
+          "Aberration",
+          "Aboutir",
+          "Réduire",
+          "Déplacer"
+        ]
+      },
+      "acceptedAnswers": [
+        "Réduire"
+      ],
+      "points": 1
+    },
+    {
+      "id": "synonyme",
+      "prompt": "Synonyme",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Signaler",
+          "Pareil",
+          "Anonyme",
+          "Signifier",
+          "Canoniser"
+        ]
+      },
+      "acceptedAnswers": [
+        "Pareil"
+      ],
+      "points": 1
+    },
+    {
+      "id": "mobiliser",
+      "prompt": "Mobiliser",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Aménager",
+          "Immobilier",
+          "Verbaliser",
+          "Signifier",
+          "Appeler"
+        ]
+      },
+      "acceptedAnswers": [
+        "Appeler"
+      ],
+      "points": 1
+    },
+    {
+      "id": "differend",
+      "prompt": "Différend",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Prétend",
+          "Conflit",
+          "Vérifier",
+          "Argent",
+          "Éloquent"
+        ]
+      },
+      "acceptedAnswers": [
+        "Conflit"
+      ],
+      "points": 1
+    },
+    {
+      "id": "lucratif",
+      "prompt": "Lucratif",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Luxueux",
+          "Création",
+          "Rentable",
+          "Gratuit",
+          "Généreux"
+        ]
+      },
+      "acceptedAnswers": [
+        "Rentable"
+      ],
+      "points": 1
+    },
+    {
+      "id": "raboter",
+      "prompt": "Raboter",
+      "response": {
+        "type": "single-choice",
+        "options": [
+          "Robotiser",
+          "Aplanir",
+          "Cuisiner",
+          "Aboutir",
+          "Dérober"
+        ]
+      },
+      "acceptedAnswers": [
+        "Aplanir"
+      ],
+      "points": 1
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.savoirs_fondamentaux.expression_ecrite.maitrise",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ]
+}
