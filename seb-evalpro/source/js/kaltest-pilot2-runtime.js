@@ -296,6 +296,8 @@
   function evaluateQuestion(question, value) {
     const type = question?.response?.type || 'text';
 
+    if (type === 'free-text' || question?.manualEvaluation === true) return null;
+
     if (type === 'duration') {
       const actual = parseDurationFr(value);
       return actual !== null && actual === Number(question.acceptedMinutes);
@@ -329,11 +331,18 @@
     const details = {};
 
     for (const question of test.questions || []) {
-      const points = Number(question.points) || 0;
+      const manual = question?.response?.type === 'free-text' || question?.manualEvaluation === true;
+      const points = manual ? 0 : (Number(question.points) || 0);
       const value = testState.answers[question.id];
-      const correct = evaluateQuestion(question, value);
-      if (question.example !== true && test.scored !== false) scoreMax += points;
-      details[question.id] = { value:value ?? '', correct, points };
+      const correct = manual ? null : evaluateQuestion(question, value);
+      if (!manual && question.example !== true && test.scored !== false) scoreMax += points;
+      details[question.id] = {
+        value:value ?? '',
+        correct,
+        points,
+        manual,
+        manualLevel:manual ? null : undefined
+      };
     }
 
     for (const group of test.evaluation?.uniqueGroups || []) {
@@ -545,6 +554,17 @@
       select.value = String(testState.answers[question.id] ?? '');
       select.addEventListener('change', () => saveAnswer(test, question.id, select.value));
       return select;
+    }
+
+    if (type === 'free-text') {
+      const input = document.createElement('textarea');
+      input.className = 'step kaltest-free-text-answer';
+      input.dataset.questionId = question.id;
+      input.rows = 6;
+      input.value = String(testState.answers[question.id] ?? '');
+      input.placeholder = 'Votre réponse';
+      input.addEventListener('input', () => saveAnswer(test, question.id, input.value));
+      return input;
     }
 
     if (type === 'multiple-choice') {
