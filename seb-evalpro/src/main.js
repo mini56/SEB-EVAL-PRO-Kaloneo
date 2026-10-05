@@ -20,8 +20,6 @@ const MIN_SPLASH_MS = 1400;
 const DESIGN_WIDTH = 1600;
 const DESIGN_HEIGHT = 900;
 const MIN_ZOOM_FACTOR = 0.60;
-const KALTEST_PILOT2_MODE = process.env.SEB_KALTEST_PILOT2 === '1';
-const KALTEST_FULL_PARCOURS_MODE = process.env.SEB_KALTEST_FULL_PARCOURS === '1';
 let mainWindow = null;
 let splashWindow = null;
 let splashStartedAt = 0;
@@ -268,10 +266,8 @@ function installDownloadRouting() {
 }
 
 function defaultState() {
-  const initialPage = KALTEST_PILOT2_MODE ? 'kaltest-pilot2.html' : 'qcmv1.0.html';
-  const initialRoute = KALTEST_PILOT2_MODE && KALTEST_FULL_PARCOURS_MODE
-    ? kaloneoFullParcoursRoute.INITIAL_ROUTE
-    : initialPage;
+  const initialPage = 'kaltest-pilot2.html';
+  const initialRoute = kaloneoFullParcoursRoute.INITIAL_ROUTE;
   return {
     version: STATE_VERSION,
     sessionStorage: {},
@@ -553,16 +549,6 @@ function finishStartup() {
   }, delay + 180);
 }
 
-function loadEvaluationFile(target) {
-  if (!mainWindow || mainWindow.isDestroyed()) return;
-  const base = path.basename(String(target || '')).toLowerCase();
-  if (KALTEST_PILOT2_MODE && KALTEST_FULL_PARCOURS_MODE && base === 'kaltest-pilot2.html') {
-    mainWindow.loadFile(target, { query:{ fullParcours:'1' } });
-    return;
-  }
-  mainWindow.loadFile(target);
-}
-
 function loadKaloneoCandidateRoute(route) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   const resolved = kaloneoFullParcoursRoute.toLoadOptions(route);
@@ -573,11 +559,7 @@ function loadKaloneoCandidateRoute(route) {
 }
 
 function loadSavedCandidateEvaluation(state) {
-  if (KALTEST_PILOT2_MODE && KALTEST_FULL_PARCOURS_MODE) {
-    loadKaloneoCandidateRoute(kaloneoFullParcoursRoute.resolveStateRoute(state));
-    return;
-  }
-  loadEvaluationFile(existingWebPage(state.lastEvaluationPage || state.lastPage));
+  loadKaloneoCandidateRoute(kaloneoFullParcoursRoute.resolveStateRoute(state));
 }
 
 function createWindow() {
@@ -630,11 +612,9 @@ function createWindow() {
     const current = readState();
     current.lastPage = page;
     current.lastEvaluationPage = page;
-    if (KALTEST_PILOT2_MODE && KALTEST_FULL_PARCOURS_MODE) {
-      const route = kaloneoFullParcoursRoute.routeFromNavigationUrl(url);
-      current.lastRoute = route;
-      current.lastEvaluationRoute = route;
-    }
+    const route = kaloneoFullParcoursRoute.routeFromNavigationUrl(url);
+    current.lastRoute = route;
+    current.lastEvaluationRoute = route;
     writeState(current);
     applyAdaptiveZoom();
   });

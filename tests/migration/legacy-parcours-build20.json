@@ -10,7 +10,8 @@
       "file": "qcmv1.0.html",
       "page": "1",
       "role": "system-page-introduction",
-      "status": "preserve"
+      "status": "retired-system",
+      "retiredReason": "Remplacée par l’entrée candidat KALONÉO/KALTEST."
     },
     {
       "id": "qcm-2",
@@ -53,21 +54,27 @@
       "file": "qcmv1.0.html",
       "page": "4",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "fractions_preparation_lots",
+      "fixturePath": "tests/fixtures/kaltests/fractions-preparation-lots/1.0.0/test.json"
     },
     {
       "id": "qcm-5",
       "file": "qcmv1.0.html",
       "page": "5",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "organisation_demenagement",
+      "fixturePath": "tests/fixtures/kaltests/organisation-demenagement/1.0.0/test.json"
     },
     {
       "id": "qcm-5_1",
       "file": "qcmv1.0.html",
       "page": "5_1",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "gestes_postures",
+      "fixturePath": "tests/fixtures/kaltests/gestes-postures/1.0.0/test.json"
     },
     {
       "id": "qcm-6",
@@ -82,31 +89,41 @@
       "id": "autoeval1",
       "file": "autoeval1.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "autoevaluation_savoirs",
+      "fixturePath": "tests/fixtures/kaltests/autoevaluation-savoirs/1.0.0/test.json"
     },
     {
       "id": "introbrique",
       "file": "introbrique.html",
       "role": "test-support",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "transition_video_f1",
+      "fixturePath": "tests/fixtures/kaltests/transition-video-f1/1.0.0/test.json"
     },
     {
       "id": "brique",
       "file": "brique.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "construction_briques",
+      "fixturePath": "tests/fixtures/kaltests/construction-briques/1.0.0/test.json"
     },
     {
       "id": "stock",
       "file": "stock.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "ranger_stock",
+      "fixturePath": "tests/fixtures/kaltests/ranger-stock/1.0.0/test.json"
     },
     {
       "id": "planning",
       "file": "planning.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "planning_cantine",
+      "fixturePath": "tests/fixtures/kaltests/planning-cantine/1.0.0/test.json"
     },
     {
       "id": "genrenombres",
@@ -120,31 +137,41 @@
       "id": "dictee",
       "file": "dictee.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "dictee_professionnelle",
+      "fixturePath": "tests/fixtures/kaltests/dictee-professionnelle/1.0.0/test.json"
     },
     {
       "id": "tri-de-cheville",
       "file": "tri_de_cheville.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "tri_chevilles",
+      "fixturePath": "tests/fixtures/kaltests/tri-chevilles/1.0.0/test.json"
     },
     {
       "id": "nwtexte",
       "file": "nwtexte.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "traitement_texte_bureautique",
+      "fixturePath": "tests/fixtures/kaltests/traitement-texte-bureautique/1.0.0/test.json"
     },
     {
       "id": "nvmail",
       "file": "nvmail.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "redaction_email",
+      "fixturePath": "tests/fixtures/kaltests/redaction-email/1.0.0/test.json"
     },
     {
       "id": "autoeval2",
       "file": "autoeval2.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "autoevaluation_tic",
+      "fixturePath": "tests/fixtures/kaltests/autoevaluation-tic/1.0.0/test.json"
     },
     {
       "id": "paronymes",
@@ -158,21 +185,26 @@
       "id": "carre",
       "file": "carre.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "gratte_ciel",
+      "fixturePath": "tests/fixtures/kaltests/gratte-ciel/1.0.0/test.json"
     },
     {
       "id": "qcm-11",
       "file": "qcmv1.0.html",
       "page": "11",
       "role": "legacy-step-review",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "fin_parcours",
+      "fixturePath": "tests/fixtures/kaltests/fin-parcours/1.0.0/test.json"
     },
     {
       "id": "qcm-finale",
       "file": "qcmv1.0.html",
       "page": "finale",
       "role": "system-page-final",
-      "status": "preserve"
+      "status": "retired-system",
+      "retiredReason": "Remplacée par le KALTEST fin_parcours."
     }
   ]
 }

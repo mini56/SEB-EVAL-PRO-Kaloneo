@@ -1676,7 +1676,7 @@ function showReadOnlyCandidateResults() {
 async function completeCandidateFromFinalPage() {
   if (candidateJourneyCompleted || candidateCompletionInFlight || adminUnlocked || adminCandidateWorkspace || adminCandidateResultsWorkspace) return;
   if (isAdminCandidatesPage() || isAdminBilanPage()) return;
-  const finalPage = document.getElementById('pageFinale') || document.getElementById('page-final');
+  const finalPage = document.getElementById('pageFinale') || document.getElementById('page-final') || document.querySelector('.kaltest-terminal-page');
   if (!finalPage) return;
   const style = window.getComputedStyle(finalPage);
   const visible = finalPage.classList.contains('visible')
@@ -1836,8 +1836,8 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
       return !!(page && page.classList.contains('visible'));
     }
     if (current === 'kaltest-pilot2.html') {
-      const page = document.getElementById('page-final');
-      return !!(page && page.classList.contains('visible'));
+      const page = document.querySelector('.kaltest-terminal-page') || document.getElementById('page-final');
+      return !!(page && (page.classList.contains('visible') || page.classList.contains('kaltest-terminal-page')));
     }
     return false;
   }

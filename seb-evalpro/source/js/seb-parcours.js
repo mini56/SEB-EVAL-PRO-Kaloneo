@@ -230,35 +230,83 @@
       id:'kaltest-initial',
       file:'kaltest-pilot2.html'
     }),
-    fullParcoursStep(legacyStep('qcm-4')),
-    fullParcoursStep(legacyStep('qcm-5')),
-    fullParcoursStep(legacyStep('qcm-5_1')),
+    fullParcoursStep({
+      ...legacyStep('qcm-4'),
+      file:'kaltest-pilot2.html',
+      page:null
+    }, { segment:'fractions' }),
+    fullParcoursStep({
+      ...legacyStep('qcm-5'),
+      file:'kaltest-pilot2.html',
+      page:null
+    }, { segment:'organisation' }),
+    fullParcoursStep({
+      ...legacyStep('qcm-5_1'),
+      file:'kaltest-pilot2.html',
+      page:null
+    }, { segment:'postures' }),
     fullParcoursStep({
       ...legacyStep('qcm-6'),
       file:'kaltest-pilot2.html',
       page:null
     }, { segment:'conversions' }),
-    fullParcoursStep(legacyStep('autoeval1')),
-    fullParcoursStep(legacyStep('introbrique')),
-    fullParcoursStep(legacyStep('brique')),
-    fullParcoursStep(legacyStep('stock')),
-    fullParcoursStep(legacyStep('planning')),
+    fullParcoursStep({
+      ...legacyStep('autoeval1'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'autoeval1' }),
+    fullParcoursStep({
+      id:'transition-video-f1',
+      file:'kaltest-pilot2.html'
+    }, { segment:'transition-video-f1' }),
+    fullParcoursStep({
+      ...legacyStep('brique'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'brique' }),
+    fullParcoursStep({
+      ...legacyStep('stock'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'stock' }),
+    fullParcoursStep({
+      ...legacyStep('planning'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'planning' }),
     fullParcoursStep({
       ...legacyStep('genrenombres'),
       file:'kaltest-pilot2.html'
     }, { segment:'genre-nombre' }),
-    fullParcoursStep(legacyStep('dictee')),
-    fullParcoursStep(legacyStep('tri-de-cheville')),
-    fullParcoursStep(legacyStep('nwtexte')),
-    fullParcoursStep(legacyStep('nvmail')),
-    fullParcoursStep(legacyStep('autoeval2')),
+    fullParcoursStep({
+      ...legacyStep('dictee'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'dictee' }),
+    fullParcoursStep({
+      ...legacyStep('tri-de-cheville'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'tri' }),
+    fullParcoursStep({
+      ...legacyStep('nwtexte'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'nwtexte' }),
+    fullParcoursStep({
+      ...legacyStep('nvmail'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'mail' }),
+    fullParcoursStep({
+      ...legacyStep('autoeval2'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'autoeval2' }),
     fullParcoursStep({
       ...legacyStep('paronymes'),
       file:'kaltest-pilot2.html'
     }, { segment:'paronymes' }),
-    fullParcoursStep(legacyStep('carre')),
-    fullParcoursStep(legacyStep('qcm-11')),
-    fullParcoursStep(legacyStep('qcm-finale'))
+    fullParcoursStep({
+      ...legacyStep('carre'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'carre' }),
+    fullParcoursStep({
+      ...legacyStep('qcm-11'),
+      file:'kaltest-pilot2.html',
+      page:null
+    }, { segment:'fin' })
   ]);
 
   function pilot11Enabled() {

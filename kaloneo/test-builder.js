@@ -62,6 +62,18 @@
         tableDefinition:{id:uid('tabledef'),title:'',headers:['Colonne 1','Colonne 2'],questionIds:[]}
       };
     }
+    if (type === 'text-editor') {
+      return {
+        uid:uid('editor'),
+        type,
+        zone:'right',
+        config:{
+          fileSimulation:true,
+          imageSimulation:true,
+          scoringProfile:'none'
+        }
+      };
+    }
     return {
       uid:uid(),
       type,
@@ -760,6 +772,46 @@
       return;
     }
     if(['image','audio','video'].includes(block.type)) {renderMediaEditor(block,body);return;}
+    if(block.type==='text-editor') {
+      block.config=Object.assign({fileSimulation:true,imageSimulation:true,scoringProfile:'none'},block.config||{});
+      const panel=document.createElement('div');
+      panel.className='text-editor-builder-options';
+
+      const title=document.createElement('strong');
+      title.textContent='Outil Éditeur de texte KALONÉO';
+      panel.appendChild(title);
+
+      const profileLabel=document.createElement('label');
+      profileLabel.textContent='Profil de correction';
+      const profile=document.createElement('select');
+      profile.innerHTML='<option value="none">Aucune correction automatique</option><option value="seb-bureautique-v1">Traitement de texte SEB — barème /8</option>';
+      profile.value=block.config.scoringProfile||'none';
+      profile.addEventListener('change',()=>{block.config.scoringProfile=profile.value;changed();});
+      profileLabel.appendChild(profile);
+      panel.appendChild(profileLabel);
+
+      const flags=document.createElement('div');
+      flags.className='option-row compact';
+      const fileLabel=document.createElement('label');
+      const fileCb=document.createElement('input');
+      fileCb.type='checkbox';fileCb.checked=block.config.fileSimulation!==false;
+      fileCb.addEventListener('change',()=>{block.config.fileSimulation=fileCb.checked;changed();});
+      fileLabel.append(fileCb,document.createTextNode(' Menu Fichier simulé'));
+      const imageLabel=document.createElement('label');
+      const imageCb=document.createElement('input');
+      imageCb.type='checkbox';imageCb.checked=block.config.imageSimulation!==false;
+      imageCb.addEventListener('change',()=>{block.config.imageSimulation=imageCb.checked;changed();});
+      imageLabel.append(imageCb,document.createTextNode(' Insertion d’image simulée'));
+      flags.append(fileLabel,imageLabel);
+      panel.appendChild(flags);
+
+      const help=document.createElement('p');
+      help.className='muted';
+      help.textContent='Le même moteur d’édition est réutilisé dans tous les tests KALONÉO. Les fenêtres Ouvrir, Image et Enregistrer restent internes à SEB EvalPro.';
+      panel.appendChild(help);
+      body.appendChild(panel);
+      return;
+    }
     if(block.type==='question') {renderQuestionEditor(block,body);return;}
     if(block.type==='response-table') {renderResponseTableEditor(block,body);return;}
     if(block.type==='table-grid') {renderGridEditor(block,body);return;}
@@ -959,6 +1011,19 @@
     if(block.type==='audio'&&block.mediaData) {const a=document.createElement('audio');a.controls=true;a.src=block.mediaData;a.style.width='100%';wrap.appendChild(a);return wrap;}
     if(block.type==='video'&&block.mediaData) {const v=document.createElement('video');v.controls=true;v.src=block.mediaData;v.className='preview-media';wrap.appendChild(v);return wrap;}
     if(['image','audio','video'].includes(block.type)) {wrap.textContent=block.mediaPlaceholder||'Aucun média sélectionné';return wrap;}
+    if(block.type==='text-editor') {
+      wrap.classList.add('preview-text-editor');
+      const toolbar=document.createElement('div');
+      toolbar.className='preview-text-editor-toolbar';
+      toolbar.innerHTML='<button type="button" disabled>📂 Fichier</button><button type="button" disabled><b>G</b></button><button type="button" disabled><i>I</i></button><button type="button" disabled><u>U</u></button><select disabled><option>Arial</option></select><select disabled><option>12</option></select><button type="button" disabled>🖼️</button>';
+      const page=document.createElement('div');
+      page.className='preview-text-editor-page';
+      page.textContent='Zone de rédaction du candidat…';
+      const badge=document.createElement('small');
+      badge.textContent=(block.config?.scoringProfile==='seb-bureautique-v1')?'Correction SEB /8':'Éditeur libre';
+      wrap.append(toolbar,page,badge);
+      return wrap;
+    }
     if(block.type==='question') return createQuestionPreview(block);
     if(block.type==='table-grid') return gridPreview(block);
     if(block.type==='response-table') return responseTablePreview(block);
@@ -1036,6 +1101,15 @@
     }
     if(m.adminIntervention) add(Boolean(m.adminInstructions),'Intervention Administrateur : besoin décrit');
     if(m.externalMaterial) add(Boolean(m.externalMaterialText),'Matériel extérieur : matériel décrit');
+
+    const editorBlocks=state.blocks.filter(b=>b.type==='text-editor');
+    if(editorBlocks.length) {
+      add(editorBlocks.length===1,'Éditeur de texte : un seul bloc par test');
+      editorBlocks.forEach((block,index)=>{
+        const profile=block.config?.scoringProfile||'none';
+        add(['none','seb-bureautique-v1'].includes(profile),'Éditeur '+(index+1)+' : profil de correction reconnu');
+      });
+    }
 
     let qi=0;
     state.blocks.filter(b=>b.type==='question').forEach(block=>{

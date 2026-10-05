@@ -1,0 +1,80 @@
+name: PILOTE 21 KALTEST migration check
+
+on:
+  push:
+    branches:
+      - pilot21-kaltest-migrate-simple
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migration-check:
+    runs-on: windows-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        working-directory: seb-evalpro
+        run: npm install --no-audit --no-fund
+
+      - name: Validate migration coverage
+        run: node tests/migration/check-migration-coverage.js
+
+      - name: Validate KALTEST contract
+        working-directory: kaltest-contract
+        run: npm test
+
+      - name: Generate KALTEST data
+        working-directory: seb-evalpro
+        run: node scripts/build-kaltest-pilot2-data.js
+
+      - name: Validate KALONÉO Builder parity
+        working-directory: seb-evalpro
+        run: npm run test:kaloneo-builder-parity
+
+      - name: Validate KALONÉO route policy
+        working-directory: seb-evalpro
+        run: node scripts/pilot21-route-policy-guard.js
+
+      - name: Prepare web application
+        working-directory: seb-evalpro
+        run: npm run prepare:web
+
+      - name: Validate parcours registry
+        working-directory: seb-evalpro
+        run: node scripts/parcours-registry-guard.js
+
+      - name: Validate KALTEST regression guard
+        working-directory: seb-evalpro
+        run: node scripts/kaltest-pilot3-regression-guard.js
+
+      - name: Validate Bilan levels and dependencies
+        working-directory: seb-evalpro
+        run: node scripts/kaltest-bilan-levels-guard.js
+
+      - name: Run KALTEST Electron smoke
+        working-directory: seb-evalpro
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $electron = Join-Path (Get-Location) 'node_modules/.bin/electron.cmd'
+          & $electron --no-sandbox scripts/kaltest-pilot2-functional-smoke-main.js
+          if ($LASTEXITCODE -ne 0) { throw "KALTEST functional smoke failed: $LASTEXITCODE" }
+
+      - name: Run full parcours Electron smoke
+        working-directory: seb-evalpro
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $electron = Join-Path (Get-Location) 'node_modules/.bin/electron.cmd'
+          & $electron --no-sandbox scripts/full-pilot-journey-smoke-main.js
+          if ($LASTEXITCODE -ne 0) { throw "Full journey smoke failed: $LASTEXITCODE" }

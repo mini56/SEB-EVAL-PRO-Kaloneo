@@ -55,7 +55,8 @@
     "response-table",
     "word-bank",
     "inline-flow",
-    "multiple-tables"
+    "multiple-tables",
+    "text-editor"
   ],
   "questionResponseTypes": [
     "text",
@@ -369,5 +370,16 @@
     "generatedPagesUseDeclaredComponents": true,
     "commonComponentsSharedWithSebEvalPro": true,
     "sourceAndBuilderParityBlocking": true
+  },
+  "textEditor": {
+    "supported": true,
+    "sharedEngine": "js/nwtexte-quill-engine.js",
+    "fileDialogsInternal": true,
+    "imageDialogsInternal": true,
+    "profiles": [
+      "none",
+      "seb-bureautique-v1"
+    ],
+    "reusableAcrossTests": true
   }
 }

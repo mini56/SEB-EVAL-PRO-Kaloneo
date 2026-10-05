@@ -25,6 +25,7 @@ const DEFAULT_SUPPORTED_FEATURES = Object.freeze([
   'host.admin-intervention',
   'host.autoevaluation',
   'host.external-material',
+  'host.text-editor',
   'media.image',
   'media.audio',
   'media.video',

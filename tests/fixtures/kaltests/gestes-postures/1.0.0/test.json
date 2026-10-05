@@ -1,0 +1,124 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "id": "gestes_postures",
+  "version": "1.0.0",
+  "title": "Gestes et postures",
+  "category": "prevention",
+  "description": "Identifier trois bonnes postures de manutention parmi six propositions.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "qcmv1.0.html#page5_1",
+    "sourceScript": "source/js/qcm-page5-1.js",
+    "legacyParcoursId": "qcm-5_1"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "Pour ce déménagement, vous avez été sensibilisé-e aux bons gestes professionnels. Vous devez les transmettre à un collègue qui n'était pas là.",
+  "instruction": "Sélectionnez les trois bonnes postures parmi les six images proposées.",
+  "presentation": {
+    "layout": "single-block",
+    "postureSelection": {
+      "imageSrc": "imageqcm/qcm_posture.png",
+      "imageAlt": "Six postures de manutention proposées",
+      "questionIds": [
+        "posture_1",
+        "posture_2",
+        "posture_3"
+      ],
+      "labels": [
+        "Première posture sélectionnée",
+        "Seconde posture sélectionnée",
+        "Troisième posture sélectionnée"
+      ]
+    }
+  },
+  "evaluation": {
+    "uniqueGroups": [
+      {
+        "questionIds": [
+          "posture_1",
+          "posture_2",
+          "posture_3"
+        ],
+        "allowedValues": [
+          "2",
+          "3",
+          "5"
+        ]
+      }
+    ]
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "posture_1",
+      "prompt": "Numéro de la première posture sélectionnée.",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "2",
+        "3",
+        "5"
+      ],
+      "points": 1
+    },
+    {
+      "id": "posture_2",
+      "prompt": "Numéro de la seconde posture sélectionnée.",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "2",
+        "3",
+        "5"
+      ],
+      "points": 1
+    },
+    {
+      "id": "posture_3",
+      "prompt": "Numéro de la troisième posture sélectionnée.",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "2",
+        "3",
+        "5"
+      ],
+      "points": 1
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [],
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "layout.single"
+  ]
+}

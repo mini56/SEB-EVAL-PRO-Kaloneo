@@ -189,7 +189,7 @@ function validateEmbeddedResource(resource, errors, path) {
 function validateBuilderContent(test, errors) {
   const BUILDER_CONTENT_TYPES = new Set([
     'text','html','html-js','image','audio','video','question',
-    'response-table','inline-flow','table-definition','table-grid'
+    'response-table','inline-flow','table-definition','table-grid','text-editor'
   ]);
   const GRID_CELL_TYPES = new Set([
     'empty','fixed-text','candidate-answer','select','choice-option','unit','image','audio','video'
@@ -227,6 +227,18 @@ function validateBuilderContent(test, errors) {
     if (item.type === 'question') {
       if (!requireId(errors, item.questionId, `${p}.questionId`)) return;
       if (!questions.has(item.questionId)) push(errors, `${p}.questionId`, 'question référencée absente');
+    }
+    if (item.type === 'text-editor') {
+      const config = item.config || {};
+      if (!isObject(config)) push(errors, `${p}.config`, 'configuration éditeur attendue');
+      else {
+        if (config.scoringProfile !== undefined && !['none','seb-bureautique-v1'].includes(config.scoringProfile)) {
+          push(errors, `${p}.config.scoringProfile`, 'profil éditeur inconnu');
+        }
+        for (const flag of ['fileSimulation','imageSimulation']) {
+          if (config[flag] !== undefined && typeof config[flag] !== 'boolean') push(errors, `${p}.config.${flag}`, 'booléen attendu');
+        }
+      }
     }
     if (item.type === 'response-table') {
       const definition = item.definition;

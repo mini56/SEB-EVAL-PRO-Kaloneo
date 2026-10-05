@@ -39,8 +39,8 @@ if (new Set(ids).size !== ids.length) fail('identifiant de parcours historique d
 
 const pilot11ExpectedIds = [
   'kaltest-initial','qcm-4','qcm-5','qcm-5_1','qcm-6',
-  'autoeval1','introbrique','brique','stock','planning','genrenombres','dictee',
-  'tri-de-cheville','nwtexte','nvmail','autoeval2','paronymes','carre','qcm-11','qcm-finale'
+  'autoeval1','transition-video-f1','brique','stock','planning','genrenombres','dictee',
+  'tri-de-cheville','nwtexte','nvmail','autoeval2','paronymes','carre','qcm-11'
 ];
 const pilot11Ids = Array.from(api.pilot11Steps, (step) => String(step.id));
 if (JSON.stringify(pilot11Ids) !== JSON.stringify(pilot11ExpectedIds)) {
@@ -51,9 +51,24 @@ if (new Set(pilot11Ids).size !== pilot11Ids.length) fail('identifiant PILOTE 11 
 const pilot11ById = new Map(Array.from(api.pilot11Steps, step => [String(step.id), step]));
 const expectedPilotRoutes = {
   'kaltest-initial':'kaltest-pilot2.html?fullParcours=1',
+  'qcm-4':'kaltest-pilot2.html?fullParcours=1&segment=fractions',
+  'qcm-5':'kaltest-pilot2.html?fullParcours=1&segment=organisation',
+  'qcm-5_1':'kaltest-pilot2.html?fullParcours=1&segment=postures',
   'qcm-6':'kaltest-pilot2.html?fullParcours=1&segment=conversions',
+  'autoeval1':'kaltest-pilot2.html?fullParcours=1&segment=autoeval1',
+  'transition-video-f1':'kaltest-pilot2.html?fullParcours=1&segment=transition-video-f1',
+  'brique':'kaltest-pilot2.html?fullParcours=1&segment=brique',
+  'stock':'kaltest-pilot2.html?fullParcours=1&segment=stock',
+  'planning':'kaltest-pilot2.html?fullParcours=1&segment=planning',
   'genrenombres':'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre',
-  'paronymes':'kaltest-pilot2.html?fullParcours=1&segment=paronymes'
+  'dictee':'kaltest-pilot2.html?fullParcours=1&segment=dictee',
+  'tri-de-cheville':'kaltest-pilot2.html?fullParcours=1&segment=tri',
+  'nwtexte':'kaltest-pilot2.html?fullParcours=1&segment=nwtexte',
+  'nvmail':'kaltest-pilot2.html?fullParcours=1&segment=mail',
+  'autoeval2':'kaltest-pilot2.html?fullParcours=1&segment=autoeval2',
+  'paronymes':'kaltest-pilot2.html?fullParcours=1&segment=paronymes',
+  'carre':'kaltest-pilot2.html?fullParcours=1&segment=carre',
+  'qcm-11':'kaltest-pilot2.html?fullParcours=1&segment=fin'
 };
 for (const [id, expectedUrl] of Object.entries(expectedPilotRoutes)) {
   const step = pilot11ById.get(id);
@@ -63,6 +78,13 @@ for (const [id, expectedUrl] of Object.entries(expectedPilotRoutes)) {
     .join('&');
   const url = step.file + (query ? '?' + query : '');
   if (url !== expectedUrl) fail('route PILOTE 11 incorrecte pour ' + id + ': ' + url);
+}
+
+function pilotNextUrl(id) {
+  const index = pilot11Ids.indexOf(String(id || ''));
+  if (index < 0 || index + 1 >= pilot11Ids.length) return null;
+  const nextId = pilot11Ids[index + 1];
+  return expectedPilotRoutes[nextId] || null;
 }
 for (const removed of ['qcm-1','qcm-2','qcm-2_1','qcm-3','qcm-texte-trous']) {
   if (pilot11Ids.includes(removed)) fail('ancienne page dupliquée dans PILOTE 11: ' + removed);
@@ -76,20 +98,26 @@ for (const step of [...api.legacySteps, ...api.pilot11Steps]) {
   if (!fs.existsSync(localFile)) fail('page de parcours absente: ' + step.file);
 }
 
+
+// Transition F1 et Briques sont maintenant deux segments KALTEST.
+if (pilotNextUrl('autoeval1') !== 'kaltest-pilot2.html?fullParcours=1&segment=transition-video-f1') fail('autoeval1 -> Transition vidéo F1 modifié');
+if (pilotNextUrl('transition-video-f1') !== 'kaltest-pilot2.html?fullParcours=1&segment=brique') fail('Transition vidéo F1 -> Briques KALTEST modifié');
+if (pilotNextUrl('brique') !== 'kaltest-pilot2.html?fullParcours=1&segment=stock') fail('Briques KALTEST -> Stock KALTEST modifié');
+
 // Dictée obligatoire entre Genre/Nombre et Tri.
-if (api.nextFile('genrenombres') !== 'dictee.html') fail('genrenombres -> dictee modifié');
-if (api.nextFile('dictee') !== 'tri_de_cheville.html') fail('dictee -> tri modifié');
+if (pilotNextUrl('genrenombres') !== 'kaltest-pilot2.html?fullParcours=1&segment=dictee') fail('genrenombres -> dictée KALTEST modifié');
+if (pilotNextUrl('dictee') !== 'kaltest-pilot2.html?fullParcours=1&segment=tri') fail('dictée KALTEST -> tri KALTEST modifié');
 const dicteeContract = api.resultContractFor('dictee');
 if (!dicteeContract || dicteeContract.storage !== 'dictee_data') fail('contrat Résultats dictée modifié');
 
 // Ordre actuellement validé autour du traitement de texte.
-if (api.nextFile('tri-de-cheville') !== 'nwtexte.html') fail('tri -> nwtexte modifié');
-if (api.nextFile('nwtexte') !== 'nvmail.html') fail('nwtexte -> nvmail modifié');
-if (api.nextFile('nvmail') !== 'autoeval2.html') fail('nvmail -> autoeval2 modifié');
+if (pilotNextUrl('tri-de-cheville') !== 'kaltest-pilot2.html?fullParcours=1&segment=nwtexte') fail('tri KALTEST -> Traitement de texte KALTEST modifié');
+if (pilotNextUrl('nwtexte') !== 'kaltest-pilot2.html?fullParcours=1&segment=mail') fail('nwtexte -> mail KALTEST modifié');
+if (pilotNextUrl('nvmail') !== 'kaltest-pilot2.html?fullParcours=1&segment=autoeval2') fail('mail KALTEST -> autoeval2 modifié');
 
-// Retour du carré vers la page 11 du QCM, puis page de fin.
-if (api.nextUrl('carre') !== 'qcmv1.0.html?page=11#page11') fail('carre -> QCM page 11 modifié');
-if (api.nextUrl('qcm-11') !== 'qcmv1.0.html?page=finale#pageFinale') fail('QCM page 11 -> fin modifié');
+// Le Gratte-ciel mène à la page terminale KALTEST. Cette page est la fin du parcours.
+if (pilotNextUrl('carre') !== 'kaltest-pilot2.html?fullParcours=1&segment=fin') fail('carre KALTEST -> fin KALTEST modifié');
+if (pilotNextUrl('qcm-11') !== null) fail('la page terminale qcm-11 ne doit avoir aucune étape suivante');
 
 // Le contrat Résultats historique nwtexte doit rester lisible sans renommage.
 const nw = api.resultContractFor('nwtexte');

@@ -1,0 +1,57 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "2.0.0",
+  "id": "fin_parcours",
+  "version": "1.0.0",
+  "title": "Fin du parcours",
+  "category": "systeme",
+  "description": "Page de fin du parcours candidat.",
+  "kind": "complex",
+  "scored": false,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "qcmv1.0.html#page11",
+    "legacyParcoursId": "qcm-11"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "",
+  "instruction": "",
+  "presentation": {
+    "endPage": {
+      "image": "imageqcm/avatar_transparant.png",
+      "heading": "Félicitations pour votre parcours !",
+      "paragraphs": [
+        "Vous avez mené à bien cette étape et nous tenons à vous féliciter pour votre engagement et votre persévérance. Nous espérons que cette expérience vous a permis de découvrir de nouvelles compétences, de mieux comprendre le monde de l’entreprise et, surtout, de prendre plaisir à ce parcours.",
+        "Nous vous souhaitons le meilleur pour la suite de vos projets et espérons que cette étape aura été enrichissante et motivante pour vous."
+      ],
+      "endMessage": "Votre évaluation est terminée. Merci. Vous pouvez maintenant prévenir l’administrateur."
+    }
+  },
+  "behavior": {
+    "terminal": true,
+    "hideNavigation": true,
+    "hideContext": true
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "outputs": [
+    {
+      "id": "status",
+      "type": "string"
+    }
+  ],
+  "bilanContributions": [],
+  "features": [
+    "runtime.basic",
+    "layout.single",
+    "media.image"
+  ]
+}

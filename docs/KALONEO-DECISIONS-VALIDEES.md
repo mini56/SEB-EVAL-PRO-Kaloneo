@@ -2560,3 +2560,90 @@ Décision après retour réel :
 - le Builder KALONÉO est une page Administrateur et ne doit jamais écraser le pointeur de reprise candidat ;
 - l’affichage Administrateur des résultats peut continuer à utiliser `qcmv1.0.html` en lecture seule : cela ne réactive pas l’ancien parcours candidat ;
 - une garde de compilation bloque toute réintroduction du point d’entrée autonome historique dans le PILOTE 21.
+
+
+---
+
+## 69. Migration KALTEST complète — clôture du parcours historique
+
+**Statut : VALIDÉ TECHNIQUEMENT — 5 octobre 2026**
+
+La migration des exercices historiques de SEB EvalPro vers KALONÉO / KALTEST est considérée comme terminée.
+
+### 69.1 Périmètre migré
+
+La matrice historique comporte 24 étapes :
+- **22 étapes** sont désormais représentées par une définition KALTEST autonome ;
+- les 2 anciennes pages système `qcm-1` et `qcm-finale` sont classées **retired-system** et ne font plus partie du parcours candidat actif.
+
+La transition anciennement nommée `introbrique` devient officiellement :
+- nom affiché : **Transition vidéo F1** ;
+- identifiant KALTEST : `transition_video_f1` ;
+- segment technique : `transition-video-f1`.
+
+La page historique `qcm-11` est remplacée par le KALTEST terminal `fin_parcours`, qui termine réellement le parcours candidat.
+
+### 69.2 Un seul moteur candidat actif
+
+Le démarrage candidat normal de SEB EvalPro ouvre maintenant KALONÉO / KALTEST.
+
+Règles de non-régression :
+- aucune reprise candidat ne doit lancer `qcmv1.0.html` ;
+- aucune ancienne page autonome (`brique.html`, `stock.html`, `planning.html`, `dictee.html`, `tri_de_cheville.html`, `nwtexte.html`, `nvmail.html`, etc.) ne doit être une route candidat valide ;
+- toute ancienne route ou reprise ambiguë est normalisée vers l’entrée KALONÉO ;
+- `qcmv1.0.html` peut encore être utilisé **uniquement en lecture Administrateur** pour les résultats historiques tant que cette compatibilité reste nécessaire. Cela ne constitue pas un parcours candidat.
+
+Les anciens fichiers source peuvent rester temporairement dans le dépôt comme référence de compatibilité ou pour les gardes de non-régression, mais ils ne font plus partie du routage candidat.
+
+### 69.3 Résultats et Bilan
+
+Chaque KALTEST migré conserve ses dépendances nécessaires :
+- sorties de résultat ;
+- clés de compatibilité historiques encore lues par SEB EvalPro ;
+- raccordements `bilanContributions` ;
+- niveaux Bilan **I / II / III** suivant les règles métier existantes.
+
+Les contrôles automatiques vérifient les dépendances Résultats/Bilan avant validation de la migration.
+
+### 69.4 Outils KALONÉO réutilisables
+
+Les fonctions complexes ne sont plus considérées comme des pages exceptionnelles.
+
+Sont notamment intégrés comme capacités communes :
+- compteur KALONÉO ;
+- validation administrateur ;
+- autoévaluation ;
+- matériel extérieur ;
+- calculatrice ;
+- **Éditeur de texte KALONÉO** réutilisable dans les tests.
+
+L’Éditeur de texte peut être ajouté comme bloc dans le Builder. Il utilise un stockage isolé par test et peut fonctionner :
+- en éditeur libre ;
+- avec le profil de correction **Traitement de texte SEB /8**.
+
+### 69.5 Validation de clôture
+
+Le workflow **PILOTE 21 KALTEST migration check** est VERT avec :
+- couverture de migration ;
+- contrat KALTEST ;
+- parité Builder ;
+- politique de routes KALONÉO ;
+- registre du parcours ;
+- gardes de régression ;
+- dépendances Bilan ;
+- smoke Electron KALTEST ;
+- smoke Electron du parcours complet.
+
+### 69.6 Étape suivante : Bibliothèque de tests et modèles de parcours
+
+Le parcours actuellement livré devient le **parcours de base fourni**. Il ne constitue pas la cible finale du système de parcours.
+
+La prochaine architecture fonctionnelle à reprendre est celle déjà validée :
+1. tous les KALTEST disponibles apparaissent dans une **Bibliothèque de tests**, classés par section ;
+2. tout nouveau test créé avec KALONÉO rejoint cette bibliothèque ;
+3. l’administrateur crée un parcours en **glissant les tests de la bibliothèque dans l’ordre souhaité** ;
+4. le parcours terminé peut être enregistré comme **modèle de parcours** (exemple : « Parcours long ») ;
+5. un même KALTEST peut être réutilisé dans plusieurs modèles sans duplication ;
+6. SEB EvalPro lance le modèle de parcours sélectionné.
+
+Le parcours de base actuel doit donc servir de **premier modèle livré**, et non de liste d’exercices codée en dur à conserver comme architecture définitive.

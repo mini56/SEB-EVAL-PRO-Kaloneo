@@ -2,6 +2,10 @@
   'use strict';
 
   const SAVE_KEY = 'nwtexte_save_simulation';
+  function saveKey() {
+    const prefix = String(window.sebNwtexteContext?.storagePrefix || '');
+    return prefix ? prefix + SAVE_KEY : SAVE_KEY;
+  }
   const STYLE_ID = 'seb-nwtexte-closed-dialogs-style';
   const BACKDROP_ID = 'seb-nwtexte-picker-backdrop';
   const TOAST_ID = 'seb-nwtexte-picker-toast';
@@ -55,7 +59,7 @@
 
   function readSavedDocument() {
     try {
-      const state = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+      const state = JSON.parse(localStorage.getItem(saveKey()) || 'null');
       if (state && state.enregistre && state.fichier) return state;
     } catch (_) {}
     return null;

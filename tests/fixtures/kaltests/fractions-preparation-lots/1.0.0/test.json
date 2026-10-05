@@ -1,0 +1,180 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "id": "fractions_preparation_lots",
+  "version": "1.0.0",
+  "title": "Fractions et proportions",
+  "category": "mathematiques",
+  "description": "Sélectionner un nombre d’objets correspondant à des fractions données dans une situation de préparation de lots.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "qcmv1.0.html#page4",
+    "sourceScript": "source/js/qcm-page4.js",
+    "legacyParcoursId": "qcm-4"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "Vous êtes en train de préparer des lots de pièces dans l'atelier. Certaines pièces sont regroupées par type et doivent être emballées selon des fractions précises.",
+  "instruction": "Sélectionnez pour chaque fraction indiquée le nombre d’images correspondant à celle-ci.",
+  "presentation": {
+    "layout": {
+      "type": "split",
+      "ratio": "40/60",
+      "blocks": [
+        {
+          "id": "illustration"
+        },
+        {
+          "id": "fractions"
+        }
+      ]
+    },
+    "fractionSelection": {
+      "visual": {
+        "type": "image",
+        "orientation": "portrait",
+        "src": "imageqcm/chariot.png",
+        "alt": "Illustration de préparation de lots"
+      },
+      "groups": [
+        {
+          "questionId": "fraction_3_4",
+          "label": "Fraction 3/4",
+          "totalItems": 4,
+          "itemImage": "imageqcm/image3.png"
+        },
+        {
+          "questionId": "fraction_1_2",
+          "label": "Fraction 1/2",
+          "totalItems": 6,
+          "itemImage": "imageqcm/image2.png"
+        },
+        {
+          "questionId": "fraction_2_8",
+          "label": "Fraction 2/8",
+          "totalItems": 12,
+          "itemImage": "imageqcm/image1.png",
+          "cloud": true
+        }
+      ]
+    }
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "fraction_3_4",
+      "prompt": "Sélectionnez le nombre d’objets correspondant à 3/4.",
+      "response": {
+        "type": "multiple-choice",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      "acceptedAnswers": [
+        [
+          "1",
+          "2",
+          "3"
+        ]
+      ],
+      "acceptedCount": 3,
+      "points": 1
+    },
+    {
+      "id": "fraction_1_2",
+      "prompt": "Sélectionnez le nombre d’objets correspondant à 1/2.",
+      "response": {
+        "type": "multiple-choice",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      },
+      "acceptedAnswers": [
+        [
+          "1",
+          "2",
+          "3"
+        ]
+      ],
+      "acceptedCount": 3,
+      "points": 1
+    },
+    {
+      "id": "fraction_2_8",
+      "prompt": "Sélectionnez le nombre d’objets correspondant à 2/8 parmi 12 objets.",
+      "response": {
+        "type": "multiple-choice",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12"
+        ]
+      },
+      "acceptedAnswers": [
+        [
+          "1",
+          "2",
+          "3"
+        ]
+      ],
+      "acceptedCount": 3,
+      "points": 1
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.savoirs_fondamentaux.mathematiques.resoudre_problemes",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ],
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "layout.split",
+    "bilan.bindings"
+  ]
+}

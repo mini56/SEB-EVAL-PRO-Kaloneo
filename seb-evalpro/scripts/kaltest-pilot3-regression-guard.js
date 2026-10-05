@@ -26,27 +26,40 @@ for (const [needle,label] of [
   ["window.closeCalculator?.()", 'fermeture calculatrice'],
   ["window.dispatchEvent(new CustomEvent('seb-kaltest-final'))", 'signal fin KALTEST'],
   ["input.placeholder = ''", 'suppression exemples horaires'],
-  ["className = 'kaltest-table kaltest-grammar-table'", 'deux tableaux Genre/Nombre']
+  ["className = 'kaltest-table kaltest-grammar-table'", 'deux tableaux Genre/Nombre'],
+  ["test.id === 'fractions_preparation_lots'", 'pont Fractions Résultats/Bilan'],
+  ["test.id === 'organisation_demenagement'", 'pont Organisation Résultats/Bilan'],
+  ["test.id === 'gestes_postures'", 'pont Postures Résultats'],
+  ["function renderFractions(test, host)", 'rendu Fractions KALTEST'],
+  ["function renderOrganisation(test, host)", 'rendu Organisation KALTEST'],
+  ["function renderPostures(test, host)", 'rendu Postures KALTEST'],
+  ["test.id === 'planning_cantine'", 'pont Planning Résultats/Bilan'],
+  ["function renderPlanning(test, host)", 'rendu Planning KALTEST'],
+  ["validateBeforeAdvance", 'validation Planning avant navigation'],
+  ["test.id === 'autoevaluation_savoirs'", 'pont Autoévaluation 1 Résultats'],
+  ["test.id === 'autoevaluation_tic'", 'pont Autoévaluation 2 Résultats'],
+  ["function renderAutoevaluation(test, host)", 'rendu Autoévaluations KALTEST'],
+  ["allowEmptyCompletion", 'passage volontaire Autoévaluation 2']
 ]) must(runtime, needle, label);
 
 for (const [needle,label] of [
   ["document.getElementById('pageFinale') || document.getElementById('page-final')", 'fin commune'],
-  ["id=\"seb-evalpro-open-candidate\"", 'barre Admin contextuelle'],
+  ["id=\"seb-evalpro-tests-parcours\"", 'accès Tests / Parcours dans la barre Admin'],
   ['closeSessionButton.hidden = true', 'masquage fermeture session redondante'],
-  ['const hasActiveJourney = !!active', 'contexte parcours actif'],
-  ['overflow:hidden;background:#004E70', 'barre Admin sans dépassement'],
+  ['testsParcoursButton.hidden = !!active || onAdminDetail || isAdminTestsParcoursPage();', 'Tests / Parcours masqué pendant un parcours actif'],
+  ['overflow:hidden;background:#0070c0', 'barre Admin sans dépassement'],
   ["window.addEventListener('seb-kaltest-final'", 'écoute fin KALTEST']
 ]) must(preload, needle, label);
 
 for (const [needle,label] of [
   ["lower === 'kaltest-pilot2.html'", 'Replay KALTEST'],
   ['pageKey: `${file}#test:${testId}`', 'clé Replay par exercice'],
-  ['terminer le parcours', 'capture navigation finale']
+  ['captureBeforeNavigation()', 'capture navigation garantie']
 ]) must(replay, needle, label);
 
 for (const [needle,label] of [
   ['Félicitations pour votre parcours !', 'page finale Build #20'],
-  ['pilot2-calculator-guide', 'explications calculatrice'],
+  ['pilot2-calculator-dock', 'explications calculatrice'],
   ['Ouvrir la calculatrice', 'test calculatrice introduction']
 ]) must(html, needle, label);
 

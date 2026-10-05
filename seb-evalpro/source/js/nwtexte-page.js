@@ -32,6 +32,11 @@
   }
 
   function install() {
+    const editorRoot = document.getElementById('editor');
+    if (!editorRoot) return false;
+    if (editorRoot.dataset.sebNwtextePageBound === '1') return true;
+    editorRoot.dataset.sebNwtextePageBound = '1';
+
     const formatButtons = {
       'btn-bold':'bold',
       'btn-italic':'italic',
@@ -109,7 +114,10 @@
       if (confirm('Voulez-vous vraiment passer sans sauvegarder ?')) navigateNext();
     });
     document.getElementById('btn-score')?.addEventListener('click', navigateNext);
+    return true;
   }
+
+  window.sebNwtextePage = Object.freeze({ install });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once:true });
   else install();

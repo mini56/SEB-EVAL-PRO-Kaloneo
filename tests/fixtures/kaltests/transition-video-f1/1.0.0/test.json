@@ -1,0 +1,58 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "2.0.0",
+  "id": "transition_video_f1",
+  "version": "1.0.0",
+  "title": "Transition vidéo F1",
+  "category": "transition",
+  "description": "Transition vidéo plein écran Formule 1 avant l’exercice Construction à base de briques.",
+  "kind": "complex",
+  "scored": false,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "introbrique.html",
+    "sourceScript": "source/js/introbrique-page.js",
+    "legacyParcoursId": "introbrique"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "",
+  "instruction": "",
+  "presentation": {
+    "transitionVideo": {
+      "src": "imageqcm/video_brique.mp4",
+      "mime": "video/mp4",
+      "autoplay": true,
+      "muted": true,
+      "playsInline": true,
+      "objectFit": "cover",
+      "fadeMs": 1500,
+      "fullscreen": true
+    }
+  },
+  "behavior": {
+    "autoAdvanceOnEnded": true,
+    "hideNavigation": true,
+    "hideContext": true
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "outputs": [
+    {
+      "id": "status",
+      "type": "string"
+    }
+  ],
+  "bilanContributions": [],
+  "features": [
+    "runtime.basic",
+    "media.video"
+  ]
+}

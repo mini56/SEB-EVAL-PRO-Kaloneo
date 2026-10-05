@@ -11,7 +11,7 @@
     'runtime.basic','questionnaire.basic','questionnaire.table','questionnaire.duration-fr',
     'questionnaire.supplemental-fields','questionnaire.inline-gaps','questionnaire.single-choice-table',
     'questionnaire.grid','layout.single','layout.split','calculator.host','host.calculator','host.chrono',
-    'host.admin-intervention','host.autoevaluation','host.external-material','media.image','media.audio',
+    'host.admin-intervention','host.autoevaluation','host.external-material','host.text-editor','media.image','media.audio',
     'media.video','content.html','content.html-js','bilan.bindings'
   ]);
   const RESPONSE_TYPES=new Set([
@@ -21,7 +21,7 @@
   const LEGACY_LAYOUTS=new Set(['single-block']);
   const BUILDER_CONTENT_TYPES=new Set([
     'text','html','html-js','image','audio','video','question',
-    'response-table','table-grid','inline-flow','table-definition'
+    'response-table','table-grid','inline-flow','table-definition','text-editor'
   ]);
 
   function clone(value){ return JSON.parse(JSON.stringify(value==null?null:value)); }
@@ -230,6 +230,10 @@
       if(type==='table-grid') return {
         uid:'content_'+index,type,zone,table:clone(item.table||{})
       };
+      if(type==='text-editor') return {
+        uid:'content_'+index,type,zone,
+        config:Object.assign({fileSimulation:true,imageSimulation:true,scoringProfile:'none'},clone(item.config||{}))
+      };
       return {uid:'content_'+index,type,zone,config:clone(item.config||{})};
     });
   }
@@ -337,7 +341,7 @@
     for(const row of table.cells||[]){
       for(const cell of row||[]){
         if(!cell||!['candidate-answer','select','choice-option','unit'].includes(cell.kind)) continue;
-        const id=String(cell.questionId||('ID'+(startIndex+out.length+1)+'_grille'));
+        const id=String(cell.questionId||('id'+(startIndex+out.length+1)+'_grille'));
         if(seen.has(id)) continue;
         seen.add(id);
         const response={type:cell.responseType||((cell.kind==='select'||cell.kind==='choice-option')?'single-choice':'text')};
@@ -368,7 +372,10 @@
         target.acceptedMinutes=built.acceptedMinutes;
         if(Object.prototype.hasOwnProperty.call(target,'acceptedAnswers')) delete target.acceptedAnswers;
       } else {
-        target.acceptedAnswers=built.acceptedAnswers;
+        if(Object.prototype.hasOwnProperty.call(target,'acceptedAnswers') ||
+           (Array.isArray(built.acceptedAnswers) && built.acceptedAnswers.length)) {
+          target.acceptedAnswers=built.acceptedAnswers;
+        }
         if(Object.prototype.hasOwnProperty.call(target,'acceptedMinutes')) delete target.acceptedMinutes;
       }
       if(Object.prototype.hasOwnProperty.call(target,'points') || built.points!==1) target.points=built.points;
@@ -398,6 +405,10 @@
       if(block.type==='inline-flow') return {type:'inline-flow',zone:block.zone||'left',wordBank:clone(block.wordBank||[]),flow:clone(block.flow||[])};
       if(block.type==='multiple-tables') return {type:'table-definition',zone:block.zone||'left',definition:clone(block.tableDefinition||{})};
       if(block.type==='table-grid') return {type:'table-grid',zone:block.zone||'left',table:clone(block.table||{})};
+      if(block.type==='text-editor') return {
+        type:'text-editor',zone:block.zone||'left',
+        config:Object.assign({fileSimulation:true,imageSimulation:true,scoringProfile:'none'},clone(block.config||{}))
+      };
       return {type:block.type,zone:block.zone||'left'};
     });
     return {
@@ -465,6 +476,10 @@
       }
       if(Array.isArray(m.outputs)) def.outputs=clone(m.outputs);
       if(Array.isArray(m.bilanContributions)) def.bilanContributions=clone(m.bilanContributions);
+      const usesTextEditor=(model.blocks||[]).some(block=>block.type==='text-editor');
+      const featureSet=new Set(def.features||[]);
+      if(usesTextEditor) featureSet.add('host.text-editor'); else featureSet.delete('host.text-editor');
+      def.features=[...featureSet];
 
       if(Array.isArray(def.presentation?.builderContent)){
         const generated=genericPresentation(model);
@@ -480,7 +495,11 @@
             questionIndex+=qs.length;
           }
         }
-        def.questions=rebuilt.map(q=>Object.assign({},existing.get(q.id)||{},q));
+        if(rebuilt.length || Object.prototype.hasOwnProperty.call(def,'questions')) {
+          def.questions=rebuilt.map(q=>Object.assign({},existing.get(q.id)||{},q));
+        } else if(Object.prototype.hasOwnProperty.call(def,'questions')) {
+          delete def.questions;
+        }
       } else {
         updateImportedQuestions(def,model);
       }
@@ -510,6 +529,7 @@
     if(m.adminIntervention) features.push('host.admin-intervention');
     if(m.autoevaluation) features.push('host.autoevaluation');
     if(m.externalMaterial) features.push('host.external-material');
+    if((model.blocks||[]).some(b=>b.type==='text-editor')) features.push('host.text-editor');
     if(m.layout==='single') features.push('layout.single'); else features.push('layout.split');
 
     return {
@@ -520,7 +540,7 @@
       version:m.version||'1.0.0',
       title:m.title||'',
       category:m.category||'',
-      kind:'questionnaire',
+      kind:questions.length?'questionnaire':'complex',
       scored:m.scored!==false,
       icon:m.icon?clone(m.icon):undefined,
       features:[...new Set(features)],

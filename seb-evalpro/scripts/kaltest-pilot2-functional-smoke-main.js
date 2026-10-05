@@ -50,7 +50,7 @@ async function visiblePage(win) {
 
 async function assertNoOverflow(win, label) {
   const metrics = await win.webContents.executeJavaScript(
-    "({bodyScrollHeight:document.body.scrollHeight,bodyClientHeight:document.body.clientHeight,contentScrollHeight:document.getElementById('kaltest-content')?.scrollHeight||0,contentClientHeight:document.getElementById('kaltest-content')?.clientHeight||0,contentInnerHeight:document.getElementById('kaltest-content')?.firstElementChild?.getBoundingClientRect().height||0})",
+    "(()=>{const metric=(sel)=>{const el=document.querySelector(sel);return el?{scrollHeight:el.scrollHeight,clientHeight:el.clientHeight,height:el.getBoundingClientRect().height}:null};return {bodyScrollHeight:document.body.scrollHeight,bodyClientHeight:document.body.clientHeight,contentScrollHeight:document.getElementById('kaltest-content')?.scrollHeight||0,contentClientHeight:document.getElementById('kaltest-content')?.clientHeight||0,contentInnerHeight:document.getElementById('kaltest-content')?.firstElementChild?.getBoundingClientRect().height||0,stock:{layout:metric('.kaltest-stock-layout'),left:metric('.kaltest-stock-left'),source:metric('.kaltest-stock-zone'),pots:metric('.kaltest-stock-pots'),shelves:metric('.kaltest-stock-shelves'),shelf1:metric('.kaltest-stock-shelf.shelf-1'),shelf2:metric('.kaltest-stock-shelf.shelf-2'),shelf3:metric('.kaltest-stock-shelf.shelf-3')}}})()",
     true
   );
   if (metrics.bodyScrollHeight > metrics.bodyClientHeight + 2) {
@@ -63,25 +63,62 @@ async function assertNoOverflow(win, label) {
 
 async function perfectResult(win) {
   return win.webContents.executeJavaScript(
-    "(function(){const test=window.sebKaltestPilot2.currentTest();const answers={};for(const q of test.questions||[]){if(q.response?.type==='duration')answers[q.id]=q.acceptedMinutes+' min';else answers[q.id]=Array.isArray(q.acceptedAnswers)?q.acceptedAnswers[0]:'';}return window.sebKaltestPilot2.evaluateTest(test,{answers,units:{},supplemental:{}});})()",
+    "(function(){const test=window.sebKaltestPilot2.currentTest();const answers={};for(const q of test.questions||[]){if(q.response?.type==='duration')answers[q.id]=q.acceptedMinutes+' min';else answers[q.id]=Array.isArray(q.acceptedAnswers)?q.acceptedAnswers[0]:'';}for(const group of test.evaluation?.uniqueGroups||[]){(group.questionIds||[]).forEach((id,index)=>{answers[id]=(group.allowedValues||[])[index]||'';});}if(test.id==='dictee_professionnelle'){answers.dictee_text=window.sebKaltestDicteeEngine.reference;}if(test.id==='redaction_email'){answers.mail_to='conseil.perso@sauvegarde56.org';answers.mail_cc='stage-pro@sauvegarde56.org';answers.mail_subject='YY Mail-SEB';answers.mail_file='Rapport_stage.docx';answers.mail_signature='Bonjour. Cordialement, YY XX 01.02.34.56.78';answers.mail_phone=answers.mail_signature;}return window.sebKaltestPilot2.evaluateTest(test,{answers,units:{},supplemental:{}});})()",
     true
   );
 }
 
 async function fillOneAnswer(win) {
-  const choice = await win.webContents.executeJavaScript(
-    "Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.choiceTable)",
+  const mode = await win.webContents.executeJavaScript(
+    "({choice:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.choiceTable),fractions:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.fractionSelection),autoeval:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.autoevaluationForm),tri:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.triStation),dictation:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.dictation),mail:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.mailComposer),brique:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.bricksStation),editor:Boolean((window.sebKaltestPilot2.currentTest()?.presentation?.builderContent||[]).some(x=>x.type==='text-editor')),transition:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.transitionVideo),terminal:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.endPage)})",
     true
   );
 
-  if (choice) {
+  if (mode.transition || mode.terminal) {
+    // La transition et la page terminale ne demandent aucune saisie candidat.
+  } else if (mode.brique) {
+    await win.webContents.executeJavaScript(
+      "(function(){document.getElementById('startBtn')?.click();document.getElementById('stopBtn')?.click();const e=document.getElementById('nivDiff');e.value='0';e.dispatchEvent(new Event('input',{bubbles:true}));const c=document.getElementById('secretCode');c.value='svg56';document.getElementById('validBtn')?.click();const a=document.querySelector('.kaltest-brique-auto-choice input');if(a&&!a.checked)a.click();document.getElementById('autoEvalBtn')?.click();return true;})()",
+      true
+    );
+  } else if (mode.editor) {
+    await win.webContents.executeJavaScript(
+      "(function(){const root=document.querySelector('.kaltest-text-editor-tool .ql-editor');if(!root)return false;root.innerHTML='<p><strong>Quelle est mon activité préférée et pourquoi ?</strong></p><p>Ligne 1</p><p>Ligne 2</p><p>Ligne 3</p><p>Ligne 4</p><p>Ligne 5</p><p>Ligne 6</p><p>Ligne 7</p><p>Ligne 8</p><p>Ligne 9</p><p>Ligne 10</p>';root.dispatchEvent(new Event('input',{bubbles:true}));return true;})()",
+      true
+    );
+  } else if (mode.fractions) {
+    await win.webContents.executeJavaScript(
+      "document.querySelector('.kaltest-fraction-item')?.click();true",
+      true
+    );
+  } else if (mode.autoeval) {
+    await win.webContents.executeJavaScript(
+      "document.querySelector('.kaltest-autoeval-choice input')?.click();true",
+      true
+    );
+  } else if (mode.tri) {
+    await win.webContents.executeJavaScript(
+      "(function(){const start=document.querySelector('.kaltest-tri-chrono-buttons .seb-btn-timer-start');const stop=document.querySelector('.kaltest-tri-chrono-buttons .seb-btn-timer-stop');const errors=document.querySelectorAll('[data-tri-error]');if(!start||!stop||errors.length<3)return false;for(let i=0;i<3;i++){start.click();stop.click();errors[i].value=String(i);errors[i].dispatchEvent(new Event('input',{bubbles:true}));}const results=document.querySelector('.kaltest-tri-results-button');if(results&&!results.disabled)results.click();const comment=document.querySelector('.kaltest-tri-comment textarea');if(comment){comment.value='Smoke tri';comment.dispatchEvent(new Event('input',{bubbles:true}));}const validate=document.querySelector('.kaltest-tri-auto-validate');if(validate&&!validate.disabled)validate.click();return true;})()",
+      true
+    );
+  } else if (mode.dictation) {
+    await win.webContents.executeJavaScript(
+      "(function(){const area=document.querySelector('.kaltest-dictee-writing textarea');area.value='Texte de test';area.dispatchEvent(new Event('input',{bubbles:true}));return true;})()",
+      true
+    );
+  } else if (mode.mail) {
+    await win.webContents.executeJavaScript(
+      `(function(){const input=document.querySelector('.kaltest-mail-composer input[data-question-id="mail_to"]');input.value='conseil.perso@sauvegarde56.org';input.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`,
+      true
+    );
+  } else if (mode.choice) {
     await win.webContents.executeJavaScript(
       "(function(){const test=window.sebKaltestPilot2.currentTest();const q=test.questions[0];const row=document.querySelector('.kaltest-choice-table tbody tr');const cells=Array.from(row.querySelectorAll('.kaltest-choice'));const target=cells.find(cell=>cell.textContent.trim()===q.acceptedAnswers[0]);target.click();return true;})()",
       true
     );
   } else {
     await win.webContents.executeJavaScript(
-      `(function(){const test=window.sebKaltestPilot2.currentTest();const q=test.questions[0];const input=document.querySelector('[data-question-id="'+q.id+'"]');const value=q.response?.type==='duration'?q.acceptedMinutes+' min':q.acceptedAnswers[0];input.value=String(value);input.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`,
+      `(function(){const test=window.sebKaltestPilot2.currentTest();const q=test.questions[0];const input=document.querySelector('[data-question-id="'+q.id+'"]');const value=q.response?.type==='duration'?q.acceptedMinutes+' min':q.acceptedAnswers[0];input.value=String(value);input.dispatchEvent(new Event(input.tagName==='SELECT'?'change':'input',{bubbles:true}));return true;})()`,
       true
     );
   }
@@ -119,7 +156,7 @@ app.whenReady().then(async () => {
     );
 
     if (initial.page !== 'page-identification') throw new Error('Le parcours ne démarre pas par Identification.');
-    if (initial.tests !== 7) throw new Error('Le PILOTE 2 doit contenir les 7 migrations KALTEST validées.');
+    if (initial.tests !== 22) throw new Error('Le moteur doit contenir les 22 définitions KALTEST du parcours de base.');
     if (!initial.introVideo) throw new Error('Mini vidéo/animation d’introduction absente.');
     if (initial.introLegacyImage) throw new Error('L’ancienne image de couverture est encore présente sur Introduction.');
     if (initial.introCalculatorGuide) throw new Error('Le doublon de test calculatrice est encore présent sur Introduction.');
@@ -191,28 +228,64 @@ app.whenReady().then(async () => {
       'calculs_poids_volumes',
       'horaires_reception_controle',
       'texte_a_trous_stage_logistique',
+      'fractions_preparation_lots',
+      'organisation_demenagement',
+      'gestes_postures',
       'conversions_atelier_expedition',
+      'autoevaluation_savoirs',
+      'transition_video_f1',
+      'construction_briques',
+      'ranger_stock',
+      'planning_cantine',
       'genre_nombre',
-      'paronymes_rapport'
+      'dictee_professionnelle',
+      'tri_chevilles',
+      'traitement_texte_bureautique',
+      'redaction_email',
+      'autoevaluation_tic',
+      'paronymes_rapport',
+      'gratte_ciel',
+      'fin_parcours'
     ];
 
     for (let index = 0; index < expectedIds.length; index += 1) {
       console.log('PILOT2_SMOKE_STAGE=test-' + (index + 1) + '-' + expectedIds[index]);
-      const testId = await win.webContents.executeJavaScript("window.sebKaltestPilot2.currentTest().id",true);
+      const currentInfo = await win.webContents.executeJavaScript(
+        "({id:window.sebKaltestPilot2.currentTest().id,status:document.getElementById('exercise-status')?.textContent||'',nextDisabled:Boolean(document.getElementById('kaltest-next')?.disabled),tri:window.sebKaltestPilot2.state.tests?.tri_chevilles?.tri||null})",
+        true
+      );
+      const testId = currentInfo.id;
       if (testId !== expectedIds[index]) {
-        throw new Error('Ordre KALTEST incorrect : attendu ' + expectedIds[index] + ', trouvé ' + testId);
+        throw new Error('Ordre KALTEST incorrect : attendu ' + expectedIds[index] + ', trouvé ' + testId + ' — ' + JSON.stringify(currentInfo));
       }
 
+      console.log('PILOT2_SMOKE_SUBSTAGE=perfect-' + testId);
       const perfect = await perfectResult(win);
-      const questionCount = await win.webContents.executeJavaScript("window.sebKaltestPilot2.currentTest().questions.length",true);
-      if (perfect.score !== perfect.scoreMax || perfect.scoreMax !== questionCount) {
-        throw new Error(testId + ' : moteur de correction partagé incorrect.');
+      const meta = await win.webContents.executeJavaScript(
+        "({questionCount:(window.sebKaltestPilot2.currentTest().questions||[]).length,scored:window.sebKaltestPilot2.currentTest().scored!==false})",
+        true
+      );
+      if (meta.scored) {
+        if (testId === 'traitement_texte_bureautique') {
+          if (perfect.scoreMax !== 8 || perfect.score < 0 || perfect.score > 8) {
+            throw new Error(testId + ' : barème Traitement de texte /8 incorrect.');
+          }
+        } else {
+          const expectedMax = testId === 'dictee_professionnelle' ? 20 : meta.questionCount;
+          if (perfect.score !== perfect.scoreMax || perfect.scoreMax !== expectedMax) {
+            throw new Error(testId + ' : moteur de correction partagé incorrect.');
+          }
+        }
+      } else if (perfect.score !== 0 || perfect.scoreMax !== 0) {
+        throw new Error(testId + ' : une autoévaluation non notée produit encore un score.');
       }
 
+      console.log('PILOT2_SMOKE_SUBSTAGE=overflow-' + testId);
       await assertNoOverflow(win, testId);
 
+      console.log('PILOT2_SMOKE_SUBSTAGE=visual-' + testId);
       const visualContract = await win.webContents.executeJavaScript(
-        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null};})()",
+        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null,fractionItems:document.querySelectorAll('.kaltest-fraction-item').length,organisationRows:document.querySelectorAll('.kaltest-organisation-row').length,postureFields:document.querySelectorAll('.kaltest-postures-answer input').length,autoevalChoices:document.querySelectorAll('.kaltest-autoeval-choice input').length,stockPots:document.querySelectorAll('.kaltest-stock-pot').length,stockCases:document.querySelectorAll('.kaltest-stock-case').length,mailInputs:document.querySelectorAll('.kaltest-mail-composer input').length,mailTextarea:document.querySelectorAll('.kaltest-mail-composer textarea').length,dicteeAudio:document.querySelectorAll('.kaltest-dictee-player audio').length,dicteeTextarea:document.querySelectorAll('.kaltest-dictee-writing textarea').length,triRows:document.querySelectorAll('.kaltest-tri-row:not(.head)').length,triChronoButtons:document.querySelectorAll('.kaltest-tri-chrono-buttons button').length,transitionVideo:document.querySelectorAll('.kaltest-transition-video').length,briqueChrono:Boolean(document.getElementById('startBtn')&&document.getElementById('stopBtn')),briqueAdmin:Boolean(document.getElementById('secretCode')&&document.getElementById('validBtn')),textEditor:Boolean(document.querySelector('.kaltest-text-editor-tool .ql-editor')),textEditorFile:Boolean(document.getElementById('nw-file-menu-button')),textEditorImage:Boolean(document.getElementById('nw-image-button')),terminal:Boolean(document.querySelector('.kaltest-terminal-page')),builderGridInputs:document.querySelectorAll('.kaltest-builder-grid input[data-question-id]').length};})()",
         true
       );
 
@@ -225,6 +298,48 @@ app.whenReady().then(async () => {
       if (testId === 'texte_a_trous_stage_logistique' && visualContract.textGapBreaks !== 14) {
         throw new Error('Texte à trous : retours à la ligne de fin de phrase incorrects : ' + JSON.stringify(visualContract));
       }
+      if (testId === 'fractions_preparation_lots' && visualContract.fractionItems !== 22) {
+        throw new Error('Fractions : 22 objets sélectionnables attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'organisation_demenagement' && visualContract.organisationRows !== 8) {
+        throw new Error('Organisation : 8 actions attendues : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'gestes_postures' && visualContract.postureFields !== 3) {
+        throw new Error('Postures : 3 champs attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'autoevaluation_savoirs' && visualContract.autoevalChoices !== 5) {
+        throw new Error('Autoévaluation 1 : 5 choix attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'autoevaluation_tic' && visualContract.autoevalChoices !== 6) {
+        throw new Error('Autoévaluation 2 : 6 choix attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'transition_video_f1' && visualContract.transitionVideo !== 1) {
+        throw new Error('Transition vidéo F1 : vidéo plein écran absente : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'construction_briques' && (!visualContract.briqueChrono || !visualContract.briqueAdmin)) {
+        throw new Error('Briques : compteur ou validation administrateur absents : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'traitement_texte_bureautique' && (!visualContract.textEditor || !visualContract.textEditorFile || !visualContract.textEditorImage)) {
+        throw new Error('Traitement de texte : outil Éditeur KALONÉO incomplet : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'fin_parcours' && !visualContract.terminal) {
+        throw new Error('Fin de parcours : page terminale KALTEST absente : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'ranger_stock' && (visualContract.stockPots !== 34 || visualContract.stockCases !== 35)) {
+        throw new Error('Stock : 34 pots et 35 cases attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'tri_chevilles' && (visualContract.triRows !== 5 || visualContract.triChronoButtons !== 2)) {
+        throw new Error('Tri : 5 lignes et 2 boutons chrono attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'dictee_professionnelle' && (visualContract.dicteeAudio !== 1 || visualContract.dicteeTextarea !== 1)) {
+        throw new Error('Dictée : lecteur audio et zone de texte attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'redaction_email' && (visualContract.mailInputs !== 3 || visualContract.mailTextarea !== 1)) {
+        throw new Error('Mail : champs À/Cc/Objet et message attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'gratte_ciel' && visualContract.builderGridInputs !== 16) {
+        throw new Error('Gratte-ciel : 16 cases de réponse attendues : ' + JSON.stringify(visualContract));
+      }
       if (testId === 'genre_nombre' && visualContract.genreTables !== 2) {
         throw new Error('Genre / Nombre : les deux tableaux Build #20 ne sont pas rendus.');
       }
@@ -232,9 +347,44 @@ app.whenReady().then(async () => {
         throw new Error('Paronymes : police trop petite pour un test réel.');
       }
 
+      if (testId === 'transition_video_f1') {
+        await win.webContents.executeJavaScript("document.querySelector('.kaltest-transition-video')?.dispatchEvent(new Event('ended'));true",true);
+        await sleep(1750);
+        continue;
+      }
+      if (testId === 'fin_parcours') {
+        const terminal = await win.webContents.executeJavaScript("({id:window.sebKaltestPilot2.currentTest()?.id||'',finished:sessionStorage.getItem('seb_kaltest_parcours_finished'),text:document.querySelector('.kaltest-terminal-page')?.textContent||''})",true);
+        if (terminal.id!=='fin_parcours' || terminal.finished!=='1' || !/Félicitations/.test(terminal.text)) {
+          throw new Error('Page terminale KALTEST invalide : '+JSON.stringify(terminal));
+        }
+        break;
+      }
+
+      console.log('PILOT2_SMOKE_SUBSTAGE=fill-' + testId);
       await fillOneAnswer(win);
+      console.log('PILOT2_SMOKE_SUBSTAGE=advance-' + testId);
+      const validateBeforeAdvance = await win.webContents.executeJavaScript("window.sebKaltestPilot2.currentTest()?.behavior?.validateBeforeAdvance===true",true);
       await win.webContents.executeJavaScript("document.getElementById('kaltest-next').click();true",true);
       await sleep(70);
+      if (validateBeforeAdvance) {
+        const validated = await win.webContents.executeJavaScript(
+          "({same:window.sebKaltestPilot2.currentTest()?.id||'',label:document.getElementById('kaltest-next')?.textContent||'',planning:sessionStorage.getItem('planningScore'),stock:sessionStorage.getItem('stockCorrect'),dictee:sessionStorage.getItem('dictee_data'),tri:sessionStorage.getItem('tri_cheville_data'),brique:sessionStorage.getItem('eval_brique'),nwtexte:(JSON.parse(sessionStorage.getItem('scores_data')||'{}').page7!==undefined),mail:sessionStorage.getItem('page8_data'),carre:sessionStorage.getItem('carre_magique_erreurs')})",
+          true
+        );
+        const legacyOk = testId === 'planning_cantine' ? validated.planning !== null :
+          testId === 'ranger_stock' ? validated.stock !== null :
+          testId === 'dictee_professionnelle' ? validated.dictee !== null :
+          testId === 'tri_chevilles' ? validated.tri !== null :
+          testId === 'construction_briques' ? validated.brique !== null :
+          testId === 'traitement_texte_bureautique' ? validated.nwtexte === true :
+          testId === 'redaction_email' ? validated.mail !== null :
+          testId === 'gratte_ciel' ? validated.carre !== null : true;
+        if (validated.same !== testId || !/Suivant\s*$/.test(validated.label.trim()) || !legacyOk) {
+          throw new Error(testId + ' : validation avant navigation incorrecte : ' + JSON.stringify(validated));
+        }
+        await win.webContents.executeJavaScript("document.getElementById('kaltest-next').click();true",true);
+        await sleep(70);
+      }
 
       if (index === 0) {
         const calcAfterNavigation = await win.webContents.executeJavaScript(
@@ -247,25 +397,23 @@ app.whenReady().then(async () => {
       }
     }
 
-    if (await visiblePage(win) !== 'page-final') throw new Error('Page finale système attendue après les 7 tests.');
-
     const finalAudit = await win.webContents.executeJavaScript(
-      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.getElementById('page-final')?.textContent||''),date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null};})()",
+      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.querySelector('.kaltest-terminal-page')?.textContent||''),finished:sessionStorage.getItem('seb_kaltest_parcours_finished')==='1',date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page4','page5_q1','page5_1_q1','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),brique:sessionStorage.getItem('eval_brique')!==null,nwtexte:sc.page7!==undefined,paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null,auto1:sessionStorage.getItem('autoEval1_resultats')!==null,auto2:sessionStorage.getItem('autoEval2_resultats')!==null,planning:sessionStorage.getItem('planningScore')!==null,stock:sessionStorage.getItem('stockCorrect')!==null,dictee:sessionStorage.getItem('dictee_data')!==null,tri:sessionStorage.getItem('tri_cheville_data')!==null,mail:sessionStorage.getItem('page8_data')!==null,carre:sessionStorage.getItem('carre_magique_erreurs')!==null};})()",
       true
     );
-    if (!finalAudit.congrats) throw new Error('La page finale Félicitations du Build #20 n’est pas restaurée.');
-    if (!finalAudit.requiredLegacy || !finalAudit.paronymes || !finalAudit.genre) {
+    if (!finalAudit.congrats || !finalAudit.finished) throw new Error('La page terminale KALTEST n’est pas correctement finalisée.');
+    if (!finalAudit.requiredLegacy || !finalAudit.brique || !finalAudit.nwtexte || !finalAudit.paronymes || !finalAudit.genre || !finalAudit.auto1 || !finalAudit.auto2 || !finalAudit.planning || !finalAudit.stock || !finalAudit.dictee || !finalAudit.tri || !finalAudit.mail || !finalAudit.carre) {
       throw new Error('Le pont KALTEST → Résultats/Bilan historiques est incomplet : ' + JSON.stringify(finalAudit));
     }
 
     console.log('KALTEST_PILOT2_FUNCTIONAL_SMOKE: OK');
     console.log('PILOT2_REAL_SEB_VISUALS=Introduction video + Scenario/Consigne icons');
-    console.log('PILOT2_DYNAMIC_TESTS=7');
-    console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + supplemental fields + two tables + single choice');
+    console.log('PILOT2_DYNAMIC_TESTS=22');
+    console.log('PILOT2_RENDERERS=basic + transition F1 + briques + stock + planning + dictation + tri + text-editor + mail + autoevaluations + grid + tables');
     console.log('PILOT2_FLOATING_CALCULATOR=OK');
     console.log('PILOT2_ABANDON_UI=4 reasons + admin password + NE');
     console.log('PILOT2_NO_VERTICAL_OVERFLOW=OK');
-    console.log('PILOT2_FINAL_PAGE=BUILD20_CONGRATULATIONS');
+    console.log('PILOT2_FINAL_PAGE=KALTEST_TERMINAL');
     console.log('PILOT2_LEGACY_RESULTS_BRIDGE=OK');
     console.log('PILOT2_CALCULATOR_CLOSE_ON_NAVIGATION=OK');
     console.log('PILOT2_GENRE_NOMBRE_TWO_TABLES=OK');

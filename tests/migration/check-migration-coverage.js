@@ -10,7 +10,11 @@ const matrixPath = path.join(__dirname, 'legacy-parcours-build20.json');
 const registrySource = fs.readFileSync(registryPath, 'utf8');
 const matrix = JSON.parse(fs.readFileSync(matrixPath, 'utf8'));
 
-const ids = [...registrySource.matchAll(/\bid\s*:\s*'([^']+)'/g)].map(match => match[1]);
+const legacyStart = registrySource.indexOf('const legacySteps');
+const legacyEnd = registrySource.indexOf('function legacyStep', legacyStart);
+if (legacyStart < 0 || legacyEnd < 0) throw new Error('Bloc legacySteps introuvable dans seb-parcours.js');
+const legacyRegistrySource = registrySource.slice(legacyStart, legacyEnd);
+const ids = [...legacyRegistrySource.matchAll(/\bid\s*:\s*'([^']+)'/g)].map(match => match[1]);
 const uniqueRegistryIds = [...new Set(ids)];
 const matrixIds = (matrix.steps || []).map(step => step.id);
 
@@ -33,9 +37,24 @@ const expectedMigrated = [
   'qcm-2_1',
   'qcm-3',
   'qcm-texte-trous',
+  'qcm-4',
+  'qcm-5',
+  'qcm-5_1',
   'qcm-6',
+  'autoeval1',
+  'introbrique',
+  'brique',
+  'stock',
+  'planning',
   'genrenombres',
-  'paronymes'
+  'dictee',
+  'tri-de-cheville',
+  'nwtexte',
+  'nvmail',
+  'autoeval2',
+  'paronymes',
+  'carre',
+  'qcm-11'
 ];
 if (JSON.stringify(migratedIds) !== JSON.stringify(expectedMigrated)) {
   throw new Error(
@@ -59,5 +78,17 @@ for (const step of migrated) {
   }
 }
 
-console.log('LEGACY_PARCOURS_BUILD20_COVERAGE: OK — 24/24 étapes suivies');
+
+const retiredSystem = (matrix.steps || []).filter(step => step.status === 'retired-system').map(step => step.id);
+const expectedRetiredSystem = ['qcm-1','qcm-finale'];
+if (JSON.stringify(retiredSystem) !== JSON.stringify(expectedRetiredSystem)) {
+  throw new Error('Pages système historiques à retirer : ' + expectedRetiredSystem.join(', ') + ' ; trouvé : ' + retiredSystem.join(', '));
+}
+const unresolved = (matrix.steps || []).filter(step => !['contract-fixture-ready','retired-system'].includes(step.status));
+if (unresolved.length) {
+  throw new Error('Migration non terminée : ' + unresolved.map(step => step.id + '=' + step.status).join(', '));
+}
+
+console.log('LEGACY_PARCOURS_BUILD20_COVERAGE: OK — 24/24 étapes historiques suivies');
 console.log('MIGRATED_CONTRACTS: ' + migrated.map(step => step.id + ' -> ' + step.targetTestId).join(' | '));
+console.log('KALTEST_MIGRATION_COMPLETE: 22 KALTEST + 2 pages système historiques retirées du parcours actif');

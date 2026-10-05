@@ -2679,3 +2679,265 @@ body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-
   align-items:center;
   gap:7px;
 }
+
+
+/* PILOTE 21 — pages 4 / 5 / 5_1 migrées en KALTEST. */
+.kaltest-fractions-layout,.kaltest-organisation-layout{width:100%;height:100%;min-height:0;display:grid;gap:12px;align-items:stretch}
+.kaltest-fractions-layout{grid-template-columns:minmax(280px,2fr) minmax(0,3fr)}
+.kaltest-organisation-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.kaltest-fractions-work,.kaltest-organisation-work{min-width:0;min-height:0;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:rgba(255,255,255,.96);padding:10px}
+.kaltest-fractions-work{display:flex;flex-direction:column;justify-content:space-evenly;gap:8px}
+.kaltest-fraction-row{display:grid;grid-template-columns:145px minmax(0,1fr);gap:10px;align-items:center}
+.kaltest-fraction-title{min-height:42px;display:flex;align-items:center;justify-content:center;gap:7px;padding:5px 7px;border:1px solid rgba(0,78,112,.28);border-radius:9px;background:rgba(0,78,112,.08);color:var(--seb-blue-100,#004E70)}
+.kaltest-fraction-title img{width:34px;height:34px;object-fit:contain}
+.kaltest-fraction-items{min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.kaltest-fraction-item{width:54px;height:54px;flex:0 0 54px;border:3px solid #c5cbd2;border-radius:9px;background-size:cover;background-position:center;background-color:#fff;cursor:pointer}
+.kaltest-fraction-item.selected{border-color:var(--seb-orange-100,#F9B233);transform:scale(1.08);box-shadow:0 4px 10px rgba(0,0,0,.14)}
+.kaltest-fraction-item:focus-visible{outline:2px solid var(--seb-blue-100,#004E70);outline-offset:2px}
+body[data-seb-kaltest-id="fractions_preparation_lots"] #kaltest-content,body[data-seb-kaltest-id="organisation_demenagement"] #kaltest-content,body[data-seb-kaltest-id="gestes_postures"] #kaltest-content{padding:7px 9px}
+.kaltest-organisation-work{display:flex;flex-direction:column;justify-content:space-evenly;gap:5px}
+.kaltest-organisation-row{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:9px;padding:5px 7px;border-bottom:1px solid rgba(0,78,112,.12);font-size:16px;line-height:1.2}
+.kaltest-organisation-row:last-child{border-bottom:0}
+.kaltest-organisation-row input{width:42px;min-height:31px;padding:3px;text-align:center;font-size:16px}
+.kaltest-postures-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:9px}
+.kaltest-postures-image{min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.kaltest-postures-image img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}
+.kaltest-postures-answers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kaltest-postures-answer{display:grid;grid-template-columns:minmax(0,1fr) 46px;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(0,78,112,.20);border-radius:10px;background:#fff;font-size:15px}
+.kaltest-postures-answer input{width:42px;min-height:31px;text-align:center;font-size:16px}
+@media(max-height:760px){.kaltest-fraction-item{width:46px;height:46px;flex-basis:46px}.kaltest-fraction-row{grid-template-columns:132px minmax(0,1fr)}.kaltest-organisation-row{padding:3px 6px;font-size:15px}.kaltest-postures-answer{padding:5px 7px;font-size:14.5px}}
+
+
+
+
+/* PILOTE 21 — Planning cantine migré en KALTEST. */
+.kaltest-planning-layout{
+  width:100%;height:100%;min-height:0;display:grid;
+  grid-template-columns:minmax(0,3fr) minmax(270px,2fr);
+  gap:12px;align-items:stretch;
+  padding:8px;
+  border-radius:12px;
+  background:
+    linear-gradient(rgba(255,255,255,.70),rgba(255,255,255,.70)),
+    var(--kaltest-planning-bg,none) center/cover no-repeat;
+}
+.kaltest-planning-work,.kaltest-planning-guide{
+  min-width:0;min-height:0;border:1px solid rgba(0,78,112,.20);
+  border-radius:12px;background:rgba(255,255,255,.94);
+  box-shadow:0 4px 14px rgba(0,0,0,.10);
+}
+.kaltest-planning-work{padding:10px;display:flex;flex-direction:column;gap:9px}
+.kaltest-planning-table{width:100%;table-layout:fixed;font-size:14.5px}
+.kaltest-planning-table th,.kaltest-planning-table td{padding:5px}
+.kaltest-planning-table th{font-weight:700}
+.kaltest-planning-table select{width:100%;min-height:31px;font-size:13.5px}
+.kaltest-planning-lists{margin-top:auto;padding:7px 9px;border:1px solid rgba(0,78,112,.18);border-radius:9px;background:#eef4ff;font-size:13.5px;line-height:1.25}
+.kaltest-planning-lists p{margin:3px 0}
+.kaltest-planning-guide{padding:12px 15px;overflow:auto;color:#344563}
+.kaltest-planning-guide h3{margin:0 0 8px;color:var(--seb-blue-100,#004E70);font-size:18px}
+.kaltest-planning-guide ol{margin:0;padding-left:24px}
+.kaltest-planning-guide li{margin:0 0 8px;line-height:1.25;font-size:14.5px}
+.kaltest-answer-correct{box-shadow:inset 0 0 0 3px #22c55e}
+.kaltest-answer-incorrect{box-shadow:inset 0 0 0 3px #ef4444}
+body[data-seb-kaltest-id="planning_cantine"] #kaltest-content{padding:4px 6px;background:transparent;border:0;box-shadow:none}
+@media(max-height:760px){
+  .kaltest-planning-layout{gap:8px;padding:5px}
+  .kaltest-planning-work{padding:6px;gap:5px}
+  .kaltest-planning-table{font-size:13.5px}
+  .kaltest-planning-table th,.kaltest-planning-table td{padding:3px}
+  .kaltest-planning-table select{min-height:27px;font-size:12.5px}
+  .kaltest-planning-lists{padding:5px 7px;font-size:12.5px}
+  .kaltest-planning-guide{padding:8px 10px}
+  .kaltest-planning-guide li{margin-bottom:5px;font-size:13px}
+}
+
+
+/* PILOTE 21 — autoévaluations 1 et 2 migrées en KALTEST, gabarit 50/50. */
+.kaltest-autoeval-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch}
+.kaltest-autoeval-form{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:#fff;overflow:auto}
+.kaltest-autoeval-form h3{margin:5px 0 1px;color:var(--seb-blue-100,#004E70);font-size:17px;font-weight:700}
+.kaltest-autoeval-choice{display:grid;grid-template-columns:24px minmax(0,1fr);align-items:start;gap:8px;padding:6px 8px;border:1px solid rgba(0,78,112,.12);border-radius:8px;background:rgba(0,78,112,.035);font-size:15.5px;line-height:1.25}
+.kaltest-autoeval-choice input{width:18px;height:18px;margin-top:1px;accent-color:var(--seb-blue-100,#004E70)}
+.kaltest-autoeval-comment{display:flex;flex-direction:column;gap:6px;margin-top:auto;font-weight:700;color:#31414b}
+.kaltest-autoeval-comment textarea{width:100%;min-height:88px;resize:none;padding:8px;border:1.5px solid #8398B0;border-radius:8px;font:15.5px/1.3 Calibri,"Segoe UI",Arial,sans-serif}
+body[data-seb-kaltest-id="autoevaluation_savoirs"] #kaltest-content,body[data-seb-kaltest-id="autoevaluation_tic"] #kaltest-content{padding:7px 9px}
+@media(max-height:760px){.kaltest-autoeval-form{gap:5px;padding:7px 9px}.kaltest-autoeval-choice{padding:4px 6px;font-size:14.5px}.kaltest-autoeval-comment textarea{min-height:62px}}
+
+
+/* PILOTE 21 — Gratte-ciel 4x4 migré en grille KALTEST. */
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-runtime-layout{grid-template-columns:minmax(260px,.85fr) minmax(420px,1.15fr);align-items:stretch;gap:14px}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-runtime-zone{min-height:0;display:flex;align-items:center;justify-content:center}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-html{width:100%;height:100%;min-height:330px;border:0;border-radius:12px;background:#fff}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid-wrap{width:auto;max-width:100%;overflow:visible}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid{width:auto;margin:auto;border-collapse:separate;border-spacing:5px;background:transparent}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid td{width:54px!important;min-width:54px!important;max-width:54px!important;height:54px;padding:4px;border:2px solid #d1d5db;border-radius:8px;background:#fff;text-align:center;font-size:20px;font-weight:700}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid tr:first-child td:not(:first-child):not(:last-child),
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid tr:last-child td:not(:first-child):not(:last-child){border-width:5px;border-color:#1e3a8a}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid tr:not(:first-child):not(:last-child) td:first-child,
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid tr:not(:first-child):not(:last-child) td:last-child{border-width:5px;border-color:#f97316}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid tr:first-child td:first-child,
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid tr:first-child td:last-child,
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid tr:last-child td:first-child,
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid tr:last-child td:last-child{border-color:transparent;background:transparent}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid input{width:100%;height:100%;min-height:42px;padding:2px;text-align:center;font-size:24px;font-weight:700;border:1px solid #94a3b8;border-radius:6px;box-sizing:border-box}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-answer-correct{box-shadow:0 0 0 3px #22c55e inset}
+body[data-seb-kaltest-id="gratte_ciel"] .kaltest-answer-incorrect{box-shadow:0 0 0 3px #ef4444 inset}
+@media(max-height:760px){body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid td{width:46px!important;min-width:46px!important;max-width:46px!important;height:46px}body[data-seb-kaltest-id="gratte_ciel"] .kaltest-builder-grid input{min-height:36px;font-size:21px}}
+
+
+/* PILOTE 21 — Ranger le stock migré dans KALTEST. */
+body[data-seb-kaltest-id="ranger_stock"] #kaltest-content{padding:5px 7px}
+.kaltest-stock-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(220px,.38fr) minmax(0,1fr);gap:10px}
+.kaltest-stock-left{min-height:0;display:grid;grid-template-rows:1fr .72fr;gap:8px}
+.kaltest-stock-zone,.kaltest-stock-shelf{min-height:0;border:1px solid rgba(0,78,112,.22);border-radius:10px;background:rgba(255,255,255,.96);padding:6px}.kaltest-stock-zone{display:flex;flex-direction:column;overflow:hidden}
+.kaltest-stock-zone h3{margin:0 0 5px;color:#004e70;font-size:15px}
+.kaltest-stock-pots{flex:1 1 auto;min-height:0;display:flex;flex-wrap:wrap;align-content:flex-start;gap:4px;padding:4px;border:1px dashed rgba(0,78,112,.28);border-radius:8px;background:rgba(0,78,112,.035)}
+.kaltest-stock-tri{box-sizing:border-box}
+.kaltest-stock-pot{width:43px;height:51px;flex:0 0 43px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid #9aa7b4;border-radius:7px;background-color:#fff;background-size:contain;background-position:center;background-repeat:no-repeat;color:#111;font-size:11px;line-height:1.05;cursor:grab;box-sizing:border-box;text-shadow:0 0 2px #fff}
+.kaltest-stock-pot strong{font-size:12px}.kaltest-stock-pot.example{opacity:.82;cursor:default}.kaltest-stock-pot.dragging{opacity:.45}.kaltest-stock-pot.correct{border-color:#22c55e;box-shadow:0 0 0 2px #22c55e inset}.kaltest-stock-pot.incorrect{border-color:#ef4444;box-shadow:0 0 0 2px #ef4444 inset}
+.kaltest-stock-shelves{min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) auto;gap:8px}
+.kaltest-stock-shelf.shelf-3{grid-column:1 / -1}
+.kaltest-stock-shelf-title{min-height:30px;display:flex;align-items:center;justify-content:center;padding:3px 6px;border-radius:7px;background:#eaf3f8;color:#004e70;text-align:center;font-size:13px;font-weight:700;line-height:1.1}
+.kaltest-stock-level{display:grid;grid-template-columns:82px minmax(0,1fr);gap:5px;align-items:center;margin-top:3px}
+.kaltest-stock-level-label{font-size:11px;line-height:1.05;text-align:center;color:#374151}
+.kaltest-stock-cases{display:grid;grid-template-columns:repeat(4,minmax(38px,1fr));gap:3px}
+.kaltest-stock-shelf.shelf-3 .kaltest-stock-level{grid-template-columns:1fr}
+.kaltest-stock-shelf.shelf-3 .kaltest-stock-level-label:empty{display:none}
+.kaltest-stock-shelf.shelf-3 .kaltest-stock-cases{grid-template-columns:repeat(11,minmax(38px,1fr))}
+.kaltest-stock-case{height:53px;border:2px dashed #a8b3bf;border-radius:6px;background:#f8fafc;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.kaltest-stock-case:has(.kaltest-stock-pot){border-style:solid;border-color:#7d8b99}
+@media(max-height:760px){.kaltest-stock-layout{grid-template-columns:minmax(205px,.34fr) minmax(0,1fr);gap:7px}.kaltest-stock-pot{width:37px;height:47px;flex-basis:37px;font-size:10px}.kaltest-stock-pot strong{font-size:11px}.kaltest-stock-case{height:49px}.kaltest-stock-level{grid-template-columns:70px minmax(0,1fr);margin-top:2px}.kaltest-stock-shelf-title{min-height:25px;font-size:12px}}
+
+
+/* PILOTE 21 — rédaction d'e-mail migrée dans KALTEST. */
+body[data-seb-kaltest-id="redaction_email"] #kaltest-content{padding:6px 8px}
+.kaltest-mail-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;position:relative}
+.kaltest-mail-instructions,.kaltest-mail-composer{min-width:0;min-height:0;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:#fff;padding:10px 12px;box-sizing:border-box}
+.kaltest-mail-instructions{display:flex;flex-direction:column;justify-content:flex-start;overflow:auto}
+.kaltest-mail-instructions h3,.kaltest-mail-composer h3{margin:0 0 8px;color:#004e70;font-size:19px}
+.kaltest-mail-instruction-list{display:flex;flex-direction:column;gap:8px}
+.kaltest-mail-instruction-list p{margin:0;padding:7px 9px;border-left:4px solid #1a73e8;background:#f5f9fc;border-radius:5px;font-size:15px;line-height:1.25}
+.kaltest-mail-composer{display:flex;flex-direction:column;gap:6px;overflow:auto}
+.kaltest-mail-field{display:flex;flex-direction:column;gap:3px;font-weight:700;color:#374151;font-size:14px}
+.kaltest-mail-field input,.kaltest-mail-field textarea{width:100%;box-sizing:border-box;border:1.5px solid #94a3b8;border-radius:7px;padding:7px 8px;font:15px/1.25 Calibri,"Segoe UI",Arial,sans-serif;background:#fff}
+.kaltest-mail-message{min-height:0;flex:1}.kaltest-mail-message textarea{min-height:95px;flex:1;resize:none}
+.kaltest-mail-attachment{display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:center;gap:8px;font-size:14px}
+.kaltest-mail-browse{margin:0;padding:7px 11px;border:1px solid #1a73e8;border-radius:7px;background:#fff;color:#1a73e8;font-weight:700;cursor:pointer}
+.kaltest-mail-selected{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic;color:#4b5563}
+.kaltest-mail-overlay{position:fixed;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)}
+.kaltest-mail-overlay[hidden]{display:none!important}
+.kaltest-mail-modal{width:min(420px,80vw);display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:12px;background:#fff;box-shadow:0 14px 40px rgba(0,0,0,.24)}
+.kaltest-mail-modal h3{margin:0 0 6px;color:#004e70}.kaltest-mail-modal button{padding:9px 11px;border:1px solid #d1d5db;border-radius:7px;background:#fff;text-align:left;cursor:pointer}
+body[data-seb-kaltest-id="redaction_email"] #exercise-status{color:#08783e;font-weight:700}
+@media(max-height:760px){.kaltest-mail-instructions,.kaltest-mail-composer{padding:7px 9px}.kaltest-mail-instruction-list{gap:5px}.kaltest-mail-instruction-list p{padding:5px 7px;font-size:14px}.kaltest-mail-field input,.kaltest-mail-field textarea{padding:5px 7px}.kaltest-mail-message textarea{min-height:70px}}
+
+
+/* PILOTE 21 — Dictée professionnelle migrée dans KALTEST. */
+body[data-seb-kaltest-id="dictee_professionnelle"] #kaltest-content{padding:7px 9px}
+.kaltest-dictee-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(300px,2fr) minmax(0,3fr);gap:12px}
+.kaltest-dictee-player,.kaltest-dictee-writing{min-width:0;min-height:0;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:#fff;padding:11px;box-sizing:border-box}
+.kaltest-dictee-player{display:flex;flex-direction:column;gap:10px}.kaltest-dictee-writing{display:flex;flex-direction:column;gap:8px}
+.kaltest-dictee-player h3,.kaltest-dictee-writing h3{margin:0;color:#004e70;font-size:19px}
+.kaltest-dictee-controls{display:flex;flex-wrap:wrap;gap:7px}.kaltest-dictee-controls button{padding:8px 11px;border:1px solid #b8c2cf;border-radius:7px;background:#fff;color:#233345;font-weight:700;cursor:pointer}
+.kaltest-dictee-controls button:first-child{border-color:#1a73e8;background:#1a73e8;color:#fff}
+.kaltest-dictee-progress{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.kaltest-dictee-progress input{width:100%;accent-color:#1a73e8}
+.kaltest-dictee-listen-count,.kaltest-dictee-audio-status,.kaltest-dictee-counter{font-size:14px;color:#55616d}.kaltest-dictee-counter{text-align:right}
+.kaltest-dictee-writing textarea{flex:1;min-height:210px;width:100%;resize:none;border:2px solid #aeb8c3;border-radius:8px;padding:12px;font:18px/1.5 Arial,sans-serif;box-sizing:border-box}
+.kaltest-dictee-writing textarea:focus{outline:none;border-color:#1a73e8;box-shadow:0 0 0 3px rgba(26,115,232,.12)}
+.kaltest-dictee-validated{padding:7px 9px;border-radius:7px;background:#eaf7ef;color:#08783e;font-size:14px;font-weight:700}
+@media(max-height:760px){.kaltest-dictee-player,.kaltest-dictee-writing{padding:8px;gap:6px}.kaltest-dictee-controls button{padding:6px 8px}.kaltest-dictee-writing textarea{min-height:150px;font-size:16px}}
+
+
+/* PILOTE 21 — Tri de chevilles migré dans KALTEST. */
+body[data-seb-kaltest-id="tri_chevilles"] #kaltest-content{padding:5px 7px}
+.kaltest-tri-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.kaltest-tri-left,.kaltest-tri-right{min-width:0;min-height:0;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:#fff;padding:9px;box-sizing:border-box}
+.kaltest-tri-left{overflow:auto}.kaltest-tri-right{display:flex;flex-direction:column;gap:7px}
+.kaltest-tri-guide h3,.kaltest-tri-autoeval h3{margin:0 0 6px;color:#004e70;font-size:18px}.kaltest-tri-guide ul{margin:0;padding-left:23px;font-size:14px;line-height:1.25}.kaltest-tri-guide li{margin:4px 0}
+.kaltest-tri-autoeval{display:flex;flex-direction:column;gap:6px}.kaltest-tri-autoeval[hidden]{display:none!important}.kaltest-tri-autoeval>p{margin:0 0 3px;font-size:14px}
+.kaltest-tri-auto-choice{display:grid;grid-template-columns:20px minmax(0,1fr);gap:6px;align-items:start;padding:4px 6px;border-radius:6px;background:#f7fafc;font-size:13.5px;line-height:1.2}.kaltest-tri-auto-choice input{width:17px;height:17px;margin:0;accent-color:#004e70}
+.kaltest-tri-comment{display:flex;flex-direction:column;gap:3px;font-size:13.5px;font-weight:700}.kaltest-tri-comment textarea{resize:none;min-height:55px;border:1px solid #aab5c1;border-radius:7px;padding:6px}
+.kaltest-tri-auto-validate{align-self:center;margin-top:2px}
+.kaltest-tri-chrono-card{display:flex;flex-direction:column;align-items:center;gap:7px;padding:7px;border:1px solid #d7dee6;border-radius:9px;background:#f9fbfc}.kaltest-tri-display{font-size:44px!important;line-height:1}
+.kaltest-tri-chrono-buttons{display:flex;gap:8px;width:100%}.kaltest-tri-chrono-buttons button{flex:1}
+.kaltest-tri-table{display:flex;flex-direction:column;gap:3px}.kaltest-tri-row{display:grid;grid-template-columns:64px repeat(3,minmax(0,1fr));gap:5px;align-items:center}.kaltest-tri-row.head{font-weight:700;color:#475569;text-align:center;font-size:13px}.kaltest-tri-row>span{text-align:center}.kaltest-tri-row input{min-width:0;height:31px;padding:3px 5px;border:1px solid #aeb8c3;border-radius:6px;text-align:center;font-size:15px;box-sizing:border-box}.kaltest-tri-row input[readonly]{background:#f1f5f9}
+.kaltest-tri-results-button{align-self:center;padding:7px 14px;border:1px solid #1a73e8;border-radius:7px;background:#fff;color:#1a73e8;font-weight:700;cursor:pointer}.kaltest-tri-results-button:disabled{opacity:.45;cursor:not-allowed}
+.kaltest-tri-results{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:7px;border-radius:8px;background:#eef6fa;text-align:center;font-size:14px}.kaltest-tri-results[hidden]{display:none!important}
+@media(max-height:760px){.kaltest-tri-left,.kaltest-tri-right{padding:6px}.kaltest-tri-guide ul{font-size:12.5px}.kaltest-tri-guide li{margin:2px 0}.kaltest-tri-row input{height:27px}.kaltest-tri-display{font-size:40px!important}.kaltest-tri-auto-choice{font-size:12.5px;padding:3px 5px}.kaltest-tri-comment textarea{min-height:42px}}
+
+
+/* PILOTE 21 — Transition vidéo F1, Briques et page terminale. */
+body[data-seb-kaltest-id="transition_video_f1"]{background:#000!important}
+body[data-seb-kaltest-id="transition_video_f1"].seb-kaloneo-nav-active{height:100dvh!important;max-height:100dvh!important}
+body[data-seb-kaltest-id="transition_video_f1"] #pilot2-shell,
+body[data-seb-kaltest-id="transition_video_f1"] #page-exercise,
+body[data-seb-kaltest-id="transition_video_f1"] #kaltest-content{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#000!important;box-shadow:none!important;z-index:2147481000!important}
+body[data-seb-kaltest-id="transition_video_f1"] .kaltest-heading,
+body[data-seb-kaltest-id="transition_video_f1"] .kaltest-context-row,
+body[data-seb-kaltest-id="transition_video_f1"] .kaltest-footer,
+body[data-seb-kaltest-id="transition_video_f1"] #kaloneo-common-navigation,
+body[data-seb-kaltest-id="transition_video_f1"] #seb-evalpro-abandon-fixed,
+body[data-seb-kaltest-id="transition_video_f1"] #seb-evalpro-privacy-toggle{display:none!important}
+.kaltest-transition-video-wrap{position:absolute;inset:0;background:#000;overflow:hidden}
+.kaltest-transition-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.kaltest-transition-fade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity 1.5s ease-in-out;pointer-events:none}
+.kaltest-transition-fade.visible{opacity:1}
+
+body[data-seb-kaltest-id="construction_briques"] #kaltest-content{padding:7px 9px}
+.kaltest-brique-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.kaltest-brique-left,.kaltest-brique-right{min-width:0;min-height:0}
+.kaltest-brique-left{display:flex;align-items:stretch;justify-content:center}
+.kaltest-brique-image-card,.kaltest-brique-autoeval,.kaltest-brique-control-card{width:100%;min-height:0;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:#fff;padding:10px;box-sizing:border-box}
+.kaltest-brique-image-card{display:flex;align-items:center;justify-content:center;overflow:hidden}
+.kaltest-brique-image-card img{display:block;width:100%;height:100%;object-fit:contain}
+.kaltest-brique-autoeval{display:flex;flex-direction:column;gap:7px;overflow:auto}
+.kaltest-brique-autoeval h3,.kaltest-brique-control-card h3{margin:0 0 4px;color:#004e70;font-size:18px}
+.kaltest-brique-autoeval p{margin:0 0 4px;color:#44515c;font-size:14px}
+.kaltest-brique-auto-choice{display:grid;grid-template-columns:22px minmax(0,1fr);gap:7px;align-items:start;padding:5px 6px;border:1px solid rgba(0,78,112,.12);border-radius:7px;background:#f9fbfc;font-size:14.5px;line-height:1.2}
+.kaltest-brique-auto-choice input{width:17px;height:17px;margin-top:1px;accent-color:#004e70}
+.kaltest-brique-comment{display:flex;flex-direction:column;gap:5px;margin-top:auto;font-size:14px;font-weight:700;color:#34424d}
+.kaltest-brique-comment textarea{width:100%;min-height:72px;resize:none;padding:7px;border:1.5px solid #94a3b8;border-radius:7px;font:14px/1.3 Calibri,"Segoe UI",Arial,sans-serif;box-sizing:border-box}
+.kaltest-brique-auto-validate{align-self:flex-end;margin-top:2px}
+.kaltest-brique-right{display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:8px}
+.kaltest-brique-control-card{display:flex;flex-direction:column;gap:8px}
+.kaltest-brique-display{align-self:center;font-size:30px;font-weight:800;color:#004e70;letter-spacing:1px}
+.kaltest-brique-chrono-buttons{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.kaltest-brique-measures{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kaltest-brique-measures label{display:flex;flex-direction:column;gap:4px;font-size:13.5px;font-weight:700;color:#374151}
+.kaltest-brique-measures input{width:100%;box-sizing:border-box;min-height:34px;padding:5px 7px;border:1.5px solid #94a3b8;border-radius:7px;text-align:center;font:16px Calibri,"Segoe UI",Arial,sans-serif}
+.kaltest-brique-admin{justify-content:flex-start}
+.kaltest-brique-admin p{margin:0;color:#53606b;font-size:13.5px;line-height:1.25}
+.kaltest-brique-code{display:grid;grid-template-columns:auto minmax(120px,1fr);gap:8px;align-items:center;font-weight:700;color:#374151}
+.kaltest-brique-code input{min-height:34px;padding:5px 7px;border:1.5px solid #94a3b8;border-radius:7px;font:16px Calibri,"Segoe UI",Arial,sans-serif}
+.kaltest-brique-admin-status{min-height:18px;color:#c62828;font-size:13px;font-weight:700}
+body[data-seb-kaltest-id="construction_briques"] .seb-btn-timer-start{color:#198754!important;border-color:#198754!important}
+body[data-seb-kaltest-id="construction_briques"] .seb-btn-timer-stop{color:#c62828!important;border-color:#c62828!important}
+
+body[data-seb-kaltest-id="fin_parcours"] .kaltest-heading,
+body[data-seb-kaltest-id="fin_parcours"] .kaltest-context-row,
+body[data-seb-kaltest-id="fin_parcours"] .kaltest-footer{display:none!important}
+body[data-seb-kaltest-id="fin_parcours"] #kaltest-content{height:100%!important;min-height:0!important;display:flex;align-items:center;justify-content:center;padding:18px!important;background:linear-gradient(180deg,#f8fbfd 0%,#eef6fa 100%)!important}
+body[data-seb-kaltest-id="fin_parcours"] #kaloneo-nav-abandon{display:none!important}
+.kaltest-terminal-page{width:min(1050px,92vw);display:flex;flex-direction:column;gap:18px;padding:28px 34px;border:1px solid rgba(0,78,112,.20);border-radius:18px;background:#fff;box-shadow:0 10px 28px rgba(0,78,112,.10);color:#244353;font-size:20px;line-height:1.42}
+.kaltest-terminal-title{display:flex;align-items:center;justify-content:center;gap:24px}.kaltest-terminal-title img{width:110px;height:110px;object-fit:contain}.kaltest-terminal-title h2{margin:0;color:#1a73e8;font-size:34px;text-align:center}
+.kaltest-terminal-page p{margin:0}.kaltest-terminal-message{margin-top:4px;padding:16px 20px;border:1px solid #9cc2e5;border-radius:10px;background:#f7fbff;text-align:center;color:#1f4e79;font-weight:800}
+@media(max-height:760px){.kaltest-brique-layout{gap:8px}.kaltest-brique-image-card,.kaltest-brique-autoeval,.kaltest-brique-control-card{padding:7px}.kaltest-brique-auto-choice{padding:3px 5px;font-size:13.5px}.kaltest-brique-comment textarea{min-height:54px}.kaltest-brique-display{font-size:26px}.kaltest-terminal-page{gap:12px;padding:20px 26px;font-size:18px}.kaltest-terminal-title img{width:85px;height:85px}.kaltest-terminal-title h2{font-size:28px}}
+
+
+/* Outil Éditeur de texte KALONÉO — réutilisable dans les tests Builder. */
+.kaltest-builder-content-item{white-space:pre-line}
+.kaltest-text-editor-tool{height:100%;min-height:0;display:flex;flex-direction:column;gap:6px;padding:7px;border:1px solid #c5d2dd;border-radius:10px;background:#f8fafc;box-sizing:border-box}
+.kaltest-text-editor-toolbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:0 0 auto}
+.kaltest-text-editor-toolbar button,.kaltest-text-editor-toolbar select,.kaltest-text-editor-toolbar .color-picker-btn{height:31px;min-width:31px;padding:4px 7px;border:1px solid #b9c5cf;border-radius:6px;background:#fff;color:#27313a;font:13px Calibri,"Segoe UI",Arial,sans-serif;box-sizing:border-box}
+.kaltest-text-editor-toolbar button{cursor:pointer}.kaltest-text-editor-toolbar button.active{border-color:#66b9f0;background:linear-gradient(#fff,#c2eefc)}
+.kaltest-text-editor-tool .menu-container,.kaltest-text-editor-tool .color-picker-container{position:relative}
+.kaltest-text-editor-tool #menu-fichier,.kaltest-text-editor-tool .color-picker-menu{display:none;position:absolute;top:34px;left:0;z-index:1000;min-width:185px;padding:5px;border:1px solid #b8c4ce;border-radius:7px;background:#fff;box-shadow:0 5px 16px rgba(0,0,0,.18)}
+.kaltest-text-editor-tool #menu-fichier>div{padding:7px 9px;cursor:pointer}.kaltest-text-editor-tool #menu-fichier>div:hover{background:#e7f3fb}
+.kaltest-text-editor-tool .color-picker-menu.show{display:flex;gap:5px;align-items:center}.kaltest-text-editor-tool .color-swatch{width:27px;min-width:27px;padding:0}.kaltest-text-editor-tool #text-color-indicator,.kaltest-text-editor-tool #highlight-color-indicator{display:inline-block;width:15px;height:15px;border:1px solid #777;border-radius:3px;background:#000}.kaltest-text-editor-tool #highlight-color-indicator{background:#fff}
+.kaltest-text-editor-paper{flex:1 1 auto;min-height:190px;width:100%;overflow:auto;border:1px solid #b9c5cf;border-radius:7px;background:#fff;padding:10px;box-sizing:border-box}
+.kaltest-text-editor-paper.ql-container{font-family:Calibri,"Segoe UI",Arial,sans-serif}.kaltest-text-editor-paper .ql-editor{min-height:100%;padding:0;font-size:14pt;line-height:normal;white-space:pre-wrap}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] #kaltest-content{padding:8px}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-layout{height:100%;min-height:0}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-zone{min-height:0;overflow:auto}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-zone:nth-child(2){overflow:hidden}
+@media(max-height:760px){.kaltest-text-editor-toolbar button,.kaltest-text-editor-toolbar select,.kaltest-text-editor-toolbar .color-picker-btn{height:28px;padding:3px 6px;font-size:12px}.kaltest-text-editor-paper{min-height:150px}}
