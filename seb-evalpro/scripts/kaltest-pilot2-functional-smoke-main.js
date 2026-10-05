@@ -70,11 +70,23 @@ async function perfectResult(win) {
 
 async function fillOneAnswer(win) {
   const mode = await win.webContents.executeJavaScript(
-    "({choice:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.choiceTable),fractions:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.fractionSelection),autoeval:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.autoevaluationForm),tri:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.triStation),dictation:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.dictation),mail:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.mailComposer)})",
+    "({choice:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.choiceTable),fractions:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.fractionSelection),autoeval:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.autoevaluationForm),tri:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.triStation),dictation:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.dictation),mail:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.mailComposer),brique:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.bricksStation),editor:Boolean((window.sebKaltestPilot2.currentTest()?.presentation?.builderContent||[]).some(x=>x.type==='text-editor')),transition:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.transitionVideo),terminal:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.endPage)})",
     true
   );
 
-  if (mode.fractions) {
+  if (mode.transition || mode.terminal) {
+    // La transition et la page terminale ne demandent aucune saisie candidat.
+  } else if (mode.brique) {
+    await win.webContents.executeJavaScript(
+      "(function(){document.getElementById('startBtn')?.click();document.getElementById('stopBtn')?.click();const e=document.getElementById('nivDiff');e.value='0';e.dispatchEvent(new Event('input',{bubbles:true}));const c=document.getElementById('secretCode');c.value='svg56';document.getElementById('validBtn')?.click();const a=document.querySelector('.kaltest-brique-auto-choice input');if(a&&!a.checked)a.click();document.getElementById('autoEvalBtn')?.click();return true;})()",
+      true
+    );
+  } else if (mode.editor) {
+    await win.webContents.executeJavaScript(
+      "(function(){const root=document.querySelector('.kaltest-text-editor-tool .ql-editor');if(!root)return false;root.innerHTML='<p><strong>Quelle est mon activité préférée et pourquoi ?</strong></p><p>Ligne 1</p><p>Ligne 2</p><p>Ligne 3</p><p>Ligne 4</p><p>Ligne 5</p><p>Ligne 6</p><p>Ligne 7</p><p>Ligne 8</p><p>Ligne 9</p><p>Ligne 10</p>';root.dispatchEvent(new Event('input',{bubbles:true}));return true;})()",
+      true
+    );
+  } else if (mode.fractions) {
     await win.webContents.executeJavaScript(
       "document.querySelector('.kaltest-fraction-item')?.click();true",
       true
@@ -144,7 +156,7 @@ app.whenReady().then(async () => {
     );
 
     if (initial.page !== 'page-identification') throw new Error('Le parcours ne démarre pas par Identification.');
-    if (initial.tests !== 18) throw new Error('Le moteur doit contenir les 18 migrations KALTEST validées.');
+    if (initial.tests !== 22) throw new Error('Le moteur doit contenir les 22 définitions KALTEST du parcours de base.');
     if (!initial.introVideo) throw new Error('Mini vidéo/animation d’introduction absente.');
     if (initial.introLegacyImage) throw new Error('L’ancienne image de couverture est encore présente sur Introduction.');
     if (initial.introCalculatorGuide) throw new Error('Le doublon de test calculatrice est encore présent sur Introduction.');
@@ -221,15 +233,19 @@ app.whenReady().then(async () => {
       'gestes_postures',
       'conversions_atelier_expedition',
       'autoevaluation_savoirs',
+      'transition_video_f1',
+      'construction_briques',
       'ranger_stock',
       'planning_cantine',
       'genre_nombre',
       'dictee_professionnelle',
       'tri_chevilles',
+      'traitement_texte_bureautique',
       'redaction_email',
       'autoevaluation_tic',
       'paronymes_rapport',
-      'gratte_ciel'
+      'gratte_ciel',
+      'fin_parcours'
     ];
 
     for (let index = 0; index < expectedIds.length; index += 1) {
@@ -245,9 +261,15 @@ app.whenReady().then(async () => {
         true
       );
       if (meta.scored) {
-        const expectedMax = testId === 'dictee_professionnelle' ? 20 : meta.questionCount;
-        if (perfect.score !== perfect.scoreMax || perfect.scoreMax !== expectedMax) {
-          throw new Error(testId + ' : moteur de correction partagé incorrect.');
+        if (testId === 'traitement_texte_bureautique') {
+          if (perfect.scoreMax !== 8 || perfect.score < 0 || perfect.score > 8) {
+            throw new Error(testId + ' : barème Traitement de texte /8 incorrect.');
+          }
+        } else {
+          const expectedMax = testId === 'dictee_professionnelle' ? 20 : meta.questionCount;
+          if (perfect.score !== perfect.scoreMax || perfect.scoreMax !== expectedMax) {
+            throw new Error(testId + ' : moteur de correction partagé incorrect.');
+          }
         }
       } else if (perfect.score !== 0 || perfect.scoreMax !== 0) {
         throw new Error(testId + ' : une autoévaluation non notée produit encore un score.');
@@ -256,7 +278,7 @@ app.whenReady().then(async () => {
       await assertNoOverflow(win, testId);
 
       const visualContract = await win.webContents.executeJavaScript(
-        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null,fractionItems:document.querySelectorAll('.kaltest-fraction-item').length,organisationRows:document.querySelectorAll('.kaltest-organisation-row').length,postureFields:document.querySelectorAll('.kaltest-postures-answer input').length,autoevalChoices:document.querySelectorAll('.kaltest-autoeval-choice input').length,stockPots:document.querySelectorAll('.kaltest-stock-pot').length,stockCases:document.querySelectorAll('.kaltest-stock-case').length,mailInputs:document.querySelectorAll('.kaltest-mail-composer input').length,mailTextarea:document.querySelectorAll('.kaltest-mail-composer textarea').length,dicteeAudio:document.querySelectorAll('.kaltest-dictee-player audio').length,dicteeTextarea:document.querySelectorAll('.kaltest-dictee-writing textarea').length,triRows:document.querySelectorAll('.kaltest-tri-row:not(.head)').length,triChronoButtons:document.querySelectorAll('.kaltest-tri-chrono-buttons button').length,builderGridInputs:document.querySelectorAll('.kaltest-builder-grid input[data-question-id]').length};})()",
+        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null,fractionItems:document.querySelectorAll('.kaltest-fraction-item').length,organisationRows:document.querySelectorAll('.kaltest-organisation-row').length,postureFields:document.querySelectorAll('.kaltest-postures-answer input').length,autoevalChoices:document.querySelectorAll('.kaltest-autoeval-choice input').length,stockPots:document.querySelectorAll('.kaltest-stock-pot').length,stockCases:document.querySelectorAll('.kaltest-stock-case').length,mailInputs:document.querySelectorAll('.kaltest-mail-composer input').length,mailTextarea:document.querySelectorAll('.kaltest-mail-composer textarea').length,dicteeAudio:document.querySelectorAll('.kaltest-dictee-player audio').length,dicteeTextarea:document.querySelectorAll('.kaltest-dictee-writing textarea').length,triRows:document.querySelectorAll('.kaltest-tri-row:not(.head)').length,triChronoButtons:document.querySelectorAll('.kaltest-tri-chrono-buttons button').length,transitionVideo:document.querySelectorAll('.kaltest-transition-video').length,briqueChrono:Boolean(document.getElementById('startBtn')&&document.getElementById('stopBtn')),briqueAdmin:Boolean(document.getElementById('secretCode')&&document.getElementById('validBtn')),textEditor:Boolean(document.querySelector('.kaltest-text-editor-tool .ql-editor')),textEditorFile:Boolean(document.getElementById('nw-file-menu-button')),textEditorImage:Boolean(document.getElementById('nw-image-button')),terminal:Boolean(document.querySelector('.kaltest-terminal-page')),builderGridInputs:document.querySelectorAll('.kaltest-builder-grid input[data-question-id]').length};})()",
         true
       );
 
@@ -284,6 +306,18 @@ app.whenReady().then(async () => {
       if (testId === 'autoevaluation_tic' && visualContract.autoevalChoices !== 6) {
         throw new Error('Autoévaluation 2 : 6 choix attendus : ' + JSON.stringify(visualContract));
       }
+      if (testId === 'transition_video_f1' && visualContract.transitionVideo !== 1) {
+        throw new Error('Transition vidéo F1 : vidéo plein écran absente : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'construction_briques' && (!visualContract.briqueChrono || !visualContract.briqueAdmin)) {
+        throw new Error('Briques : compteur ou validation administrateur absents : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'traitement_texte_bureautique' && (!visualContract.textEditor || !visualContract.textEditorFile || !visualContract.textEditorImage)) {
+        throw new Error('Traitement de texte : outil Éditeur KALONÉO incomplet : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'fin_parcours' && !visualContract.terminal) {
+        throw new Error('Fin de parcours : page terminale KALTEST absente : ' + JSON.stringify(visualContract));
+      }
       if (testId === 'ranger_stock' && (visualContract.stockPots !== 34 || visualContract.stockCases !== 35)) {
         throw new Error('Stock : 34 pots et 35 cases attendus : ' + JSON.stringify(visualContract));
       }
@@ -306,19 +340,34 @@ app.whenReady().then(async () => {
         throw new Error('Paronymes : police trop petite pour un test réel.');
       }
 
+      if (testId === 'transition_video_f1') {
+        await win.webContents.executeJavaScript("document.querySelector('.kaltest-transition-video')?.dispatchEvent(new Event('ended'));true",true);
+        await sleep(1750);
+        continue;
+      }
+      if (testId === 'fin_parcours') {
+        const terminal = await win.webContents.executeJavaScript("({id:window.sebKaltestPilot2.currentTest()?.id||'',finished:sessionStorage.getItem('seb_kaltest_parcours_finished'),text:document.querySelector('.kaltest-terminal-page')?.textContent||''})",true);
+        if (terminal.id!=='fin_parcours' || terminal.finished!=='1' || !/Félicitations/.test(terminal.text)) {
+          throw new Error('Page terminale KALTEST invalide : '+JSON.stringify(terminal));
+        }
+        break;
+      }
+
       await fillOneAnswer(win);
       const validateBeforeAdvance = await win.webContents.executeJavaScript("window.sebKaltestPilot2.currentTest()?.behavior?.validateBeforeAdvance===true",true);
       await win.webContents.executeJavaScript("document.getElementById('kaltest-next').click();true",true);
       await sleep(70);
       if (validateBeforeAdvance) {
         const validated = await win.webContents.executeJavaScript(
-          "({same:window.sebKaltestPilot2.currentTest()?.id||'',label:document.getElementById('kaltest-next')?.textContent||'',planning:sessionStorage.getItem('planningScore'),stock:sessionStorage.getItem('stockCorrect'),dictee:sessionStorage.getItem('dictee_data'),tri:sessionStorage.getItem('tri_cheville_data'),mail:sessionStorage.getItem('page8_data'),carre:sessionStorage.getItem('carre_magique_erreurs')})",
+          "({same:window.sebKaltestPilot2.currentTest()?.id||'',label:document.getElementById('kaltest-next')?.textContent||'',planning:sessionStorage.getItem('planningScore'),stock:sessionStorage.getItem('stockCorrect'),dictee:sessionStorage.getItem('dictee_data'),tri:sessionStorage.getItem('tri_cheville_data'),brique:sessionStorage.getItem('eval_brique'),nwtexte:(JSON.parse(sessionStorage.getItem('scores_data')||'{}').page7!==undefined),mail:sessionStorage.getItem('page8_data'),carre:sessionStorage.getItem('carre_magique_erreurs')})",
           true
         );
         const legacyOk = testId === 'planning_cantine' ? validated.planning !== null :
           testId === 'ranger_stock' ? validated.stock !== null :
           testId === 'dictee_professionnelle' ? validated.dictee !== null :
           testId === 'tri_chevilles' ? validated.tri !== null :
+          testId === 'construction_briques' ? validated.brique !== null :
+          testId === 'traitement_texte_bureautique' ? validated.nwtexte === true :
           testId === 'redaction_email' ? validated.mail !== null :
           testId === 'gratte_ciel' ? validated.carre !== null : true;
         if (validated.same !== testId || validated.label.trim() !== 'Suivant' || !legacyOk) {
@@ -339,25 +388,23 @@ app.whenReady().then(async () => {
       }
     }
 
-    if (await visiblePage(win) !== 'page-final') throw new Error('Page finale système attendue après les tests KALTEST.');
-
     const finalAudit = await win.webContents.executeJavaScript(
-      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.getElementById('page-final')?.textContent||''),date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page4','page5_q1','page5_1_q1','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null,auto1:sessionStorage.getItem('autoEval1_resultats')!==null,auto2:sessionStorage.getItem('autoEval2_resultats')!==null,planning:sessionStorage.getItem('planningScore')!==null,stock:sessionStorage.getItem('stockCorrect')!==null,dictee:sessionStorage.getItem('dictee_data')!==null,tri:sessionStorage.getItem('tri_cheville_data')!==null,mail:sessionStorage.getItem('page8_data')!==null,carre:sessionStorage.getItem('carre_magique_erreurs')!==null};})()",
+      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.querySelector('.kaltest-terminal-page')?.textContent||''),finished:sessionStorage.getItem('seb_kaltest_parcours_finished')==='1',date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page4','page5_q1','page5_1_q1','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),brique:sessionStorage.getItem('eval_brique')!==null,nwtexte:sc.page7!==undefined,paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null,auto1:sessionStorage.getItem('autoEval1_resultats')!==null,auto2:sessionStorage.getItem('autoEval2_resultats')!==null,planning:sessionStorage.getItem('planningScore')!==null,stock:sessionStorage.getItem('stockCorrect')!==null,dictee:sessionStorage.getItem('dictee_data')!==null,tri:sessionStorage.getItem('tri_cheville_data')!==null,mail:sessionStorage.getItem('page8_data')!==null,carre:sessionStorage.getItem('carre_magique_erreurs')!==null};})()",
       true
     );
-    if (!finalAudit.congrats) throw new Error('La page finale Félicitations du Build #20 n’est pas restaurée.');
-    if (!finalAudit.requiredLegacy || !finalAudit.paronymes || !finalAudit.genre || !finalAudit.auto1 || !finalAudit.auto2 || !finalAudit.planning || !finalAudit.stock || !finalAudit.dictee || !finalAudit.tri || !finalAudit.mail || !finalAudit.carre) {
+    if (!finalAudit.congrats || !finalAudit.finished) throw new Error('La page terminale KALTEST n’est pas correctement finalisée.');
+    if (!finalAudit.requiredLegacy || !finalAudit.brique || !finalAudit.nwtexte || !finalAudit.paronymes || !finalAudit.genre || !finalAudit.auto1 || !finalAudit.auto2 || !finalAudit.planning || !finalAudit.stock || !finalAudit.dictee || !finalAudit.tri || !finalAudit.mail || !finalAudit.carre) {
       throw new Error('Le pont KALTEST → Résultats/Bilan historiques est incomplet : ' + JSON.stringify(finalAudit));
     }
 
     console.log('KALTEST_PILOT2_FUNCTIONAL_SMOKE: OK');
     console.log('PILOT2_REAL_SEB_VISUALS=Introduction video + Scenario/Consigne icons');
-    console.log('PILOT2_DYNAMIC_TESTS=18');
-    console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + fractions + organisation + postures + stock + planning + dictation + tri + mail + autoevaluations + supplemental fields + two tables + single choice');
+    console.log('PILOT2_DYNAMIC_TESTS=22');
+    console.log('PILOT2_RENDERERS=basic + transition F1 + briques + stock + planning + dictation + tri + text-editor + mail + autoevaluations + grid + tables');
     console.log('PILOT2_FLOATING_CALCULATOR=OK');
     console.log('PILOT2_ABANDON_UI=4 reasons + admin password + NE');
     console.log('PILOT2_NO_VERTICAL_OVERFLOW=OK');
-    console.log('PILOT2_FINAL_PAGE=BUILD20_CONGRATULATIONS');
+    console.log('PILOT2_FINAL_PAGE=KALTEST_TERMINAL');
     console.log('PILOT2_LEGACY_RESULTS_BRIDGE=OK');
     console.log('PILOT2_CALCULATOR_CLOSE_ON_NAVIGATION=OK');
     console.log('PILOT2_GENRE_NOMBRE_TWO_TABLES=OK');
