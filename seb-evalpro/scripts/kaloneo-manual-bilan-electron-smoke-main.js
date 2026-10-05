@@ -38,6 +38,7 @@ ipcMain.handle('candidate-catalog:workspace-save',()=>({ok:true}));
 ipcMain.handle('replay:capture-page',()=>({ok:true}));
 ipcMain.handle('replay:list',()=>[]);
 ipcMain.handle('bilan-history:list',()=>[]);
+ipcMain.handle('kaloneo-library:get-mask-screen',()=>({ok:true,maskScreen:{id:'kaloneo-default',version:'1.0.0',name:'KALONÉO',content:{text:'KALONÉO',image:''}}}));
 
 app.commandLine.appendSwitch('disable-gpu');
 
@@ -75,7 +76,7 @@ app.whenReady().then(async()=>{
       text.value='Réponse pertinente avec quelques repères à consolider.';
       text.dispatchEvent(new Event('input',{bubbles:true}));
       document.getElementById('save').click();
-      const saved=JSON.parse(sessionStorage.getItem('seb_evalpro_bilan')||'{}');
+      const saved=JSON.parse(sessionStorage.getItem('admin_bilan_state')||'{}');
       return {
         selected:[...row.querySelectorAll('.level.on')].map(x=>x.dataset.l),
         rowId:row.dataset.r,
