@@ -2770,3 +2770,24 @@ Règles validées :
 - l’aperçu est une fonction Administrateur et reste interdit pendant un parcours candidat actif.
 
 Contrôle automatique associé : smoke Electron ouvrant le Builder, passant au rendu plein écran, contrôlant scénario, consigne, calculatrice, compteur et barre de navigation, puis revenant au Builder sans perte du brouillon.
+
+
+## 72. PILOTE 22 R4 — bibliothèque de tests, texte libre et écrans de masquage
+
+Décisions validées le 05/10/2026 après test réel du Test Builder R3 :
+
+- un test créé dans KALONÉO n’est pas seulement exporté en `test.json` : l’action d’enregistrement/génération l’inscrit dans la bibliothèque interne `KALONEO/Bibliotheque-tests` ;
+- l’export `test.json` reste disponible, mais n’est plus l’unique sauvegarde ;
+- l’ouverture normale de « Créer / modifier un test » reste vierge ; un test existant n’est ouvert que par une action explicite depuis la bibliothèque ou par import ;
+- une version déjà présente n’est jamais remplacée silencieusement : le remplacement demande confirmation ;
+- un nouveau type de réponse `free-text` est disponible sous le libellé « Texte libre — évaluation Administrateur » ;
+- la réponse texte libre du candidat est conservée telle quelle, n’est pas corrigée automatiquement, vaut 0 point automatique et est marquée pour évaluation manuelle `NE / I / II / III` ;
+- la bibliothèque Admin comporte une section distincte « Écrans de masquage » ;
+- l’écran de masquage est celui ouvert par le bouton candidat existant « Afficher l’écran d’accueil » : ce n’est ni une page d’accueil de parcours, ni une étape du parcours ;
+- un écran de masquage accepte uniquement : texte, image, ou texte + image ;
+- l’écran `KALONÉO` est fourni comme écran de masquage par défaut et reste protégé ;
+- un parcours peut sélectionner un autre écran de masquage ; si rien n’est défini, `KALONÉO` est prioritaire par défaut ;
+- le parcours reste strictement `Introduction → tests → Fin` ; l’écran de masquage est une configuration hors séquence ;
+- le bouton de fermeture conserve le libellé validé existant : « Masquer l’écran d’accueil » ;
+- fermer l’écran de masquage ramène au test en cours sans changer de route, réponse, état ou position dans le parcours ;
+- les pages Admin, Test Builder et aperçus restent sans bouton candidat « Afficher l’écran d’accueil ».
