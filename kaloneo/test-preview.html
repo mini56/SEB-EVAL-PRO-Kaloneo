@@ -4,12 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>KALONÉO — Aperçu Electron</title>
+  <link rel="stylesheet" href="../css/seb-design-system.css">
+  <link rel="stylesheet" href="../css/seb-floating-calculator.css">
   <link rel="stylesheet" href="../kaloneo/kaloneo-theme.css">
   <link rel="stylesheet" href="test-preview.css">
 </head>
 <body>
+  <div id="calc-container" style="display:none;">
+    <div id="calc-display">0</div>
+    <div id="keypad">
+      <button class="calc-btn" type="button">7</button><button class="calc-btn" type="button">8</button><button class="calc-btn" type="button">9</button><button class="calc-btn" type="button">/</button><br>
+      <button class="calc-btn" type="button">4</button><button class="calc-btn" type="button">5</button><button class="calc-btn" type="button">6</button><button class="calc-btn" type="button">x</button><br>
+      <button class="calc-btn" type="button">1</button><button class="calc-btn" type="button">2</button><button class="calc-btn" type="button">3</button><button class="calc-btn" type="button">-</button><br>
+      <button class="calc-btn" type="button">0</button><button class="calc-btn" type="button">.</button><button class="calc-btn" type="button">=</button><button class="calc-btn" type="button">+</button><br>
+      <button class="calc-btn" id="clear" type="button">C</button>
+      <button class="calc-btn-fermez" id="close" type="button">Fermer</button>
+    </div>
+  </div>
   <main id="kaloneo-real-preview" aria-live="polite"></main>
   <script src="builder-core.js"></script>
+  <script src="../js/seb-floating-calculator.js"></script>
   <script src="test-preview.js"></script>
 </body>
 </html>
