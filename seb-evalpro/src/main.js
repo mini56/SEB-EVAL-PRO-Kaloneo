@@ -383,6 +383,10 @@ function isAdminKaloneoBuilderPage(pageName) {
   return String(pageName || '').toLowerCase() === 'test-builder.html';
 }
 
+function isAdminMaskBuilderPage(pageName) {
+  return String(pageName || '').toLowerCase() === 'admin-mask-builder.html';
+}
+
 function isAdminKaloneoBuilderPreviewPage(pageName) {
   return String(pageName || '').toLowerCase() === 'test-preview.html';
 }
@@ -390,7 +394,8 @@ function isAdminKaloneoBuilderPreviewPage(pageName) {
 function isAdminNavigationPage(pageName) {
   return isAdminBilanPage(pageName) || isAdminCandidatePage(pageName) ||
     isAdminTestsParcoursPage(pageName) || isAdminParcoursBuilderPage(pageName) ||
-    isAdminKaloneoBuilderPage(pageName) || isAdminKaloneoBuilderPreviewPage(pageName);
+    isAdminKaloneoBuilderPage(pageName) || isAdminMaskBuilderPage(pageName) ||
+    isAdminKaloneoBuilderPreviewPage(pageName);
 }
 
 function existingWebPage(pageName) {
