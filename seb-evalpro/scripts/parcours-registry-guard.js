@@ -56,6 +56,7 @@ const expectedPilotRoutes = {
   'qcm-5_1':'kaltest-pilot2.html?fullParcours=1&segment=postures',
   'qcm-6':'kaltest-pilot2.html?fullParcours=1&segment=conversions',
   'autoeval1':'kaltest-pilot2.html?fullParcours=1&segment=autoeval1',
+  'stock':'kaltest-pilot2.html?fullParcours=1&segment=stock',
   'planning':'kaltest-pilot2.html?fullParcours=1&segment=planning',
   'genrenombres':'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre',
   'autoeval2':'kaltest-pilot2.html?fullParcours=1&segment=autoeval2',
