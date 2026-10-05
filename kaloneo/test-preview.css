@@ -101,3 +101,20 @@ body{font-family:Calibri,"Segoe UI",Arial,sans-serif;background:linear-gradient(
   margin:auto;
   object-fit:contain;
 }
+
+/* PILOTE 22 R3 — chrono + exercice partagent la hauteur disponible */
+.kb-workspace{
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.kb-workspace>.kb-tool-strip{
+  flex:0 0 auto;
+}
+.kb-workspace>.kb-layout{
+  flex:1 1 0;
+  height:auto;
+  min-height:0;
+}
