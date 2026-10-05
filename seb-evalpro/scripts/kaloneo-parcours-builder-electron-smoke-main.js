@@ -91,11 +91,14 @@ async function pointerDrag(win, sourceSelector, targetSelector) {
 app.whenReady().then(async()=>{
   const root=path.join(__dirname,'..'),web=path.join(root,'app','web'),target=path.join(web,'admin-parcours-builder.html');
   if(!fs.existsSync(target)) return fail('admin-parcours-builder.html absent de app/web');
-  const win=new BrowserWindow({show:false,width:1366,height:768,webPreferences:{preload:path.join(root,'src','preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:false}});
+  const win=new BrowserWindow({show:true,width:1366,height:768,webPreferences:{preload:path.join(root,'src','preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:false}});
   win.webContents.on('preload-error',(_e,p,error)=>fail('erreur preload '+String(p||''),{error:String(error?.stack||error)}));
 
   try{
-    await win.loadFile(target);await wait(900);
+    await win.loadFile(target);
+    win.show();
+    win.focus();
+    await wait(900);
 
     const initial=await win.webContents.executeJavaScript(`(()=>{
       const body=getComputedStyle(document.body);
