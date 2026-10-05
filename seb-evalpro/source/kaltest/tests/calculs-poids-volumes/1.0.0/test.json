@@ -1,0 +1,160 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "layout.single",
+    "calculator.host",
+    "bilan.bindings"
+  ],
+  "id": "calculs_poids_volumes",
+  "version": "1.0.0",
+  "title": "Calculs de poids et volumes",
+  "category": "mathematiques",
+  "description": "Calculer des poids et volumes dans une situation de préparation avant expédition.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "qcmv1.0.html#page2_1",
+    "sourceScript": "source/js/qcm-page2-1.js",
+    "legacyParcoursId": "qcm-2_1"
+  },
+  "calculator": {
+    "compatible": true,
+    "defaultEnabled": true
+  },
+  "scenario": "Vous devez vérifier le poids et le volume des produits avant expédition.",
+  "instruction": "Notez votre réponse pour chaque question dans ce tableau :",
+  "presentation": {
+    "layout": "single-block",
+    "responseTable": {
+      "headers": [
+        "Question N°",
+        "Réponse",
+        "Unités"
+      ],
+      "roundedInstitutionalStyle": true
+    },
+    "kaloneoLayout": {
+      "type": "questions-table-visual",
+      "ratio": "60/40",
+      "left": {
+        "order": [
+          "questions",
+          "responseTable"
+        ]
+      },
+      "right": {
+        "type": "image",
+        "orientation": "portrait",
+        "src": "",
+        "alt": "Illustration de l’exercice",
+        "placeholder": "Image verticale"
+      }
+    }
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "id1_calculs_poids_volumes",
+      "prompt": "Une boîte de clous pèse 2,5 kg. Quel est le poids total de 4 boîtes identiques ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "10"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": []
+    },
+    {
+      "id": "id2_calculs_poids_volumes",
+      "prompt": "Un colis contient 3 sacs de farine de 25 kg chacun. Quel est le poids total du colis ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "75"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": []
+    },
+    {
+      "id": "id3_calculs_poids_volumes",
+      "prompt": "Une bouteille contient 1,5 litre de produit. Combien de litres auront 8 bouteilles ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "12"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": []
+    },
+    {
+      "id": "id4_calculs_poids_volumes",
+      "prompt": "Le poids total d'une palette est de 480 kg. Si elle contient 20 cartons identiques, quel est le poids d'un carton ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "24"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": []
+    },
+    {
+      "id": "id5_calculs_poids_volumes",
+      "prompt": "Une cuve contient 200 litres d'eau. On en retire 35 litres. Quelle quantité d'eau reste-t-il dans la cuve ?",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "165"
+      ],
+      "points": 1,
+      "unitInput": true,
+      "unitScored": false,
+      "units": []
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.savoirs_fondamentaux.mathematiques.comprendre_enonce_consigne",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ]
+}
