@@ -1956,6 +1956,8 @@
           tri.liveSeconds = 0;
           activeTriChrono?.setSeconds?.(0);
           display.textContent = '00:00';
+          start.disabled = Number(tri.currentTri) > maxTris;
+          stop.disabled = true;
           setTimeout(()=>start.focus(),0);
         }
         tri.ready = false;
