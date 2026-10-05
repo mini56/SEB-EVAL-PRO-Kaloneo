@@ -3,6 +3,23 @@
 
   const STORAGE_KEY = 'nwtexte_save_simulation';
   let simulatedPath = null;
+  let simulatedContextKey = '';
+
+  function storageKey() {
+    const prefix = String(window.sebNwtexteContext?.storagePrefix || '');
+    return prefix ? prefix + STORAGE_KEY : STORAGE_KEY;
+  }
+  function localKey(base) {
+    const prefix = String(window.sebNwtexteContext?.storagePrefix || '');
+    return prefix ? prefix + base : base;
+  }
+  function syncContext() {
+    const key = storageKey();
+    if (simulatedContextKey !== key) {
+      simulatedContextKey = key;
+      simulatedPath = null;
+    }
+  }
 
   function readCandidateName() {
     try {
@@ -84,10 +101,10 @@
       date: new Date().toISOString()
     };
 
-    localStorage.setItem('dernierFichierTexte', clean);
-    localStorage.setItem('dernierEnregistrementSous', 'true');
-    localStorage.setItem('dernierEnregistrement', 'true');
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(localKey('dernierFichierTexte'), clean);
+    localStorage.setItem(localKey('dernierEnregistrementSous'), 'true');
+    localStorage.setItem(localKey('dernierEnregistrement'), 'true');
+    localStorage.setItem(storageKey(), JSON.stringify(state));
     simulatedPath = state;
 
     try {
@@ -101,12 +118,14 @@
 
   function restoreSimulationState() {
     try {
-      const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+      syncContext();
+      const value = JSON.parse(localStorage.getItem(storageKey()) || 'null');
       if (value && value.enregistre && value.nom) simulatedPath = value;
     } catch (_) {}
   }
 
   function openSaveDialog() {
+    syncContext();
     ensureStyles();
     document.getElementById('seb-fake-save-backdrop')?.remove();
 
@@ -220,6 +239,7 @@
   }
 
   function saveCurrentOrOpenDialog() {
+    syncContext();
     restoreSimulationState();
     if (!simulatedPath) {
       openSaveDialog();
