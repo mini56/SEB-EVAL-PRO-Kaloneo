@@ -59,33 +59,39 @@ async function pointerDrag(win, sourceSelector, targetSelector) {
     const target=document.querySelector(${JSON.stringify(targetSelector)});
     if(!source||!target) return null;
     source.scrollIntoView({block:'center',inline:'nearest'});
+    window.__sebDragTrace={down:0,move:0,up:0,downTarget:'',moveTarget:'',upTarget:''};
+    if(!window.__sebDragTraceInstalled){
+      window.__sebDragTraceInstalled=true;
+      document.addEventListener('mousedown',e=>{const t=window.__sebDragTrace;if(t){t.down++;t.downTarget=(e.target.id||e.target.className||e.target.tagName||'').toString();}},true);
+      document.addEventListener('mousemove',e=>{const t=window.__sebDragTrace;if(t){t.move++;t.moveTarget=(e.target.id||e.target.className||e.target.tagName||'').toString();}},true);
+      document.addEventListener('mouseup',e=>{const t=window.__sebDragTrace;if(t){t.up++;t.upTarget=(e.target.id||e.target.className||e.target.tagName||'').toString();}},true);
+    }
     const a=source.getBoundingClientRect();
     const b=target.getBoundingClientRect();
-    return {
-      sx:Math.round(a.left+Math.min(a.width/2,40)),
-      sy:Math.round(a.top+Math.min(a.height/2,22)),
-      tx:Math.round(b.left+Math.min(Math.max(20,b.width/2),Math.max(20,b.width-10))),
-      ty:Math.round(b.top+Math.min(Math.max(20,b.height/2),Math.max(20,b.height-10)))
-    };
+    const sx=Math.round(a.left+Math.min(a.width/2,40));
+    const sy=Math.round(a.top+Math.min(a.height/2,22));
+    const tx=Math.round(b.left+Math.min(Math.max(20,b.width/2),Math.max(20,b.width-10)));
+    const ty=Math.round(b.top+Math.min(Math.max(20,b.height/2),Math.max(20,b.height-10)));
+    const describe=(n)=>n?{id:n.id||'',className:String(n.className||''),tag:n.tagName||''}:null;
+    return {sx,sy,tx,ty,sourceHit:describe(document.elementFromPoint(sx,sy)),targetHit:describe(document.elementFromPoint(tx,ty))};
   })()`);
   if(!points) return {ok:false,reason:'élément absent'};
 
-  const send=(type,x,y,extra={})=>win.webContents.sendInputEvent({
-    type,x,y,button:'left',...extra
-  });
+  const send=(type,x,y,extra={})=>win.webContents.sendInputEvent({type,x,y,button:'left',...extra});
   send('mouseDown',points.sx,points.sy,{clickCount:1});
-  await wait(45);
+  await wait(55);
   send('mouseMove',points.sx+12,points.sy+8,{movementX:12,movementY:8});
-  await wait(45);
+  await wait(55);
   const midX=Math.round((points.sx+points.tx)/2);
   const midY=Math.round((points.sy+points.ty)/2);
   send('mouseMove',midX,midY,{movementX:midX-points.sx,movementY:midY-points.sy});
-  await wait(55);
+  await wait(65);
   send('mouseMove',points.tx,points.ty,{movementX:points.tx-midX,movementY:points.ty-midY});
-  await wait(70);
-  send('mouseUp',points.tx,points.ty,{clickCount:1});
   await wait(80);
-  return {ok:true,from:[points.sx,points.sy],to:[points.tx,points.ty]};
+  send('mouseUp',points.tx,points.ty,{clickCount:1});
+  await wait(100);
+  const trace=await win.webContents.executeJavaScript('window.__sebDragTrace');
+  return {ok:true,from:[points.sx,points.sy],to:[points.tx,points.ty],sourceHit:points.sourceHit,targetHit:points.targetHit,trace};
 }
 
 app.whenReady().then(async()=>{
