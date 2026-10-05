@@ -268,10 +268,9 @@
         event.preventDefault();
         if (payload.source === 'sequence') {
           const from = Number(payload.index);
-          let to = index;
-          if (from < to) to -= 1;
           const [moved] = state.tests.splice(from, 1);
-          state.tests.splice(Math.max(0, to), 0, moved);
+          const to = Math.max(0, Math.min(index, state.tests.length));
+          state.tests.splice(to, 0, moved);
         } else {
           const itemToAdd = libraryItem(payload.id, payload.version);
           if (itemToAdd && !state.tests.some(test => test.id === itemToAdd.id)) state.tests.splice(index, 0, itemToAdd);
