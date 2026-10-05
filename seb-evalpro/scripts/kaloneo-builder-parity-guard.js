@@ -77,6 +77,9 @@ const builderHtml=read(path.join(builderRoot,'test-builder.html'));
 const builderJs=read(path.join(builderRoot,'test-builder.js'));
 const previewHtml=read(path.join(builderRoot,'test-preview.html'));
 const previewJs=read(path.join(builderRoot,'test-preview.js'));
+const builderCss=read(path.join(builderRoot,'test-builder.css'));
+const previewCss=read(path.join(builderRoot,'test-preview.css'));
+const kaltestCss=read(path.join(sebRoot,'source','css','kaltest-pilot2.css'));
 const sharedCalculator=read(path.join(sebRoot,'source','js','seb-floating-calculator.js'));
 const kaltestRuntime=read(path.join(sebRoot,'source','js','kaltest-pilot2-runtime.js'));
 const prepare=read(path.join(sebRoot,'scripts','prepare-web.js'));
@@ -110,6 +113,20 @@ if(!sharedCalculator.includes("brand.textContent = 'KALONÉO'") ||
 }
 if(!kaltestRuntime.includes("test.calculator?.brandLabel ?? 'KALONÉO'")) {
   fail('Runtime KALTEST: libellé de calculatrice configurable absent');
+}
+
+for(const token of ["params.get('resume') === 'preview'","focusTitleField","startNewTest"]) {
+  if(!builderJs.includes(token)) fail('Test Builder R3 incomplet: '+token);
+}
+if(!main.includes("query:{ resume:'preview' }")) {
+  fail('Retour aperçu R3 sans reprise explicite du brouillon');
+}
+for(const token of ['overflow-y:auto','scrollbar-gutter:stable','preview-media-block']) {
+  if(!builderCss.includes(token)) fail('Scroll / média Builder R3 absent: '+token);
+}
+for(const token of ['PILOTE 22 R3','width:auto','height:auto','max-height:100%']) {
+  if(!previewCss.includes(token)) fail('Aperçu Electron R3 sans média borné: '+token);
+  if(!kaltestCss.includes(token)) fail('Runtime KALTEST R3 sans média borné: '+token);
 }
 
 if(!prepare.includes("copyTree(kaloneoBuilderDir,path.join(outputDir,'kaloneo-builder'))")) {
