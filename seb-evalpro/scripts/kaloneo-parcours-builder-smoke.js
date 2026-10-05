@@ -28,6 +28,33 @@ try {
 
   assert.ok(fs.existsSync(path.join(temp, 'KALONEO', 'Bibliotheque-tests')), 'bibliothèque interne absente');
   assert.ok(fs.existsSync(path.join(temp, 'KALONEO', 'Parcours')), 'dossier interne Parcours absent');
+  assert.ok(fs.existsSync(path.join(temp, 'KALONEO', 'Ecrans-masquage')), 'dossier interne Écrans de masquage absent');
+
+  const masks = library.listMaskScreens();
+  assert.ok(masks.some(item => item.id === 'kaloneo-default' && item.systemProvided), 'écran KALONÉO par défaut absent');
+
+  const customMask = library.saveMaskScreen({
+    id:'masque-smoke',
+    version:'1.0.0',
+    name:'Masque smoke',
+    content:{text:'Écran de test',image:''}
+  });
+  assert.strictEqual(customMask.ok, true, customMask.error || 'écran de masquage refusé');
+
+  const sourceDefinition = library.getTest(normal[0].id, normal[0].version);
+  assert.strictEqual(sourceDefinition.ok, true, 'lecture d’un test source impossible');
+  const generated = JSON.parse(JSON.stringify(sourceDefinition.definition));
+  generated.id = 'test_genere_smoke';
+  generated.version = '1.0.0';
+  generated.title = 'Test généré smoke';
+  const savedTest = library.saveTest(generated);
+  assert.strictEqual(savedTest.ok, true, savedTest.error || 'nouveau test non enregistré');
+  assert.ok(library.listTests().some(item => item.id === generated.id), 'nouveau test absent de la bibliothèque');
+  const duplicateTestVersion = library.saveTest(generated);
+  assert.strictEqual(duplicateTestVersion.ok, false, 'une version existante ne doit pas être remplacée silencieusement');
+  assert.strictEqual(duplicateTestVersion.code, 'EXISTS');
+  const overwrittenTest = library.saveTest(generated, {overwrite:true});
+  assert.strictEqual(overwrittenTest.ok, true, overwrittenTest.error || 'remplacement explicite impossible');
 
   const base = library.listParcours().find(item => item.id === 'parcours-de-base');
   assert.ok(base, 'Parcours de base absent');
@@ -38,6 +65,7 @@ try {
   const payload = {
     name:'Parcours long',
     creator:'Test automatisé',
+    maskScreen:{ id:'masque-smoke', version:'1.0.0' },
     introduction:{ id:intro[0].id, version:intro[0].version },
     tests:selected.map(item => ({ id:item.id, version:item.version })),
     fin:{ id:fins[0].id, version:fins[0].version }
@@ -48,6 +76,7 @@ try {
   assert.strictEqual(saved.parcours.name, 'Parcours long');
   assert.strictEqual(saved.parcours.creator, 'Test automatisé');
   assert.strictEqual(saved.parcours.tests.length, 3);
+  assert.deepStrictEqual(saved.parcours.maskScreen, {id:'masque-smoke',version:'1.0.0'});
 
   const duplicateName = library.saveParcours({ ...payload, name:'  PARCOURS   LONG  ' });
   assert.strictEqual(duplicateName.ok, false, 'le nom de parcours doit être unique');
