@@ -42,6 +42,7 @@ const expectedMigrated = [
   'qcm-5_1',
   'qcm-6',
   'autoeval1',
+  'stock',
   'planning',
   'genrenombres',
   'autoeval2',
