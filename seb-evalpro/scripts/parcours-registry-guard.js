@@ -63,6 +63,7 @@ const expectedPilotRoutes = {
   'genrenombres':'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre',
   'dictee':'kaltest-pilot2.html?fullParcours=1&segment=dictee',
   'tri-de-cheville':'kaltest-pilot2.html?fullParcours=1&segment=tri',
+  'nwtexte':'kaltest-pilot2.html?fullParcours=1&segment=nwtexte',
   'nvmail':'kaltest-pilot2.html?fullParcours=1&segment=mail',
   'autoeval2':'kaltest-pilot2.html?fullParcours=1&segment=autoeval2',
   'paronymes':'kaltest-pilot2.html?fullParcours=1&segment=paronymes',
@@ -103,7 +104,7 @@ const dicteeContract = api.resultContractFor('dictee');
 if (!dicteeContract || dicteeContract.storage !== 'dictee_data') fail('contrat Résultats dictée modifié');
 
 // Ordre actuellement validé autour du traitement de texte.
-if (api.nextUrl('tri-de-cheville') !== 'nwtexte.html?fullParcours=1') fail('tri KALTEST -> nwtexte modifié');
+if (api.nextUrl('tri-de-cheville') !== 'kaltest-pilot2.html?fullParcours=1&segment=nwtexte') fail('tri KALTEST -> Traitement de texte KALTEST modifié');
 if (api.nextUrl('nwtexte') !== 'kaltest-pilot2.html?fullParcours=1&segment=mail') fail('nwtexte -> mail KALTEST modifié');
 if (api.nextUrl('nvmail') !== 'kaltest-pilot2.html?fullParcours=1&segment=autoeval2') fail('mail KALTEST -> autoeval2 modifié');
 
