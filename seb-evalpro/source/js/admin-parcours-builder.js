@@ -107,18 +107,35 @@
     document.querySelectorAll('.pointer-drop-target').forEach(node => node.classList.remove('pointer-drop-target'));
   }
 
+  function pointInside(element, x, y) {
+    if (!element) return false;
+    const rect = element.getBoundingClientRect();
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+  }
+
   function pointerDropTargetAt(x, y, payload) {
-    const node = document.elementFromPoint(x, y);
-    if (!node) return null;
+    if (!payload) return null;
+
     if (payload.source === 'library' && payload.role === 'introduction') {
-      return node.closest('#intro-slot');
+      const intro = $('intro-slot');
+      return pointInside(intro, x, y) ? intro : null;
     }
+
     if (payload.source === 'library' && payload.role === 'fin') {
-      return node.closest('#fin-slot');
+      const fin = $('fin-slot');
+      return pointInside(fin, x, y) ? fin : null;
     }
+
     if (payload.role === 'test') {
-      return node.closest('.sequence-card') || node.closest('#tests-dropzone') || node.closest('.library-panel');
+      for (const card of document.querySelectorAll('#tests-dropzone .sequence-card')) {
+        if (pointInside(card, x, y)) return card;
+      }
+      const dropzone = $('tests-dropzone');
+      if (pointInside(dropzone, x, y)) return dropzone;
+      const libraryPanel = document.querySelector('.library-panel');
+      if (payload.source === 'sequence' && pointInside(libraryPanel, x, y)) return libraryPanel;
     }
+
     return null;
   }
 
