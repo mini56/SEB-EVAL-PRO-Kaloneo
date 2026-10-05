@@ -47,7 +47,7 @@ for (const [needle,label] of [
   ["id=\"seb-evalpro-tests-parcours\"", 'accès Tests / Parcours dans la barre Admin'],
   ['closeSessionButton.hidden = true', 'masquage fermeture session redondante'],
   ['testsParcoursButton.hidden = !!active || onAdminDetail || isAdminTestsParcoursPage();', 'Tests / Parcours masqué pendant un parcours actif'],
-  ['overflow:hidden;background:#004E70', 'barre Admin sans dépassement'],
+  ['overflow:hidden;background:#0070c0', 'barre Admin sans dépassement'],
   ["window.addEventListener('seb-kaltest-final'", 'écoute fin KALTEST']
 ]) must(preload, needle, label);
 
