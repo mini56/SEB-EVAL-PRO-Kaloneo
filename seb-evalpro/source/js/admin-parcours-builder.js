@@ -182,62 +182,82 @@
   }
 
   function armPointerDrag(event, payload, source, label) {
-    if (!event || event.button !== 0 || event.isPrimary === false) return;
+    if (!event || event.button !== 0) return;
     if (event.target?.closest?.('button,input,select,textarea,a')) return;
 
+    const pointerId = event.pointerId;
     const startX = event.clientX;
     const startY = event.clientY;
-    const pointerId = event.pointerId;
     let active = false;
     let ghost = null;
-    let target = null;
+
+    const pointTarget = (x, y) => pointerDropTargetAt(x, y, payload);
+
+    const activate = () => {
+      if (active) return;
+      active = true;
+      state.pointerDrag = { payload, source };
+      source.classList.add('pointer-dragging');
+      ghost = document.createElement('div');
+      ghost.className = 'pointer-drag-ghost';
+      ghost.textContent = label || payload.id || 'Élément';
+      document.body.appendChild(ghost);
+    };
+
+    const paint = (x, y) => {
+      if (!ghost) return;
+      ghost.style.left = Math.min(window.innerWidth - 250, Math.max(8, x + 14)) + 'px';
+      ghost.style.top = Math.min(window.innerHeight - 48, Math.max(8, y + 14)) + 'px';
+      clearPointerDropTargets();
+      const target = pointTarget(x, y);
+      if (target) target.classList.add('pointer-drop-target');
+
+      const panel = target?.closest?.('.library-panel,.sequence-scroll,.saved-panel');
+      if (panel) {
+        const rect = panel.getBoundingClientRect();
+        const edge = 34;
+        if (y < rect.top + edge) panel.scrollTop -= 18;
+        else if (y > rect.bottom - edge) panel.scrollTop += 18;
+      }
+    };
+
+    const cleanup = () => {
+      clearPointerDropTargets();
+      source.classList.remove('pointer-dragging');
+      if (ghost) ghost.remove();
+      ghost = null;
+      state.pointerDrag = null;
+      document.removeEventListener('pointermove', move, true);
+      document.removeEventListener('pointerup', finish, true);
+      document.removeEventListener('pointercancel', cancel, true);
+    };
 
     const move = moveEvent => {
-      if (moveEvent.pointerId !== pointerId) return;
+      if (pointerId != null && moveEvent.pointerId !== pointerId) return;
       const dx = moveEvent.clientX - startX;
       const dy = moveEvent.clientY - startY;
-      if (!active && Math.hypot(dx, dy) < 6) return;
-      if (!active) {
-        active = true;
-        source.classList.add('pointer-dragging');
-        ghost = document.createElement('div');
-        ghost.className = 'pointer-drag-ghost';
-        ghost.textContent = label || payload.id || 'Élément';
-        document.body.appendChild(ghost);
-        try { source.setPointerCapture(pointerId); } catch (_) {}
-      }
-
+      if (!active && Math.hypot(dx, dy) < 5) return;
+      activate();
       moveEvent.preventDefault();
-      ghost.style.left = Math.min(window.innerWidth - 250, Math.max(8, moveEvent.clientX + 14)) + 'px';
-      ghost.style.top = Math.min(window.innerHeight - 48, Math.max(8, moveEvent.clientY + 14)) + 'px';
-      clearPointerDropTargets();
-      target = pointerDropTargetAt(moveEvent.clientX, moveEvent.clientY, payload);
-      if (target) target.classList.add('pointer-drop-target');
+      paint(moveEvent.clientX, moveEvent.clientY);
     };
 
     const finish = endEvent => {
-      if (endEvent.pointerId !== pointerId) return;
-      document.removeEventListener('pointermove', move, true);
-      document.removeEventListener('pointerup', finish, true);
-      document.removeEventListener('pointercancel', cancel, true);
-      clearPointerDropTargets();
-      source.classList.remove('pointer-dragging');
-      if (ghost) ghost.remove();
-      try { source.releasePointerCapture(pointerId); } catch (_) {}
-      if (!active) return;
+      if (pointerId != null && endEvent.pointerId !== pointerId) return;
+      if (!active) {
+        cleanup();
+        return;
+      }
       endEvent.preventDefault();
-      if (applyPointerDrop(payload, target)) render();
+      const target = pointTarget(endEvent.clientX, endEvent.clientY);
+      const changed = applyPointerDrop(payload, target);
+      cleanup();
+      if (changed) render();
     };
 
     const cancel = cancelEvent => {
-      if (cancelEvent.pointerId !== pointerId) return;
-      document.removeEventListener('pointermove', move, true);
-      document.removeEventListener('pointerup', finish, true);
-      document.removeEventListener('pointercancel', cancel, true);
-      clearPointerDropTargets();
-      source.classList.remove('pointer-dragging');
-      if (ghost) ghost.remove();
-      try { source.releasePointerCapture(pointerId); } catch (_) {}
+      if (pointerId != null && cancelEvent.pointerId !== pointerId) return;
+      cleanup();
     };
 
     document.addEventListener('pointermove', move, { capture:true, passive:false });
