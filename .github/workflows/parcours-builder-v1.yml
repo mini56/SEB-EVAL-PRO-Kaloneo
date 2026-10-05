@@ -38,6 +38,9 @@ jobs:
       - name: Verify parcours builder in real Electron
         run: npx electron --no-sandbox scripts/kaloneo-parcours-builder-electron-smoke-main.js
 
+      - name: Verify KALONÉO Builder full Electron preview
+        run: npx electron --no-sandbox scripts/kaloneo-builder-preview-electron-smoke-main.js
+
       - name: Verify Admin foundation
         run: npm run test:admin-foundation
 
