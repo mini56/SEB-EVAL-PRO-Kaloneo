@@ -115,5 +115,6 @@
     "questionnaire.basic",
     "layout.split",
     "host.autoevaluation"
-  ]
+  ],
+  "autoevaluation": true
 }
