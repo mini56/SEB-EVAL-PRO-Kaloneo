@@ -186,9 +186,16 @@
   if (!brand) {
     brand = document.createElement('div');
     brand.className = 'seb-calc-brand';
-    brand.textContent = 'Sauvegarde 56';
+    brand.textContent = 'KALONÉO';
     container.appendChild(brand);
   }
+
+  window.setCalculatorBrand = function (value) {
+    const text = String(value == null ? '' : value).trim();
+    brand.textContent = text || '';
+    brand.hidden = !text;
+  };
+  window.setCalculatorBrand('KALONÉO');
 
   function setPosition(left, top) {
     const margin = 10;
