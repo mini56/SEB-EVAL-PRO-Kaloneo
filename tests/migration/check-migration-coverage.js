@@ -45,6 +45,7 @@ const expectedMigrated = [
   'stock',
   'planning',
   'genrenombres',
+  'nvmail',
   'autoeval2',
   'paronymes',
   'carre'
