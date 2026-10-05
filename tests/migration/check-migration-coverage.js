@@ -10,7 +10,11 @@ const matrixPath = path.join(__dirname, 'legacy-parcours-build20.json');
 const registrySource = fs.readFileSync(registryPath, 'utf8');
 const matrix = JSON.parse(fs.readFileSync(matrixPath, 'utf8'));
 
-const ids = [...registrySource.matchAll(/\bid\s*:\s*'([^']+)'/g)].map(match => match[1]);
+const legacyStart = registrySource.indexOf('const legacySteps');
+const legacyEnd = registrySource.indexOf('function legacyStep', legacyStart);
+if (legacyStart < 0 || legacyEnd < 0) throw new Error('Bloc legacySteps introuvable dans seb-parcours.js');
+const legacyRegistrySource = registrySource.slice(legacyStart, legacyEnd);
+const ids = [...legacyRegistrySource.matchAll(/\bid\s*:\s*'([^']+)'/g)].map(match => match[1]);
 const uniqueRegistryIds = [...new Set(ids)];
 const matrixIds = (matrix.steps || []).map(step => step.id);
 
@@ -65,5 +69,5 @@ for (const step of migrated) {
   }
 }
 
-console.log('LEGACY_PARCOURS_BUILD20_COVERAGE: OK — 24/24 étapes suivies');
+console.log('LEGACY_PARCOURS_BUILD20_COVERAGE: OK — 24/24 étapes historiques suivies');
 console.log('MIGRATED_CONTRACTS: ' + migrated.map(step => step.id + ' -> ' + step.targetTestId).join(' | '));
