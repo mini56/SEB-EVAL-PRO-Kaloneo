@@ -472,6 +472,19 @@
       };
     }
 
+    const manualItems = (test.questions || [])
+      .filter(question => question?.response?.type === 'free-text' || question?.manualEvaluation === true)
+      .map(question => ({
+        questionId:String(question.id || ''),
+        prompt:String(question.prompt || ''),
+        response:String(testState.answers?.[question.id] ?? ''),
+        level:null,
+        comment:'',
+        levels:Array.isArray(question.manualLevels) && question.manualLevels.length
+          ? question.manualLevels.slice()
+          : ['NE','I','II','III']
+      }));
+
     let score = 0;
     if (test.scored !== false) {
       for (const question of test.questions || []) {
@@ -484,7 +497,12 @@
       score,
       scoreMax,
       percentage: scoreMax > 0 ? (score / scoreMax) * 100 : 0,
-      details
+      details,
+      manualEvaluation:{
+        required:manualItems.length > 0,
+        levels:['NE','I','II','III'],
+        items:manualItems
+      }
     };
   }
 
