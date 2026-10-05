@@ -53,21 +53,27 @@
       "file": "qcmv1.0.html",
       "page": "4",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "fractions_preparation_lots",
+      "fixturePath": "tests/fixtures/kaltests/fractions-preparation-lots/1.0.0/test.json"
     },
     {
       "id": "qcm-5",
       "file": "qcmv1.0.html",
       "page": "5",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "organisation_demenagement",
+      "fixturePath": "tests/fixtures/kaltests/organisation-demenagement/1.0.0/test.json"
     },
     {
       "id": "qcm-5_1",
       "file": "qcmv1.0.html",
       "page": "5_1",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "gestes_postures",
+      "fixturePath": "tests/fixtures/kaltests/gestes-postures/1.0.0/test.json"
     },
     {
       "id": "qcm-6",
