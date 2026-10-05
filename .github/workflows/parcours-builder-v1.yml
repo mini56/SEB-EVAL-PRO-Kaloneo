@@ -35,6 +35,9 @@ jobs:
       - name: Rebuild real web application
         run: npm run prepare:web
 
+      - name: Verify parcours builder in real Electron
+        run: npx electron --no-sandbox scripts/kaloneo-parcours-builder-electron-smoke-main.js
+
       - name: Verify Admin foundation
         run: npm run test:admin-foundation
 
