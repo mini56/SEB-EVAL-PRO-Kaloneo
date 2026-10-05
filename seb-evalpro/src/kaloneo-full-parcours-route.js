@@ -2,11 +2,7 @@
 
 const INITIAL_ROUTE='kaltest-pilot2.html?fullParcours=1';
 const KALTEST_FILE='kaltest-pilot2.html';
-const LEGACY_CONTAINER_FILE='qcmv1.0.html';
-
 const KALTEST_SEGMENTS=new Set(['','initial','fractions','organisation','postures','conversions','autoeval1','transition-video-f1','brique','stock','planning','genre-nombre','dictee','tri','nwtexte','mail','autoeval2','paronymes','carre','fin']);
-const QCM_PAGES=new Set([]);
-const DIRECT_FILES=new Set([]);
 
 function fileName(value){
   return String(value||'').replace(/\\/g,'/').split('/').pop().toLowerCase();
@@ -17,9 +13,6 @@ function parseRelative(value){
   catch(_){return null;}
 }
 
-function qcmHash(page){
-  return page==='finale'?'pageFinale':'page'+page;
-}
 
 function normalizeCandidateRoute(value){
   const url=parseRelative(value);
@@ -35,18 +28,6 @@ function normalizeCandidateRoute(value){
     return KALTEST_FILE+'?'+params.toString();
   }
 
-  if(file===LEGACY_CONTAINER_FILE){
-    const page=String(url.searchParams.get('page')||'').trim();
-    if(!QCM_PAGES.has(page))return INITIAL_ROUTE;
-    const params=new URLSearchParams();
-    params.set('fullParcours','1');
-    params.set('page',page);
-    return LEGACY_CONTAINER_FILE+'?'+params.toString()+'#'+qcmHash(page);
-  }
-
-  if(DIRECT_FILES.has(file)){
-    return file+'?fullParcours=1';
-  }
 
   return INITIAL_ROUTE;
 }
@@ -64,7 +45,7 @@ function resolveStateRoute(state){
   if(explicit)return normalizeCandidateRoute(explicit);
 
   const oldPage=fileName(source.lastEvaluationPage||source.lastPage||'');
-  if(!oldPage||oldPage===LEGACY_CONTAINER_FILE)return INITIAL_ROUTE;
+  if(!oldPage)return INITIAL_ROUTE;
   return normalizeCandidateRoute(oldPage);
 }
 
@@ -84,7 +65,6 @@ function toLoadOptions(value){
 module.exports=Object.freeze({
   INITIAL_ROUTE,
   KALTEST_FILE,
-  LEGACY_CONTAINER_FILE,
   normalizeCandidateRoute,
   routeFromNavigationUrl,
   resolveStateRoute,
