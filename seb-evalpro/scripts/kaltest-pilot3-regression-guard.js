@@ -46,7 +46,7 @@ for (const [needle,label] of [
   ["document.getElementById('pageFinale') || document.getElementById('page-final')", 'fin commune'],
   ["id=\"seb-evalpro-tests-parcours\"", 'accès Tests / Parcours dans la barre Admin'],
   ['closeSessionButton.hidden = true', 'masquage fermeture session redondante'],
-  ['const hasActiveJourney = !!active', 'contexte parcours actif'],
+  ['testsParcoursButton.hidden = !!active || onAdminDetail || isAdminTestsParcoursPage();', 'Tests / Parcours masqué pendant un parcours actif'],
   ['overflow:hidden;background:#004E70', 'barre Admin sans dépassement'],
   ["window.addEventListener('seb-kaltest-final'", 'écoute fin KALTEST']
 ]) must(preload, needle, label);
