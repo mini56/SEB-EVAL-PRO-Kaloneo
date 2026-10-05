@@ -63,14 +63,14 @@ async function assertNoOverflow(win, label) {
 
 async function perfectResult(win) {
   return win.webContents.executeJavaScript(
-    "(function(){const test=window.sebKaltestPilot2.currentTest();const answers={};for(const q of test.questions||[]){if(q.response?.type==='duration')answers[q.id]=q.acceptedMinutes+' min';else answers[q.id]=Array.isArray(q.acceptedAnswers)?q.acceptedAnswers[0]:'';}for(const group of test.evaluation?.uniqueGroups||[]){(group.questionIds||[]).forEach((id,index)=>{answers[id]=(group.allowedValues||[])[index]||'';});}return window.sebKaltestPilot2.evaluateTest(test,{answers,units:{},supplemental:{}});})()",
+    "(function(){const test=window.sebKaltestPilot2.currentTest();const answers={};for(const q of test.questions||[]){if(q.response?.type==='duration')answers[q.id]=q.acceptedMinutes+' min';else answers[q.id]=Array.isArray(q.acceptedAnswers)?q.acceptedAnswers[0]:'';}for(const group of test.evaluation?.uniqueGroups||[]){(group.questionIds||[]).forEach((id,index)=>{answers[id]=(group.allowedValues||[])[index]||'';});}if(test.id==='redaction_email'){answers.mail_to='conseil.perso@sauvegarde56.org';answers.mail_cc='stage-pro@sauvegarde56.org';answers.mail_subject='YY Mail-SEB';answers.mail_file='Rapport_stage.docx';answers.mail_signature='Bonjour. Cordialement, YY XX 01.02.34.56.78';answers.mail_phone=answers.mail_signature;}return window.sebKaltestPilot2.evaluateTest(test,{answers,units:{},supplemental:{}});})()",
     true
   );
 }
 
 async function fillOneAnswer(win) {
   const mode = await win.webContents.executeJavaScript(
-    "({choice:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.choiceTable),fractions:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.fractionSelection),autoeval:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.autoevaluationForm)})",
+    "({choice:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.choiceTable),fractions:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.fractionSelection),autoeval:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.autoevaluationForm),mail:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.mailComposer)})",
     true
   );
 
@@ -82,6 +82,11 @@ async function fillOneAnswer(win) {
   } else if (mode.autoeval) {
     await win.webContents.executeJavaScript(
       "document.querySelector('.kaltest-autoeval-choice input')?.click();true",
+      true
+    );
+  } else if (mode.mail) {
+    await win.webContents.executeJavaScript(
+      "(function(){const input=document.querySelector('.kaltest-mail-composer input[data-question-id="mail_to"]');input.value='conseil.perso@sauvegarde56.org';input.dispatchEvent(new Event('input',{bubbles:true}));return true;})()",
       true
     );
   } else if (mode.choice) {
@@ -129,7 +134,7 @@ app.whenReady().then(async () => {
     );
 
     if (initial.page !== 'page-identification') throw new Error('Le parcours ne démarre pas par Identification.');
-    if (initial.tests !== 15) throw new Error('Le moteur doit contenir les 15 migrations KALTEST validées.');
+    if (initial.tests !== 16) throw new Error('Le moteur doit contenir les 16 migrations KALTEST validées.');
     if (!initial.introVideo) throw new Error('Mini vidéo/animation d’introduction absente.');
     if (initial.introLegacyImage) throw new Error('L’ancienne image de couverture est encore présente sur Introduction.');
     if (initial.introCalculatorGuide) throw new Error('Le doublon de test calculatrice est encore présent sur Introduction.');
@@ -209,6 +214,7 @@ app.whenReady().then(async () => {
       'ranger_stock',
       'planning_cantine',
       'genre_nombre',
+      'redaction_email',
       'autoevaluation_tic',
       'paronymes_rapport',
       'gratte_ciel'
@@ -237,7 +243,7 @@ app.whenReady().then(async () => {
       await assertNoOverflow(win, testId);
 
       const visualContract = await win.webContents.executeJavaScript(
-        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null,fractionItems:document.querySelectorAll('.kaltest-fraction-item').length,organisationRows:document.querySelectorAll('.kaltest-organisation-row').length,postureFields:document.querySelectorAll('.kaltest-postures-answer input').length,autoevalChoices:document.querySelectorAll('.kaltest-autoeval-choice input').length,stockPots:document.querySelectorAll('.kaltest-stock-pot').length,stockCases:document.querySelectorAll('.kaltest-stock-case').length,builderGridInputs:document.querySelectorAll('.kaltest-builder-grid input[data-question-id]').length};})()",
+        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null,fractionItems:document.querySelectorAll('.kaltest-fraction-item').length,organisationRows:document.querySelectorAll('.kaltest-organisation-row').length,postureFields:document.querySelectorAll('.kaltest-postures-answer input').length,autoevalChoices:document.querySelectorAll('.kaltest-autoeval-choice input').length,stockPots:document.querySelectorAll('.kaltest-stock-pot').length,stockCases:document.querySelectorAll('.kaltest-stock-case').length,mailInputs:document.querySelectorAll('.kaltest-mail-composer input').length,mailTextarea:document.querySelectorAll('.kaltest-mail-composer textarea').length,builderGridInputs:document.querySelectorAll('.kaltest-builder-grid input[data-question-id]').length};})()",
         true
       );
 
@@ -268,6 +274,9 @@ app.whenReady().then(async () => {
       if (testId === 'ranger_stock' && (visualContract.stockPots !== 34 || visualContract.stockCases !== 35)) {
         throw new Error('Stock : 34 pots et 35 cases attendus : ' + JSON.stringify(visualContract));
       }
+      if (testId === 'redaction_email' && (visualContract.mailInputs !== 3 || visualContract.mailTextarea !== 1)) {
+        throw new Error('Mail : champs À/Cc/Objet et message attendus : ' + JSON.stringify(visualContract));
+      }
       if (testId === 'gratte_ciel' && visualContract.builderGridInputs !== 16) {
         throw new Error('Gratte-ciel : 16 cases de réponse attendues : ' + JSON.stringify(visualContract));
       }
@@ -284,11 +293,12 @@ app.whenReady().then(async () => {
       await sleep(70);
       if (validateBeforeAdvance) {
         const validated = await win.webContents.executeJavaScript(
-          "({same:window.sebKaltestPilot2.currentTest()?.id||'',label:document.getElementById('kaltest-next')?.textContent||'',planning:sessionStorage.getItem('planningScore'),stock:sessionStorage.getItem('stockCorrect'),carre:sessionStorage.getItem('carre_magique_erreurs')})",
+          "({same:window.sebKaltestPilot2.currentTest()?.id||'',label:document.getElementById('kaltest-next')?.textContent||'',planning:sessionStorage.getItem('planningScore'),stock:sessionStorage.getItem('stockCorrect'),mail:sessionStorage.getItem('page8_data'),carre:sessionStorage.getItem('carre_magique_erreurs')})",
           true
         );
         const legacyOk = testId === 'planning_cantine' ? validated.planning !== null :
           testId === 'ranger_stock' ? validated.stock !== null :
+          testId === 'redaction_email' ? validated.mail !== null :
           testId === 'gratte_ciel' ? validated.carre !== null : true;
         if (validated.same !== testId || validated.label.trim() !== 'Suivant' || !legacyOk) {
           throw new Error(testId + ' : validation avant navigation incorrecte : ' + JSON.stringify(validated));
@@ -311,18 +321,18 @@ app.whenReady().then(async () => {
     if (await visiblePage(win) !== 'page-final') throw new Error('Page finale système attendue après les tests KALTEST.');
 
     const finalAudit = await win.webContents.executeJavaScript(
-      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.getElementById('page-final')?.textContent||''),date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page4','page5_q1','page5_1_q1','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null,auto1:sessionStorage.getItem('autoEval1_resultats')!==null,auto2:sessionStorage.getItem('autoEval2_resultats')!==null,planning:sessionStorage.getItem('planningScore')!==null,stock:sessionStorage.getItem('stockCorrect')!==null,carre:sessionStorage.getItem('carre_magique_erreurs')!==null};})()",
+      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.getElementById('page-final')?.textContent||''),date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page4','page5_q1','page5_1_q1','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null,auto1:sessionStorage.getItem('autoEval1_resultats')!==null,auto2:sessionStorage.getItem('autoEval2_resultats')!==null,planning:sessionStorage.getItem('planningScore')!==null,stock:sessionStorage.getItem('stockCorrect')!==null,mail:sessionStorage.getItem('page8_data')!==null,carre:sessionStorage.getItem('carre_magique_erreurs')!==null};})()",
       true
     );
     if (!finalAudit.congrats) throw new Error('La page finale Félicitations du Build #20 n’est pas restaurée.');
-    if (!finalAudit.requiredLegacy || !finalAudit.paronymes || !finalAudit.genre || !finalAudit.auto1 || !finalAudit.auto2 || !finalAudit.planning || !finalAudit.stock || !finalAudit.carre) {
+    if (!finalAudit.requiredLegacy || !finalAudit.paronymes || !finalAudit.genre || !finalAudit.auto1 || !finalAudit.auto2 || !finalAudit.planning || !finalAudit.stock || !finalAudit.mail || !finalAudit.carre) {
       throw new Error('Le pont KALTEST → Résultats/Bilan historiques est incomplet : ' + JSON.stringify(finalAudit));
     }
 
     console.log('KALTEST_PILOT2_FUNCTIONAL_SMOKE: OK');
     console.log('PILOT2_REAL_SEB_VISUALS=Introduction video + Scenario/Consigne icons');
-    console.log('PILOT2_DYNAMIC_TESTS=15');
-    console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + fractions + organisation + postures + planning + autoevaluations + supplemental fields + two tables + single choice');
+    console.log('PILOT2_DYNAMIC_TESTS=16');
+    console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + fractions + organisation + postures + stock + planning + mail + autoevaluations + supplemental fields + two tables + single choice');
     console.log('PILOT2_FLOATING_CALCULATOR=OK');
     console.log('PILOT2_ABANDON_UI=4 reasons + admin password + NE');
     console.log('PILOT2_NO_VERTICAL_OVERFLOW=OK');
