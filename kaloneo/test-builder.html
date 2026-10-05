@@ -15,6 +15,7 @@
     </div>
     <div class="builder-top-actions">
       <button id="back-tests" class="seb-action-btn seb-btn-functional" type="button">← Tests / Parcours</button>
+      <button id="open-library-test" class="seb-action-btn seb-btn-functional" type="button">Ouvrir la bibliothèque</button>
       <button id="import-json" class="seb-action-btn seb-btn-functional" type="button">Importer test.json</button>
       <input id="import-json-file" type="file" accept=".json,application/json" hidden>
       <button id="new-test" class="seb-action-btn seb-btn-danger" type="button">Nouveau</button>
@@ -292,6 +293,20 @@
       <div class="block-body"></div>
     </article>
   </template>
+
+  <dialog id="test-library-dialog" class="test-library-dialog">
+    <div class="dialog-head">
+      <div>
+        <h2>Bibliothèque de tests</h2>
+        <p>Choisissez explicitement le test à modifier.</p>
+      </div>
+      <button id="close-test-library" class="mini-btn" type="button">Fermer</button>
+    </div>
+    <label>Rechercher
+      <input id="test-library-search" type="search" placeholder="Nom ou catégorie">
+    </label>
+    <div id="test-library-list" class="test-library-list"></div>
+  </dialog>
 
   <script src="icon-library.js"></script>
   <script src="builder-core.js"></script>
