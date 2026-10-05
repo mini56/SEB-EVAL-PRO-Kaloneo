@@ -82,6 +82,11 @@
       startPhase:'exercise',
       ids:Object.freeze(['tri_chevilles'])
     }),
+    nwtexte:Object.freeze({
+      stepId:'nwtexte',
+      startPhase:'exercise',
+      ids:Object.freeze(['traitement_texte_bureautique'])
+    }),
     mail:Object.freeze({
       stepId:'nvmail',
       startPhase:'exercise',
@@ -374,6 +379,25 @@
         Boolean(prenom && nom && messageNorm) && (messageNorm.includes(prenomNom) || messageNorm.includes(nomPrenom));
       if (details.mail_phone) details.mail_phone.correct =
         /(^|[^\d])0\d(?:[\s.,\/-]?\d{2}){4}(?!\d)/.test(message);
+    }
+
+    if (test.evaluation?.nwtexteRules === true) {
+      const config = (test.presentation?.builderContent || []).find(item => item?.type === 'text-editor')?.config || {};
+      window.sebNwtexteContext = {
+        storagePrefix:'seb_kaltest_editor:' + test.id + ':',
+        legacyPage7:config.scoringProfile === 'seb-bureautique-v1'
+      };
+      const analyse = window.sebNwtexteEditor?.saveEvaluation?.() || null;
+      const score = Math.max(0, Number(analyse?.score?.total) || 0);
+      testState.answers.text_editor_html = window.sebNwtexteEditor?.editorHtml?.() || '';
+      testState.answers.text_editor_text = window.sebNwtexteEditor?.editorText?.() || '';
+      return {
+        score,
+        scoreMax:Number(test.evaluation?.scoreMax) || 8,
+        percentage:(Number(test.evaluation?.scoreMax) || 8) > 0 ? (score / (Number(test.evaluation?.scoreMax) || 8)) * 100 : 0,
+        details,
+        textEditor:{analyse}
+      };
     }
 
     if (test.evaluation?.bricksRules === true) {
@@ -2733,6 +2757,101 @@
     return true;
   }
 
+  function renderTextEditorTool(test, item) {
+    const config = Object.assign({fileSimulation:true,imageSimulation:true,scoringProfile:'none'}, item.config || {});
+    const wrap = document.createElement('div');
+    wrap.className = 'kaltest-text-editor-tool';
+    wrap.dataset.scoringProfile = config.scoringProfile;
+
+    wrap.innerHTML = `
+      <div id="toolbar" class="kaltest-text-editor-toolbar">
+        <div class="menu-container">
+          <button id="nw-file-menu-button" type="button">📂 Fichier ▼</button>
+          <div id="menu-fichier">
+            <div id="nw-file-open">📂 Ouvrir</div>
+            <div id="nw-file-save">💾 Enregistrer (.html)</div>
+            <div id="nw-file-save-as">💾 Enregistrer sous...</div>
+            <div id="nw-file-close">❌ Fermer</div>
+          </div>
+        </div>
+        <button id="btn-bold" type="button" title="Gras"><b>G</b></button>
+        <button id="btn-italic" type="button" title="Italique"><i>I</i></button>
+        <button id="btn-underline" type="button" title="Souligné"><u>U</u></button>
+        <button id="btn-ul" type="button" title="Liste à puces">• Liste</button>
+        <button id="btn-ol" type="button" title="Liste numérotée">1. Liste</button>
+        <button id="btn-left" type="button" title="Aligner à gauche">☰</button>
+        <button id="btn-center" type="button" title="Centrer">≡</button>
+        <button id="btn-right" type="button" title="Aligner à droite">☷</button>
+        <button id="btn-cut" type="button">Couper</button>
+        <button id="btn-copy" type="button">Copier</button>
+        <button id="btn-paste" type="button">Coller</button>
+      </div>
+      <div class="toolbar-row2 kaltest-text-editor-toolbar">
+        <select id="nw-font" title="Changer la police">
+          <option value="Arial">Arial</option><option value="Calibri" selected>Calibri</option>
+          <option value="Times New Roman">Times New Roman</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option>
+        </select>
+        <select id="nw-size" title="Taille du texte">
+          <option value="10pt">10</option><option value="12pt">12</option><option value="14pt" selected>14</option>
+          <option value="16pt">16</option><option value="18pt">18</option><option value="24pt">24</option><option value="32pt">32</option><option value="48pt">48</option>
+        </select>
+        <div class="color-picker-container">
+          <button id="nw-text-color-button" class="color-picker-btn" type="button" title="Couleur du texte"><span class="color-indicator" id="text-color-indicator"></span><strong>A</strong></button>
+          <div class="color-picker-menu" id="text-color-menu">
+            <button type="button" class="color-swatch" data-seb-color-type="text" data-seb-color="#000000" title="Noir"></button>
+            <button type="button" class="color-swatch" data-seb-color-type="text" data-seb-color="#0000FF" title="Bleu"></button>
+            <button type="button" class="color-swatch" data-seb-color-type="text" data-seb-color="#FF0000" title="Rouge"></button>
+            <input type="color" id="custom-text-color" value="#000000" title="Couleur personnalisée">
+          </div>
+        </div>
+        <div class="color-picker-container">
+          <button id="nw-highlight-color-button" class="color-picker-btn" type="button" title="Surlignage"><span class="color-indicator" id="highlight-color-indicator"></span>▰</button>
+          <div class="color-picker-menu" id="highlight-color-menu">
+            <button type="button" class="color-swatch" data-seb-color-type="highlight" data-seb-color="#FFFF00" title="Jaune"></button>
+            <button type="button" class="color-swatch" data-seb-color-type="highlight" data-seb-color="#90EE90" title="Vert"></button>
+            <input type="color" id="custom-highlight-color" value="#FFFF00" title="Surlignage personnalisé">
+          </div>
+        </div>
+        <select id="nw-line-height" title="Interligne">
+          <option value="1">Simple</option><option value="1.15">1.15</option><option value="1.5">1.5</option><option value="2">Double</option>
+        </select>
+        <button id="nw-image-button" type="button" title="Insérer une image">🖼️ Image</button>
+      </div>
+      <div id="editor" class="kaltest-text-editor-paper" spellcheck="false"></div>
+    `;
+
+    if (!config.fileSimulation) {
+      wrap.querySelector('#nw-file-menu-button')?.remove();
+      wrap.querySelector('#menu-fichier')?.remove();
+    }
+    if (!config.imageSimulation) wrap.querySelector('#nw-image-button')?.remove();
+
+    requestAnimationFrame(() => {
+      if (!wrap.isConnected) return;
+      window.sebNwtexteContext = {
+        storagePrefix:'seb_kaltest_editor:' + test.id + ':',
+        legacyPage7:config.scoringProfile === 'seb-bureautique-v1'
+      };
+      if (!window.sebNwtexteEditor?.initialize?.()) {
+        document.getElementById('exercise-status').textContent = 'Éditeur de texte indisponible.';
+        return;
+      }
+      window.sebNwtextePage?.install?.();
+      const testState = testStateFor(test);
+      const root = wrap.querySelector('#editor .ql-editor');
+      const sync = () => {
+        testState.answers.text_editor_html = window.sebNwtexteEditor?.editorHtml?.() || '';
+        testState.answers.text_editor_text = window.sebNwtexteEditor?.editorText?.() || '';
+        if (testState.answers.text_editor_text.trim()) testState.status = 'ACTIVE';
+        persist();
+      };
+      root?.addEventListener('input', sync);
+      sync();
+    });
+
+    return wrap;
+  }
+
   function renderBuilderContentItem(test, item) {
     const wrap = document.createElement('div');
     wrap.className = 'kaltest-builder-content-item';
@@ -2753,6 +2872,7 @@
       return wrap;
     }
     if (['image','audio','video'].includes(item.type)) return renderBuilderMedia(item);
+    if (item.type === 'text-editor') return renderTextEditorTool(test, item);
     if (item.type === 'question') {
       const question = questionById(test, item.questionId);
       if (question) {
@@ -3043,6 +3163,17 @@
         updatedAt:new Date().toISOString()
       }));
       sessionStorage.setItem('seb_exercise_activity:dictee.html', '1');
+    } else if (test.id === 'traitement_texte_bureautique') {
+      const analyse = result.textEditor?.analyse || null;
+      if (analyse) {
+        responses.page7_contenu_html = analyse.html || '';
+        responses.page7_contenu_texte = window.sebNwtexteEditor?.editorText?.() || testState.answers?.text_editor_text || '';
+        responses.page7_delta = window.sebNwtexteEditor?.getContents?.() || null;
+        responses.page7_analyse = analyse;
+        scores.page7 = Number(result.score) || 0;
+        scores.page7_detail = analyse.score || {};
+      }
+      sessionStorage.setItem('seb_exercise_activity:nwtexte.html','1');
     } else if (test.id === 'redaction_email') {
       const value = id => String(testState.answers?.[id] ?? '');
       const detail = id => testState.result?.details?.[id]?.correct ? 1 : 0;
@@ -3123,6 +3254,7 @@
     document.body.dataset.sebKaltestId = test.id;
     document.body.classList.remove('seb-kaltest-transition-video','seb-kaltest-terminal');
     document.body.dataset.sebKaltestLabel = test.title;
+    window.sebNwtexteContext = null;
 
     document.getElementById('kaltest-title').textContent = test.title || 'Exercice';
     document.getElementById('kaltest-progress').textContent =
