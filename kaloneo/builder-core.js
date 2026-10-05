@@ -12,10 +12,10 @@
     'questionnaire.supplemental-fields','questionnaire.inline-gaps','questionnaire.single-choice-table',
     'questionnaire.grid','layout.single','layout.split','calculator.host','host.calculator','host.chrono',
     'host.admin-intervention','host.autoevaluation','host.external-material','host.text-editor','media.image','media.audio',
-    'media.video','content.html','content.html-js','bilan.bindings'
+    'media.video','content.html','content.html-js','bilan.bindings','questionnaire.free-text-manual'
   ]);
   const RESPONSE_TYPES=new Set([
-    'text','number','number-unit','duration','single-choice','multiple-choice','boolean','select'
+    'text','free-text','number','number-unit','duration','single-choice','multiple-choice','boolean','select'
   ]);
   const LAYOUTS=new Set(['single','50-50','40-60','60-40','chars-rest']);
   const LEGACY_LAYOUTS=new Set(['single-block']);
@@ -60,6 +60,7 @@
         id:String(q.id||''),
         prompt:String(q.prompt||''),
         responseType:String(q.response?.type||'text'),
+        manualEvaluation:Boolean(q.manualEvaluation)||String(q.response?.type||'')==='free-text',
         normalizer:q.response?.normalizer||'',
         acceptedAnswers:q.response?.type==='multiple-choice'
           ? ((Array.isArray(q.acceptedAnswers?.[0])?q.acceptedAnswers[0]:q.acceptedAnswers)||[]).join('; ')
@@ -313,18 +314,20 @@
     const options=splitValues(q.options);
     if(options.length) response.options=options;
     if(q.normalizer) response.normalizer=q.normalizer;
+    const manual=response.type==='free-text'||q.manualEvaluation===true;
     const out={
       id,
       prompt:q.prompt||'',
       response,
-      points:q.example?0:Math.max(0,Number(q.points)||0),
-      example:Boolean(q.example)
+      points:(q.example||manual)?0:Math.max(0,Number(q.points)||0),
+      example:Boolean(q.example),
+      manualEvaluation:manual
     };
     if(response.type==='duration'){
       out.acceptedMinutes=Math.max(0,Number(q.acceptedMinutes)||0);
     } else if(response.type==='multiple-choice'){
       out.acceptedAnswers=[splitValues(q.acceptedAnswers)];
-    } else {
+    } else if(response.type!=='free-text') {
       out.acceptedAnswers=splitValues(q.acceptedAnswers);
     }
     const units=splitValues(q.units);
@@ -523,6 +526,7 @@
     }
     const features=['runtime.basic'];
     if(questions.length) features.push('questionnaire.basic');
+    if(questions.some(q=>q.response?.type==='free-text'||q.manualEvaluation===true)) features.push('questionnaire.free-text-manual');
     if((model.blocks||[]).some(b=>['table-grid','response-table','multiple-tables'].includes(b.type))) features.push('questionnaire.table');
     if((model.blocks||[]).some(b=>b.type==='table-grid')) features.push('questionnaire.grid');
     if((model.blocks||[]).some(b=>b.type==='inline-flow')) features.push('questionnaire.inline-gaps');
