@@ -15,7 +15,10 @@ function expect(actual,expected,label){
 
 expect(policy.normalizeCandidateRoute('qcmv1.0.html'),policy.INITIAL_ROUTE,'ancien point d’entrée QCM doit être refusé');
 expect(policy.normalizeCandidateRoute('qcmv1.0.html?page=1#page1'),policy.INITIAL_ROUTE,'ancienne page 1 doit être refusée');
-expect(policy.normalizeCandidateRoute('qcmv1.0.html?page=4#page4'),'qcmv1.0.html?fullParcours=1&page=4#page4','page 4 autorisée uniquement dans le parcours KALONÉO');
+expect(policy.normalizeCandidateRoute('qcmv1.0.html?page=4#page4'),policy.INITIAL_ROUTE,'ancienne page 4 doit être refusée après migration KALTEST');
+expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=fractions'),'kaltest-pilot2.html?fullParcours=1&segment=fractions','segment Fractions KALTEST');
+expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=organisation'),'kaltest-pilot2.html?fullParcours=1&segment=organisation','segment Organisation KALTEST');
+expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=postures'),'kaltest-pilot2.html?fullParcours=1&segment=postures','segment Postures KALTEST');
 expect(policy.normalizeCandidateRoute('qcmv1.0.html?fullParcours=1&page=finale#pageFinale'),'qcmv1.0.html?fullParcours=1&page=finale#pageFinale','page finale KALONÉO');
 expect(policy.normalizeCandidateRoute('brique.html'),'brique.html?fullParcours=1','page pratique doit rester dans le parcours KALONÉO');
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=genre-nombre'),'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre','segment KALTEST doit forcer fullParcours');
@@ -24,7 +27,8 @@ expect(policy.normalizeCandidateRoute('page-inconnue.html'),policy.INITIAL_ROUTE
 
 expect(policy.resolveStateRoute({lastEvaluationPage:'qcmv1.0.html'}),policy.INITIAL_ROUTE,'ancienne reprise qcm sans page doit être neutralisée');
 expect(policy.resolveStateRoute({lastEvaluationPage:'brique.html'}),'brique.html?fullParcours=1','ancienne reprise d’une page unique reste possible');
-expect(policy.resolveStateRoute({lastEvaluationRoute:'qcmv1.0.html?page=5#page5'}),'qcmv1.0.html?fullParcours=1&page=5#page5','reprise exacte qcm doit être normalisée');
+expect(policy.resolveStateRoute({lastEvaluationRoute:'qcmv1.0.html?page=5#page5'}),policy.INITIAL_ROUTE,'ancienne reprise page 5 doit être neutralisée après migration KALTEST');
+expect(policy.resolveStateRoute({lastEvaluationRoute:'kaltest-pilot2.html?segment=postures'}),'kaltest-pilot2.html?fullParcours=1&segment=postures','reprise exacte segment Postures');
 
 const parcours=fs.readFileSync(path.join(root,'source','js','seb-parcours.js'),'utf8');
 const pilotStart=parcours.indexOf('const pilot11Steps');
