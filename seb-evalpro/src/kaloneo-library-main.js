@@ -175,7 +175,7 @@ function createKaloneoLibrary(options = {}) {
   }
 
   function ensureBaseParcours() {
-    if (readAllParcours().length) return;
+    if (readAllParcours().some(item => item && item.id === 'parcours-de-base')) return;
     const definitions = scanLatestDefinitions();
     const introRecord = [...definitions.values()].find(record => roleOf(record.definition) === 'introduction');
     const finRecord = [...definitions.values()].find(record => roleOf(record.definition) === 'fin');
