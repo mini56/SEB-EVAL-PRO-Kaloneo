@@ -26,7 +26,13 @@ for (const [needle,label] of [
   ["window.closeCalculator?.()", 'fermeture calculatrice'],
   ["window.dispatchEvent(new CustomEvent('seb-kaltest-final'))", 'signal fin KALTEST'],
   ["input.placeholder = ''", 'suppression exemples horaires'],
-  ["className = 'kaltest-table kaltest-grammar-table'", 'deux tableaux Genre/Nombre']
+  ["className = 'kaltest-table kaltest-grammar-table'", 'deux tableaux Genre/Nombre'],
+  ["test.id === 'fractions_preparation_lots'", 'pont Fractions Résultats/Bilan'],
+  ["test.id === 'organisation_demenagement'", 'pont Organisation Résultats/Bilan'],
+  ["test.id === 'gestes_postures'", 'pont Postures Résultats'],
+  ["function renderFractions(test, host)", 'rendu Fractions KALTEST'],
+  ["function renderOrganisation(test, host)", 'rendu Organisation KALTEST'],
+  ["function renderPostures(test, host)", 'rendu Postures KALTEST']
 ]) must(runtime, needle, label);
 
 for (const [needle,label] of [
