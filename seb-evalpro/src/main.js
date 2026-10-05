@@ -9,6 +9,7 @@ const appPackage = require('../package.json');
 const APP_BUILD_NUMBER = String(appPackage.sebBuildNumber || '').trim() || 'DEV';
 const { createCandidateStore } = require('./candidate-store-main');
 const { createCandidateTransfer } = require('./candidate-transfer-main');
+const { createKaloneoLibrary } = require('./kaloneo-library-main');
 const { configureLocalKey, readJsonFile, encodeJson, migrateJsonFile, migrateJsonTree } = require('./candidate-data-crypto');
 const { createCandidateLocalProtection } = require('./candidate-local-protection');
 const { internalStorageRoot, documentsWordRoot, migrateLegacyDocumentsStorage } = require('./storage-layout');
@@ -29,6 +30,7 @@ const editionCapabilities = getEditionCapabilities();
 let candidateStore = null;
 let candidateTransfer = null;
 let candidateProtection = null;
+let kaloneoLibrary = null;
 let adminExportCandidateDir = null;
 let adminCandidateResultsMode = false;
 let lastCandidateSaveError = '';
@@ -202,6 +204,16 @@ function getCandidateTransfer() {
   return candidateTransfer;
 }
 
+function getKaloneoLibrary() {
+  if (!kaloneoLibrary) {
+    kaloneoLibrary = createKaloneoLibrary({
+      dataRoot: sebInternalRoot(),
+      seedTestsRoot: path.join(__dirname, '..', 'app', 'web', 'kaltest', 'tests')
+    });
+  }
+  return kaloneoLibrary;
+}
+
 function bilanDocumentsDir() {
   return sebDocumentsRoot();
 }
@@ -362,13 +374,18 @@ function isAdminTestsParcoursPage(pageName) {
   return String(pageName || '').toLowerCase() === 'admin-tests-parcours.html';
 }
 
+function isAdminParcoursBuilderPage(pageName) {
+  return String(pageName || '').toLowerCase() === 'admin-parcours-builder.html';
+}
+
 function isAdminKaloneoBuilderPage(pageName) {
   return String(pageName || '').toLowerCase() === 'test-builder.html';
 }
 
 function isAdminNavigationPage(pageName) {
   return isAdminBilanPage(pageName) || isAdminCandidatePage(pageName) ||
-    isAdminTestsParcoursPage(pageName) || isAdminKaloneoBuilderPage(pageName);
+    isAdminTestsParcoursPage(pageName) || isAdminParcoursBuilderPage(pageName) ||
+    isAdminKaloneoBuilderPage(pageName);
 }
 
 function existingWebPage(pageName) {
@@ -1009,6 +1026,36 @@ ipcMain.handle('admin:open-tests-parcours', () => {
 
 ipcMain.handle('admin:close-tests-parcours', () => {
   return loadAdminCandidateBrowser();
+});
+
+ipcMain.handle('kaloneo-library:list-tests', () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les parcours pendant une évaluation active.' };
+  try {
+    return { ok:true, tests:getKaloneoLibrary().listTests() };
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:list-parcours', () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les parcours pendant une évaluation active.' };
+  try {
+    return { ok:true, parcours:getKaloneoLibrary().listParcours() };
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:save-parcours', (_event, payload) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les parcours pendant une évaluation active.' };
+  try {
+    return getKaloneoLibrary().saveParcours(payload || {});
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
 });
 
 ipcMain.handle('admin:open-bilan', () => {
