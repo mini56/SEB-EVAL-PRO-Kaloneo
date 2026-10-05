@@ -389,7 +389,7 @@
   function renderSequence() {
     const dropzone = $('tests-dropzone');
     dropzone.replaceChildren();
-    $('empty-tests').hidden = state.tests.length > 0;
+    dropzone.classList.toggle('is-empty', state.tests.length === 0);
 
     state.tests.forEach((item, index) => {
       const template = $('sequence-card-template');
