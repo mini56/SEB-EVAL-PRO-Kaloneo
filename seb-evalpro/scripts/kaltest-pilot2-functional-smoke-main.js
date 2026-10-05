@@ -220,15 +220,22 @@ app.whenReady().then(async () => {
       }
 
       const perfect = await perfectResult(win);
-      const questionCount = await win.webContents.executeJavaScript("window.sebKaltestPilot2.currentTest().questions.length",true);
-      if (perfect.score !== perfect.scoreMax || perfect.scoreMax !== questionCount) {
-        throw new Error(testId + ' : moteur de correction partagé incorrect.');
+      const meta = await win.webContents.executeJavaScript(
+        "({questionCount:window.sebKaltestPilot2.currentTest().questions.length,scored:window.sebKaltestPilot2.currentTest().scored!==false})",
+        true
+      );
+      if (meta.scored) {
+        if (perfect.score !== perfect.scoreMax || perfect.scoreMax !== meta.questionCount) {
+          throw new Error(testId + ' : moteur de correction partagé incorrect.');
+        }
+      } else if (perfect.score !== 0 || perfect.scoreMax !== 0) {
+        throw new Error(testId + ' : une autoévaluation non notée produit encore un score.');
       }
 
       await assertNoOverflow(win, testId);
 
       const visualContract = await win.webContents.executeJavaScript(
-        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null,fractionItems:document.querySelectorAll('.kaltest-fraction-item').length,organisationRows:document.querySelectorAll('.kaltest-organisation-row').length,postureFields:document.querySelectorAll('.kaltest-postures-answer input').length};})()",
+        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null,fractionItems:document.querySelectorAll('.kaltest-fraction-item').length,organisationRows:document.querySelectorAll('.kaltest-organisation-row').length,postureFields:document.querySelectorAll('.kaltest-postures-answer input').length,autoevalChoices:document.querySelectorAll('.kaltest-autoeval-choice input').length};})()",
         true
       );
 
@@ -249,6 +256,12 @@ app.whenReady().then(async () => {
       }
       if (testId === 'gestes_postures' && visualContract.postureFields !== 3) {
         throw new Error('Postures : 3 champs attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'autoevaluation_savoirs' && visualContract.autoevalChoices !== 5) {
+        throw new Error('Autoévaluation 1 : 5 choix attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'autoevaluation_tic' && visualContract.autoevalChoices !== 6) {
+        throw new Error('Autoévaluation 2 : 6 choix attendus : ' + JSON.stringify(visualContract));
       }
       if (testId === 'genre_nombre' && visualContract.genreTables !== 2) {
         throw new Error('Genre / Nombre : les deux tableaux Build #20 ne sont pas rendus.');
