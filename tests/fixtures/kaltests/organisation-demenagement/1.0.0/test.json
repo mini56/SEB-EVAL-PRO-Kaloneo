@@ -1,0 +1,205 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "id": "organisation_demenagement",
+  "version": "1.0.0",
+  "title": "Organisation d’une activité",
+  "category": "organisation",
+  "description": "Remettre dans l’ordre les huit étapes d’un déménagement d’atelier.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "qcmv1.0.html#page5",
+    "sourceScript": "source/js/qcm-page5.js",
+    "legacyParcoursId": "qcm-5"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "L'entreprise va ouvrir un deuxième atelier. Vous participez à l'équipe chargée de déménager une partie du stock de pièces et de machines et de préparer les nouveaux locaux. Pour que tout se déroule efficacement, il faut planifier l'ordre des étapes correctement.",
+  "instruction": "Numérotez les actions de 1 à 8 pour organiser le déménagement dans le bon ordre.",
+  "presentation": {
+    "layout": {
+      "type": "split",
+      "ratio": "50/50",
+      "blocks": [
+        {
+          "id": "illustration"
+        },
+        {
+          "id": "actions"
+        }
+      ]
+    },
+    "organisationList": {
+      "visual": {
+        "type": "image",
+        "orientation": "landscape",
+        "src": "imageqcm/demenagement.png",
+        "alt": "Illustration du déménagement d'atelier"
+      },
+      "rows": [
+        {
+          "questionId": "organisation_1",
+          "text": "Emballer les pièces et protéger les machines fragiles."
+        },
+        {
+          "questionId": "organisation_2",
+          "text": "Décharger le camion et positionner les machines."
+        },
+        {
+          "questionId": "organisation_3",
+          "text": "Charger le camion et les machines."
+        },
+        {
+          "questionId": "organisation_4",
+          "text": "Vérifier l'inventaire du stock à transférer."
+        },
+        {
+          "questionId": "organisation_5",
+          "text": "Transporter le matériel jusqu'au nouvel atelier."
+        },
+        {
+          "questionId": "organisation_6",
+          "text": "Installer les postes de travail et le mobilier."
+        },
+        {
+          "questionId": "organisation_7",
+          "text": "Préparer le planning des premières productions dans le nouvel atelier."
+        },
+        {
+          "questionId": "organisation_8",
+          "text": "Vérifier que tout le matériel est intact et fonctionnel."
+        }
+      ]
+    }
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "organisation_1",
+      "prompt": "Emballer les pièces et protéger les machines fragiles.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "organisation_2",
+      "prompt": "Décharger le camion et positionner les machines.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "5"
+      ],
+      "points": 1
+    },
+    {
+      "id": "organisation_3",
+      "prompt": "Charger le camion et les machines.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "3"
+      ],
+      "points": 1
+    },
+    {
+      "id": "organisation_4",
+      "prompt": "Vérifier l'inventaire du stock à transférer.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "1"
+      ],
+      "points": 1
+    },
+    {
+      "id": "organisation_5",
+      "prompt": "Transporter le matériel jusqu'au nouvel atelier.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "organisation_6",
+      "prompt": "Installer les postes de travail et le mobilier.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "7"
+      ],
+      "points": 1
+    },
+    {
+      "id": "organisation_7",
+      "prompt": "Préparer le planning des premières productions dans le nouvel atelier.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "8"
+      ],
+      "points": 1
+    },
+    {
+      "id": "organisation_8",
+      "prompt": "Vérifier que tout le matériel est intact et fonctionnel.",
+      "response": {
+        "type": "number"
+      },
+      "acceptedAnswers": [
+        "6"
+      ],
+      "points": 1
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "pourcentage",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.competences_techniques.planning.repartition_taches",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ],
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "layout.split",
+    "bilan.bindings"
+  ]
+}
