@@ -16,7 +16,11 @@ const library=[
   {id:'test_gamma',version:'1.0.0',title:'Test Gamma',category:'organisation',role:'test',kind:'complex',scored:false,description:'Troisième test',questionCount:0},
   {id:'fin_parcours',version:'1.0.0',title:'Fin du parcours',category:'systeme',role:'fin',kind:'complex',scored:false,description:'Fin'}
 ];
-const saved=[{id:'parcours-de-base',name:'Parcours de base',creator:'SEB EvalPro / KALONÉO',systemProvided:true,testCount:3}];
+const masks=[
+  {id:'kaloneo-default',version:'1.0.0',name:'KALONÉO',systemProvided:true,hasText:true,hasImage:false},
+  {id:'masque-smoke',version:'1.0.0',name:'Masque Smoke',systemProvided:false,hasText:true,hasImage:true}
+];
+const saved=[{id:'parcours-de-base',name:'Parcours de base',creator:'SEB EvalPro / KALONÉO',systemProvided:true,testCount:3,maskScreen:{id:'kaloneo-default',version:'1.0.0'}}];
 let lastSavedPayload=null;
 
 ipcMain.on('app:edition-sync',e=>{e.returnValue={edition:'unified',canBilan:true,canAi:true,canImport:true,canExport:true};});
@@ -40,6 +44,11 @@ ipcMain.handle('candidate-catalog:list',()=>[]);
 ipcMain.handle('candidate-catalog:sync',()=>({ok:true}));
 ipcMain.handle('candidate-catalog:detail',()=>({ok:false}));
 ipcMain.handle('kaloneo-library:list-tests',()=>({ok:true,tests:library}));
+ipcMain.handle('kaloneo-library:list-mask-screens',()=>({ok:true,maskScreens:masks}));
+ipcMain.handle('kaloneo-library:get-mask-screen',(_e,ref)=>{
+  const meta=masks.find(x=>x.id===(ref?.id||'kaloneo-default')&&x.version===(ref?.version||'1.0.0'))||masks[0];
+  return {ok:true,maskScreen:{...meta,format:'kaloneo-mask-screen',content:{text:meta.name,image:''}}};
+});
 ipcMain.handle('kaloneo-library:list-parcours',()=>({ok:true,parcours:saved}));
 ipcMain.handle('kaloneo-library:save-parcours',(_e,payload)=>{
   const key=String(payload?.name||'').trim().toLocaleLowerCase('fr-FR');
@@ -129,6 +138,7 @@ app.whenReady().then(async()=>{
       return {
         title:String(document.querySelector('.page-topbar h1')?.textContent||'').trim(),
         libraryCount:document.querySelectorAll('.library-card').length,
+        mask:String(document.querySelector('#mask-slot .special-card strong')?.textContent||'').trim(),
         intro:String(document.querySelector('#intro-slot .special-card strong')?.textContent||'').trim(),
         fin:String(document.querySelector('#fin-slot .special-card strong')?.textContent||'').trim(),
         savedCount:document.querySelectorAll('#saved-parcours .saved-card').length,
@@ -140,28 +150,38 @@ app.whenReady().then(async()=>{
         privacyDisplay:privacy?getComputedStyle(privacy).display:'absent'
       };
     })()`);
-    if(initial.title!=='Création de parcours'||initial.libraryCount!==3||!/Introduction/.test(initial.intro)||initial.fin!=='Fin du parcours'||initial.savedCount!==1||
+    if(initial.title!=='Création de parcours'||initial.libraryCount!==5||initial.mask!=='KALONÉO'||!/Introduction/.test(initial.intro)||initial.fin!=='Fin du parcours'||initial.savedCount!==1||
        initial.bodyOverflow!=='hidden'||initial.scrolls.some(v=>v!=='auto')||!initial.saveInTop||initial.saveShadow!=='none'||initial.finGap<12||
        !['none','absent'].includes(initial.privacyDisplay)) return fail('état R2 initial incorrect',initial);
+
+    // L’écran de masquage est une configuration hors parcours et peut remplacer KALONÉO.
+    await win.webContents.executeJavaScript(`(()=>{
+      const c=[...document.querySelectorAll('.library-card')].find(x=>x.querySelector('.card-title')?.textContent==='Masque Smoke');
+      c?.querySelector('.card-add')?.click();
+      return true;
+    })()`);
+    await wait(100);
+    const maskSelection=await win.webContents.executeJavaScript(`String(document.querySelector('#mask-slot .special-card strong')?.textContent||'').trim()`);
+    if(maskSelection!=='Masque Smoke')return fail('sélection écran de masquage incorrecte',{maskSelection});
 
     // Boutons Ajouter / Retirer restent fonctionnels.
     await win.webContents.executeJavaScript(`(()=>{const c=[...document.querySelectorAll('.library-card')].find(x=>x.querySelector('.card-title')?.textContent==='Test Alpha');c?.querySelector('.card-add')?.click();return true;})()`);
     await wait(100);
     let stateUi=await win.webContents.executeJavaScript(`({sequence:document.querySelectorAll('.sequence-card').length,library:document.querySelectorAll('.library-card').length})`);
-    if(stateUi.sequence!==1||stateUi.library!==2)return fail('Ajouter incorrect',stateUi);
+    if(stateUi.sequence!==1||stateUi.library!==4)return fail('Ajouter incorrect',stateUi);
     await win.webContents.executeJavaScript(`document.querySelector('.sequence-card .remove-test').click();true`);await wait(100);
     stateUi=await win.webContents.executeJavaScript(`({sequence:document.querySelectorAll('.sequence-card').length,library:document.querySelectorAll('.library-card').length})`);
-    if(stateUi.sequence!==0||stateUi.library!==3)return fail('Retirer incorrect',stateUi);
+    if(stateUi.sequence!==0||stateUi.library!==5)return fail('Retirer incorrect',stateUi);
 
     // Pointer drag réel Bibliothèque -> Parcours.
     let drag=await pointerDrag(win,'.library-card[data-id="test_gamma"]','#tests-dropzone');await wait(140);
     let afterPointer=await win.webContents.executeJavaScript(`({titles:[...document.querySelectorAll('.sequence-title')].map(x=>x.textContent.trim()),library:document.querySelectorAll('.library-card').length})`);
-    if(!drag.ok||JSON.stringify(afterPointer.titles)!==JSON.stringify(['Test Gamma'])||afterPointer.library!==2)return fail('drag souris Bibliothèque -> Parcours incorrect',{drag,afterPointer});
+    if(!drag.ok||JSON.stringify(afterPointer.titles)!==JSON.stringify(['Test Gamma'])||afterPointer.library!==4)return fail('drag souris Bibliothèque -> Parcours incorrect',{drag,afterPointer});
 
     // Pointer drag réel Parcours -> Bibliothèque.
     drag=await pointerDrag(win,'.sequence-card[data-test-id="test_gamma"]','.library-panel');await wait(140);
     afterPointer=await win.webContents.executeJavaScript(`({sequence:document.querySelectorAll('.sequence-card').length,library:document.querySelectorAll('.library-card').length,gamma:!![...document.querySelectorAll('.library-card')].find(x=>x.dataset.id==='test_gamma')})`);
-    if(!drag.ok||afterPointer.sequence!==0||afterPointer.library!==3||!afterPointer.gamma)return fail('drag souris Parcours -> Bibliothèque incorrect',{drag,afterPointer});
+    if(!drag.ok||afterPointer.sequence!==0||afterPointer.library!==5||!afterPointer.gamma)return fail('drag souris Parcours -> Bibliothèque incorrect',{drag,afterPointer});
 
     // Construire trois tests puis réordonner par vrai drag souris.
     await win.webContents.executeJavaScript(`(()=>{
@@ -178,7 +198,7 @@ app.whenReady().then(async()=>{
     await win.webContents.executeJavaScript(`(()=>{document.getElementById('parcours-name').value='Parcours long';document.getElementById('parcours-creator').value='Créateur smoke';document.getElementById('save-parcours').click();return true;})()`);
     await wait(220);
     const savedUi=await win.webContents.executeJavaScript(`({status:document.getElementById('builder-status').textContent.trim(),saved:[...document.querySelectorAll('.saved-card strong')].map(x=>x.textContent.trim()),creators:[...document.querySelectorAll('.saved-card span:first-of-type')].map(x=>x.textContent.trim())})`);
-    if(!lastSavedPayload||lastSavedPayload.tests?.length!==3||new Set(lastSavedPayload.tests.map(x=>x.id)).size!==3||!/enregistré/i.test(savedUi.status)||!savedUi.saved.includes('Parcours long'))return fail('enregistrement incorrect',{lastSavedPayload,savedUi});
+    if(!lastSavedPayload||lastSavedPayload.maskScreen?.id!=='masque-smoke'||lastSavedPayload.tests?.length!==3||new Set(lastSavedPayload.tests.map(x=>x.id)).size!==3||!/enregistré/i.test(savedUi.status)||!savedUi.saved.includes('Parcours long'))return fail('enregistrement incorrect',{lastSavedPayload,savedUi});
 
     await win.reload();await wait(750);
     const reloaded=await win.webContents.executeJavaScript(`({saved:[...document.querySelectorAll('.saved-card strong')].map(x=>x.textContent.trim()),creators:[...document.querySelectorAll('.saved-card span:first-of-type')].map(x=>x.textContent.trim())})`);
