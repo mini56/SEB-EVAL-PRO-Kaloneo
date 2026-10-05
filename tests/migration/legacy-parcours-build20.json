@@ -96,13 +96,17 @@
       "id": "introbrique",
       "file": "introbrique.html",
       "role": "test-support",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "transition_video_f1",
+      "fixturePath": "tests/fixtures/kaltests/transition-video-f1/1.0.0/test.json"
     },
     {
       "id": "brique",
       "file": "brique.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "construction_briques",
+      "fixturePath": "tests/fixtures/kaltests/construction-briques/1.0.0/test.json"
     },
     {
       "id": "stock",
@@ -187,7 +191,9 @@
       "file": "qcmv1.0.html",
       "page": "11",
       "role": "legacy-step-review",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "fin_parcours",
+      "fixturePath": "tests/fixtures/kaltests/fin-parcours/1.0.0/test.json"
     },
     {
       "id": "qcm-finale",
