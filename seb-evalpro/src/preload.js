@@ -83,10 +83,18 @@ function isAdminKaloneoBuilderPage(page = pageName()) {
   return String(page || '').toLowerCase() === 'test-builder.html';
 }
 
+function isAdminKaloneoBuilderPreviewPage(page = pageName()) {
+  return String(page || '').toLowerCase() === 'test-preview.html';
+}
+
+function isTestsParcoursWorkspacePage(page = pageName()) {
+  return isAdminTestsParcoursPage(page) || isAdminParcoursBuilderPage(page) ||
+    isAdminKaloneoBuilderPage(page) || isAdminKaloneoBuilderPreviewPage(page);
+}
+
 function isAdminNavigationPage(page = pageName()) {
   return isAdminBilanPage(page) || isAdminCandidatesPage(page) ||
-    isAdminTestsParcoursPage(page) || isAdminParcoursBuilderPage(page) ||
-    isAdminKaloneoBuilderPage(page);
+    isTestsParcoursWorkspacePage(page);
 }
 
 function pageRoute() {
@@ -811,7 +819,7 @@ function sebSyncAdminBarState() {
       }).catch(() => { testsParcoursButton.hidden = true; });
     }
   }
-  if (showPrivacyButton) showPrivacyButton.hidden = !adminUnlocked;
+  if (showPrivacyButton) showPrivacyButton.hidden = !adminUnlocked || isTestsParcoursWorkspacePage();
   const finishCandidateButton = document.getElementById('seb-evalpro-finish-candidate');
   if (finishCandidateButton) finishCandidateButton.hidden = true;
   if (closeSessionButton) {
@@ -1945,7 +1953,10 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   function refreshPrivacy(){
     if (!document.body) return;
 
-    const adminPage = isAdminBilanPage() || (typeof isAdminCandidatesPage === 'function' && isAdminCandidatesPage()) || (typeof isAdminTestsParcoursPage === 'function' && isAdminTestsParcoursPage()) || !!adminCandidateResultsWorkspace;
+    const adminPage = isAdminBilanPage() ||
+      (typeof isAdminCandidatesPage === 'function' && isAdminCandidatesPage()) ||
+      (typeof isTestsParcoursWorkspacePage === 'function' && isTestsParcoursWorkspacePage()) ||
+      !!adminCandidateResultsWorkspace;
     const toggle = ensurePrivacyToggle();
     const layer = ensurePrivacyLayer();
     const hide = layer.querySelector('#seb-evalpro-privacy-hide');
