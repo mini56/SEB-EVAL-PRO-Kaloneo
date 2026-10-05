@@ -44,8 +44,8 @@ for (const token of ['>NE<','>I<','>II<','>III<','data-l="NE"','data-l="I"','dat
 const runtime = read('seb-evalpro/source/js/admin-bilan-runtime.js');
 for (const token of [
   "const colours={NE:['#CCFFFF','#000000'],I:['#92D050','#000000'],II:['#ED7D31','#FFFFFF'],III:['#C00000','#FFFFFF']}",
-  "p>=70?'I':p>=45?'II':'III'",
-  "const totalMathsProblemes = 27",
+  "if(Object.hasOwn(sc,'page4')){hp=true;pr+=+sc.page4||0}",
+  "const p=Math.round(pr/27*100);apply('math-problemes',p>=70?'I':p>=45?'II':'III'",
   "combined>=20?'I':combined>=17?'II':'III'",
   'errors=23-combined'
 ]) {
