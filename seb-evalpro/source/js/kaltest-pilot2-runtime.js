@@ -22,6 +22,21 @@
         'texte_a_trous_stage_logistique'
       ])
     }),
+    fractions:Object.freeze({
+      stepId:'qcm-4',
+      startPhase:'exercise',
+      ids:Object.freeze(['fractions_preparation_lots'])
+    }),
+    organisation:Object.freeze({
+      stepId:'qcm-5',
+      startPhase:'exercise',
+      ids:Object.freeze(['organisation_demenagement'])
+    }),
+    postures:Object.freeze({
+      stepId:'qcm-5_1',
+      startPhase:'exercise',
+      ids:Object.freeze(['gestes_postures'])
+    }),
     conversions:Object.freeze({
       stepId:'qcm-6',
       startPhase:'exercise',
@@ -233,6 +248,9 @@
 
     if (type === 'multiple-choice') {
       const actual = Array.isArray(value) ? value.map(normalizeText).sort() : [];
+      if (Number.isInteger(Number(question.acceptedCount))) {
+        return actual.length === Number(question.acceptedCount);
+      }
       return (question.acceptedAnswers || []).some(answer => {
         const expected = Array.isArray(answer) ? answer.map(normalizeText).sort() : [];
         return JSON.stringify(actual) === JSON.stringify(expected);
@@ -244,7 +262,6 @@
   }
 
   function evaluateTest(test, testState) {
-    let score = 0;
     let scoreMax = 0;
     const details = {};
 
@@ -252,15 +269,29 @@
       const points = Number(question.points) || 0;
       const value = testState.answers[question.id];
       const correct = evaluateQuestion(question, value);
-      if (question.example !== true && test.scored !== false) {
-        scoreMax += points;
-        if (correct) score += points;
+      if (question.example !== true && test.scored !== false) scoreMax += points;
+      details[question.id] = { value:value ?? '', correct, points };
+    }
+
+    for (const group of test.evaluation?.uniqueGroups || []) {
+      const allowed = new Set((group.allowedValues || []).map(normalizeText));
+      const seen = new Set();
+      for (const questionId of group.questionIds || []) {
+        const detail = details[questionId];
+        if (!detail) continue;
+        const value = normalizeText(testState.answers?.[questionId]);
+        const correct = allowed.has(value) && !seen.has(value);
+        detail.correct = correct;
+        if (correct) seen.add(value);
       }
-      details[question.id] = {
-        value: value ?? '',
-        correct,
-        points
-      };
+    }
+
+    let score = 0;
+    if (test.scored !== false) {
+      for (const question of test.questions || []) {
+        if (question.example === true) continue;
+        if (details[question.id]?.correct) score += Number(question.points) || 0;
+      }
     }
 
     return {
@@ -1057,6 +1088,134 @@
     return wrapper;
   }
 
+  function renderFractions(test, host) {
+    const definition = test.presentation?.fractionSelection;
+    if (!definition || !Array.isArray(definition.groups)) return false;
+
+    const layout = document.createElement('div');
+    layout.className = 'kaltest-fractions-layout';
+    layout.appendChild(renderVisualPanel(definition.visual || {}));
+
+    const work = document.createElement('section');
+    work.className = 'kaltest-fractions-work';
+    const testState = testStateFor(test);
+
+    for (const group of definition.groups) {
+      const question = questionById(test, group.questionId);
+      if (!question) continue;
+      const row = document.createElement('section');
+      row.className = 'kaltest-fraction-row';
+
+      const title = document.createElement('div');
+      title.className = 'kaltest-fraction-title';
+      const label = document.createElement('strong');
+      label.textContent = group.label || question.prompt || '';
+      title.appendChild(label);
+      if (group.itemImage) {
+        const icon = document.createElement('img');
+        icon.src = group.itemImage;
+        icon.alt = '';
+        title.appendChild(icon);
+      }
+
+      const items = document.createElement('div');
+      items.className = 'kaltest-fraction-items' + (group.cloud ? ' cloud' : '');
+      const selected = new Set(Array.isArray(testState.answers?.[question.id]) ? testState.answers[question.id].map(String) : []);
+      const count = Math.max(1, Number(group.totalItems) || 1);
+      for (let index = 1; index <= count; index += 1) {
+        const value = String(index);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'kaltest-fraction-item';
+        button.setAttribute('aria-label', (group.label || 'Fraction') + ' — objet ' + index);
+        button.setAttribute('aria-pressed', selected.has(value) ? 'true' : 'false');
+        if (selected.has(value)) button.classList.add('selected');
+        if (group.itemImage) button.style.backgroundImage = 'url("' + group.itemImage + '")';
+        button.addEventListener('click', () => {
+          const stateNow = testStateFor(test);
+          const current = new Set(Array.isArray(stateNow.answers?.[question.id]) ? stateNow.answers[question.id].map(String) : []);
+          if (current.has(value)) current.delete(value); else current.add(value);
+          const active = current.has(value);
+          button.classList.toggle('selected', active);
+          button.setAttribute('aria-pressed', active ? 'true' : 'false');
+          saveAnswer(test, question.id, Array.from(current));
+        });
+        items.appendChild(button);
+      }
+      row.append(title, items);
+      work.appendChild(row);
+    }
+
+    layout.appendChild(work);
+    host.appendChild(layout);
+    return true;
+  }
+
+  function renderOrganisation(test, host) {
+    const definition = test.presentation?.organisationList;
+    if (!definition || !Array.isArray(definition.rows)) return false;
+
+    const layout = document.createElement('div');
+    layout.className = 'kaltest-organisation-layout';
+    layout.appendChild(renderVisualPanel(definition.visual || {}));
+
+    const work = document.createElement('section');
+    work.className = 'kaltest-organisation-work';
+    for (const rowDefinition of definition.rows) {
+      const question = questionById(test, rowDefinition.questionId);
+      if (!question) continue;
+      const row = document.createElement('label');
+      row.className = 'kaltest-organisation-row';
+      const input = makeInput(test, question, { compact:true });
+      input.maxLength = 1;
+      input.inputMode = 'numeric';
+      const text = document.createElement('span');
+      text.textContent = rowDefinition.text || question.prompt || '';
+      row.append(input, text);
+      work.appendChild(row);
+    }
+    layout.appendChild(work);
+    host.appendChild(layout);
+    return true;
+  }
+
+  function renderPostures(test, host) {
+    const definition = test.presentation?.postureSelection;
+    if (!definition || !Array.isArray(definition.questionIds)) return false;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'kaltest-postures-layout';
+
+    if (definition.imageSrc) {
+      const frame = document.createElement('div');
+      frame.className = 'kaltest-postures-image';
+      const img = document.createElement('img');
+      img.src = definition.imageSrc;
+      img.alt = definition.imageAlt || '';
+      frame.appendChild(img);
+      wrap.appendChild(frame);
+    }
+
+    const answers = document.createElement('div');
+    answers.className = 'kaltest-postures-answers';
+    definition.questionIds.forEach((questionId, index) => {
+      const question = questionById(test, questionId);
+      if (!question) return;
+      const label = document.createElement('label');
+      label.className = 'kaltest-postures-answer';
+      const span = document.createElement('span');
+      span.textContent = (definition.labels || [])[index] || question.prompt || '';
+      const input = makeInput(test, question, { compact:true });
+      input.maxLength = 1;
+      input.inputMode = 'numeric';
+      label.append(span, input);
+      answers.appendChild(label);
+    });
+    wrap.appendChild(answers);
+    host.appendChild(wrap);
+    return true;
+  }
+
   function renderBuilderContentItem(test, item) {
     const wrap = document.createElement('div');
     wrap.className = 'kaltest-builder-content-item';
@@ -1222,6 +1381,36 @@
         correct: String(Array.isArray(question.acceptedAnswers) && question.acceptedAnswers.length ? question.acceptedAnswers[0] : '')
       }));
       scores.pageTexteTrous = Number(result.score) || 0;
+    } else if (test.id === 'fractions_preparation_lots') {
+      responses.page4 = String(Number(result.score) || 0) + '/' + String(Number(result.scoreMax) || questions.length || 3);
+      scores.page4 = Number(result.score) || 0;
+    } else if (test.id === 'organisation_demenagement') {
+      const snapshot = {};
+      const values = {};
+      questions.forEach((question, offset) => {
+        const index = offset + 1;
+        const key = 'page5_q' + index;
+        const value = String(testState.answers?.[question.id] ?? '');
+        const detail = result.details?.[question.id] || {};
+        responses[key] = value;
+        scores[key] = detail.correct ? 1 : 0;
+        values[index] = value;
+        snapshot[index] = { reponse:value, score:scores[key] };
+      });
+      sessionStorage.setItem('page5_organisation_data', JSON.stringify(snapshot));
+      sessionStorage.setItem('seb_evalpro_qcm_page5_state', JSON.stringify({ values, savedAt:Date.now(), source:'kaltest' }));
+    } else if (test.id === 'gestes_postures') {
+      const values = {};
+      questions.forEach((question, offset) => {
+        const index = offset + 1;
+        const key = 'page5_1_q' + index;
+        const value = String(testState.answers?.[question.id] ?? '');
+        const detail = result.details?.[question.id] || {};
+        responses[key] = value;
+        scores[key] = detail.correct ? 1 : 0;
+        values[index] = value;
+      });
+      sessionStorage.setItem('seb_evalpro_qcm_page5_1_state', JSON.stringify({ values, savedAt:Date.now(), source:'kaltest' }));
     } else if (test.id === 'conversions_atelier_expedition') {
       copyRange('page6_q', 'page6_q', 1, true, true);
     } else if (test.id === 'genre_nombre') {
@@ -1300,7 +1489,13 @@
     const host = document.getElementById('kaltest-content');
     host.innerHTML = '';
 
-    if (renderBuilderContent(test, host)) {
+    if (renderFractions(test, host)) {
+      // Migration KALTEST de l'ancienne page 4.
+    } else if (renderOrganisation(test, host)) {
+      // Migration KALTEST de l'ancienne page 5.
+    } else if (renderPostures(test, host)) {
+      // Migration KALTEST de l'ancienne page 5_1.
+    } else if (renderBuilderContent(test, host)) {
       // Les tests générés par KALONÉO passent par le rendu générique commun.
     } else if (Array.isArray(test.presentation?.inlineFlow)) {
       renderInlineGaps(test, host);
