@@ -1446,6 +1446,7 @@
 
     const autoCard = document.createElement('div');
     autoCard.className = 'kaltest-brique-autoeval';
+    autoCard.id = 'autoEvalPart';
     autoCard.hidden = !brique.adminValidated;
     const autoTitle = document.createElement('h3');
     autoTitle.textContent = 'Autoévaluation personnelle';
@@ -1492,6 +1493,7 @@
 
     const autoValidate = document.createElement('button');
     autoValidate.type = 'button';
+    autoValidate.id = 'autoEvalBtn';
     autoValidate.className = 'seb-action-btn seb-btn-nav kaltest-brique-auto-validate';
     autoValidate.textContent = brique.autoValidated ? 'Autoévaluation validée ✓' : 'Valider mon autoévaluation';
     autoValidate.disabled = testState.status === 'COMPLETED' || brique.autoValidated;
@@ -1513,10 +1515,12 @@
     buttons.className = 'kaltest-brique-chrono-buttons';
     const start = document.createElement('button');
     start.type = 'button';
+    start.id = 'startBtn';
     start.className = 'seb-action-btn seb-btn-timer-start';
     start.textContent = 'Démarrer le compteur';
     const stop = document.createElement('button');
     stop.type = 'button';
+    stop.id = 'stopBtn';
     stop.className = 'seb-action-btn seb-btn-timer-stop';
     stop.textContent = 'Arrêter le compteur';
     stop.disabled = true;
@@ -1546,6 +1550,7 @@
     const minuteInput = measure('Minutes', String(Math.floor((Number(brique.chronoSeconds)||0)/60)), true);
     const secondInput = measure('Secondes', String((Number(brique.chronoSeconds)||0)%60), true);
     const errorInput = measure('Nombre d’erreur(s)', brique.errors===null||brique.errors===undefined?'':String(brique.errors), false);
+    errorInput.id = 'nivDiff';
     errorInput.disabled = testState.status === 'COMPLETED';
     right.appendChild(fieldsCard);
 
@@ -1561,6 +1566,7 @@
     codeText.textContent = 'Code administrateur :';
     const code = document.createElement('input');
     code.type = 'password';
+    code.id = 'secretCode';
     code.maxLength = 10;
     code.autocomplete = 'off';
     code.spellcheck = false;
@@ -1569,6 +1575,7 @@
     codeLabel.append(codeText, code);
     const adminValidate = document.createElement('button');
     adminValidate.type = 'button';
+    adminValidate.id = 'validBtn';
     adminValidate.className = 'seb-action-btn seb-btn-nav';
     adminValidate.textContent = brique.adminValidated ? 'Validation administrateur ✓' : 'Valider';
     adminValidate.disabled = testState.status === 'COMPLETED' || brique.adminValidated;
