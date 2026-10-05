@@ -104,6 +104,7 @@
       instruction:'',
       calculatorCompatible:false,
       calculatorDefaultEnabled:false,
+      calculatorBrand:'KALONÉO',
       chronoEnabled:false,
       chronoMode:'simple',
       chronoMinMeasures:1,
@@ -136,6 +137,7 @@
       instruction:$('test-instruction').value.trim(),
       calculatorCompatible:$('calculator-compatible').checked,
       calculatorDefaultEnabled:false,
+      calculatorBrand:$('calculator-brand').value.trim(),
       chronoEnabled:$('chrono-enabled').checked,
       chronoMode:$('chrono-mode').value,
       chronoMinMeasures:Math.max(1,Number($('chrono-min-measures').value)||1),
@@ -167,6 +169,7 @@
     $('test-scenario').value=m.scenario;
     $('test-instruction').value=m.instruction;
     $('calculator-compatible').checked=Boolean(m.calculatorCompatible);
+    $('calculator-brand').value=String(m.calculatorBrand ?? 'KALONÉO');
     $('chrono-enabled').checked=Boolean(m.chronoEnabled);
     $('chrono-mode').value=m.chronoMode||'simple';
     $('chrono-min-measures').value=Math.max(1,Number(m.chronoMinMeasures)||1);
@@ -187,6 +190,7 @@
   }
 
   function syncCapabilityOptions() {
+    $('calculator-options').hidden=!$('calculator-compatible').checked;
     $('chrono-options').hidden=!$('chrono-enabled').checked;
     $('admin-options').hidden=!$('admin-intervention').checked;
     $('material-options').hidden=!$('external-material').checked;
