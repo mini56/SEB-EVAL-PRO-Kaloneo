@@ -68,6 +68,7 @@ const expected = {
   organisation_demenagement:'bilan.competences_techniques.planning.repartition_taches',
   ranger_stock:'bilan.competences_techniques.gestion_logistique.classement_multicritere',
   planning_cantine:'bilan.competences_techniques.planning.repartition_taches',
+  dictee_professionnelle:'bilan.savoirs_fondamentaux.expression_ecrite.maitrise',
   redaction_email:'bilan.tic.messagerie.echanger',
   gratte_ciel:'bilan.competences_techniques.carre_magique.resolution_contraintes'
 };
