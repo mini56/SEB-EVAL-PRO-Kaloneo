@@ -608,3 +608,12 @@ textarea {
 @media(max-width:1100px){
   .icon-picker{grid-template-columns:repeat(5,minmax(0,1fr))}
 }
+
+
+/* Outil Éditeur de texte KALONÉO */
+.text-editor-builder-options{display:grid;gap:9px;padding:10px;border:1px solid #D7E3EE;border-radius:9px;background:#F8FBFE}
+.text-editor-builder-options>strong{color:#004E70;font-size:16px}
+.preview-text-editor{display:flex;flex-direction:column;gap:6px;height:100%;min-height:180px;padding:7px;border:1px solid #B8C8D8;border-radius:8px;background:#F8FAFC}
+.preview-text-editor-toolbar{display:flex;gap:4px;flex-wrap:wrap}.preview-text-editor-toolbar button,.preview-text-editor-toolbar select{height:28px;padding:3px 6px;border:1px solid #C1C9D6;border-radius:5px;background:#fff;color:#46515A}
+.preview-text-editor-page{flex:1;min-height:110px;padding:10px;border:1px solid #C1C9D6;border-radius:6px;background:#fff;color:#8A949D;font:14px Calibri,Arial,sans-serif}
+.preview-text-editor small{align-self:flex-end;color:#004E70;font-weight:700}
