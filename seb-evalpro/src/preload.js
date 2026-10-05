@@ -1796,6 +1796,9 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   kaloneoListTests: () => ipcRenderer.invoke('kaloneo-library:list-tests'),
   kaloneoListParcours: () => ipcRenderer.invoke('kaloneo-library:list-parcours'),
   kaloneoSaveParcours: (payload) => ipcRenderer.invoke('kaloneo-library:save-parcours', payload),
+  kaloneoOpenPreview: (definition) => ipcRenderer.invoke('kaloneo-builder:open-preview', definition),
+  kaloneoGetPreviewDefinition: () => ipcRenderer.invoke('kaloneo-builder:get-preview'),
+  kaloneoClosePreview: () => ipcRenderer.invoke('kaloneo-builder:close-preview'),
   closeAdminBilan: () => closeAdminBilanPage(),
   verifyAdminPassword: (password) => ipcRenderer.invoke('admin:verify-password', password),
   sebIaStatus: () => ipcRenderer.invoke('ai:status')
