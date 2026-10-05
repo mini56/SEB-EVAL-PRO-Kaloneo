@@ -1606,8 +1606,8 @@
       if (ready) testState.answers.brique_ready = '1';
       else delete testState.answers.brique_ready;
       if (next) {
-        next.disabled = false;
-        next.classList.remove('seb-exercise-nav-locked');
+        next.disabled = !ready && testState.status !== 'COMPLETED';
+        next.classList.toggle('seb-exercise-nav-locked', !ready && testState.status !== 'COMPLETED');
       }
     }
     function saveLegacyMain() {
@@ -2028,8 +2028,8 @@
       const ready = Boolean(tri.ready && canShowResults() && autoAnswered());
       const next = document.getElementById('kaltest-next');
       if (next) {
-        next.disabled = !ready && testState.status !== 'COMPLETED';
-        next.classList.toggle('seb-exercise-nav-locked', !ready && testState.status !== 'COMPLETED');
+        next.disabled = false;
+        next.classList.remove('seb-exercise-nav-locked');
       }
       if (!ready) {
         delete testState.answers.tri_ready;
