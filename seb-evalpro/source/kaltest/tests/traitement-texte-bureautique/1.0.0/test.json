@@ -24,21 +24,22 @@
   "instruction": "Répondez à l'une des trois questions suivantes dans un texte de dix lignes. Respectez les consignes de mise en forme et enregistrez le document dans le dossier SEB sur le bureau.",
   "presentation": {
     "layout": "50-50",
-    "wordProcessor": {
-      "questions": [
-        "Quelle est mon activité préférée et pourquoi ?",
-        "Quelle est mon expérience professionnelle préférée et pourquoi ?",
-        "Quel est mon métier préféré et pourquoi ?"
-      ],
-      "requirements": [
-        "Titre : notez la question choisie, en gras, police Arial, taille 16.",
-        "Texte : au moins 10 lignes, police Arial, taille 12.",
-        "Enregistrez le document dans le dossier SEB sur le bureau sous l’intitulé : Nom*_Evaluation_Bureautique_SEB.",
-        "* Remplacez Nom par votre vrai nom."
-      ],
-      "fileSimulation": true,
-      "imageSimulation": true
-    }
+    "builderContent": [
+      {
+        "type": "text",
+        "zone": "left",
+        "text": "Choisissez une question :\n1. Quelle est mon activité préférée et pourquoi ?\n2. Quelle est mon expérience professionnelle préférée et pourquoi ?\n3. Quel est mon métier préféré et pourquoi ?\n\nTitre : notez la question choisie, puis mettez-la en gras, police Arial, taille 16.\nTexte : au moins 10 lignes, police Arial, taille 12.\n\nEnregistrez le document dans le dossier SEB sur le bureau sous l’intitulé :\nNom*_Evaluation_Bureautique_SEB\n* Remplacez Nom par votre vrai nom."
+      },
+      {
+        "type": "text-editor",
+        "zone": "right",
+        "config": {
+          "fileSimulation": true,
+          "imageSimulation": true,
+          "scoringProfile": "seb-bureautique-v1"
+        }
+      }
+    ]
   },
   "evaluation": {
     "nwtexteRules": true,
@@ -76,7 +77,7 @@
   "features": [
     "runtime.basic",
     "layout.split",
-    "bilan.bindings",
-    "content.html"
+    "host.text-editor",
+    "bilan.bindings"
   ]
 }
