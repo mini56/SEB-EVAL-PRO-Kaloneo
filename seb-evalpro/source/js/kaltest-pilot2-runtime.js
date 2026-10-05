@@ -2837,7 +2837,7 @@
     }
     if (!config.imageSimulation) wrap.querySelector('#nw-image-button')?.remove();
 
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       if (!wrap.isConnected) return;
       window.sebNwtexteContext = {
         storagePrefix:'seb_kaltest_editor:' + test.id + ':',
