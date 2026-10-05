@@ -62,6 +62,13 @@ async function pointerDrag(win, sourceSelector, targetSelector) {
       source.scrollIntoView({block:'center',inline:'nearest'});
     } else if(source.closest('.sequence-scroll') && target.closest('.library-panel')) {
       source.scrollIntoView({block:'center',inline:'nearest'});
+    } else {
+      const sourceScroller=source.closest('.sequence-scroll');
+      const targetScroller=target.closest('.sequence-scroll');
+      if(sourceScroller && sourceScroller===targetScroller) {
+        target.scrollIntoView({block:'start',inline:'nearest'});
+        source.scrollIntoView({block:'nearest',inline:'nearest'});
+      }
     }
     window.__sebDragTrace={down:0,move:0,up:0,downTarget:'',moveTarget:'',upTarget:''};
     if(!window.__sebDragTraceInstalled){
