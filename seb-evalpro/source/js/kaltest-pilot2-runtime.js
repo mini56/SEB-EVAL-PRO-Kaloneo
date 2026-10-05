@@ -500,6 +500,8 @@
       details,
       manualEvaluation:{
         required:manualItems.length > 0,
+        testId:String(test.id || ''),
+        testTitle:String(test.title || test.id || ''),
         levels:['NE','I','II','III'],
         items:manualItems
       }
