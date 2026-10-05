@@ -16,7 +16,9 @@ const testPaths = [
   'seb-evalpro/source/kaltest/tests/organisation-demenagement/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/gestes-postures/1.0.0/test.json',
   'tests/fixtures/kaltests/conversions-atelier-expedition/1.0.0/test.json',
+  'seb-evalpro/source/kaltest/tests/autoevaluation-savoirs/1.0.0/test.json',
   'tests/fixtures/kaltests/genre-nombre/1.0.0/test.json',
+  'seb-evalpro/source/kaltest/tests/autoevaluation-tic/1.0.0/test.json',
   'tests/fixtures/kaltests/paronymes-rapport/1.0.0/test.json'
 ];
 
