@@ -1,0 +1,110 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "2.0.0",
+  "id": "dictee_professionnelle",
+  "version": "1.0.0",
+  "title": "Dictée professionnelle — Réclamation client",
+  "category": "expression_ecrite",
+  "description": "Écouter une réclamation client et saisir fidèlement le message entendu.",
+  "kind": "questionnaire",
+  "scored": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "dictee.html",
+    "sourceScript": "source/js/dictee-page.js",
+    "legacyParcoursId": "dictee"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "Vous travaillez au service administratif et commercial. Un client téléphone pour signaler un problème concernant une livraison. Votre responsable vous demande de prendre en note fidèlement son message afin de transmettre la réclamation au service concerné.",
+  "instruction": "Écoutez l'enregistrement avec le haut-parleur ou un casque. Vous pouvez le mettre en pause, le reprendre, l'arrêter ou le recommencer autant de fois que nécessaire. Saisissez exactement le texte entendu en respectant l'orthographe, les accents, les apostrophes, les majuscules et la ponctuation.",
+  "presentation": {
+    "layout": {
+      "type": "split",
+      "ratio": "40/60",
+      "blocks": [
+        {
+          "id": "audio"
+        },
+        {
+          "id": "texte"
+        }
+      ]
+    },
+    "dictation": {
+      "audio": "dictee-reclamation-client.wav",
+      "questionId": "dictee_text",
+      "totalWords": 80,
+      "controls": [
+        "play",
+        "pause",
+        "stop",
+        "restart"
+      ],
+      "showListenCount": true
+    }
+  },
+  "evaluation": {
+    "dictationEngine": "seb-dictee-v3"
+  },
+  "behavior": {
+    "validateBeforeAdvance": true,
+    "validationLabel": "Dictée terminée",
+    "revalidateOnAdvance": true
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "dictee_text",
+      "prompt": "Texte de la dictée",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "__dictee_engine__"
+      ],
+      "points": 20
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "mots_corrects",
+      "type": "number"
+    },
+    {
+      "id": "erreurs_notees",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.savoirs_fondamentaux.expression_ecrite.maitrise",
+      "bindings": {
+        "score": "score",
+        "score_max": "score_max"
+      }
+    }
+  ],
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "layout.split",
+    "bilan.bindings"
+  ]
+}
