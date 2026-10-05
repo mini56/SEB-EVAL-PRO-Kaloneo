@@ -272,7 +272,10 @@
       ...legacyStep('dictee'),
       file:'kaltest-pilot2.html'
     }, { segment:'dictee' }),
-    fullParcoursStep(legacyStep('tri-de-cheville')),
+    fullParcoursStep({
+      ...legacyStep('tri-de-cheville'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'tri' }),
     fullParcoursStep(legacyStep('nwtexte')),
     fullParcoursStep({
       ...legacyStep('nvmail'),
