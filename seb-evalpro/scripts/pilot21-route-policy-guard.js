@@ -21,6 +21,10 @@ expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=organisation'
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=postures'),'kaltest-pilot2.html?fullParcours=1&segment=postures','segment Postures KALTEST');
 expect(policy.normalizeCandidateRoute('planning.html'),policy.INITIAL_ROUTE,'ancienne page Planning doit être refusée après migration KALTEST');
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=planning'),'kaltest-pilot2.html?fullParcours=1&segment=planning','segment Planning KALTEST');
+expect(policy.normalizeCandidateRoute('autoeval1.html'),policy.INITIAL_ROUTE,'ancienne Autoévaluation 1 doit être refusée');
+expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=autoeval1'),'kaltest-pilot2.html?fullParcours=1&segment=autoeval1','segment Autoévaluation 1 KALTEST');
+expect(policy.normalizeCandidateRoute('autoeval2.html'),policy.INITIAL_ROUTE,'ancienne Autoévaluation 2 doit être refusée');
+expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=autoeval2'),'kaltest-pilot2.html?fullParcours=1&segment=autoeval2','segment Autoévaluation 2 KALTEST');
 expect(policy.normalizeCandidateRoute('qcmv1.0.html?fullParcours=1&page=finale#pageFinale'),'qcmv1.0.html?fullParcours=1&page=finale#pageFinale','page finale KALONÉO');
 expect(policy.normalizeCandidateRoute('brique.html'),'brique.html?fullParcours=1','page pratique doit rester dans le parcours KALONÉO');
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=genre-nombre'),'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre','segment KALTEST doit forcer fullParcours');
