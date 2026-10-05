@@ -31,8 +31,10 @@ try {
       scores_data: '{}'
     },
     localStorage: {},
-    lastPage: 'dictee.html',
-    lastEvaluationPage: 'dictee.html'
+    lastPage: 'kaltest-pilot2.html',
+    lastEvaluationPage: 'kaltest-pilot2.html',
+    lastRoute: 'kaltest-pilot2.html?fullParcours=1&segment=dictee',
+    lastEvaluationRoute: 'kaltest-pilot2.html?fullParcours=1&segment=dictee'
   };
 
   const saved = store.saveSnapshot(dicteeState);
@@ -55,8 +57,10 @@ try {
 
   const restored = readJsonFile(path.join(saved.candidateDir, 'donnees', 'evaluation-state.json'));
   assert(restored, 'L’état du candidat doit rester disponible après Quitter.');
-  assert.strictEqual(restored.lastPage, 'dictee.html', 'La dernière page doit rester la Dictée.');
-  assert.strictEqual(restored.lastEvaluationPage, 'dictee.html', 'La page de reprise doit rester la Dictée.');
+  assert.strictEqual(restored.lastPage, 'kaltest-pilot2.html', 'La dernière page doit rester dans le moteur KALTEST.');
+  assert.strictEqual(restored.lastEvaluationPage, 'kaltest-pilot2.html', 'La page de reprise doit rester dans le moteur KALTEST.');
+  assert.strictEqual(restored.lastRoute, 'kaltest-pilot2.html?fullParcours=1&segment=dictee', 'La route exacte de la Dictée KALTEST doit être conservée.');
+  assert.strictEqual(restored.lastEvaluationRoute, 'kaltest-pilot2.html?fullParcours=1&segment=dictee', 'La route de reprise exacte de la Dictée KALTEST doit être conservée.');
 
   const preload = fs.readFileSync(path.join(__dirname, '..', 'src', 'preload.js'), 'utf8').replace(/\r\n/g, '\n');
   const sessionClose = fs.readFileSync(path.join(__dirname, '..', 'src', 'session-close.js'), 'utf8').replace(/\r\n/g, '\n');
@@ -96,13 +100,12 @@ try {
   assert(preload.includes("ipcRenderer.invoke('admin:open-candidate-browser')"), 'Après fermeture de session, SEB EvalPro doit revenir à l’espace candidats.');
 
   assert(
-    main.includes("loadEvaluationFile(existingWebPage(state.lastEvaluationPage || state.lastPage));") ||
-    main.includes("mainWindow.loadFile(existingWebPage(state.lastEvaluationPage || state.lastPage));"),
-    'Le démarrage doit reprendre la dernière page enregistrée.'
+    main.includes("loadKaloneoCandidateRoute(kaloneoFullParcoursRoute.resolveStateRoute(state));"),
+    'Le démarrage doit reprendre la route KALTEST enregistrée et normalisée.'
   );
 
   console.log('ADMIN_QUIT_PRESERVES_ACTIVE_CANDIDATE: OK');
-  console.log('ADMIN_QUIT_PRESERVES_LAST_PAGE: dictee.html');
+  console.log('ADMIN_QUIT_PRESERVES_LAST_ROUTE: kaltest-pilot2.html?fullParcours=1&segment=dictee');
   console.log('ADMIN_QUIT_SEPARATE_FROM_SESSION_CLOSE: OK');
   console.log('ADMIN_CLOSE_LABEL: Fermer la session active');
 } finally {
