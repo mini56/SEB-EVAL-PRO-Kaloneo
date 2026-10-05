@@ -1,0 +1,772 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "2.0.0",
+  "id": "ranger_stock",
+  "version": "1.0.0",
+  "title": "Ranger le stock de produits",
+  "category": "organisation",
+  "description": "Ranger des flacons dans trois casiers en respectant des critères alphabétiques, de dosage et de doublons.",
+  "kind": "questionnaire",
+  "scored": true,
+  "allowEmptyCompletion": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "stock.html",
+    "sourceScript": "source/js/stock-page.js",
+    "legacyParcoursId": "stock"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "Vous êtes chargé de mettre de l'ordre dans le stock des divers produits de l'entreprise. À vous de ranger, suivant les critères, les produits à leur bonne place.",
+  "instruction": "Comment ça fonctionne ? Glissez-déposez les pots dans les bonnes étagères selon les règles affichées. Vous disposez d'une zone de tri si vous en avez besoin. Sur chaque étagère, les flacons seront placés en ordre alphabétique puis, le cas échéant, selon le dosage en ordre décroissant. Les flacons en double ou ne convenant pas aux casiers 1 et 2 seront placés dans le casier 3, selon les mêmes critères.",
+  "presentation": {
+    "layout": "single",
+    "stockBoard": {
+      "examplePotId": 8,
+      "examplePlacement": "case:1:1:1",
+      "pots": [
+        {
+          "id": 1,
+          "code": "Ow",
+          "percentage": 37,
+          "color": "rouge",
+          "questionId": "stock_pot_1",
+          "example": false
+        },
+        {
+          "id": 2,
+          "code": "To",
+          "percentage": 87,
+          "color": "bleu",
+          "questionId": "stock_pot_2",
+          "example": false
+        },
+        {
+          "id": 3,
+          "code": "Ba",
+          "percentage": 28,
+          "color": "orange",
+          "questionId": "stock_pot_3",
+          "example": false
+        },
+        {
+          "id": 4,
+          "code": "Sa",
+          "percentage": 21,
+          "color": "vert",
+          "questionId": "stock_pot_4",
+          "example": false
+        },
+        {
+          "id": 5,
+          "code": "Lu",
+          "percentage": 28,
+          "color": "violet",
+          "questionId": "stock_pot_5",
+          "example": false
+        },
+        {
+          "id": 6,
+          "code": "Ba",
+          "percentage": 28,
+          "color": "jaune",
+          "questionId": "stock_pot_6",
+          "example": false
+        },
+        {
+          "id": 7,
+          "code": "Uv",
+          "percentage": 31,
+          "color": "rouge",
+          "questionId": "stock_pot_7",
+          "example": false
+        },
+        {
+          "id": 8,
+          "code": "Ab",
+          "percentage": 62,
+          "color": "orange",
+          "questionId": null,
+          "example": true
+        },
+        {
+          "id": 9,
+          "code": "Lu",
+          "percentage": 28,
+          "color": "jaune",
+          "questionId": "stock_pot_9",
+          "example": false
+        },
+        {
+          "id": 10,
+          "code": "Ma",
+          "percentage": 52,
+          "color": "violet",
+          "questionId": "stock_pot_10",
+          "example": false
+        },
+        {
+          "id": 11,
+          "code": "Ab",
+          "percentage": 22,
+          "color": "vert",
+          "questionId": "stock_pot_11",
+          "example": false
+        },
+        {
+          "id": 12,
+          "code": "Ab",
+          "percentage": 50,
+          "color": "jaune",
+          "questionId": "stock_pot_12",
+          "example": false
+        },
+        {
+          "id": 13,
+          "code": "Ac",
+          "percentage": 30,
+          "color": "rouge",
+          "questionId": "stock_pot_13",
+          "example": false
+        },
+        {
+          "id": 14,
+          "code": "Du",
+          "percentage": 70,
+          "color": "vert",
+          "questionId": "stock_pot_14",
+          "example": false
+        },
+        {
+          "id": 15,
+          "code": "Kr",
+          "percentage": 60,
+          "color": "orange",
+          "questionId": "stock_pot_15",
+          "example": false
+        },
+        {
+          "id": 16,
+          "code": "Qa",
+          "percentage": 89,
+          "color": "rouge",
+          "questionId": "stock_pot_16",
+          "example": false
+        },
+        {
+          "id": 17,
+          "code": "Ma",
+          "percentage": 29,
+          "color": "bleu",
+          "questionId": "stock_pot_17",
+          "example": false
+        },
+        {
+          "id": 18,
+          "code": "Ni",
+          "percentage": 55,
+          "color": "jaune",
+          "questionId": "stock_pot_18",
+          "example": false
+        },
+        {
+          "id": 19,
+          "code": "Pa",
+          "percentage": 47,
+          "color": "orange",
+          "questionId": "stock_pot_19",
+          "example": false
+        },
+        {
+          "id": 20,
+          "code": "Qa",
+          "percentage": 12,
+          "color": "vert",
+          "questionId": "stock_pot_20",
+          "example": false
+        },
+        {
+          "id": 21,
+          "code": "Gi",
+          "percentage": 55,
+          "color": "rouge",
+          "questionId": "stock_pot_21",
+          "example": false
+        },
+        {
+          "id": 22,
+          "code": "Lu",
+          "percentage": 28,
+          "color": "jaune",
+          "questionId": "stock_pot_22",
+          "example": false
+        },
+        {
+          "id": 23,
+          "code": "Ju",
+          "percentage": 27,
+          "color": "bleu",
+          "questionId": "stock_pot_23",
+          "example": false
+        },
+        {
+          "id": 24,
+          "code": "Gi",
+          "percentage": 12,
+          "color": "violet",
+          "questionId": "stock_pot_24",
+          "example": false
+        },
+        {
+          "id": 25,
+          "code": "Ux",
+          "percentage": 31,
+          "color": "orange",
+          "questionId": "stock_pot_25",
+          "example": false
+        },
+        {
+          "id": 26,
+          "code": "Lu",
+          "percentage": 18,
+          "color": "rouge",
+          "questionId": "stock_pot_26",
+          "example": false
+        },
+        {
+          "id": 27,
+          "code": "Fa",
+          "percentage": 90,
+          "color": "bleu",
+          "questionId": "stock_pot_27",
+          "example": false
+        },
+        {
+          "id": 28,
+          "code": "Lu",
+          "percentage": 53,
+          "color": "jaune",
+          "questionId": "stock_pot_28",
+          "example": false
+        },
+        {
+          "id": 29,
+          "code": "Ju",
+          "percentage": 20,
+          "color": "vert",
+          "questionId": "stock_pot_29",
+          "example": false
+        },
+        {
+          "id": 30,
+          "code": "Et",
+          "percentage": 12,
+          "color": "violet",
+          "questionId": "stock_pot_30",
+          "example": false
+        },
+        {
+          "id": 31,
+          "code": "Ju",
+          "percentage": 26,
+          "color": "orange",
+          "questionId": "stock_pot_31",
+          "example": false
+        },
+        {
+          "id": 32,
+          "code": "Ma",
+          "percentage": 11,
+          "color": "bleu",
+          "questionId": "stock_pot_32",
+          "example": false
+        },
+        {
+          "id": 33,
+          "code": "Ne",
+          "percentage": 31,
+          "color": "jaune",
+          "questionId": "stock_pot_33",
+          "example": false
+        },
+        {
+          "id": 34,
+          "code": "Ni",
+          "percentage": 62,
+          "color": "rouge",
+          "questionId": "stock_pot_34",
+          "example": false
+        }
+      ],
+      "shelves": [
+        {
+          "id": 1,
+          "title": "Casier 1 — Ranger ici les flacons de A à K, sauf E et G",
+          "levels": [
+            {
+              "id": 3,
+              "label": "26% et moins",
+              "cases": 4
+            },
+            {
+              "id": 2,
+              "label": "27% à 59%",
+              "cases": 4
+            },
+            {
+              "id": 1,
+              "label": "60% et plus",
+              "cases": 4
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Casier 2 — Ranger ici les flacons de L à U, sauf M, O, P",
+          "levels": [
+            {
+              "id": 3,
+              "label": "29% et moins",
+              "cases": 4
+            },
+            {
+              "id": 2,
+              "label": "30% à 54%",
+              "cases": 4
+            },
+            {
+              "id": 1,
+              "label": "55% et plus",
+              "cases": 4
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Casier 3 — Flacons en double ou ne convenant pas aux casiers 1 et 2",
+          "levels": [
+            {
+              "id": 1,
+              "label": "",
+              "cases": 11
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "behavior": {
+    "validateBeforeAdvance": true,
+    "validationLabel": "Vérifier"
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "stock_pot_1",
+      "prompt": "Flacon Ow 37%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:3:1:10"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_2",
+      "prompt": "Flacon To 87%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:1:4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_3",
+      "prompt": "Flacon Ba 28%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:2:3",
+        "case:3:1:1"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_4",
+      "prompt": "Flacon Sa 21%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:3:4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_5",
+      "prompt": "Flacon Lu 28%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:3:1",
+        "case:3:1:5",
+        "case:3:1:6"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_6",
+      "prompt": "Flacon Ba 28%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:2:3",
+        "case:3:1:1"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_7",
+      "prompt": "Flacon Uv 31%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:2:3"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_9",
+      "prompt": "Flacon Lu 28%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:3:1",
+        "case:3:1:5",
+        "case:3:1:6"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_10",
+      "prompt": "Flacon Ma 52%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:3:1:7"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_11",
+      "prompt": "Flacon Ab 22%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:3:1"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_12",
+      "prompt": "Flacon Ab 50%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:2:1"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_13",
+      "prompt": "Flacon Ac 30%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:2:2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_14",
+      "prompt": "Flacon Du 70%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:1:2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_15",
+      "prompt": "Flacon Kr 60%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:1:4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_16",
+      "prompt": "Flacon Qa 89%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:1:3"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_17",
+      "prompt": "Flacon Ma 29%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:3:1:8"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_18",
+      "prompt": "Flacon Ni 55%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:1:2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_19",
+      "prompt": "Flacon Pa 47%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:3:1:11"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_20",
+      "prompt": "Flacon Qa 12%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:3:3"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_21",
+      "prompt": "Flacon Gi 55%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:3:1:3"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_22",
+      "prompt": "Flacon Lu 28%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:3:1",
+        "case:3:1:5",
+        "case:3:1:6"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_23",
+      "prompt": "Flacon Ju 27%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:2:4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_24",
+      "prompt": "Flacon Gi 12%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:3:1:4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_25",
+      "prompt": "Flacon Ux 31%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:2:4"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_26",
+      "prompt": "Flacon Lu 18%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:3:2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_27",
+      "prompt": "Flacon Fa 90%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:1:3"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_28",
+      "prompt": "Flacon Lu 53%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:2:1"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_29",
+      "prompt": "Flacon Ju 20%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:3:3"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_30",
+      "prompt": "Flacon Et 12%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:3:1:2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_31",
+      "prompt": "Flacon Ju 26%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:1:3:2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_32",
+      "prompt": "Flacon Ma 11%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:3:1:9"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_33",
+      "prompt": "Flacon Ne 31%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:2:2"
+      ],
+      "points": 1
+    },
+    {
+      "id": "stock_pot_34",
+      "prompt": "Flacon Ni 62%",
+      "response": {
+        "type": "text"
+      },
+      "acceptedAnswers": [
+        "case:2:1:1"
+      ],
+      "points": 1
+    }
+  ],
+  "outputs": [
+    {
+      "id": "score",
+      "type": "number"
+    },
+    {
+      "id": "score_max",
+      "type": "number"
+    },
+    {
+      "id": "erreurs",
+      "type": "number"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "bilan.competences_techniques.gestion_logistique.classement_multicritere",
+      "bindings": {
+        "erreurs": "erreurs"
+      }
+    }
+  ],
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "layout.single",
+    "bilan.bindings"
+  ]
+}
