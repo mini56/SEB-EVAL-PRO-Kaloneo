@@ -94,8 +94,8 @@ app.whenReady().then(async()=>{
       throw new Error('Entrée PILOTE 11 invalide: '+JSON.stringify(intro));
     }
 
-    // 2. Fin du 4e KALTEST initial -> Page 4. Les tests Conversions,
-    // Genre/Nombre et Paronymes ne doivent plus être joués ici.
+    // 2. Fin du 4e KALTEST initial -> Fractions KALTEST. Les exercices 4/5/5_1
+    // conservent leur position historique mais ne passent plus par qcmv1.0.html.
     await win.webContents.executeJavaScript(`
       sessionStorage.setItem('seb_kaltest_pilot2_state_v1', JSON.stringify({
         phase:'exercise',
@@ -126,12 +126,12 @@ app.whenReady().then(async()=>{
       "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
       true
     );
-    await waitForLocation(win, current=>current.file==='qcmv1.0.html' && current.page==='4', 'Page 4');
-    await sleep(350);
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='fractions', 'Fractions KALTEST');
+    await sleep(450);
 
     const page4=await win.webContents.executeJavaScript(`
       ({
-        visible:document.getElementById('page4')?.classList.contains('visible')||false,
+        current:window.sebKaltestPilot2.currentTest()?.id||'',
         mode:window.sebParcours?.mode||'',
         next4:window.sebParcours?.nextUrl('qcm-4')||'',
         next5:window.sebParcours?.nextUrl('qcm-5')||'',
@@ -146,24 +146,37 @@ app.whenReady().then(async()=>{
       'tri-de-cheville','nwtexte','nvmail','autoeval2','paronymes','carre','qcm-11','qcm-finale'
     ];
     const page4Location=locationInfo(win);
-    if(!page4.visible || page4.mode!=='pilot11' || page4Location.search.indexOf('fullParcours=1')<0 ||
-       page4.next4!=='qcmv1.0.html?fullParcours=1&page=5#page5' ||
-       page4.next5!=='qcmv1.0.html?fullParcours=1&page=5_1#page5_1' ||
+    if(page4.current!=='fractions_preparation_lots' || page4.mode!=='pilot11' || page4Location.search.indexOf('fullParcours=1')<0 ||
+       page4.next4!=='kaltest-pilot2.html?fullParcours=1&segment=organisation' ||
+       page4.next5!=='kaltest-pilot2.html?fullParcours=1&segment=postures' ||
        page4.next51!=='kaltest-pilot2.html?fullParcours=1&segment=conversions' ||
        JSON.stringify(page4.ids)!==JSON.stringify(expectedPilotIds)){
       throw new Error('Ordre central PILOTE 11 invalide: '+JSON.stringify(page4));
     }
 
-    // 3. Pages 4 -> 5 -> 5_1 sont réellement traversables avant Conversions.
-    await win.webContents.executeJavaScript("window.sebParcours.goNext('qcm-4'); true;",true);
-    await waitForLocation(win, current=>current.file==='qcmv1.0.html' && current.page==='5', 'Page 5');
-    await sleep(250);
+    // 3. Fractions -> Organisation -> Postures sont maintenant trois KALTEST.
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='organisation', 'Organisation KALTEST');
+    await sleep(350);
+    const organisation=await win.webContents.executeJavaScript("window.sebKaltestPilot2.currentTest()?.id||''",true);
+    if(organisation!=='organisation_demenagement') throw new Error('Organisation KALTEST absente: '+organisation);
 
-    await win.webContents.executeJavaScript("window.sebParcours.goNext('qcm-5'); true;",true);
-    await waitForLocation(win, current=>current.file==='qcmv1.0.html' && current.page==='5_1', 'Page 5_1');
-    await sleep(250);
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='postures', 'Postures KALTEST');
+    await sleep(350);
+    const postures=await win.webContents.executeJavaScript("window.sebKaltestPilot2.currentTest()?.id||''",true);
+    if(postures!=='gestes_postures') throw new Error('Postures KALTEST absentes: '+postures);
 
-    await win.webContents.executeJavaScript("window.sebParcours.goNext('qcm-5_1'); true;",true);
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
     await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='conversions', 'Conversions KALTEST');
     await sleep(500);
 
@@ -340,7 +353,7 @@ app.whenReady().then(async()=>{
 
     console.log('FULL_PILOT_JOURNEY_SMOKE: OK');
     console.log('PILOT11_INITIAL_KALTESTS='+expectedInitial.join(','));
-    console.log('PILOT11_PAGES_4_5_5_1=OK');
+    console.log('PILOT11_KALTEST_4_5_5_1=Fractions,Organisation,Postures');
     console.log('PILOT11_CONVERSIONS_AT_CORRECT_POSITION=OK');
     console.log('BRIQUE_VIDEO='+video.src);
     console.log('LEGO_PAGE=OK');
