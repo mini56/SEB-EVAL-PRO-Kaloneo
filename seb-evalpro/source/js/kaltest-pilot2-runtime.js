@@ -3305,7 +3305,6 @@
     }
     clearTimeout(transitionAdvanceTimer);
     transitionAdvanceTimer = null;
-    const next = document.getElementById('kaltest-next');
     if (next) next.hidden = false;
     host.innerHTML = '';
 
