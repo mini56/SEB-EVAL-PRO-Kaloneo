@@ -752,7 +752,7 @@
     },
     {
       "id": "erreurs",
-      "type": "number"
+      "type": "integer"
     }
   ],
   "bilanContributions": [
