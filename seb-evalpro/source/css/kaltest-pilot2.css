@@ -2708,3 +2708,45 @@ body[data-seb-kaltest-id="fractions_preparation_lots"] #kaltest-content,body[dat
 @media(max-height:760px){.kaltest-fraction-item{width:46px;height:46px;flex-basis:46px}.kaltest-fraction-row{grid-template-columns:132px minmax(0,1fr)}.kaltest-organisation-row{padding:3px 6px;font-size:15px}.kaltest-postures-answer{padding:5px 7px;font-size:14.5px}}
 
 
+
+
+/* PILOTE 21 — Planning cantine migré en KALTEST. */
+.kaltest-planning-layout{
+  width:100%;height:100%;min-height:0;display:grid;
+  grid-template-columns:minmax(0,3fr) minmax(270px,2fr);
+  gap:12px;align-items:stretch;
+  padding:8px;
+  border-radius:12px;
+  background:
+    linear-gradient(rgba(255,255,255,.70),rgba(255,255,255,.70)),
+    var(--kaltest-planning-bg,none) center/cover no-repeat;
+}
+.kaltest-planning-work,.kaltest-planning-guide{
+  min-width:0;min-height:0;border:1px solid rgba(0,78,112,.20);
+  border-radius:12px;background:rgba(255,255,255,.94);
+  box-shadow:0 4px 14px rgba(0,0,0,.10);
+}
+.kaltest-planning-work{padding:10px;display:flex;flex-direction:column;gap:9px}
+.kaltest-planning-table{width:100%;table-layout:fixed;font-size:14.5px}
+.kaltest-planning-table th,.kaltest-planning-table td{padding:5px}
+.kaltest-planning-table th{font-weight:700}
+.kaltest-planning-table select{width:100%;min-height:31px;font-size:13.5px}
+.kaltest-planning-lists{margin-top:auto;padding:7px 9px;border:1px solid rgba(0,78,112,.18);border-radius:9px;background:#eef4ff;font-size:13.5px;line-height:1.25}
+.kaltest-planning-lists p{margin:3px 0}
+.kaltest-planning-guide{padding:12px 15px;overflow:auto;color:#344563}
+.kaltest-planning-guide h3{margin:0 0 8px;color:var(--seb-blue-100,#004E70);font-size:18px}
+.kaltest-planning-guide ol{margin:0;padding-left:24px}
+.kaltest-planning-guide li{margin:0 0 8px;line-height:1.25;font-size:14.5px}
+.kaltest-answer-correct{box-shadow:inset 0 0 0 3px #22c55e}
+.kaltest-answer-incorrect{box-shadow:inset 0 0 0 3px #ef4444}
+body[data-seb-kaltest-id="planning_cantine"] #kaltest-content{padding:4px 6px;background:transparent;border:0;box-shadow:none}
+@media(max-height:760px){
+  .kaltest-planning-layout{gap:8px;padding:5px}
+  .kaltest-planning-work{padding:6px;gap:5px}
+  .kaltest-planning-table{font-size:13.5px}
+  .kaltest-planning-table th,.kaltest-planning-table td{padding:3px}
+  .kaltest-planning-table select{min-height:27px;font-size:12.5px}
+  .kaltest-planning-lists{padding:5px 7px;font-size:12.5px}
+  .kaltest-planning-guide{padding:8px 10px}
+  .kaltest-planning-guide li{margin-bottom:5px;font-size:13px}
+}
