@@ -21,6 +21,7 @@ const testPaths = [
   'seb-evalpro/source/kaltest/tests/planning-cantine/1.0.0/test.json',
   'tests/fixtures/kaltests/genre-nombre/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/dictee-professionnelle/1.0.0/test.json',
+  'seb-evalpro/source/kaltest/tests/tri-chevilles/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/redaction-email/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/autoevaluation-tic/1.0.0/test.json',
   'tests/fixtures/kaltests/paronymes-rapport/1.0.0/test.json',
