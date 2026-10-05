@@ -1606,8 +1606,8 @@
       if (ready) testState.answers.brique_ready = '1';
       else delete testState.answers.brique_ready;
       if (next) {
-        next.disabled = !ready && testState.status !== 'COMPLETED';
-        next.classList.toggle('seb-exercise-nav-locked', !ready && testState.status !== 'COMPLETED');
+        next.disabled = false;
+        next.classList.remove('seb-exercise-nav-locked');
       }
     }
     function saveLegacyMain() {
@@ -1958,7 +1958,6 @@
           display.textContent = '00:00';
           start.disabled = Number(tri.currentTri) > maxTris;
           stop.disabled = true;
-          console.log('KALTEST_TRI_ERROR_ACCEPTED', index+1, tri.currentTri, tri.awaitingError);
           setTimeout(()=>start.focus(),0);
         }
         tri.ready = false;
@@ -2041,7 +2040,6 @@
     }
 
     resultsButton.addEventListener('click', () => {
-      console.log('KALTEST_TRI_RESULTS_CLICK', completedRows().length, hasPartial(), Boolean(activeTriChrono?.isRunning?.()), tri.awaitingError);
       if (!canShowResults()) return;
       tri.resultsShown = true;
       auto.hidden = false;
@@ -2050,7 +2048,6 @@
       persist();
     });
     autoValidate.addEventListener('click', () => {
-      console.log('KALTEST_TRI_AUTO_VALIDATE', completedRows().length, hasPartial(), Boolean(activeTriChrono?.isRunning?.()), tri.awaitingError, autoAnswered());
       if (!canShowResults()) return;
       if (!autoAnswered()) {
         document.getElementById('exercise-status').textContent = 'Complétez l’autoévaluation avant de continuer.';
@@ -3416,6 +3413,31 @@
       await captureReplayPage();
       advance();
       return;
+    }
+
+    if (test.evaluation?.triRules === true) {
+      const tri = testState.tri || {};
+      const rows = Array.isArray(tri.rows) ? tri.rows.slice(0, Number(test.presentation?.triStation?.maxTris) || 5) : [];
+      const complete = rows.filter(row =>
+        row?.seconds !== null && row?.seconds !== undefined &&
+        row?.errors !== null && row?.errors !== undefined &&
+        String(row.errors).trim() !== ''
+      );
+      const partial = rows.some(row => {
+        const hasTime = row?.seconds !== null && row?.seconds !== undefined;
+        const hasErrors = row?.errors !== null && row?.errors !== undefined && String(row.errors).trim() !== '';
+        return hasTime !== hasErrors;
+      });
+      const autoAnswered = (Array.isArray(tri.autoSelections) && tri.autoSelections.length > 0) ||
+        String(tri.commentaire || '').trim() !== '';
+      const minimum = Number(test.presentation?.triStation?.minTris) || 3;
+      if (complete.length < minimum || partial || !autoAnswered) {
+        status.textContent = 'Effectuez au moins ' + minimum + ' tris complets, renseignez les erreurs puis complétez l’autoévaluation.';
+        return;
+      }
+      tri.ready = true;
+      testState.answers.tri_ready = '1';
+      testState.status = 'ACTIVE';
     }
 
     if (!hasActivity(test, testState) && test.allowEmptyCompletion !== true) {
