@@ -59,7 +59,8 @@ const expectedPilotRoutes = {
   'planning':'kaltest-pilot2.html?fullParcours=1&segment=planning',
   'genrenombres':'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre',
   'autoeval2':'kaltest-pilot2.html?fullParcours=1&segment=autoeval2',
-  'paronymes':'kaltest-pilot2.html?fullParcours=1&segment=paronymes'
+  'paronymes':'kaltest-pilot2.html?fullParcours=1&segment=paronymes',
+  'carre':'kaltest-pilot2.html?fullParcours=1&segment=carre'
 };
 for (const [id, expectedUrl] of Object.entries(expectedPilotRoutes)) {
   const step = pilot11ById.get(id);
@@ -94,7 +95,7 @@ if (api.nextFile('nwtexte') !== 'nvmail.html') fail('nwtexte -> nvmail modifié'
 if (api.nextFile('nvmail') !== 'autoeval2.html') fail('nvmail -> autoeval2 modifié');
 
 // Retour du carré vers la page 11 du QCM, puis page de fin.
-if (api.nextUrl('carre') !== 'qcmv1.0.html?page=11#page11') fail('carre -> QCM page 11 modifié');
+if (api.nextUrl('carre') !== 'qcmv1.0.html?fullParcours=1&page=11#page11') fail('carre KALTEST -> QCM page 11 modifié');
 if (api.nextUrl('qcm-11') !== 'qcmv1.0.html?page=finale#pageFinale') fail('QCM page 11 -> fin modifié');
 
 // Le contrat Résultats historique nwtexte doit rester lisible sans renommage.
