@@ -276,6 +276,7 @@
         instruction:def.instruction||'',
         calculatorCompatible:def.calculator?.compatible===true,
         calculatorDefaultEnabled:def.calculator?.defaultEnabled===true,
+        calculatorBrand:String(def.calculator?.brandLabel ?? 'KALONÉO'),
         chronoEnabled:def.chrono?.enabled===true||def.features?.includes('host.chrono'),
         chronoMode:def.chrono?.mode||'simple',
         chronoMinMeasures:Math.max(1,Number(def.chrono?.minMeasures)||1),
@@ -441,6 +442,10 @@
         compatible:Boolean(m.calculatorCompatible),
         defaultEnabled:Boolean(m.calculatorCompatible&&m.calculatorDefaultEnabled)
       });
+      const calculatorBrand=String(m.calculatorBrand ?? 'KALONÉO').trim();
+      if(Object.prototype.hasOwnProperty.call(def.calculator,'brandLabel') || calculatorBrand!=='KALONÉO') {
+        def.calculator.brandLabel=calculatorBrand;
+      }
       if(m.chronoEnabled||def.chrono) {
         const chrono=Object.assign({},def.chrono||{},{
           enabled:Boolean(m.chronoEnabled),
@@ -546,7 +551,11 @@
       features:[...new Set(features)],
       scenario:m.scenario||'',
       instruction:m.instruction||'',
-      calculator:{compatible:Boolean(m.calculatorCompatible),defaultEnabled:Boolean(m.calculatorCompatible&&m.calculatorDefaultEnabled)},
+      calculator:{
+        compatible:Boolean(m.calculatorCompatible),
+        defaultEnabled:Boolean(m.calculatorCompatible&&m.calculatorDefaultEnabled),
+        brandLabel:String(m.calculatorBrand ?? 'KALONÉO').trim()
+      },
       chrono:m.chronoEnabled?{
         enabled:true,
         engine:'seb-common',
