@@ -57,6 +57,10 @@ jobs:
         working-directory: seb-evalpro
         run: node scripts/kaltest-pilot3-regression-guard.js
 
+      - name: Validate Bilan levels and dependencies
+        working-directory: seb-evalpro
+        run: node scripts/kaltest-bilan-levels-guard.js
+
       - name: Run KALTEST Electron smoke
         working-directory: seb-evalpro
         shell: pwsh
