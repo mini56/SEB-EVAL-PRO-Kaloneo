@@ -55,8 +55,10 @@ const expectedPilotRoutes = {
   'qcm-5':'kaltest-pilot2.html?fullParcours=1&segment=organisation',
   'qcm-5_1':'kaltest-pilot2.html?fullParcours=1&segment=postures',
   'qcm-6':'kaltest-pilot2.html?fullParcours=1&segment=conversions',
+  'autoeval1':'kaltest-pilot2.html?fullParcours=1&segment=autoeval1',
   'planning':'kaltest-pilot2.html?fullParcours=1&segment=planning',
   'genrenombres':'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre',
+  'autoeval2':'kaltest-pilot2.html?fullParcours=1&segment=autoeval2',
   'paronymes':'kaltest-pilot2.html?fullParcours=1&segment=paronymes'
 };
 for (const [id, expectedUrl] of Object.entries(expectedPilotRoutes)) {
