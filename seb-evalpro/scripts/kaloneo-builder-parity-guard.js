@@ -127,7 +127,7 @@ function proofBlock(type,index){
   if(type==='image') return {uid:'proof_img_'+index,type,zone,mediaName:'preuve.svg',mediaType:'image/svg+xml',mediaData:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiLz4=',mediaAlt:'Illustration',mediaPlaceholder:''};
   if(type==='audio') return {uid:'proof_audio_'+index,type,zone,mediaName:'preuve.wav',mediaType:'audio/wav',mediaData:'data:audio/wav;base64,UklGRg==',mediaAlt:'Audio'};
   if(type==='video') return {uid:'proof_video_'+index,type,zone,mediaName:'preuve.webm',mediaType:'video/webm',mediaData:'data:video/webm;base64,GkXf',mediaAlt:'Vidéo'};
-  if(type==='question') return {uid:'proof_q_'+index,type,zone,question:{id:'ID'+(index+1)+'_preuve',prompt:'Question de contrôle '+(index+1),responseType:'text',normalizer:'',acceptedAnswers:'ok',acceptedMinutes:'',units:'',points:1,example:false,options:'',unitInput:false,unitScored:false,supplementalFields:[]}};
+  if(type==='question') return {uid:'proof_q_'+index,type,zone,question:{id:'id'+(index+1)+'_preuve',prompt:'Question de contrôle '+(index+1),responseType:'text',normalizer:'',acceptedAnswers:'ok',acceptedMinutes:'',units:'',points:1,example:false,options:'',unitInput:false,unitScored:false,supplementalFields:[]}};
   if(type==='response-table') return {uid:'proof_response_'+index,type,zone,responseTable:{headers:['N°','Réponse','Unités'],columns:[{id:'number',widthChars:5,align:'center'},{id:'answer',widthChars:14,align:'center'},{id:'unit',align:'left'}]}};
   if(type==='inline-flow') return {uid:'proof_inline_'+index,type,zone,wordBank:['mot'],flow:[{type:'text',text:'Phrase de contrôle.',breakAfterSentence:true}]};
   if(type==='multiple-tables') return {uid:'proof_multitable_'+index,type,zone,tableDefinition:{id:'table_'+index,title:'Tableau',headers:['A','B'],questionIds:[]}};
@@ -138,7 +138,7 @@ function proofBlock(type,index){
     block.table.cells[0][0].kind='fixed-text';
     block.table.cells[0][0].value='Repère';
     block.table.cells[0][1].kind='candidate-answer';
-    block.table.cells[0][1].questionId='ID'+(index+1)+'_grille';
+    block.table.cells[0][1].questionId='id'+(index+1)+'_grille';
     block.table.cells[0][1].acceptedAnswers='1';
     block.table.cells[0][1].responseType='number';
     block.table.cells[0][1].points=1;
