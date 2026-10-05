@@ -23,6 +23,8 @@ expect(policy.normalizeCandidateRoute('planning.html'),policy.INITIAL_ROUTE,'anc
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=planning'),'kaltest-pilot2.html?fullParcours=1&segment=planning','segment Planning KALTEST');
 expect(policy.normalizeCandidateRoute('autoeval1.html'),policy.INITIAL_ROUTE,'ancienne Autoévaluation 1 doit être refusée');
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=autoeval1'),'kaltest-pilot2.html?fullParcours=1&segment=autoeval1','segment Autoévaluation 1 KALTEST');
+expect(policy.normalizeCandidateRoute('stock.html'),policy.INITIAL_ROUTE,'ancienne page Stock doit être refusée');
+expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=stock'),'kaltest-pilot2.html?fullParcours=1&segment=stock','segment Stock KALTEST');
 expect(policy.normalizeCandidateRoute('autoeval2.html'),policy.INITIAL_ROUTE,'ancienne Autoévaluation 2 doit être refusée');
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=autoeval2'),'kaltest-pilot2.html?fullParcours=1&segment=autoeval2','segment Autoévaluation 2 KALTEST');
 expect(policy.normalizeCandidateRoute('carre.html'),policy.INITIAL_ROUTE,'ancienne page Gratte-ciel doit être refusée');
