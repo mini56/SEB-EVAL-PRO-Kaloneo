@@ -296,7 +296,7 @@ function calculator(){
   ['7','8','9','/','4','5','6','*','1','2','3','-','0','.','=','+'].forEach(v=>{
     const b=el('button','',v);b.type='button';b.onclick=()=>{
       if(v==='='){
-        try{if(!/^[0-9+\\-*/.() ]+$/.test(expr))throw new Error();const out=Function('"use strict";return ('+expr+')')();display.textContent=Number.isFinite(out)?String(out):'ERR';expr=Number.isFinite(out)?String(out):'';}catch(_){display.textContent='ERR';expr='';}
+        try{if(!/^[0-9+*/(). -]+$/.test(expr))throw new Error();const out=Function('"use strict";return ('+expr+')')();display.textContent=Number.isFinite(out)?String(out):'ERR';expr=Number.isFinite(out)?String(out):'';}catch(_){display.textContent='ERR';expr='';}
       }else{expr+=v;display.textContent=expr||'0';}
     };grid.append(b);
   });
