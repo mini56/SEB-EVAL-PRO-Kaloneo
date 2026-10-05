@@ -254,8 +254,14 @@
       ...legacyStep('autoeval1'),
       file:'kaltest-pilot2.html'
     }, { segment:'autoeval1' }),
-    fullParcoursStep(legacyStep('introbrique')),
-    fullParcoursStep(legacyStep('brique')),
+    fullParcoursStep({
+      id:'transition-video-f1',
+      file:'kaltest-pilot2.html'
+    }, { segment:'transition-video-f1' }),
+    fullParcoursStep({
+      ...legacyStep('brique'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'brique' }),
     fullParcoursStep({
       ...legacyStep('stock'),
       file:'kaltest-pilot2.html'
@@ -293,8 +299,11 @@
       ...legacyStep('carre'),
       file:'kaltest-pilot2.html'
     }, { segment:'carre' }),
-    fullParcoursStep(legacyStep('qcm-11')),
-    fullParcoursStep(legacyStep('qcm-finale'))
+    fullParcoursStep({
+      ...legacyStep('qcm-11'),
+      file:'kaltest-pilot2.html',
+      page:null
+    }, { segment:'fin' })
   ]);
 
   function pilot11Enabled() {
