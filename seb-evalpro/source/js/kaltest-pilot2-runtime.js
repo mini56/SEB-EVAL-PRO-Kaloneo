@@ -66,6 +66,11 @@
       stepId:'paronymes',
       startPhase:'exercise',
       ids:Object.freeze(['paronymes_rapport'])
+    }),
+    carre:Object.freeze({
+      stepId:'carre',
+      startPhase:'exercise',
+      ids:Object.freeze(['gratte_ciel'])
     })
   });
 
@@ -971,7 +976,15 @@
                    cellDefinition.kind === 'select' ||
                    cellDefinition.kind === 'unit') {
           const question = questionById(test, cellDefinition.questionId);
-          if (question) td.appendChild(makeInput(test, question, { compact:true }));
+          if (question) {
+            const input = makeInput(test, question, { compact:true });
+            if (testState.status === 'COMPLETED') {
+              input.disabled = true;
+              const detail = testState.result?.details?.[question.id];
+              td.classList.add(detail?.correct ? 'kaltest-answer-correct' : 'kaltest-answer-incorrect');
+            }
+            td.appendChild(input);
+          }
         } else if (cellDefinition.kind === 'choice-option') {
           const question = questionById(test, cellDefinition.questionId);
           const option = String(cellDefinition.value || '');
@@ -1627,6 +1640,14 @@
       sessionStorage.setItem('paronymes_erreurs_detail', JSON.stringify(detailRows.filter(row => !row.correct)));
       sessionStorage.setItem('seb_paronymes_validated', '1');
       sessionStorage.setItem('seb_exercise_activity:paronymes.html', '1');
+    } else if (test.id === 'gratte_ciel') {
+      const score = Number(result.score) || 0;
+      const scoreMax = Number(result.scoreMax) || 16;
+      const errors = Math.max(0, scoreMax - score);
+      sessionStorage.setItem('puzzleErrors', String(errors));
+      sessionStorage.setItem('carre_magique_score', String(score));
+      sessionStorage.setItem('carre_magique_erreurs', String(errors));
+      sessionStorage.setItem('seb_exercise_activity:carre.html', '1');
     }
 
     sessionStorage.setItem('reponses_data', JSON.stringify(responses));
