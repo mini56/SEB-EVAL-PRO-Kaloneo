@@ -10,6 +10,7 @@ function fail(message, details) {
 
 let state = {version:1,sessionStorage:{},localStorage:{},lastPage:'kaltest-pilot2.html',lastEvaluationPage:'kaltest-pilot2.html'};
 let previewDefinition = null;
+let savedLibraryDefinition = null;
 let win = null;
 
 ipcMain.on('app:edition-sync', event => {
@@ -53,6 +54,12 @@ ipcMain.handle('candidate-catalog:list',()=>[]);
 ipcMain.handle('candidate-catalog:sync',()=>({ok:true}));
 ipcMain.handle('candidate-catalog:detail',()=>({ok:false}));
 ipcMain.handle('kaloneo-library:list-tests',()=>({ok:true,tests:[]}));
+ipcMain.handle('kaloneo-library:save-test',(_e,payload)=>{
+  savedLibraryDefinition=JSON.parse(JSON.stringify(payload?.definition||null));
+  return {ok:true,replaced:false,test:{id:savedLibraryDefinition?.id,version:savedLibraryDefinition?.version,title:savedLibraryDefinition?.title}};
+});
+ipcMain.handle('kaloneo-library:list-mask-screens',()=>({ok:true,maskScreens:[{id:'kaloneo-default',version:'1.0.0',name:'KALONÉO',systemProvided:true,hasText:true,hasImage:false}]}));
+ipcMain.handle('kaloneo-library:get-mask-screen',()=>({ok:true,maskScreen:{id:'kaloneo-default',version:'1.0.0',name:'KALONÉO',content:{text:'KALONÉO',image:''}}}));
 ipcMain.handle('kaloneo-library:list-parcours',()=>({ok:true,parcours:[]}));
 ipcMain.handle('kaloneo-library:save-parcours',()=>({ok:true}));
 
@@ -159,6 +166,8 @@ app.whenReady().then(async()=>{
       await new Promise(resolve=>setTimeout(resolve,180));
       document.getElementById('refresh-preview').click();
       await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      document.getElementById('save-draft').click();
+      await new Promise(resolve=>setTimeout(resolve,180));
       const smallImg=document.querySelector('.preview-media');
       const smallBlock=smallImg?.closest('.preview-media-block');
       const ir=smallImg?.getBoundingClientRect();
@@ -168,6 +177,7 @@ app.whenReady().then(async()=>{
         title:document.getElementById('test-title').value,
         calculatorBrand:document.getElementById('calculator-brand')?.value||'',
         calculatorOptionsHidden:document.getElementById('calculator-options')?.hidden,
+        libraryStatus:String(document.getElementById('draft-status')?.textContent||'').trim(),
         imagePresent:!!smallImg,
         smallImageFits:!!(ir&&br&&ir.width<=br.width+1&&ir.height<=br.height+1),
         smallImageSize:ir?{width:Math.round(ir.width),height:Math.round(ir.height)}:null,
@@ -175,6 +185,7 @@ app.whenReady().then(async()=>{
       };
     })()`);
     if(!/vraie page/i.test(setup.button)||setup.title!=='Aperçu Electron Smoke'||setup.calculatorBrand!=='KALONÉO'||setup.calculatorOptionsHidden||
+       !savedLibraryDefinition||savedLibraryDefinition.title!=='Aperçu Electron Smoke'||! /bibliothèque/i.test(setup.libraryStatus)||
        !setup.imagePresent||!setup.smallImageFits) return fail('bouton, saisie ou image Builder incorrecte',setup);
 
     await win.webContents.executeJavaScript(`document.getElementById('open-electron-preview').click();true`);
