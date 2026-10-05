@@ -59,6 +59,7 @@ const expectedPilotRoutes = {
   'stock':'kaltest-pilot2.html?fullParcours=1&segment=stock',
   'planning':'kaltest-pilot2.html?fullParcours=1&segment=planning',
   'genrenombres':'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre',
+  'nvmail':'kaltest-pilot2.html?fullParcours=1&segment=mail',
   'autoeval2':'kaltest-pilot2.html?fullParcours=1&segment=autoeval2',
   'paronymes':'kaltest-pilot2.html?fullParcours=1&segment=paronymes',
   'carre':'kaltest-pilot2.html?fullParcours=1&segment=carre'
@@ -92,8 +93,8 @@ if (!dicteeContract || dicteeContract.storage !== 'dictee_data') fail('contrat R
 
 // Ordre actuellement validé autour du traitement de texte.
 if (api.nextFile('tri-de-cheville') !== 'nwtexte.html') fail('tri -> nwtexte modifié');
-if (api.nextFile('nwtexte') !== 'nvmail.html') fail('nwtexte -> nvmail modifié');
-if (api.nextFile('nvmail') !== 'autoeval2.html') fail('nvmail -> autoeval2 modifié');
+if (api.nextUrl('nwtexte') !== 'kaltest-pilot2.html?fullParcours=1&segment=mail') fail('nwtexte -> mail KALTEST modifié');
+if (api.nextUrl('nvmail') !== 'kaltest-pilot2.html?fullParcours=1&segment=autoeval2') fail('mail KALTEST -> autoeval2 modifié');
 
 // Retour du carré vers la page 11 du QCM, puis page de fin.
 if (api.nextUrl('carre') !== 'qcmv1.0.html?fullParcours=1&page=11#page11') fail('carre KALTEST -> QCM page 11 modifié');
