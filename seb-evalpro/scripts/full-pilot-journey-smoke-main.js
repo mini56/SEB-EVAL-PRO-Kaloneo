@@ -252,24 +252,27 @@ app.whenReady().then(async()=>{
     }
 
     await win.webContents.executeJavaScript("window.sebParcours.goNext('brique'); true;",true);
-    await waitForFile(win,'stock.html');
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='stock', 'Stock KALTEST');
     await sleep(350);
 
     const stock=await win.webContents.executeJavaScript(`
       ({
-        exercise:document.body.dataset.kaloneoExercise||'',
-        pots:document.querySelectorAll('.pot').length,
-        cases:document.querySelectorAll('.case').length,
-        engine:Boolean(window.sebStock),
+        current:window.sebKaltestPilot2.currentTest()?.id||'',
+        pots:document.querySelectorAll('.kaltest-stock-pot').length,
+        cases:document.querySelectorAll('.kaltest-stock-case').length,
         next:window.sebParcours?.nextUrl('stock')||''
       })
     `,true);
-    if(stock.exercise!=='stock' || stock.pots!==34 || !stock.engine || stock.next!=='planning.html?fullParcours=1'){
-      throw new Error('Page Stock absente/invalide: '+JSON.stringify(stock));
+    if(stock.current!=='ranger_stock' || stock.pots!==34 || stock.cases!==35 ||
+       stock.next!=='kaltest-pilot2.html?fullParcours=1&segment=planning'){
+      throw new Error('Stock KALTEST absent/invalide: '+JSON.stringify(stock));
     }
 
     // 5. Planning est lui aussi un KALTEST, puis mène au Genre/Nombre KALTEST.
-    await win.webContents.executeJavaScript("window.sebParcours.goNext('stock'); true;",true);
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
     await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='planning', 'Planning KALTEST');
     await sleep(350);
 
@@ -402,7 +405,7 @@ app.whenReady().then(async()=>{
     console.log('PILOT11_CONVERSIONS_AT_CORRECT_POSITION=OK');
     console.log('BRIQUE_VIDEO='+video.src);
     console.log('LEGO_PAGE=OK');
-    console.log('STOCK_PAGE=OK pots='+stock.pots+' cases='+stock.cases);
+    console.log('PILOT11_STOCK_KALTEST=OK pots='+stock.pots+' cases='+stock.cases);
     console.log('PILOT11_AUTOEVAL1_KALTEST=OK');
     console.log('PILOT11_PLANNING_KALTEST=OK');
     console.log('PILOT11_AUTOEVAL2_KALTEST=OK');
