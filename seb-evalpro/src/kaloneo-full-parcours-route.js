@@ -5,7 +5,7 @@ const KALTEST_FILE='kaltest-pilot2.html';
 const LEGACY_CONTAINER_FILE='qcmv1.0.html';
 
 const KALTEST_SEGMENTS=new Set(['','initial','fractions','organisation','postures','conversions','autoeval1','transition-video-f1','brique','stock','planning','genre-nombre','dictee','tri','nwtexte','mail','autoeval2','paronymes','carre','fin']);
-const QCM_PAGES=new Set(['finale']);
+const QCM_PAGES=new Set([]);
 const DIRECT_FILES=new Set([]);
 
 function fileName(value){
