@@ -45,7 +45,8 @@ const expectedMigrated = [
   'planning',
   'genrenombres',
   'autoeval2',
-  'paronymes'
+  'paronymes',
+  'carre'
 ];
 if (JSON.stringify(migratedIds) !== JSON.stringify(expectedMigrated)) {
   throw new Error(
