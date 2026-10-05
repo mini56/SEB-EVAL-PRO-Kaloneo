@@ -2747,3 +2747,26 @@ L’Éditeur de texte reste également un outil KALONÉO réutilisable.
 
 Principe : **le parcours choisit les pages ; chaque page choisit les outils dont elle a besoin.**
 
+
+
+---
+
+## 71. Aperçu réel Electron depuis le Test Builder
+
+**Statut : DÉCISION VALIDÉE — 5 octobre 2026**
+
+Le petit aperçu intégré à droite du Test Builder reste utile pendant la construction, mais il ne remplace pas le contrôle du rendu candidat réel.
+
+Le Test Builder doit donc proposer un bouton **« Voir la vraie page dans Electron »**.
+
+Règles validées :
+- l’aperçu utilise l’état courant du Builder, même si le test n’est pas encore terminé ;
+- ouvrir l’aperçu ne génère pas de test dans la Bibliothèque et n’enregistre pas de parcours candidat ;
+- le rendu occupe la vraie surface Electron utilisée pour le candidat ;
+- les éléments de page et outils visibles peuvent être essayés sans écrire de résultat candidat ;
+- la barre du bas conserve le rendu KALONÉO et ajoute obligatoirement **« Fermer l’aperçu »** ;
+- le bouton **Fermer l’aperçu** revient directement au Test Builder ;
+- le brouillon du test doit être conservé intégralement pendant l’aller-retour ;
+- l’aperçu est une fonction Administrateur et reste interdit pendant un parcours candidat actif.
+
+Contrôle automatique associé : smoke Electron ouvrant le Builder, passant au rendu plein écran, contrôlant scénario, consigne, calculatrice, compteur et barre de navigation, puis revenant au Builder sans perte du brouillon.
