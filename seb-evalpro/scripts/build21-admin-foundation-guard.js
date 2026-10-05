@@ -106,14 +106,18 @@ assert(main.includes("ipcMain.handle('admin:open-candidate-results'"), 'IPC Rés
 assert(main.includes("ipcMain.handle('admin:open-tests-parcours'"), 'IPC Tests / Parcours absent.');
 assert(main.includes("ipcMain.handle('admin:close-tests-parcours'"), 'IPC Fermer Tests / Parcours absent.');
 assert(main.includes("admin-tests-parcours.html"), 'page Tests / Parcours non référencée par le main.');
+assert(main.includes("kaloneo-library:list-tests"), 'bibliothèque KALONÉO non exposée par le main.');
+assert(main.includes("kaloneo-library:save-parcours"), 'enregistrement des parcours non exposé par le main.');
 
 const testsPage = read('overrides/admin-tests-parcours.html');
 const testsScript = read('source/js/admin-tests-parcours.js');
-assert((testsPage.match(/<button\b/gi) || []).length === 2, 'la page Tests / Parcours doit contenir exactement Ouvrir KALONÉO + Fermer.');
-assert(testsPage.includes('id="open-kaloneo-builder"') && testsPage.includes('Créer / modifier un test KALONÉO'), 'bouton d’ouverture du Builder KALONÉO absent.');
+assert((testsPage.match(/<button\b/gi) || []).length === 3, 'la page Tests / Parcours doit contenir exactement Test KALONÉO + Parcours + Fermer.');
+assert(testsPage.includes('id="open-kaloneo-builder"') && testsPage.includes('Créer / modifier un test'), 'bouton d’ouverture du Builder KALONÉO absent.');
+assert(testsPage.includes('id="open-parcours-builder"') && testsPage.includes('Créer / gérer un parcours'), 'bouton d’ouverture du créateur de parcours absent.');
 assert(testsPage.includes('id="close-tests-parcours"') && testsPage.includes('>Fermer</button>'), 'bouton Fermer de Tests / Parcours absent.');
 assert(!/Importer|Exporter|Dupliquer|Supprimer/i.test(testsPage), 'la page Tests / Parcours expose une fonction non validée hors Builder.');
 assert(testsScript.includes("kaloneo-builder/test-builder.html"), 'navigation vers le Builder KALONÉO non câblée.');
+assert(testsScript.includes("admin-parcours-builder.html"), 'navigation vers le créateur de parcours non câblée.');
 assert(testsScript.includes('closeTestsParcours'), 'action Fermer de Tests / Parcours non câblée.');
 
 const bilanPage = read('overrides/admin-bilan.html');
