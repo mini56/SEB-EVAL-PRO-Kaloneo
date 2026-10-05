@@ -59,7 +59,7 @@ for (const [needle,label] of [
 
 for (const [needle,label] of [
   ['Félicitations pour votre parcours !', 'page finale Build #20'],
-  ['pilot2-calculator-guide', 'explications calculatrice'],
+  ['pilot2-calculator-dock', 'explications calculatrice'],
   ['Ouvrir la calculatrice', 'test calculatrice introduction']
 ]) must(html, needle, label);
 
