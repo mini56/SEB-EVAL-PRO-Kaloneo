@@ -312,10 +312,18 @@ app.whenReady().then(async()=>{
       "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
       true
     );
-    await waitForFile(win,'dictee.html');
-    await sleep(250);
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='dictee', 'Dictée KALTEST');
+    await sleep(300);
+    const dictee=await win.webContents.executeJavaScript(
+      "({current:window.sebKaltestPilot2.currentTest()?.id||'',audio:document.querySelector('.kaltest-dictee-player audio')?.getAttribute('src')||'',textarea:document.querySelectorAll('.kaltest-dictee-writing textarea').length,next:window.sebParcours?.nextUrl('dictee')||''})",
+      true
+    );
+    if(dictee.current!=='dictee_professionnelle' || dictee.audio!=='dictee-reclamation-client.wav' ||
+       dictee.textarea!==1 || dictee.next!=='tri_de_cheville.html?fullParcours=1'){
+      throw new Error('Dictée KALTEST invalide: '+JSON.stringify(dictee));
+    }
 
-    // 6. Milieu de parcours inchangé, puis Autoévaluation 2 -> Paronymes KALTEST.
+    // 6. Milieu de parcours restant, puis Autoévaluation 2 -> Paronymes KALTEST.
     const middle=await win.webContents.executeJavaScript(`
       ({
         dictee:window.sebParcours?.nextUrl('dictee')||'',
@@ -422,6 +430,7 @@ app.whenReady().then(async()=>{
     console.log('PILOT11_STOCK_KALTEST=OK pots='+stock.pots+' cases='+stock.cases);
     console.log('PILOT11_AUTOEVAL1_KALTEST=OK');
     console.log('PILOT11_PLANNING_KALTEST=OK');
+    console.log('PILOT11_DICTEE_KALTEST=OK');
     console.log('PILOT11_MAIL_KALTEST=OK');
     console.log('PILOT11_AUTOEVAL2_KALTEST=OK');
     console.log('PILOT11_GENRE_NOMBRE_AT_CORRECT_POSITION=OK');
