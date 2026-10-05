@@ -2708,13 +2708,3 @@ body[data-seb-kaltest-id="fractions_preparation_lots"] #kaltest-content,body[dat
 @media(max-height:760px){.kaltest-fraction-item{width:46px;height:46px;flex-basis:46px}.kaltest-fraction-row{grid-template-columns:132px minmax(0,1fr)}.kaltest-organisation-row{padding:3px 6px;font-size:15px}.kaltest-postures-answer{padding:5px 7px;font-size:14.5px}}
 
 
-/* PILOTE 21 — autoévaluations migrées dans KALTEST. */
-.kaltest-autoeval-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch}
-.kaltest-autoeval-form{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:#fff;overflow:auto}
-.kaltest-autoeval-form h3{margin:5px 0 1px;color:var(--seb-blue-100,#004E70);font-size:17px;font-weight:700}
-.kaltest-autoeval-choice{display:grid;grid-template-columns:24px minmax(0,1fr);align-items:start;gap:8px;padding:6px 8px;border:1px solid rgba(0,78,112,.12);border-radius:8px;background:rgba(0,78,112,.035);font-size:15.5px;line-height:1.25}
-.kaltest-autoeval-choice input{width:18px;height:18px;margin-top:1px;accent-color:var(--seb-blue-100,#004E70)}
-.kaltest-autoeval-comment{display:flex;flex-direction:column;gap:6px;margin-top:auto;font-weight:700;color:#31414b}
-.kaltest-autoeval-comment textarea{width:100%;min-height:88px;resize:none;padding:8px;border:1.5px solid #8398B0;border-radius:8px;font:15.5px/1.3 Calibri,"Segoe UI",Arial,sans-serif}
-body[data-seb-kaltest-id="autoevaluation_savoirs"] #kaltest-content,body[data-seb-kaltest-id="autoevaluation_tic"] #kaltest-content{padding:7px 9px}
-@media(max-height:760px){.kaltest-autoeval-form{gap:5px;padding:7px 9px}.kaltest-autoeval-choice{padding:4px 6px;font-size:14.5px}.kaltest-autoeval-comment textarea{min-height:62px}}
