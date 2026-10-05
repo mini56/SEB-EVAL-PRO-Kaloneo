@@ -277,7 +277,10 @@
       ...legacyStep('paronymes'),
       file:'kaltest-pilot2.html'
     }, { segment:'paronymes' }),
-    fullParcoursStep(legacyStep('carre')),
+    fullParcoursStep({
+      ...legacyStep('carre'),
+      file:'kaltest-pilot2.html'
+    }, { segment:'carre' }),
     fullParcoursStep(legacyStep('qcm-11')),
     fullParcoursStep(legacyStep('qcm-finale'))
   ]);
