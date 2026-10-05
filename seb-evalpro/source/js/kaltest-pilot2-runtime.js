@@ -1885,6 +1885,7 @@
     autoValidate.textContent = tri.ready ? 'Autoévaluation validée ✓' : 'Valider mon autoévaluation';
     autoValidate.disabled = testState.status === 'COMPLETED' || tri.ready;
     auto.appendChild(autoValidate);
+    left.appendChild(auto);
 
     const right = document.createElement('section');
     right.className = 'kaltest-tri-right';
