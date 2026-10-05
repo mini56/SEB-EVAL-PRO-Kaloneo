@@ -44,7 +44,7 @@ for (const [needle,label] of [
 
 for (const [needle,label] of [
   ["document.getElementById('pageFinale') || document.getElementById('page-final')", 'fin commune'],
-  ["id=\"seb-evalpro-open-candidate\"", 'barre Admin contextuelle'],
+  ["id=\"seb-evalpro-tests-parcours\"", 'accès Tests / Parcours dans la barre Admin'],
   ['closeSessionButton.hidden = true', 'masquage fermeture session redondante'],
   ['const hasActiveJourney = !!active', 'contexte parcours actif'],
   ['overflow:hidden;background:#004E70', 'barre Admin sans dépassement'],
