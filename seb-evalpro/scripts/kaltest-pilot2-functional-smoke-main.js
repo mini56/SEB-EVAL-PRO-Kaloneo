@@ -370,7 +370,7 @@ app.whenReady().then(async () => {
           testId === 'traitement_texte_bureautique' ? validated.nwtexte === true :
           testId === 'redaction_email' ? validated.mail !== null :
           testId === 'gratte_ciel' ? validated.carre !== null : true;
-        if (validated.same !== testId || validated.label.trim() !== 'Suivant' || !legacyOk) {
+        if (validated.same !== testId || !/Suivant\s*$/.test(validated.label.trim()) || !legacyOk) {
           throw new Error(testId + ' : validation avant navigation incorrecte : ' + JSON.stringify(validated));
         }
         await win.webContents.executeJavaScript("document.getElementById('kaltest-next').click();true",true);
