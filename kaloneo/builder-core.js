@@ -337,7 +337,7 @@
     for(const row of table.cells||[]){
       for(const cell of row||[]){
         if(!cell||!['candidate-answer','select','choice-option','unit'].includes(cell.kind)) continue;
-        const id=String(cell.questionId||('ID'+(startIndex+out.length+1)+'_grille'));
+        const id=String(cell.questionId||('id'+(startIndex+out.length+1)+'_grille'));
         if(seen.has(id)) continue;
         seen.add(id);
         const response={type:cell.responseType||((cell.kind==='select'||cell.kind==='choice-option')?'single-choice':'text')};
