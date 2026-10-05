@@ -323,6 +323,7 @@
       example:Boolean(q.example),
       manualEvaluation:manual
     };
+    if(manual) out.manualLevels=['NE','I','II','III'];
     if(response.type==='duration'){
       out.acceptedMinutes=Math.max(0,Number(q.acceptedMinutes)||0);
     } else if(response.type==='multiple-choice'){
@@ -375,6 +376,9 @@
       if(built.response?.type==='duration'){
         target.acceptedMinutes=built.acceptedMinutes;
         if(Object.prototype.hasOwnProperty.call(target,'acceptedAnswers')) delete target.acceptedAnswers;
+      } else if(built.response?.type==='free-text') {
+        if(Object.prototype.hasOwnProperty.call(target,'acceptedAnswers')) delete target.acceptedAnswers;
+        if(Object.prototype.hasOwnProperty.call(target,'acceptedMinutes')) delete target.acceptedMinutes;
       } else {
         if(Object.prototype.hasOwnProperty.call(target,'acceptedAnswers') ||
            (Array.isArray(built.acceptedAnswers) && built.acceptedAnswers.length)) {
@@ -382,6 +386,9 @@
         }
         if(Object.prototype.hasOwnProperty.call(target,'acceptedMinutes')) delete target.acceptedMinutes;
       }
+      target.manualEvaluation=built.manualEvaluation===true;
+      if(built.manualEvaluation===true) target.manualLevels=clone(built.manualLevels||['NE','I','II','III']);
+      else if(Object.prototype.hasOwnProperty.call(target,'manualLevels')) delete target.manualLevels;
       if(Object.prototype.hasOwnProperty.call(target,'points') || built.points!==1) target.points=built.points;
       if(Object.prototype.hasOwnProperty.call(target,'example') || built.example) target.example=built.example;
       if(built.acceptedUnits) target.acceptedUnits=built.acceptedUnits;
