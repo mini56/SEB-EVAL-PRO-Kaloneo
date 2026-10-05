@@ -148,31 +148,51 @@ app.whenReady().then(async()=>{
 
     await win.webContents.executeJavaScript(`document.querySelector('.kb-footer-center button').click();true`);
     await wait(130);
-    const calcOpen=await win.webContents.executeJavaScript(`(()=>{
+    const calcBefore=await win.webContents.executeJavaScript(`(()=>{
       const panel=document.getElementById('calc-container');
       const bar=panel?.querySelector('.seb-calc-dragbar');
       const brand=panel?.querySelector('.seb-calc-brand');
       const labels=[...panel?.querySelectorAll('.calc-btn')||[]].map(x=>String(x.textContent||'').trim());
-      const before=panel?.getBoundingClientRect();
       if(!panel||!bar||getComputedStyle(panel).display==='none') return {open:false};
-      const x=before.left+30,y=before.top+18;
-      const init=(cx,cy,buttons)=>({bubbles:true,cancelable:true,pointerId:91,pointerType:'mouse',isPrimary:true,button:0,buttons,clientX:cx,clientY:cy});
-      bar.dispatchEvent(new PointerEvent('pointerdown',init(x,y,1)));
-      bar.dispatchEvent(new PointerEvent('pointermove',init(x+70,y+45,1)));
-      bar.dispatchEvent(new PointerEvent('pointerup',init(x+70,y+45,0)));
-      const after=panel.getBoundingClientRect();
+      const rect=panel.getBoundingClientRect();
+      const barRect=bar.getBoundingClientRect();
       return {
         open:true,
         brand:String(brand?.textContent||'').trim(),
         dragLabel:String(bar?.querySelector('span')?.textContent||'').trim(),
         hasX:labels.includes('x'),
         hasStar:labels.includes('*'),
-        moved:Math.abs(after.left-before.left)>20||Math.abs(after.top-before.top)>20,
-        inside:after.left>=0&&after.top>=0&&after.right<=innerWidth&&after.bottom<=innerHeight
+        left:rect.left,top:rect.top,right:rect.right,bottom:rect.bottom,
+        x:Math.round(barRect.left+30),y:Math.round(barRect.top+Math.min(18,barRect.height/2)),
+        viewport:[innerWidth,innerHeight]
       };
     })()`);
-    if(!calcOpen.open||calcOpen.brand!=='KALONÉO'||calcOpen.dragLabel!=='Calculatrice'||!calcOpen.hasX||calcOpen.hasStar||!calcOpen.moved||!calcOpen.inside){
-      return fail('calculatrice commune de l’aperçu incorrecte',calcOpen);
+    if(!calcBefore.open||calcBefore.brand!=='KALONÉO'||calcBefore.dragLabel!=='Calculatrice'||!calcBefore.hasX||calcBefore.hasStar){
+      return fail('calculatrice commune de l’aperçu incorrecte avant déplacement',calcBefore);
+    }
+
+    win.webContents.sendInputEvent({type:'mouseDown',x:calcBefore.x,y:calcBefore.y,button:'left',clickCount:1});
+    await wait(45);
+    win.webContents.sendInputEvent({type:'mouseMove',x:calcBefore.x+35,y:calcBefore.y+22,button:'left',movementX:35,movementY:22});
+    await wait(45);
+    win.webContents.sendInputEvent({type:'mouseMove',x:calcBefore.x+70,y:calcBefore.y+45,button:'left',movementX:35,movementY:23});
+    await wait(55);
+    win.webContents.sendInputEvent({type:'mouseUp',x:calcBefore.x+70,y:calcBefore.y+45,button:'left',clickCount:1});
+    await wait(120);
+
+    const calcOpen=await win.webContents.executeJavaScript(`(()=>{
+      const panel=document.getElementById('calc-container');
+      if(!panel||getComputedStyle(panel).display==='none') return {open:false};
+      const after=panel.getBoundingClientRect();
+      return {
+        open:true,
+        moved:Math.abs(after.left-${calcBefore.left})>20||Math.abs(after.top-${calcBefore.top})>20,
+        inside:after.left>=0&&after.top>=0&&after.right<=innerWidth&&after.bottom<=innerHeight,
+        left:after.left,top:after.top
+      };
+    })()`);
+    if(!calcOpen.open||!calcOpen.moved||!calcOpen.inside){
+      return fail('déplacement réel souris de la calculatrice incorrect', {calcBefore,calcOpen});
     }
 
     await win.webContents.executeJavaScript(`document.querySelector('.close-preview').click();true`);
