@@ -4,7 +4,9 @@
   const MIME = 'application/x-kaloneo-parcours-card';
   const state = {
     library: [],
+    maskScreens: [],
     saved: [],
+    maskScreen: null,
     introduction: null,
     fin: null,
     tests: [],
@@ -52,7 +54,7 @@
   }
 
   function libraryItem(id, version) {
-    return state.library.find(item => String(item.id) === String(id) && String(item.version) === String(version)) || null;
+    return [...state.library, ...state.maskScreens].find(item => String(item.id) === String(id) && String(item.version) === String(version)) || null;
   }
 
   function usedTestIds() {
@@ -61,7 +63,9 @@
 
   function addLibraryItem(item) {
     if (!item) return;
-    if (item.role === 'introduction') {
+    if (item.role === 'mask-screen') {
+      state.maskScreen = item;
+    } else if (item.role === 'introduction') {
       state.introduction = item;
     } else if (item.role === 'fin') {
       state.fin = item;
@@ -116,6 +120,11 @@
   function pointerDropTargetAt(x, y, payload) {
     if (!payload) return null;
 
+    if (payload.source === 'library' && payload.role === 'mask-screen') {
+      const mask = $('mask-slot');
+      return pointInside(mask, x, y) ? mask : null;
+    }
+
     if (payload.source === 'library' && payload.role === 'introduction') {
       const intro = $('intro-slot');
       return pointInside(intro, x, y) ? intro : null;
@@ -145,6 +154,10 @@
     if (payload.source === 'library') {
       const item = libraryItem(payload.id, payload.version);
       if (!item) return false;
+      if (payload.role === 'mask-screen' && target.id === 'mask-slot') {
+        state.maskScreen = item;
+        return true;
+      }
       if (payload.role === 'introduction' && target.id === 'intro-slot') {
         state.introduction = item;
         return true;
@@ -288,7 +301,13 @@
     card.querySelector('.card-category').textContent = categoryLabel(item.category);
 
     const details = ['v' + item.version];
-    if (item.role === 'test') {
+    if (item.role === 'mask-screen') {
+      details.push(item.systemProvided ? 'écran par défaut' : 'écran de masquage');
+      const contents=[];
+      if(item.hasText) contents.push('texte');
+      if(item.hasImage) contents.push('image');
+      if(contents.length) details.push(contents.join(' + '));
+    } else if (item.role === 'test') {
       details.push(item.scored ? 'noté' : 'non noté');
       if (item.questionCount) details.push(item.questionCount + ' question' + (item.questionCount > 1 ? 's' : ''));
     } else if (item.role === 'introduction') {
@@ -306,7 +325,12 @@
       dragPayload(event, { source:'library', id:item.id, version:item.version, role:item.role });
     });
     card.addEventListener('dragend', () => card.classList.remove('dragging'));
-    card.querySelector('.card-add').addEventListener('click', () => addLibraryItem(item));
+    const addButton=card.querySelector('.card-add');
+    if(item.role==='mask-screen') {
+      addButton.textContent=keyOf(item)===keyOf(state.maskScreen)?'Utilisé':'Utiliser';
+      addButton.disabled=keyOf(item)===keyOf(state.maskScreen);
+    }
+    addButton.addEventListener('click', () => addLibraryItem(item));
     return card;
   }
 
@@ -317,6 +341,12 @@
     const search = String($('library-search').value || '').trim().toLocaleLowerCase('fr-FR');
     const used = usedTestIds();
     const groups = [];
+
+    const masks=state.maskScreens.filter(item=>{
+      const haystack=(item.name+' écran de masquage').toLocaleLowerCase('fr-FR');
+      return !search || haystack.includes(search);
+    });
+    if(masks.length) groups.push(['Écrans de masquage', masks.map(item=>Object.assign({role:'mask-screen',title:item.name,category:'masquage',description:''},item))]);
 
     const introductions = state.library.filter(item =>
       item.role === 'introduction' &&
@@ -381,9 +411,11 @@
     if (!item) {
       const empty = document.createElement('div');
       empty.className = 'no-results';
-      empty.textContent = role === 'introduction'
-        ? 'Glissez ici une page d’introduction.'
-        : 'Glissez ici une page de fin.';
+      empty.textContent = role === 'mask-screen'
+        ? 'KALONÉO par défaut sera utilisé.'
+        : role === 'introduction'
+          ? 'Glissez ici une page d’introduction.'
+          : 'Glissez ici une page de fin.';
       slot.appendChild(empty);
       return;
     }
@@ -398,7 +430,7 @@
     text.append(title, meta);
     const badge = document.createElement('div');
     badge.className = 'role-badge';
-    badge.textContent = role === 'introduction' ? 'INTRODUCTION' : 'FIN';
+    badge.textContent = role === 'mask-screen' ? 'MASQUAGE' : role === 'introduction' ? 'INTRODUCTION' : 'FIN';
     card.append(text, badge);
     slot.appendChild(card);
   }
@@ -463,6 +495,7 @@
       dropzone.appendChild(card);
     });
 
+    renderSpecialSlot('mask-slot', state.maskScreen, 'mask-screen');
     renderSpecialSlot('intro-slot', state.introduction, 'introduction');
     renderSpecialSlot('fin-slot', state.fin, 'fin');
   }
@@ -564,11 +597,17 @@
         throw new Error(result && result.error ? result.error : 'Lecture de la bibliothèque impossible.');
       }
       state.library = Array.isArray(result.tests) ? result.tests : [];
+      const masksResult = await api().kaloneoListMaskScreens?.();
+      if (!masksResult || masksResult.ok === false) {
+        throw new Error(masksResult && masksResult.error ? masksResult.error : 'Lecture des écrans de masquage impossible.');
+      }
+      state.maskScreens = (Array.isArray(masksResult.maskScreens) ? masksResult.maskScreens : []).map(item=>Object.assign({role:'mask-screen',title:item.name,category:'masquage',description:''},item));
+      state.maskScreen = state.maskScreens.find(item => item.systemProvided) || state.maskScreens[0] || null;
       state.introduction = state.library.find(item => item.role === 'introduction') || null;
       state.fin = state.library.find(item => item.role === 'fin') || null;
       await refreshSaved();
       render();
-      setStatus('Bibliothèque chargée : ' + state.library.filter(item => item.role === 'test').length + ' tests disponibles.');
+      setStatus('Bibliothèque chargée : ' + state.library.filter(item => item.role === 'test').length + ' tests et ' + state.maskScreens.length + ' écran(s) de masquage.');
     } catch (error) {
       setStatus(error && error.message ? error.message : String(error), 'error');
     }
@@ -591,6 +630,7 @@
       const result = await api().kaloneoSaveParcours?.({
         name,
         creator,
+        maskScreen:refOf(state.maskScreen),
         introduction:refOf(state.introduction),
         tests:state.tests.map(refOf),
         fin:refOf(state.fin)
@@ -613,6 +653,7 @@
     $('cancel-parcours').addEventListener('click', () => { window.location.href = 'admin-tests-parcours.html'; });
     $('save-parcours').addEventListener('click', saveParcours);
     $('library-search').addEventListener('input', renderLibrary);
+    installSpecialDrop('mask-slot', 'mask-screen');
     installSpecialDrop('intro-slot', 'introduction');
     installSpecialDrop('fin-slot', 'fin');
     installTestsDropzone();
