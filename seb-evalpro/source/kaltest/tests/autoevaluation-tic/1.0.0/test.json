@@ -1,0 +1,143 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "0.1.0-dev",
+  "id": "autoevaluation_tic",
+  "version": "1.0.0",
+  "title": "Autoévaluation personnelle — Outils numériques",
+  "category": "autoevaluation",
+  "description": "Recueillir le ressenti sur le traitement de texte et la messagerie.",
+  "kind": "questionnaire",
+  "scored": false,
+  "allowEmptyCompletion": true,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro 0.3.10 Build #20",
+    "sourcePage": "autoeval2.html",
+    "sourceScript": "source/js/autoeval2-page.js",
+    "legacyParcoursId": "autoeval2"
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "Vous venez d’utiliser le traitement de texte et la messagerie dans le parcours.",
+  "instruction": "Évaluez votre ressenti et votre progression. Cochez les affirmations qui correspondent à votre expérience. Vous pouvez passer cette autoévaluation sans réponse.",
+  "presentation": {
+    "layout": {
+      "type": "split",
+      "ratio": "50/50",
+      "blocks": [
+        {
+          "id": "formulaire"
+        },
+        {
+          "id": "illustration"
+        }
+      ]
+    },
+    "autoevaluationForm": {
+      "visual": {
+        "type": "image",
+        "src": "imageqcm/imgautoevaltic.png",
+        "alt": "Illustration autoévaluation des outils numériques"
+      },
+      "questionId": "autoeval2_choix",
+      "groups": [
+        {
+          "title": "Utilisation du traitement de texte",
+          "values": [
+            "stress",
+            "outilstexte",
+            "difficultetexte"
+          ]
+        },
+        {
+          "title": "Utilisation d’une boîte de messagerie",
+          "values": [
+            "stressmessage",
+            "outilsmessage",
+            "difficultemessage"
+          ]
+        }
+      ],
+      "statements": [
+        {
+          "value": "stress",
+          "label": "Je me suis senti(e) stressé(e) ou bloqué(e) à certains moments lors de cette activité."
+        },
+        {
+          "value": "outilstexte",
+          "label": "Je n’utilise jamais cet outil, c’est donc compliqué pour moi."
+        },
+        {
+          "value": "difficultetexte",
+          "label": "Je n’ai pas de difficulté avec cet outil, c’est facile pour moi."
+        },
+        {
+          "value": "stressmessage",
+          "label": "Je me suis senti(e) stressé(e) ou bloqué(e) à certains moments lors de cette activité."
+        },
+        {
+          "value": "outilsmessage",
+          "label": "Je n’utilise jamais cet outil, c’est donc compliqué pour moi."
+        },
+        {
+          "value": "difficultemessage",
+          "label": "Je n’ai pas de difficulté avec cet outil, c’est facile pour moi."
+        }
+      ],
+      "commentFieldId": "commentaire",
+      "commentLabel": "Laissez un commentaire pour préciser votre ressenti sur ces outils :"
+    }
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [
+    {
+      "id": "autoeval2_choix",
+      "prompt": "Ressenti sur les outils numériques",
+      "response": {
+        "type": "multiple-choice",
+        "options": [
+          "stress",
+          "outilstexte",
+          "difficultetexte",
+          "stressmessage",
+          "outilsmessage",
+          "difficultemessage"
+        ]
+      },
+      "points": 0,
+      "acceptedAnswers": [
+        [
+          "stress"
+        ]
+      ],
+      "supplementalFields": [
+        {
+          "id": "commentaire",
+          "label": "Commentaire",
+          "type": "text",
+          "scored": false
+        }
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "id": "status",
+      "type": "string"
+    }
+  ],
+  "bilanContributions": [],
+  "features": [
+    "runtime.basic",
+    "questionnaire.basic",
+    "layout.split",
+    "host.autoevaluation"
+  ]
+}
