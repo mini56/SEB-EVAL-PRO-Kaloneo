@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SEB EvalPro — Création de parcours</title>
+  <link rel="stylesheet" href="css/seb-design-system.css">
+  <link rel="stylesheet" href="css/admin-parcours-builder.css">
+</head>
+<body>
+  <header class="page-topbar">
+    <div>
+      <h1>Création de parcours</h1>
+      <p>Choisissez une introduction, ajoutez les tests dans l’ordre voulu puis choisissez une page de fin.</p>
+    </div>
+    <button id="back-tests-parcours" class="seb-action-btn seb-btn-functional" type="button">← Tests / Parcours</button>
+  </header>
+
+  <main class="parcours-shell">
+    <section class="meta-card">
+      <label>Nom du parcours <span>*</span>
+        <input id="parcours-name" type="text" autocomplete="off" placeholder="Ex. Parcours long">
+      </label>
+      <label>Créateur <span>*</span>
+        <input id="parcours-creator" type="text" autocomplete="off" placeholder="Nom du créateur">
+      </label>
+      <div id="builder-status" class="builder-status" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="workspace">
+      <aside class="library-panel">
+        <div class="panel-title">
+          <div>
+            <h2>Bibliothèque</h2>
+            <p>Glissez une vignette dans le parcours.</p>
+          </div>
+        </div>
+        <label class="search-field">Rechercher
+          <input id="library-search" type="search" placeholder="Nom ou catégorie">
+        </label>
+        <div id="library-sections" class="library-sections"></div>
+      </aside>
+
+      <section class="sequence-panel">
+        <div class="panel-title">
+          <div>
+            <h2>Parcours en construction</h2>
+            <p>Introduction et fin sont obligatoires. Les tests intermédiaires sont libres et uniques.</p>
+          </div>
+        </div>
+
+        <div class="fixed-step intro-step">
+          <div class="step-label">1 — Introduction de parcours</div>
+          <div id="intro-slot" class="special-slot" data-role="introduction"></div>
+        </div>
+
+        <div class="tests-step">
+          <div class="step-label">Tests du parcours</div>
+          <div id="tests-dropzone" class="tests-dropzone" aria-label="Tests du parcours"></div>
+          <div id="empty-tests" class="empty-tests">Glissez ici les tests que vous souhaitez utiliser.</div>
+        </div>
+
+        <div class="fixed-step end-step">
+          <div class="step-label">Fin de parcours</div>
+          <div id="fin-slot" class="special-slot" data-role="fin"></div>
+        </div>
+      </section>
+
+      <aside class="saved-panel">
+        <div class="panel-title">
+          <div>
+            <h2>Parcours enregistrés</h2>
+            <p>Le créateur reste une donnée interne.</p>
+          </div>
+        </div>
+        <div id="saved-parcours" class="saved-parcours"></div>
+      </aside>
+    </section>
+
+    <footer class="builder-actions">
+      <button id="cancel-parcours" class="seb-action-btn seb-btn-danger" type="button">Annuler</button>
+      <button id="save-parcours" class="seb-action-btn seb-btn-nav" type="button">Enregistrer le parcours</button>
+    </footer>
+  </main>
+
+  <template id="library-card-template">
+    <article class="library-card" draggable="true" tabindex="0">
+      <div class="card-main">
+        <strong class="card-title"></strong>
+        <span class="card-category"></span>
+      </div>
+      <div class="card-meta"></div>
+      <button class="card-add" type="button">Ajouter</button>
+    </article>
+  </template>
+
+  <template id="sequence-card-template">
+    <article class="sequence-card" draggable="true">
+      <div class="sequence-index"></div>
+      <div class="sequence-text">
+        <strong class="sequence-title"></strong>
+        <span class="sequence-meta"></span>
+      </div>
+      <div class="sequence-actions">
+        <button class="move-up" type="button" title="Monter">↑</button>
+        <button class="move-down" type="button" title="Descendre">↓</button>
+        <button class="remove-test" type="button">Retirer</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="js/admin-parcours-builder.js"></script>
+</body>
+</html>
