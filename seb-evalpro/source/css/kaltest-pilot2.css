@@ -2789,10 +2789,10 @@ body[data-seb-kaltest-id="gratte_ciel"] .kaltest-answer-incorrect{box-shadow:0 0
 body[data-seb-kaltest-id="ranger_stock"] #kaltest-content{padding:5px 7px}
 .kaltest-stock-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(220px,.38fr) minmax(0,1fr);gap:10px}
 .kaltest-stock-left{min-height:0;display:grid;grid-template-rows:1fr .72fr;gap:8px}
-.kaltest-stock-zone,.kaltest-stock-shelf{min-height:0;border:1px solid rgba(0,78,112,.22);border-radius:10px;background:rgba(255,255,255,.96);padding:6px}
+.kaltest-stock-zone,.kaltest-stock-shelf{min-height:0;border:1px solid rgba(0,78,112,.22);border-radius:10px;background:rgba(255,255,255,.96);padding:6px}.kaltest-stock-zone{display:flex;flex-direction:column;overflow:hidden}
 .kaltest-stock-zone h3{margin:0 0 5px;color:#004e70;font-size:15px}
-.kaltest-stock-pots{min-height:70px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:4px;padding:4px;border:1px dashed rgba(0,78,112,.28);border-radius:8px;background:rgba(0,78,112,.035)}
-.kaltest-stock-tri{height:100%;box-sizing:border-box}
+.kaltest-stock-pots{flex:1 1 auto;min-height:0;display:flex;flex-wrap:wrap;align-content:flex-start;gap:4px;padding:4px;border:1px dashed rgba(0,78,112,.28);border-radius:8px;background:rgba(0,78,112,.035)}
+.kaltest-stock-tri{box-sizing:border-box}
 .kaltest-stock-pot{width:43px;height:51px;flex:0 0 43px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid #9aa7b4;border-radius:7px;background-color:#fff;background-size:contain;background-position:center;background-repeat:no-repeat;color:#111;font-size:11px;line-height:1.05;cursor:grab;box-sizing:border-box;text-shadow:0 0 2px #fff}
 .kaltest-stock-pot strong{font-size:12px}.kaltest-stock-pot.example{opacity:.82;cursor:default}.kaltest-stock-pot.dragging{opacity:.45}.kaltest-stock-pot.correct{border-color:#22c55e;box-shadow:0 0 0 2px #22c55e inset}.kaltest-stock-pot.incorrect{border-color:#ef4444;box-shadow:0 0 0 2px #ef4444 inset}
 .kaltest-stock-shelves{min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) auto;gap:8px}
