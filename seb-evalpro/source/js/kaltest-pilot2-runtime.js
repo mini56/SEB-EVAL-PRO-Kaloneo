@@ -3275,6 +3275,7 @@
 
     const calculator = document.getElementById('kaltest-calculator');
     const calculatorEnabled = test.calculator?.compatible === true && test.calculator?.defaultEnabled !== false;
+    try { window.setCalculatorBrand?.(test.calculator?.brandLabel ?? 'KALONÉO'); } catch (_) {}
     calculator.hidden = !calculatorEnabled;
     if (calculatorEnabled) {
       calculator.style.removeProperty('display');
