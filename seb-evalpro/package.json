@@ -58,7 +58,8 @@
     "test:qcm-page6": "npm run prepare:web && node scripts/qcm-page6-architecture-guard.js",
     "test:qcm-page6-functional": "electron --no-sandbox scripts/qcm-page6-functional-smoke-main.js",
     "test:unified-setup": "node scripts/unified-setup-guard.js",
-    "test:admin-foundation": "node scripts/build21-admin-foundation-guard.js"
+    "test:admin-foundation": "node scripts/build21-admin-foundation-guard.js",
+    "test:parcours-builder": "node scripts/kaloneo-parcours-builder-smoke.js"
   },
   "dependencies": {
     "quill": "2.0.3"
