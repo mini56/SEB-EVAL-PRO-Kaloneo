@@ -2864,3 +2864,61 @@ body[data-seb-kaltest-id="tri_chevilles"] #kaltest-content{padding:5px 7px}
 .kaltest-tri-results-button{align-self:center;padding:7px 14px;border:1px solid #1a73e8;border-radius:7px;background:#fff;color:#1a73e8;font-weight:700;cursor:pointer}.kaltest-tri-results-button:disabled{opacity:.45;cursor:not-allowed}
 .kaltest-tri-results{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:7px;border-radius:8px;background:#eef6fa;text-align:center;font-size:14px}.kaltest-tri-results[hidden]{display:none!important}
 @media(max-height:760px){.kaltest-tri-left,.kaltest-tri-right{padding:6px}.kaltest-tri-guide ul{font-size:12.5px}.kaltest-tri-guide li{margin:2px 0}.kaltest-tri-row input{height:27px}.kaltest-tri-display{font-size:40px!important}.kaltest-tri-auto-choice{font-size:12.5px;padding:3px 5px}.kaltest-tri-comment textarea{min-height:42px}}
+
+
+/* PILOTE 21 — Transition vidéo F1, Briques et page terminale. */
+body[data-seb-kaltest-id="transition_video_f1"]{background:#000!important}
+body[data-seb-kaltest-id="transition_video_f1"].seb-kaloneo-nav-active{height:100dvh!important;max-height:100dvh!important}
+body[data-seb-kaltest-id="transition_video_f1"] #pilot2-shell,
+body[data-seb-kaltest-id="transition_video_f1"] #page-exercise,
+body[data-seb-kaltest-id="transition_video_f1"] #kaltest-content{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#000!important;box-shadow:none!important;z-index:2147481000!important}
+body[data-seb-kaltest-id="transition_video_f1"] .kaltest-heading,
+body[data-seb-kaltest-id="transition_video_f1"] .kaltest-context-row,
+body[data-seb-kaltest-id="transition_video_f1"] .kaltest-footer,
+body[data-seb-kaltest-id="transition_video_f1"] #kaloneo-common-navigation,
+body[data-seb-kaltest-id="transition_video_f1"] #seb-evalpro-abandon-fixed,
+body[data-seb-kaltest-id="transition_video_f1"] #seb-evalpro-privacy-toggle{display:none!important}
+.kaltest-transition-video-wrap{position:absolute;inset:0;background:#000;overflow:hidden}
+.kaltest-transition-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.kaltest-transition-fade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity 1.5s ease-in-out;pointer-events:none}
+.kaltest-transition-fade.visible{opacity:1}
+
+body[data-seb-kaltest-id="construction_briques"] #kaltest-content{padding:7px 9px}
+.kaltest-brique-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.kaltest-brique-left,.kaltest-brique-right{min-width:0;min-height:0}
+.kaltest-brique-left{display:flex;align-items:stretch;justify-content:center}
+.kaltest-brique-image-card,.kaltest-brique-autoeval,.kaltest-brique-control-card{width:100%;min-height:0;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:#fff;padding:10px;box-sizing:border-box}
+.kaltest-brique-image-card{display:flex;align-items:center;justify-content:center;overflow:hidden}
+.kaltest-brique-image-card img{display:block;width:100%;height:100%;object-fit:contain}
+.kaltest-brique-autoeval{display:flex;flex-direction:column;gap:7px;overflow:auto}
+.kaltest-brique-autoeval h3,.kaltest-brique-control-card h3{margin:0 0 4px;color:#004e70;font-size:18px}
+.kaltest-brique-autoeval p{margin:0 0 4px;color:#44515c;font-size:14px}
+.kaltest-brique-auto-choice{display:grid;grid-template-columns:22px minmax(0,1fr);gap:7px;align-items:start;padding:5px 6px;border:1px solid rgba(0,78,112,.12);border-radius:7px;background:#f9fbfc;font-size:14.5px;line-height:1.2}
+.kaltest-brique-auto-choice input{width:17px;height:17px;margin-top:1px;accent-color:#004e70}
+.kaltest-brique-comment{display:flex;flex-direction:column;gap:5px;margin-top:auto;font-size:14px;font-weight:700;color:#34424d}
+.kaltest-brique-comment textarea{width:100%;min-height:72px;resize:none;padding:7px;border:1.5px solid #94a3b8;border-radius:7px;font:14px/1.3 Calibri,"Segoe UI",Arial,sans-serif;box-sizing:border-box}
+.kaltest-brique-auto-validate{align-self:flex-end;margin-top:2px}
+.kaltest-brique-right{display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:8px}
+.kaltest-brique-control-card{display:flex;flex-direction:column;gap:8px}
+.kaltest-brique-display{align-self:center;font-size:30px;font-weight:800;color:#004e70;letter-spacing:1px}
+.kaltest-brique-chrono-buttons{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.kaltest-brique-measures{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kaltest-brique-measures label{display:flex;flex-direction:column;gap:4px;font-size:13.5px;font-weight:700;color:#374151}
+.kaltest-brique-measures input{width:100%;box-sizing:border-box;min-height:34px;padding:5px 7px;border:1.5px solid #94a3b8;border-radius:7px;text-align:center;font:16px Calibri,"Segoe UI",Arial,sans-serif}
+.kaltest-brique-admin{justify-content:flex-start}
+.kaltest-brique-admin p{margin:0;color:#53606b;font-size:13.5px;line-height:1.25}
+.kaltest-brique-code{display:grid;grid-template-columns:auto minmax(120px,1fr);gap:8px;align-items:center;font-weight:700;color:#374151}
+.kaltest-brique-code input{min-height:34px;padding:5px 7px;border:1.5px solid #94a3b8;border-radius:7px;font:16px Calibri,"Segoe UI",Arial,sans-serif}
+.kaltest-brique-admin-status{min-height:18px;color:#c62828;font-size:13px;font-weight:700}
+body[data-seb-kaltest-id="construction_briques"] .seb-btn-timer-start{color:#198754!important;border-color:#198754!important}
+body[data-seb-kaltest-id="construction_briques"] .seb-btn-timer-stop{color:#c62828!important;border-color:#c62828!important}
+
+body[data-seb-kaltest-id="fin_parcours"] .kaltest-heading,
+body[data-seb-kaltest-id="fin_parcours"] .kaltest-context-row,
+body[data-seb-kaltest-id="fin_parcours"] .kaltest-footer{display:none!important}
+body[data-seb-kaltest-id="fin_parcours"] #kaltest-content{height:100%!important;min-height:0!important;display:flex;align-items:center;justify-content:center;padding:18px!important;background:linear-gradient(180deg,#f8fbfd 0%,#eef6fa 100%)!important}
+body[data-seb-kaltest-id="fin_parcours"] #kaloneo-nav-abandon{display:none!important}
+.kaltest-terminal-page{width:min(1050px,92vw);display:flex;flex-direction:column;gap:18px;padding:28px 34px;border:1px solid rgba(0,78,112,.20);border-radius:18px;background:#fff;box-shadow:0 10px 28px rgba(0,78,112,.10);color:#244353;font-size:20px;line-height:1.42}
+.kaltest-terminal-title{display:flex;align-items:center;justify-content:center;gap:24px}.kaltest-terminal-title img{width:110px;height:110px;object-fit:contain}.kaltest-terminal-title h2{margin:0;color:#1a73e8;font-size:34px;text-align:center}
+.kaltest-terminal-page p{margin:0}.kaltest-terminal-message{margin-top:4px;padding:16px 20px;border:1px solid #9cc2e5;border-radius:10px;background:#f7fbff;text-align:center;color:#1f4e79;font-weight:800}
+@media(max-height:760px){.kaltest-brique-layout{gap:8px}.kaltest-brique-image-card,.kaltest-brique-autoeval,.kaltest-brique-control-card{padding:7px}.kaltest-brique-auto-choice{padding:3px 5px;font-size:13.5px}.kaltest-brique-comment textarea{min-height:54px}.kaltest-brique-display{font-size:26px}.kaltest-terminal-page{gap:12px;padding:20px 26px;font-size:18px}.kaltest-terminal-title img{width:85px;height:85px}.kaltest-terminal-title h2{font-size:28px}}
