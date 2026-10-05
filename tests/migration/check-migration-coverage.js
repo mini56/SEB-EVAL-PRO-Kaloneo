@@ -37,8 +37,10 @@ const expectedMigrated = [
   'qcm-5',
   'qcm-5_1',
   'qcm-6',
+  'autoeval1',
   'planning',
   'genrenombres',
+  'autoeval2',
   'paronymes'
 ];
 if (JSON.stringify(migratedIds) !== JSON.stringify(expectedMigrated)) {
