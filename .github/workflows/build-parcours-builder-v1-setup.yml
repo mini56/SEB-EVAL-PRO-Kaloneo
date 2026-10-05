@@ -36,6 +36,9 @@ jobs:
       - name: Verify parcours library and business rules
         run: npm run test:parcours-builder
 
+      - name: Generate KALTEST data
+        run: node scripts/build-kaltest-pilot2-data.js
+
       - name: Prepare real web app and regression guards
         run: npm run prepare:web
 
