@@ -224,7 +224,7 @@ function renderBlock(block){
   if(block.type==='text'){const w=el('section','kb-block kb-text',block.text||'Bloc texte vide');return w;}
   if(block.type==='html'||block.type==='html-js'){
     const wrap=el('section','kb-block');const frame=el('iframe','kb-frame');frame.sandbox='allow-scripts';
-    const script=block.type==='html-js'&&block.js?'<script>'+String(block.js).replace(/<\\/script/gi,'<\\\\/script')+'<\\/script>':'';
+    const script=block.type==='html-js'&&block.js?'<script>'+String(block.js).replace(/<\/script/gi,'<\\/script')+'<\/script>':'';
     frame.srcdoc='<!doctype html><html><body style="font-family:Calibri,Arial,sans-serif;margin:10px">'+(block.html||'<em>Bloc HTML vide</em>')+script+'</body></html>';
     wrap.append(frame);return wrap;
   }
