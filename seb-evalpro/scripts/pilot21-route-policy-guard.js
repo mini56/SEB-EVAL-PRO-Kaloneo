@@ -36,6 +36,8 @@ expect(policy.normalizeCandidateRoute('brique.html'),'brique.html?fullParcours=1
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=genre-nombre'),'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre','segment KALTEST doit forcer fullParcours');
 expect(policy.normalizeCandidateRoute('dictee.html'),policy.INITIAL_ROUTE,'ancienne page Dictée doit être refusée');
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=dictee'),'kaltest-pilot2.html?fullParcours=1&segment=dictee','segment Dictée KALTEST');
+expect(policy.normalizeCandidateRoute('tri_de_cheville.html'),policy.INITIAL_ROUTE,'ancienne page Tri doit être refusée');
+expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=tri'),'kaltest-pilot2.html?fullParcours=1&segment=tri','segment Tri KALTEST');
 expect(policy.normalizeCandidateRoute('kaltest-pilot2.html?segment=inconnu'),policy.INITIAL_ROUTE,'segment inconnu doit revenir à l’entrée KALONÉO');
 expect(policy.normalizeCandidateRoute('page-inconnue.html'),policy.INITIAL_ROUTE,'page inconnue doit revenir à l’entrée KALONÉO');
 
