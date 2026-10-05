@@ -2922,3 +2922,22 @@ body[data-seb-kaltest-id="fin_parcours"] #kaloneo-nav-abandon{display:none!impor
 .kaltest-terminal-title{display:flex;align-items:center;justify-content:center;gap:24px}.kaltest-terminal-title img{width:110px;height:110px;object-fit:contain}.kaltest-terminal-title h2{margin:0;color:#1a73e8;font-size:34px;text-align:center}
 .kaltest-terminal-page p{margin:0}.kaltest-terminal-message{margin-top:4px;padding:16px 20px;border:1px solid #9cc2e5;border-radius:10px;background:#f7fbff;text-align:center;color:#1f4e79;font-weight:800}
 @media(max-height:760px){.kaltest-brique-layout{gap:8px}.kaltest-brique-image-card,.kaltest-brique-autoeval,.kaltest-brique-control-card{padding:7px}.kaltest-brique-auto-choice{padding:3px 5px;font-size:13.5px}.kaltest-brique-comment textarea{min-height:54px}.kaltest-brique-display{font-size:26px}.kaltest-terminal-page{gap:12px;padding:20px 26px;font-size:18px}.kaltest-terminal-title img{width:85px;height:85px}.kaltest-terminal-title h2{font-size:28px}}
+
+
+/* Outil Éditeur de texte KALONÉO — réutilisable dans les tests Builder. */
+.kaltest-builder-content-item{white-space:pre-line}
+.kaltest-text-editor-tool{height:100%;min-height:0;display:flex;flex-direction:column;gap:6px;padding:7px;border:1px solid #c5d2dd;border-radius:10px;background:#f8fafc;box-sizing:border-box}
+.kaltest-text-editor-toolbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:0 0 auto}
+.kaltest-text-editor-toolbar button,.kaltest-text-editor-toolbar select,.kaltest-text-editor-toolbar .color-picker-btn{height:31px;min-width:31px;padding:4px 7px;border:1px solid #b9c5cf;border-radius:6px;background:#fff;color:#27313a;font:13px Calibri,"Segoe UI",Arial,sans-serif;box-sizing:border-box}
+.kaltest-text-editor-toolbar button{cursor:pointer}.kaltest-text-editor-toolbar button.active{border-color:#66b9f0;background:linear-gradient(#fff,#c2eefc)}
+.kaltest-text-editor-tool .menu-container,.kaltest-text-editor-tool .color-picker-container{position:relative}
+.kaltest-text-editor-tool #menu-fichier,.kaltest-text-editor-tool .color-picker-menu{display:none;position:absolute;top:34px;left:0;z-index:1000;min-width:185px;padding:5px;border:1px solid #b8c4ce;border-radius:7px;background:#fff;box-shadow:0 5px 16px rgba(0,0,0,.18)}
+.kaltest-text-editor-tool #menu-fichier>div{padding:7px 9px;cursor:pointer}.kaltest-text-editor-tool #menu-fichier>div:hover{background:#e7f3fb}
+.kaltest-text-editor-tool .color-picker-menu.show{display:flex;gap:5px;align-items:center}.kaltest-text-editor-tool .color-swatch{width:27px;min-width:27px;padding:0}.kaltest-text-editor-tool #text-color-indicator,.kaltest-text-editor-tool #highlight-color-indicator{display:inline-block;width:15px;height:15px;border:1px solid #777;border-radius:3px;background:#000}.kaltest-text-editor-tool #highlight-color-indicator{background:#fff}
+.kaltest-text-editor-paper{flex:1 1 auto;min-height:190px;width:100%;overflow:auto;border:1px solid #b9c5cf;border-radius:7px;background:#fff;padding:10px;box-sizing:border-box}
+.kaltest-text-editor-paper.ql-container{font-family:Calibri,"Segoe UI",Arial,sans-serif}.kaltest-text-editor-paper .ql-editor{min-height:100%;padding:0;font-size:14pt;line-height:normal;white-space:pre-wrap}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] #kaltest-content{padding:8px}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-layout{height:100%;min-height:0}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-zone{min-height:0;overflow:auto}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-zone:nth-child(2){overflow:hidden}
+@media(max-height:760px){.kaltest-text-editor-toolbar button,.kaltest-text-editor-toolbar select,.kaltest-text-editor-toolbar .color-picker-btn{height:28px;padding:3px 6px;font-size:12px}.kaltest-text-editor-paper{min-height:150px}}
