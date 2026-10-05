@@ -106,8 +106,11 @@ jobs:
         run: |
           $main = Get-Content -Raw 'src/kaltest-pilot21-main.js'
           $core = Get-Content -Raw 'src/main.js'
+          $route = Get-Content -Raw 'src/kaloneo-full-parcours-route.js'
           if ($main -notmatch "SEB_KALTEST_FULL_PARCOURS = '1'") { throw 'PILOTE 21 ne force pas le mode parcours complet.' }
-          if ($core -notmatch "fullParcours:'1'") { throw 'main.js ne transmet pas fullParcours=1.' }
+          if ($core -notmatch "const initialPage = 'kaltest-pilot2.html'") { throw 'main.js ne démarre pas directement sur KALTEST.' }
+          if ($core -notmatch "loadKaloneoCandidateRoute\(kaloneoFullParcoursRoute.resolveStateRoute\(state\)\)") { throw 'main.js ne reprend pas la route KALONÉO normalisée.' }
+          if ($route -notmatch "INITIAL_ROUTE='kaltest-pilot2.html\?fullParcours=1'") { throw 'La politique de route ne force pas fullParcours=1.' }
           Write-Host 'PILOT21_FULL_PARCOURS_LAUNCHER=OK'
 
       - name: Build isolated Windows Pilot 21 setup
@@ -116,7 +119,7 @@ jobs:
       - name: Verify Pilot 21 setup
         shell: pwsh
         run: |
-          $setup = Get-ChildItem -Path dist -Filter 'SEB-EvalPro-Kaloneo-PILOTE-21-R2-0.0.21-Windows-Setup.exe' -File | Select-Object -First 1
+          $setup = Get-ChildItem -Path dist -Filter 'SEB-EvalPro-Kaloneo-PILOTE-21-R3-0.0.21-Windows-Setup.exe' -File | Select-Object -First 1
           if (-not $setup) { throw 'Setup PILOTE 21 introuvable.' }
           $hash = (Get-FileHash -Algorithm SHA256 $setup.FullName).Hash.ToUpperInvariant()
           "SETUP_PATH=$($setup.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
@@ -128,8 +131,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SEB-EvalPro-Kaloneo-PILOTE-21-R2-Windows
-          path: seb-evalpro/dist/SEB-EvalPro-Kaloneo-PILOTE-21-R2-0.0.21-Windows-Setup.exe
+          name: SEB-EvalPro-Kaloneo-PILOTE-21-R3-Windows
+          path: seb-evalpro/dist/SEB-EvalPro-Kaloneo-PILOTE-21-R3-0.0.21-Windows-Setup.exe
           if-no-files-found: error
 
       - name: Publish Pilot 21 release
@@ -137,25 +140,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'seb-kaloneo-pilot-021-r2'
-          $title = 'SEB EvalPro Kalonéo — PILOTE #21 R2'
+          $tag = 'seb-kaloneo-pilot-021-r3'
+          $title = 'SEB EvalPro Kalonéo — PILOTE #21 R3'
           if (gh release view $tag 2>$null) { throw "La Release $tag existe deja." }
           $notes = @"
-          PILOTE #21 R2 Windows — parcours KALONÉO exclusif : ancien point d’entrée neutralisé et reprise exacte de la page/du segment.
+          PILOTE #21 R3 Windows — clôture de la migration complète KALONÉO / KALTEST.
 
-          Objectif : KALONÉO et SEB EvalPro sont désormais compilés et contrôlés ensemble.
+          État validé :
+          - 22 étapes historiques sont maintenant des définitions KALTEST autonomes ;
+          - les anciennes pages système qcm-1 et qcm-finale sont retirées du parcours candidat actif ;
+          - KALTEST est le point d’entrée candidat unique et les anciennes reprises sont normalisées vers KALONÉO ;
+          - Transition vidéo F1, Briques, Stock, Planning, Dictée, Tri, Traitement de texte, Mail, Gratte-ciel, autoévaluations et page de fin sont exécutés par le moteur KALTEST ;
+          - Résultats et raccordements Bilan I / II / III restent contrôlés ;
+          - l’Éditeur de texte est disponible comme outil KALONÉO réutilisable ;
+          - le parcours actuel devient le parcours de base fourni avant le chantier Bibliothèque de tests / modèles de parcours.
 
-          Contrôles bloquants :
-          - le générateur KALONÉO est copié dans app/web/kaloneo-builder et embarqué avec SEB EvalPro ;
-          - la page Administrateur Tests / Parcours ouvre le générateur KALONÉO ;
-          - les 19 archétypes validés sont enregistrés et doivent être générables par KALONÉO ;
-          - les fixtures KALTEST existantes doivent être importables puis régénérables sans perte ;
-          - tableaux/grilles, cellules fixes/vides/réponses, médias, largeurs en caractères et reste disponible sont contrôlés ;
-          - compteur commun KALONÉO 44 px et barre basse commune 52 px restent les références ;
-          - aucun masquage CSS n'est accepté comme implémentation d'une capacité Builder ;
-          - toute divergence Builder / KALTEST / SEB EvalPro rend la compilation ROUGE.
-
-          Le build exécute ensuite la suite Electron réelle complète avant publication.
+          Le build exécute la suite Electron réelle complète avant publication.
 
           Fichier : $env:SETUP_NAME
           SHA256 : $env:SETUP_SHA256
