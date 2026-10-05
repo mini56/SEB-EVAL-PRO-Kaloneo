@@ -63,3 +63,41 @@ body{font-family:Calibri,"Segoe UI",Arial,sans-serif;background:linear-gradient(
 .kb-error{height:100%;display:grid;place-items:center;padding:30px;text-align:center}.kb-error-box{max-width:700px;padding:22px;border:1px solid #d8b5b5;border-radius:12px;background:#fff;color:#7d2020}
 @media(max-width:1180px){.kb-heading h1{font-size:24px}.kb-context p{font-size:15px}.kb-layout.r50-50,.kb-layout.r40-60,.kb-layout.r60-40{gap:8px}}
 @media(max-height:760px){.kb-preview-page{grid-template-rows:46px auto minmax(0,1fr) 50px;gap:4px;padding:7px 13px 6px}.kb-heading{min-height:46px}.kb-context{min-height:44px;padding:3px 8px}.kb-context img{width:36px;height:36px;flex-basis:36px}.kb-workspace{padding:6px}.kb-footer{min-height:50px}}
+
+/* PILOTE 22 R3 — média borné dans le vrai aperçu Electron */
+.kb-workspace{
+  overflow:hidden;
+}
+.kb-layout{
+  height:100%;
+  min-height:0;
+  align-content:stretch;
+}
+.kb-zone{
+  height:100%;
+  min-height:0;
+  overflow:auto;
+}
+.kb-media-block{
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.kb-zone>.kb-media-block:only-child,
+.kb-zone>.kb-media-block:last-child{
+  flex:1 1 0;
+  height:auto;
+  min-height:0;
+}
+.kb-media{
+  display:block;
+  width:auto;
+  height:auto;
+  max-width:100%;
+  max-height:100%;
+  margin:auto;
+  object-fit:contain;
+}
