@@ -35,7 +35,11 @@ for (const [needle,label] of [
   ["function renderPostures(test, host)", 'rendu Postures KALTEST'],
   ["test.id === 'planning_cantine'", 'pont Planning Résultats/Bilan'],
   ["function renderPlanning(test, host)", 'rendu Planning KALTEST'],
-  ["validateBeforeAdvance", 'validation Planning avant navigation']
+  ["validateBeforeAdvance", 'validation Planning avant navigation'],
+  ["test.id === 'autoevaluation_savoirs'", 'pont Autoévaluation 1 Résultats'],
+  ["test.id === 'autoevaluation_tic'", 'pont Autoévaluation 2 Résultats'],
+  ["function renderAutoevaluation(test, host)", 'rendu Autoévaluations KALTEST'],
+  ["allowEmptyCompletion", 'passage volontaire Autoévaluation 2']
 ]) must(runtime, needle, label);
 
 for (const [needle,label] of [
