@@ -1787,6 +1787,7 @@
     sessionStorage.setItem('seb_kaltest_parcours_finished','1');
     persist();
     try { window.sebEvalPro?.save?.(); } catch (_) {}
+    try { window.dispatchEvent(new CustomEvent('seb-kaltest-final', { detail:{ testId:test.id, terminal:true } })); } catch (_) {}
     return true;
   }
 
