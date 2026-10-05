@@ -1386,6 +1386,23 @@
       state.blocks.push(baseBlock('text'));changed();renderBlocks();
     });
     $('refresh-preview').addEventListener('click',refreshPreview);
+    $('open-electron-preview').addEventListener('click',async()=>{
+      refreshPreview();
+      const bridge=window.sebEvalPro;
+      if(!bridge || typeof bridge.kaloneoOpenPreview!=='function') {
+        alert('L’aperçu Electron est disponible depuis SEB EvalPro.');
+        return;
+      }
+      const definition=Core.modelToDefinition(currentModel());
+      try {
+        const result=await bridge.kaloneoOpenPreview(definition);
+        if(!result || result.ok!==true) {
+          alert('Aperçu impossible : '+String(result?.error||'erreur inconnue'));
+        }
+      } catch(error) {
+        alert('Aperçu impossible : '+String(error?.message||error));
+      }
+    });
     $('save-draft').addEventListener('click',()=>saveDraft(true));
     $('download-json').addEventListener('click',downloadJson);
     $('new-test').addEventListener('click',reset);
