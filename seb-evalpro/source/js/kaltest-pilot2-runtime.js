@@ -1958,6 +1958,7 @@
           display.textContent = '00:00';
           start.disabled = Number(tri.currentTri) > maxTris;
           stop.disabled = true;
+          console.log('KALTEST_TRI_ERROR_ACCEPTED', index+1, tri.currentTri, tri.awaitingError);
           setTimeout(()=>start.focus(),0);
         }
         tri.ready = false;
@@ -2040,6 +2041,7 @@
     }
 
     resultsButton.addEventListener('click', () => {
+      console.log('KALTEST_TRI_RESULTS_CLICK', completedRows().length, hasPartial(), Boolean(activeTriChrono?.isRunning?.()), tri.awaitingError);
       if (!canShowResults()) return;
       tri.resultsShown = true;
       auto.hidden = false;
@@ -2048,6 +2050,7 @@
       persist();
     });
     autoValidate.addEventListener('click', () => {
+      console.log('KALTEST_TRI_AUTO_VALIDATE', completedRows().length, hasPartial(), Boolean(activeTriChrono?.isRunning?.()), tri.awaitingError, autoAnswered());
       if (!canShowResults()) return;
       if (!autoAnswered()) {
         document.getElementById('exercise-status').textContent = 'Complétez l’autoévaluation avant de continuer.';
