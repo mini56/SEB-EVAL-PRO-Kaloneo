@@ -4,15 +4,14 @@ const INITIAL_ROUTE='kaltest-pilot2.html?fullParcours=1';
 const KALTEST_FILE='kaltest-pilot2.html';
 const LEGACY_CONTAINER_FILE='qcmv1.0.html';
 
-const KALTEST_SEGMENTS=new Set(['','initial','fractions','organisation','postures','conversions','autoeval1','stock','planning','genre-nombre','autoeval2','paronymes','carre']);
+const KALTEST_SEGMENTS=new Set(['','initial','fractions','organisation','postures','conversions','autoeval1','stock','planning','genre-nombre','mail','autoeval2','paronymes','carre']);
 const QCM_PAGES=new Set(['11','finale']);
 const DIRECT_FILES=new Set([
   'introbrique.html',
   'brique.html',
   'dictee.html',
   'tri_de_cheville.html',
-  'nwtexte.html',
-  'nvmail.html'
+  'nwtexte.html'
 ]);
 
 function fileName(value){
