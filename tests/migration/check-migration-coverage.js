@@ -49,6 +49,7 @@ const expectedMigrated = [
   'genrenombres',
   'dictee',
   'tri-de-cheville',
+  'nwtexte',
   'nvmail',
   'autoeval2',
   'paronymes',
