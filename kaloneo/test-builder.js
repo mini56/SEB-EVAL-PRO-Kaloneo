@@ -1280,9 +1280,7 @@
     changed();renderBlocks();
   }
 
-  async function importJsonFile(file) {
-    const text=await file.text();
-    const definition=JSON.parse(text);
+  function loadDefinition(definition, statusLabel='Test KALTEST ouvert depuis la bibliothèque') {
     const analysis=Core.analyzeDefinition(definition);
     if(!analysis.ok) throw new Error(analysis.errors.join('\\n'));
 
@@ -1296,8 +1294,62 @@
       ? model.meta.template : 'generic';
     saveDraft(false);
     renderBlocks();
-    $('draft-status').textContent='Test KALTEST importé sans perte';
+    refreshPreview();
+    $('draft-status').textContent=statusLabel;
     setTimeout(()=>$('draft-status').textContent='Brouillon local',1800);
+  }
+
+  async function importJsonFile(file) {
+    const text=await file.text();
+    loadDefinition(JSON.parse(text),'Test KALTEST importé sans perte');
+  }
+
+  function renderLibraryTests(items) {
+    const root=$('test-library-list');
+    if(!root)return;
+    const search=String($('test-library-search')?.value||'').trim().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();
+    root.replaceChildren();
+    const filtered=(items||[]).filter(item=>{
+      if(item.role!=='test')return false;
+      const haystack=(item.title+' '+item.category+' '+item.id).normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();
+      return !search||haystack.includes(search);
+    });
+    filtered.forEach(item=>{
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='test-library-item';
+      const text=document.createElement('div');
+      const title=document.createElement('strong');title.textContent=item.title;
+      const meta=document.createElement('span');meta.textContent=item.category+' • v'+item.version+(item.scored?' • noté':' • non noté');
+      text.append(title,meta);
+      const open=document.createElement('span');open.textContent='Ouvrir';
+      button.append(text,open);
+      button.addEventListener('click',async()=>{
+        try{
+          const result=await window.sebEvalPro?.kaloneoGetTest?.(item.id,item.version);
+          if(!result||result.ok!==true)throw new Error(result?.error||'Lecture impossible');
+          loadDefinition(result.definition);
+          $('test-library-dialog')?.close();
+        }catch(error){alert('Ouverture impossible : '+String(error?.message||error));}
+      });
+      root.appendChild(button);
+    });
+    if(!filtered.length){
+      const empty=document.createElement('p');empty.className='muted';empty.textContent='Aucun test trouvé.';root.appendChild(empty);
+    }
+  }
+
+  async function openLibraryDialog() {
+    const result=await window.sebEvalPro?.kaloneoListTests?.();
+    if(!result||result.ok!==true) {
+      alert('Bibliothèque inaccessible : '+String(result?.error||'erreur inconnue'));
+      return;
+    }
+    const dialog=$('test-library-dialog');
+    dialog._kaloneoItems=Array.isArray(result.tests)?result.tests:[];
+    renderLibraryTests(dialog._kaloneoItems);
+    dialog.showModal();
+    requestAnimationFrame(()=>$('test-library-search')?.focus());
   }
 
   function exportDefinition(data) {
@@ -1416,6 +1468,9 @@
     });
 
     $('back-tests').addEventListener('click',()=>{ window.location.href='../admin-tests-parcours.html'; });
+    $('open-library-test').addEventListener('click',()=>{openLibraryDialog().catch(error=>alert('Bibliothèque inaccessible : '+String(error?.message||error)));});
+    $('close-test-library').addEventListener('click',()=>$('test-library-dialog').close());
+    $('test-library-search').addEventListener('input',()=>renderLibraryTests($('test-library-dialog')._kaloneoItems||[]));
     $('import-json').addEventListener('click',()=>$('import-json-file').click());
     $('import-json-file').addEventListener('change',async()=>{
       const file=$('import-json-file').files&&$('import-json-file').files[0];
