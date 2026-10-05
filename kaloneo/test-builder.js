@@ -1011,9 +1011,9 @@
         '</body></html>';
       wrap.appendChild(frame);return wrap;
     }
-    if(block.type==='image'&&block.mediaData) {const img=document.createElement('img');img.className='preview-media';img.src=block.mediaData;img.alt=block.mediaAlt||block.mediaName||'Image';wrap.appendChild(img);return wrap;}
+    if(block.type==='image'&&block.mediaData) {wrap.classList.add('preview-media-block');const img=document.createElement('img');img.className='preview-media';img.src=block.mediaData;img.alt=block.mediaAlt||block.mediaName||'Image';wrap.appendChild(img);return wrap;}
     if(block.type==='audio'&&block.mediaData) {const a=document.createElement('audio');a.controls=true;a.src=block.mediaData;a.style.width='100%';wrap.appendChild(a);return wrap;}
-    if(block.type==='video'&&block.mediaData) {const v=document.createElement('video');v.controls=true;v.src=block.mediaData;v.className='preview-media';wrap.appendChild(v);return wrap;}
+    if(block.type==='video'&&block.mediaData) {wrap.classList.add('preview-media-block');const v=document.createElement('video');v.controls=true;v.src=block.mediaData;v.className='preview-media';wrap.appendChild(v);return wrap;}
     if(['image','audio','video'].includes(block.type)) {wrap.textContent=block.mediaPlaceholder||'Aucun média sélectionné';return wrap;}
     if(block.type==='text-editor') {
       wrap.classList.add('preview-text-editor');
