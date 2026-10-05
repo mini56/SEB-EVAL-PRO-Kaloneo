@@ -42,6 +42,8 @@ const expectedMigrated = [
   'qcm-5_1',
   'qcm-6',
   'autoeval1',
+  'introbrique',
+  'brique',
   'stock',
   'planning',
   'genrenombres',
@@ -50,7 +52,8 @@ const expectedMigrated = [
   'nvmail',
   'autoeval2',
   'paronymes',
-  'carre'
+  'carre',
+  'qcm-11'
 ];
 if (JSON.stringify(migratedIds) !== JSON.stringify(expectedMigrated)) {
   throw new Error(
