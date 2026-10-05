@@ -257,7 +257,7 @@ app.whenReady().then(async () => {
 
       const perfect = await perfectResult(win);
       const meta = await win.webContents.executeJavaScript(
-        "({questionCount:window.sebKaltestPilot2.currentTest().questions.length,scored:window.sebKaltestPilot2.currentTest().scored!==false})",
+        "({questionCount:(window.sebKaltestPilot2.currentTest().questions||[]).length,scored:window.sebKaltestPilot2.currentTest().scored!==false})",
         true
       );
       if (meta.scored) {
