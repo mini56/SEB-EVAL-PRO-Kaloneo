@@ -319,7 +319,7 @@ app.whenReady().then(async()=>{
       true
     );
     if(dictee.current!=='dictee_professionnelle' || dictee.audio!=='dictee-reclamation-client.wav' ||
-       dictee.textarea!==1 || dictee.next!=='tri_de_cheville.html?fullParcours=1'){
+       dictee.textarea!==1 || dictee.next!=='kaltest-pilot2.html?fullParcours=1&segment=tri'){
       throw new Error('Dictée KALTEST invalide: '+JSON.stringify(dictee));
     }
 
@@ -333,12 +333,27 @@ app.whenReady().then(async()=>{
         auto2:window.sebParcours?.nextUrl('autoeval2')||''
       })
     `,true);
-    if(middle.dictee!=='tri_de_cheville.html?fullParcours=1' ||
+    if(middle.dictee!=='kaltest-pilot2.html?fullParcours=1&segment=tri' ||
        middle.tri!=='nwtexte.html?fullParcours=1' ||
        middle.nwtexte!=='kaltest-pilot2.html?fullParcours=1&segment=mail' ||
        middle.nvmail!=='kaltest-pilot2.html?fullParcours=1&segment=autoeval2' ||
        middle.auto2!=='kaltest-pilot2.html?fullParcours=1&segment=paronymes'){
       throw new Error('Milieu/fin de parcours PILOTE 11 incorrect: '+JSON.stringify(middle));
+    }
+
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='tri', 'Tri KALTEST');
+    await sleep(300);
+    const tri=await win.webContents.executeJavaScript(
+      "({current:window.sebKaltestPilot2.currentTest()?.id||'',rows:document.querySelectorAll('.kaltest-tri-row:not(.head)').length,buttons:document.querySelectorAll('.kaltest-tri-chrono-buttons button').length,next:window.sebParcours?.nextUrl('tri-de-cheville')||''})",
+      true
+    );
+    if(tri.current!=='tri_chevilles' || tri.rows!==5 || tri.buttons!==2 ||
+       tri.next!=='nwtexte.html?fullParcours=1'){
+      throw new Error('Tri KALTEST invalide: '+JSON.stringify(tri));
     }
 
     await win.webContents.executeJavaScript("window.sebParcours.goTo('nvmail'); true;",true);
@@ -431,6 +446,7 @@ app.whenReady().then(async()=>{
     console.log('PILOT11_AUTOEVAL1_KALTEST=OK');
     console.log('PILOT11_PLANNING_KALTEST=OK');
     console.log('PILOT11_DICTEE_KALTEST=OK');
+    console.log('PILOT11_TRI_KALTEST=OK');
     console.log('PILOT11_MAIL_KALTEST=OK');
     console.log('PILOT11_AUTOEVAL2_KALTEST=OK');
     console.log('PILOT11_GENRE_NOMBRE_AT_CORRECT_POSITION=OK');
