@@ -47,6 +47,11 @@
       startPhase:'exercise',
       ids:Object.freeze(['autoevaluation_savoirs'])
     }),
+    stock:Object.freeze({
+      stepId:'stock',
+      startPhase:'exercise',
+      ids:Object.freeze(['ranger_stock'])
+    }),
     planning:Object.freeze({
       stepId:'planning',
       startPhase:'exercise',
@@ -1177,6 +1182,174 @@
     return true;
   }
 
+  function renderStock(test, host) {
+    const definition = test.presentation?.stockBoard;
+    if (!definition || !Array.isArray(definition.pots) || !Array.isArray(definition.shelves)) return false;
+
+    const testState = testStateFor(test);
+    const completed = testState.status === 'COMPLETED';
+    const shell = document.createElement('div');
+    shell.className = 'kaltest-stock-layout';
+
+    const left = document.createElement('section');
+    left.className = 'kaltest-stock-left';
+
+    const sourceCard = document.createElement('div');
+    sourceCard.className = 'kaltest-stock-zone';
+    const sourceTitle = document.createElement('h3');
+    sourceTitle.textContent = 'Pots à ranger';
+    const source = document.createElement('div');
+    source.className = 'kaltest-stock-pots';
+    source.dataset.stockDrop = 'source';
+    sourceCard.append(sourceTitle, source);
+
+    const triCard = document.createElement('div');
+    triCard.className = 'kaltest-stock-zone';
+    const triTitle = document.createElement('h3');
+    triTitle.textContent = 'Zone de tri';
+    const tri = document.createElement('div');
+    tri.className = 'kaltest-stock-pots kaltest-stock-tri';
+    tri.dataset.stockDrop = 'tri';
+    triCard.append(triTitle, tri);
+    left.append(sourceCard, triCard);
+
+    const shelves = document.createElement('section');
+    shelves.className = 'kaltest-stock-shelves';
+
+    const caseByValue = new Map();
+    for (const shelf of definition.shelves) {
+      const shelfNode = document.createElement('div');
+      shelfNode.className = 'kaltest-stock-shelf shelf-' + shelf.id;
+      const title = document.createElement('div');
+      title.className = 'kaltest-stock-shelf-title';
+      title.textContent = shelf.title || ('Casier ' + shelf.id);
+      shelfNode.appendChild(title);
+
+      for (const level of shelf.levels || []) {
+        const levelNode = document.createElement('div');
+        levelNode.className = 'kaltest-stock-level';
+        const label = document.createElement('div');
+        label.className = 'kaltest-stock-level-label';
+        label.textContent = level.label || '';
+        const cases = document.createElement('div');
+        cases.className = 'kaltest-stock-cases';
+
+        for (let index = 1; index <= Number(level.cases || 0); index += 1) {
+          const value = 'case:' + shelf.id + ':' + level.id + ':' + index;
+          const cell = document.createElement('div');
+          cell.className = 'kaltest-stock-case';
+          cell.dataset.stockDrop = value;
+          cell.dataset.stockCase = value;
+          cases.appendChild(cell);
+          caseByValue.set(value, cell);
+        }
+        levelNode.append(label, cases);
+        shelfNode.appendChild(levelNode);
+      }
+      shelves.appendChild(shelfNode);
+    }
+
+    function potNode(pot) {
+      const node = document.createElement('div');
+      node.className = 'kaltest-stock-pot';
+      node.dataset.potId = String(pot.id);
+      node.dataset.questionId = pot.questionId || '';
+      node.draggable = !completed && !pot.example;
+      node.style.backgroundImage = 'url("flacon/flacon_' + String(pot.color || '') + '.png")';
+
+      const code = document.createElement('strong');
+      code.textContent = String(pot.code || '');
+      const pct = document.createElement('span');
+      pct.textContent = String(pot.percentage ?? '') + '%';
+      node.append(code, pct);
+
+      if (pot.example) {
+        node.classList.add('example');
+        node.setAttribute('aria-label', 'Exemple ' + code.textContent + ' ' + pct.textContent);
+      } else if (completed) {
+        const detail = testState.result?.details?.[pot.questionId];
+        node.classList.add(detail?.correct ? 'correct' : 'incorrect');
+      }
+      return node;
+    }
+
+    const nodes = new Map();
+    for (const pot of definition.pots) nodes.set(String(pot.id), potNode(pot));
+
+    const exampleId = String(definition.examplePotId ?? '');
+    for (const pot of definition.pots) {
+      const id = String(pot.id);
+      const node = nodes.get(id);
+      if (!node) continue;
+
+      if (id === exampleId) {
+        const target = caseByValue.get(String(definition.examplePlacement || ''));
+        (target || source).appendChild(node);
+        continue;
+      }
+
+      const answer = String(testState.answers?.[pot.questionId] ?? '');
+      if (answer.startsWith('case:')) {
+        const target = caseByValue.get(answer);
+        if (target && !target.querySelector('.kaltest-stock-pot')) target.appendChild(node);
+        else source.appendChild(node);
+      } else if (answer === 'tri') {
+        tri.appendChild(node);
+      } else {
+        source.appendChild(node);
+      }
+    }
+
+    function move(node, destination) {
+      if (!node || completed || node.classList.contains('example')) return false;
+      const questionId = node.dataset.questionId;
+      if (!questionId) return false;
+      if (destination.startsWith('case:')) {
+        const cell = caseByValue.get(destination);
+        if (!cell || cell.querySelector('.kaltest-stock-pot')) return false;
+        cell.appendChild(node);
+      } else if (destination === 'tri') {
+        tri.appendChild(node);
+      } else {
+        source.appendChild(node);
+        destination = 'source';
+      }
+      saveAnswer(test, questionId, destination);
+      return true;
+    }
+
+    if (!completed) {
+      shell.addEventListener('dragstart', event => {
+        const node = event.target?.closest?.('.kaltest-stock-pot');
+        if (!node || node.classList.contains('example')) return;
+        event.dataTransfer?.setData('text/plain', node.dataset.potId || '');
+        if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+        node.classList.add('dragging');
+      });
+      shell.addEventListener('dragend', event => {
+        event.target?.closest?.('.kaltest-stock-pot')?.classList.remove('dragging');
+      });
+      shell.addEventListener('dragover', event => {
+        const target = event.target?.closest?.('[data-stock-drop]');
+        if (!target) return;
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+      });
+      shell.addEventListener('drop', event => {
+        const target = event.target?.closest?.('[data-stock-drop]');
+        if (!target) return;
+        event.preventDefault();
+        const id = event.dataTransfer?.getData('text/plain') || '';
+        const node = nodes.get(String(id));
+        move(node, String(target.dataset.stockDrop || 'source'));
+      });
+    }
+
+    shell.append(left, shelves);
+    host.appendChild(shell);
+    return true;
+  }
+
   function renderPlanning(test, host) {
     const definition = test.presentation?.planningGrid;
     if (!definition || !Array.isArray(definition.rows)) return false;
@@ -1584,6 +1757,20 @@
         selections:Array.isArray(testState.answers?.[question?.id]) ? testState.answers[question.id] : [],
         commentaire:String(testState.supplemental?.[question?.id]?.commentaire ?? '')
       }));
+    } else if (test.id === 'ranger_stock') {
+      const correct = Number(result.score) || 0;
+      const total = Number(result.scoreMax) || 33;
+      const errors = Math.max(0, total - correct);
+      sessionStorage.setItem('stockCorrect', String(correct));
+      sessionStorage.setItem('stockErrors', String(errors));
+      sessionStorage.setItem('stockTotal', String(total));
+      sessionStorage.setItem('seb_evalpro_stock_state', JSON.stringify({
+        answers:Object.assign({}, testState.answers || {}),
+        validated:true,
+        savedAt:Date.now(),
+        source:'kaltest'
+      }));
+      sessionStorage.setItem('seb_exercise_activity:stock.html', '1');
     } else if (test.id === 'planning_cantine') {
       const correction = {};
       const answers = {};
@@ -1702,6 +1889,8 @@
 
     if (renderAutoevaluation(test, host)) {
       // Autoévaluations migrées dans le moteur KALTEST commun.
+    } else if (renderStock(test, host)) {
+      // Ranger le stock migré dans le moteur KALTEST commun.
     } else if (renderPlanning(test, host)) {
       // Planning cantine migré dans le moteur KALTEST commun.
     } else if (renderFractions(test, host)) {
