@@ -4,11 +4,18 @@
   function ready() {
     const button = document.getElementById('close-tests-parcours');
     const builder = document.getElementById('open-kaloneo-builder');
+    const parcoursBuilder = document.getElementById('open-parcours-builder');
     if (!button) return;
 
     if (builder) {
       builder.addEventListener('click', () => {
         window.location.href = 'kaloneo-builder/test-builder.html';
+      });
+    }
+
+    if (parcoursBuilder) {
+      parcoursBuilder.addEventListener('click', () => {
+        window.location.href = 'admin-parcours-builder.html';
       });
     }
 
