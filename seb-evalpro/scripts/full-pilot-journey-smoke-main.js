@@ -200,20 +200,25 @@ app.whenReady().then(async()=>{
       "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
       true
     );
-    await waitForFile(win,'autoeval1.html');
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='autoeval1', 'Autoévaluation 1 KALTEST');
+    await sleep(300);
 
-    // 4. Autoévaluation -> vraie introduction vidéo Briques -> LEGO -> Stock.
+    // 4. Autoévaluation KALTEST -> vraie introduction vidéo Briques -> LEGO -> Stock.
     const auto=await win.webContents.executeJavaScript(`
       ({
-        parcours:Boolean(window.sebParcours),
+        current:window.sebKaltestPilot2.currentTest()?.id||'',
+        choices:document.querySelectorAll('.kaltest-autoeval-choice input').length,
         next:window.sebParcours?.nextFile('autoeval1')||''
       })
     `,true);
-    if(!auto.parcours || auto.next!=='introbrique.html'){
-      throw new Error('Autoévaluation ne mène pas à introbrique.html: '+JSON.stringify(auto));
+    if(auto.current!=='autoevaluation_savoirs' || auto.choices!==5 || auto.next!=='introbrique.html'){
+      throw new Error('Autoévaluation 1 KALTEST invalide: '+JSON.stringify(auto));
     }
 
-    await win.webContents.executeJavaScript("window.sebParcours.goNext('autoeval1'); true;",true);
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
     await waitForFile(win,'introbrique.html');
     await sleep(350);
 
@@ -320,15 +325,25 @@ app.whenReady().then(async()=>{
     if(middle.dictee!=='tri_de_cheville.html?fullParcours=1' ||
        middle.tri!=='nwtexte.html?fullParcours=1' ||
        middle.nwtexte!=='nvmail.html?fullParcours=1' ||
-       middle.nvmail!=='autoeval2.html?fullParcours=1' ||
+       middle.nvmail!=='kaltest-pilot2.html?fullParcours=1&segment=autoeval2' ||
        middle.auto2!=='kaltest-pilot2.html?fullParcours=1&segment=paronymes'){
       throw new Error('Milieu/fin de parcours PILOTE 11 incorrect: '+JSON.stringify(middle));
     }
 
     await win.webContents.executeJavaScript("window.sebParcours.goTo('autoeval2'); true;",true);
-    await waitForFile(win,'autoeval2.html');
-    await sleep(250);
-    await win.webContents.executeJavaScript("window.sebParcours.goNext('autoeval2'); true;",true);
+    await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='autoeval2', 'Autoévaluation 2 KALTEST');
+    await sleep(300);
+    const auto2=await win.webContents.executeJavaScript(
+      "({current:window.sebKaltestPilot2.currentTest()?.id||'',choices:document.querySelectorAll('.kaltest-autoeval-choice input').length})",
+      true
+    );
+    if(auto2.current!=='autoevaluation_tic' || auto2.choices!==6){
+      throw new Error('Autoévaluation 2 KALTEST invalide: '+JSON.stringify(auto2));
+    }
+    await win.webContents.executeJavaScript(
+      "window.sebKaltestPilot2.onAbandon({nonEvaluated:true,reasons:['smoke'],comment:''}); true;",
+      true
+    );
     await waitForLocation(win, current=>current.file==='kaltest-pilot2.html' && current.segment==='paronymes', 'Paronymes KALTEST');
     await sleep(450);
 
@@ -369,7 +384,9 @@ app.whenReady().then(async()=>{
     console.log('BRIQUE_VIDEO='+video.src);
     console.log('LEGO_PAGE=OK');
     console.log('STOCK_PAGE=OK pots='+stock.pots+' cases='+stock.cases);
+    console.log('PILOT11_AUTOEVAL1_KALTEST=OK');
     console.log('PILOT11_PLANNING_KALTEST=OK');
+    console.log('PILOT11_AUTOEVAL2_KALTEST=OK');
     console.log('PILOT11_GENRE_NOMBRE_AT_CORRECT_POSITION=OK');
     console.log('PILOT11_PARONYMES_AT_CORRECT_POSITION=OK');
     console.log('PILOT11_NO_DUPLICATE_MIGRATED_PAGES=OK');
