@@ -27,6 +27,9 @@ const BASE_TEST_ORDER = Object.freeze([
   'gratte_ciel'
 ]);
 
+const DEFAULT_MASK_ID = 'kaloneo-default';
+const DEFAULT_MASK_VERSION = '1.0.0';
+
 function createKaloneoLibrary(options = {}) {
   const dataRoot = String(options.dataRoot || '').trim();
   const seedTestsRoot = String(options.seedTestsRoot || '').trim();
@@ -37,6 +40,7 @@ function createKaloneoLibrary(options = {}) {
   const root = path.join(dataRoot, 'KALONEO');
   const testsRoot = path.join(root, 'Bibliotheque-tests');
   const parcoursRoot = path.join(root, 'Parcours');
+  const maskScreensRoot = path.join(root, 'Ecrans-masquage');
 
   function ensureDirectory(directory) {
     fs.mkdirSync(directory, { recursive:true });
@@ -72,14 +76,18 @@ function createKaloneoLibrary(options = {}) {
     }
   }
 
-  function walkTestFiles(directory, out = []) {
+  function walkNamedFiles(directory, filename, out = []) {
     if (!fs.existsSync(directory)) return out;
     for (const entry of fs.readdirSync(directory, { withFileTypes:true })) {
       const full = path.join(directory, entry.name);
-      if (entry.isDirectory()) walkTestFiles(full, out);
-      else if (entry.isFile() && entry.name.toLowerCase() === 'test.json') out.push(full);
+      if (entry.isDirectory()) walkNamedFiles(full, filename, out);
+      else if (entry.isFile() && entry.name.toLowerCase() === filename.toLowerCase()) out.push(full);
     }
     return out;
+  }
+
+  function walkTestFiles(directory, out = []) {
+    return walkNamedFiles(directory, 'test.json', out);
   }
 
   function compareVersion(a, b) {
@@ -91,6 +99,11 @@ function createKaloneoLibrary(options = {}) {
       if (delta) return delta;
     }
     return String(a || '').localeCompare(String(b || ''));
+  }
+
+  function safeSegment(value, fallback = 'item') {
+    const clean = String(value || '').trim().replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
+    return clean || fallback;
   }
 
   function roleOf(definition) {
@@ -137,6 +150,177 @@ function createKaloneoLibrary(options = {}) {
     };
   }
 
+  function validateTestDefinition(definition) {
+    if (!definition || typeof definition !== 'object' || Array.isArray(definition)) return 'Définition KALTEST absente.';
+    if (Number(definition.kaltestFormat) !== 1) return 'Format KALTEST non supporté.';
+    if (!String(definition.id || '').trim()) return 'ID du test obligatoire.';
+    if (!String(definition.version || '').trim()) return 'Version du test obligatoire.';
+    if (!String(definition.title || '').trim()) return 'Titre du test obligatoire.';
+    if (!['test','introduction','fin'].includes(roleOf(definition))) return 'Type de page KALTEST invalide.';
+    return '';
+  }
+
+  function exactTestFile(id, version) {
+    const wantedId = String(id || '');
+    const wantedVersion = String(version || '');
+    for (const file of walkTestFiles(testsRoot)) {
+      const definition = readJson(file);
+      if (definition && String(definition.id) === wantedId && String(definition.version) === wantedVersion) return file;
+    }
+    return '';
+  }
+
+  function getTest(id, version) {
+    ensureSeed();
+    const file = exactTestFile(id, version);
+    if (!file) return { ok:false, error:'Test KALTEST introuvable.' };
+    const definition = readJson(file);
+    if (!definition) return { ok:false, error:'Test KALTEST illisible.' };
+    return { ok:true, definition };
+  }
+
+  function saveTest(definition, options = {}) {
+    ensureSeed();
+    const error = validateTestDefinition(definition);
+    if (error) return { ok:false, error };
+
+    const value = JSON.parse(JSON.stringify(definition));
+    value.id = String(value.id).trim();
+    value.version = String(value.version).trim();
+    value.title = String(value.title).trim();
+
+    const existing = exactTestFile(value.id, value.version);
+    if (existing && options.overwrite !== true) {
+      return { ok:false, code:'EXISTS', error:'Cette version du test existe déjà dans la bibliothèque.' };
+    }
+
+    const target = existing || path.join(
+      testsRoot,
+      safeSegment(value.id, 'test'),
+      safeSegment(value.version, '1.0.0'),
+      'test.json'
+    );
+    atomicWriteJson(target, value);
+    const record = { definition:value, file:target };
+    return { ok:true, replaced:Boolean(existing), test:toTestMetadata(record) };
+  }
+
+  function defaultMaskScreen() {
+    return {
+      format:'kaloneo-mask-screen',
+      schemaVersion:1,
+      id:DEFAULT_MASK_ID,
+      version:DEFAULT_MASK_VERSION,
+      name:'KALONÉO',
+      systemProvided:true,
+      createdAt:'2026-10-05T00:00:00.000Z',
+      updatedAt:'2026-10-05T00:00:00.000Z',
+      content:{
+        text:'KALONÉO\nAu cœur d’un nouvel élan',
+        image:''
+      }
+    };
+  }
+
+  function maskFile(id, version) {
+    return path.join(maskScreensRoot, safeSegment(id, 'masque'), safeSegment(version, '1.0.0'), 'mask.json');
+  }
+
+  function ensureDefaultMaskScreen() {
+    const target = maskFile(DEFAULT_MASK_ID, DEFAULT_MASK_VERSION);
+    if (!fs.existsSync(target)) atomicWriteJson(target, defaultMaskScreen());
+  }
+
+  function scanMaskScreens() {
+    const out = [];
+    for (const file of walkNamedFiles(maskScreensRoot, 'mask.json')) {
+      const value = readJson(file);
+      if (!value || value.format !== 'kaloneo-mask-screen' || !value.id || !value.version) continue;
+      out.push({ value, file });
+    }
+    return out;
+  }
+
+  function toMaskMetadata(record) {
+    const value = record.value;
+    return {
+      id:String(value.id),
+      version:String(value.version),
+      name:String(value.name || value.id),
+      systemProvided:value.systemProvided === true,
+      hasText:Boolean(String(value.content?.text || '').trim()),
+      hasImage:Boolean(String(value.content?.image || '').trim())
+    };
+  }
+
+  function listMaskScreens() {
+    ensureSeed();
+    return scanMaskScreens()
+      .map(toMaskMetadata)
+      .sort((a,b) => {
+        if (a.systemProvided !== b.systemProvided) return a.systemProvided ? -1 : 1;
+        return a.name.localeCompare(b.name, 'fr');
+      });
+  }
+
+  function findMaskScreen(id, version) {
+    const wantedId = String(id || DEFAULT_MASK_ID);
+    const wantedVersion = String(version || DEFAULT_MASK_VERSION);
+    return scanMaskScreens().find(record =>
+      String(record.value.id) === wantedId && String(record.value.version) === wantedVersion
+    ) || null;
+  }
+
+  function getMaskScreen(ref = null) {
+    ensureSeed();
+    const id = String(ref && ref.id || DEFAULT_MASK_ID);
+    const version = String(ref && ref.version || DEFAULT_MASK_VERSION);
+    let record = findMaskScreen(id, version);
+    if (!record && (id !== DEFAULT_MASK_ID || version !== DEFAULT_MASK_VERSION)) {
+      record = findMaskScreen(DEFAULT_MASK_ID, DEFAULT_MASK_VERSION);
+    }
+    if (!record) return { ok:false, error:'Écran de masquage KALONÉO introuvable.' };
+    return { ok:true, maskScreen:JSON.parse(JSON.stringify(record.value)) };
+  }
+
+  function saveMaskScreen(payload = {}, options = {}) {
+    ensureSeed();
+    const id = String(payload.id || '').trim();
+    const version = String(payload.version || '1.0.0').trim();
+    const name = String(payload.name || '').trim();
+    const text = String(payload.content?.text || '');
+    const image = String(payload.content?.image || '');
+
+    if (!id) return { ok:false, error:'ID de l’écran de masquage obligatoire.' };
+    if (!version) return { ok:false, error:'Version de l’écran de masquage obligatoire.' };
+    if (!name) return { ok:false, error:'Nom de l’écran de masquage obligatoire.' };
+    if (!text.trim() && !image.trim()) return { ok:false, error:'Ajoutez un texte, une image, ou les deux.' };
+    if (id === DEFAULT_MASK_ID) return { ok:false, error:'L’écran KALONÉO par défaut est protégé.' };
+    if (image && !/^data:image\//i.test(image)) return { ok:false, error:'L’image de masquage doit être embarquée dans KALONÉO.' };
+
+    const target = maskFile(id, version);
+    const exists = fs.existsSync(target);
+    if (exists && options.overwrite !== true) {
+      return { ok:false, code:'EXISTS', error:'Cette version de l’écran de masquage existe déjà.' };
+    }
+
+    const previous = exists ? readJson(target) : null;
+    const stamp = now().toISOString();
+    const value = {
+      format:'kaloneo-mask-screen',
+      schemaVersion:1,
+      id,
+      version,
+      name,
+      systemProvided:false,
+      createdAt:String(previous?.createdAt || stamp),
+      updatedAt:stamp,
+      content:{ text, image }
+    };
+    atomicWriteJson(target, value);
+    return { ok:true, replaced:exists, maskScreen:toMaskMetadata({ value, file:target }) };
+  }
+
   function safeNameKey(value) {
     return String(value || '')
       .normalize('NFD')
@@ -174,8 +358,25 @@ function createKaloneoLibrary(options = {}) {
     return { id:String(definition.id), version:String(definition.version) };
   }
 
+  function maskRefFor(value) {
+    return { id:String(value.id), version:String(value.version) };
+  }
+
+  function defaultMaskRef() {
+    return { id:DEFAULT_MASK_ID, version:DEFAULT_MASK_VERSION };
+  }
+
   function ensureBaseParcours() {
-    if (readAllParcours().some(item => item && item.id === 'parcours-de-base')) return;
+    const existing = readAllParcours().find(item => item && item.id === 'parcours-de-base');
+    if (existing) {
+      if (!existing.maskScreen) {
+        existing.maskScreen = defaultMaskRef();
+        existing.schemaVersion = Math.max(2, Number(existing.schemaVersion) || 1);
+        atomicWriteJson(path.join(parcoursRoot, existing.id + '.json'), existing);
+      }
+      return;
+    }
+
     const definitions = scanLatestDefinitions();
     const introRecord = [...definitions.values()].find(record => roleOf(record.definition) === 'introduction');
     const finRecord = [...definitions.values()].find(record => roleOf(record.definition) === 'fin');
@@ -189,13 +390,14 @@ function createKaloneoLibrary(options = {}) {
     const stamp = now().toISOString();
     const base = {
       format:'kaloneo-parcours',
-      schemaVersion:1,
+      schemaVersion:2,
       id:'parcours-de-base',
       name:'Parcours de base',
       creator:'SEB EvalPro / KALONÉO',
       systemProvided:true,
       createdAt:stamp,
       updatedAt:stamp,
+      maskScreen:defaultMaskRef(),
       introduction:refFor(introRecord.definition),
       tests,
       fin:refFor(finRecord.definition)
@@ -207,7 +409,9 @@ function createKaloneoLibrary(options = {}) {
     ensureDirectory(root);
     ensureDirectory(testsRoot);
     ensureDirectory(parcoursRoot);
+    ensureDirectory(maskScreensRoot);
     if (seedTestsRoot && fs.existsSync(seedTestsRoot)) copyMissingTree(seedTestsRoot, testsRoot);
+    ensureDefaultMaskScreen();
     ensureBaseParcours();
     return true;
   }
@@ -237,6 +441,7 @@ function createKaloneoLibrary(options = {}) {
         updatedAt:String(item.updatedAt || ''),
         systemProvided:item.systemProvided === true,
         testCount:Array.isArray(item.tests) ? item.tests.length : 0,
+        maskScreen:item.maskScreen || defaultMaskRef(),
         introduction:item.introduction || null,
         fin:item.fin || null
       }))
@@ -260,6 +465,13 @@ function createKaloneoLibrary(options = {}) {
     return record.definition;
   }
 
+  function resolveMaskRef(ref) {
+    const requested = ref && typeof ref === 'object' ? ref : defaultMaskRef();
+    const record = findMaskScreen(requested.id, requested.version);
+    if (!record) throw new Error('Écran de masquage introuvable : ' + String(requested.id || '') + '.');
+    return maskRefFor(record.value);
+  }
+
   function saveParcours(payload = {}) {
     ensureSeed();
 
@@ -278,9 +490,11 @@ function createKaloneoLibrary(options = {}) {
 
     let introduction;
     let fin;
+    let maskScreen;
     try {
       introduction = resolveDefinition(definitions, payload.introduction, 'introduction');
       fin = resolveDefinition(definitions, payload.fin, 'fin');
+      maskScreen = resolveMaskRef(payload.maskScreen);
     } catch (error) {
       return { ok:false, error:error.message };
     }
@@ -313,13 +527,14 @@ function createKaloneoLibrary(options = {}) {
 
     const value = {
       format:'kaloneo-parcours',
-      schemaVersion:1,
+      schemaVersion:2,
       id,
       name,
       creator,
       systemProvided:false,
       createdAt:stamp,
       updatedAt:stamp,
+      maskScreen,
       introduction:refFor(introduction),
       tests,
       fin:refFor(fin)
@@ -332,11 +547,17 @@ function createKaloneoLibrary(options = {}) {
   ensureSeed();
 
   return Object.freeze({
-    paths:Object.freeze({ root, testsRoot, parcoursRoot }),
+    paths:Object.freeze({ root, testsRoot, parcoursRoot, maskScreensRoot }),
     ensureSeed,
     listTests,
+    getTest,
+    saveTest,
+    listMaskScreens,
+    getMaskScreen,
+    saveMaskScreen,
     listParcours,
-    saveParcours
+    saveParcours,
+    defaultMaskRef
   });
 }
 
