@@ -492,7 +492,11 @@
             questionIndex+=qs.length;
           }
         }
-        def.questions=rebuilt.map(q=>Object.assign({},existing.get(q.id)||{},q));
+        if(rebuilt.length || Object.prototype.hasOwnProperty.call(def,'questions')) {
+          def.questions=rebuilt.map(q=>Object.assign({},existing.get(q.id)||{},q));
+        } else if(Object.prototype.hasOwnProperty.call(def,'questions')) {
+          delete def.questions;
+        }
       } else {
         updateImportedQuestions(def,model);
       }
