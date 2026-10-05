@@ -300,18 +300,18 @@ app.whenReady().then(async () => {
     if (await visiblePage(win) !== 'page-final') throw new Error('Page finale système attendue après les 7 tests.');
 
     const finalAudit = await win.webContents.executeJavaScript(
-      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.getElementById('page-final')?.textContent||''),date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page4','page5_q1','page5_1_q1','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null};})()",
+      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.getElementById('page-final')?.textContent||''),date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page4','page5_q1','page5_1_q1','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null,auto1:sessionStorage.getItem('autoEval1_resultats')!==null,auto2:sessionStorage.getItem('autoEval2_resultats')!==null,planning:sessionStorage.getItem('planningScore')!==null};})()",
       true
     );
     if (!finalAudit.congrats) throw new Error('La page finale Félicitations du Build #20 n’est pas restaurée.');
-    if (!finalAudit.requiredLegacy || !finalAudit.paronymes || !finalAudit.genre) {
+    if (!finalAudit.requiredLegacy || !finalAudit.paronymes || !finalAudit.genre || !finalAudit.auto1 || !finalAudit.auto2 || !finalAudit.planning) {
       throw new Error('Le pont KALTEST → Résultats/Bilan historiques est incomplet : ' + JSON.stringify(finalAudit));
     }
 
     console.log('KALTEST_PILOT2_FUNCTIONAL_SMOKE: OK');
     console.log('PILOT2_REAL_SEB_VISUALS=Introduction video + Scenario/Consigne icons');
-    console.log('PILOT2_DYNAMIC_TESTS=11');
-    console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + fractions + organisation + postures + planning + supplemental fields + two tables + single choice');
+    console.log('PILOT2_DYNAMIC_TESTS=13');
+    console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + fractions + organisation + postures + planning + autoevaluations + supplemental fields + two tables + single choice');
     console.log('PILOT2_FLOATING_CALCULATOR=OK');
     console.log('PILOT2_ABANDON_UI=4 reasons + admin password + NE');
     console.log('PILOT2_NO_VERTICAL_OVERFLOW=OK');
