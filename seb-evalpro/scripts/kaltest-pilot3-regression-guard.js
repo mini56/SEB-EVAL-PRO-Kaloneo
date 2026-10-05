@@ -32,7 +32,10 @@ for (const [needle,label] of [
   ["test.id === 'gestes_postures'", 'pont Postures Résultats'],
   ["function renderFractions(test, host)", 'rendu Fractions KALTEST'],
   ["function renderOrganisation(test, host)", 'rendu Organisation KALTEST'],
-  ["function renderPostures(test, host)", 'rendu Postures KALTEST']
+  ["function renderPostures(test, host)", 'rendu Postures KALTEST'],
+  ["test.id === 'planning_cantine'", 'pont Planning Résultats/Bilan'],
+  ["function renderPlanning(test, host)", 'rendu Planning KALTEST'],
+  ["validateBeforeAdvance", 'validation Planning avant navigation']
 ]) must(runtime, needle, label);
 
 for (const [needle,label] of [
