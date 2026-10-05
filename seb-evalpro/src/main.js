@@ -31,6 +31,7 @@ let candidateStore = null;
 let candidateTransfer = null;
 let candidateProtection = null;
 let kaloneoLibrary = null;
+let kaloneoBuilderPreviewDefinition = null;
 let adminExportCandidateDir = null;
 let adminCandidateResultsMode = false;
 let lastCandidateSaveError = '';
@@ -382,10 +383,14 @@ function isAdminKaloneoBuilderPage(pageName) {
   return String(pageName || '').toLowerCase() === 'test-builder.html';
 }
 
+function isAdminKaloneoBuilderPreviewPage(pageName) {
+  return String(pageName || '').toLowerCase() === 'test-preview.html';
+}
+
 function isAdminNavigationPage(pageName) {
   return isAdminBilanPage(pageName) || isAdminCandidatePage(pageName) ||
     isAdminTestsParcoursPage(pageName) || isAdminParcoursBuilderPage(pageName) ||
-    isAdminKaloneoBuilderPage(pageName);
+    isAdminKaloneoBuilderPage(pageName) || isAdminKaloneoBuilderPreviewPage(pageName);
 }
 
 function existingWebPage(pageName) {
@@ -1056,6 +1061,50 @@ ipcMain.handle('kaloneo-library:save-parcours', (_event, payload) => {
   } catch (error) {
     return { ok:false, error:error && error.message ? error.message : String(error) };
   }
+});
+
+ipcMain.handle('kaloneo-builder:open-preview', (_event, definition) => {
+  if (!mainWindow || mainWindow.isDestroyed() || !adminSessionUnlocked) {
+    return { ok:false, error:'Accès administrateur requis.' };
+  }
+  if (getCandidateStore().getActiveCandidate()) {
+    return { ok:false, error:'Impossible d’ouvrir un aperçu Builder pendant une évaluation active.' };
+  }
+  if (!definition || typeof definition !== 'object') {
+    return { ok:false, error:'Définition KALTEST absente.' };
+  }
+  const target = path.join(__dirname, '..', 'app', 'web', 'kaloneo-builder', 'test-preview.html');
+  if (!fs.existsSync(target)) {
+    return { ok:false, error:'Page d’aperçu KALONÉO absente.' };
+  }
+  try {
+    kaloneoBuilderPreviewDefinition = JSON.parse(JSON.stringify(definition));
+    adminCandidateResultsMode = false;
+    mainWindow.loadFile(target);
+    return { ok:true };
+  } catch (error) {
+    kaloneoBuilderPreviewDefinition = null;
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-builder:get-preview', () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (!kaloneoBuilderPreviewDefinition) return { ok:false, error:'Aucun aperçu KALONÉO en cours.' };
+  try {
+    return { ok:true, definition:JSON.parse(JSON.stringify(kaloneoBuilderPreviewDefinition)) };
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-builder:close-preview', () => {
+  if (!mainWindow || mainWindow.isDestroyed() || !adminSessionUnlocked) return false;
+  const target = path.join(__dirname, '..', 'app', 'web', 'kaloneo-builder', 'test-builder.html');
+  if (!fs.existsSync(target)) return false;
+  kaloneoBuilderPreviewDefinition = null;
+  mainWindow.loadFile(target);
+  return true;
 });
 
 ipcMain.handle('admin:open-bilan', () => {
