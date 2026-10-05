@@ -316,7 +316,10 @@ function footer(page){
 
   const center=el('div','kb-footer-center');
   if(state.definition?.calculator?.compatible){
-    const calc=el('button','kb-nav-btn','Calculatrice');calc.type='button';calc.onclick=calculator;center.append(calc);
+    const calc=el('button','seb-action-btn seb-btn-calculator','Ouvrir la calculatrice');
+    calc.type='button';
+    calc.dataset.sebAction='open-calculator';
+    center.append(calc);
   }
 
   const right=el('div','kb-footer-right');
@@ -324,6 +327,7 @@ function footer(page){
   const close=el('button','kb-nav-btn close-preview','Fermer l’aperçu');close.type='button';
   close.onclick=async()=>{
     state.chrono?.stop?.();
+    try { window.closeCalculator?.(); } catch (_) {}
     close.disabled=true;
     try{
       const ok=await window.sebEvalPro?.kaloneoClosePreview?.();
@@ -364,6 +368,7 @@ async function install(){
     if(!result?.ok||!result.definition)throw new Error(result?.error||'Définition d’aperçu absente.');
     state.definition=result.definition;
     state.model=Core.definitionToModel(result.definition);
+    try { window.setCalculatorBrand?.(result.definition?.calculator?.brandLabel ?? 'KALONÉO'); } catch (_) {}
     render();
   }catch(error){
     const box=el('div','kb-error');const card=el('div','kb-error-box');card.append(el('h2','','Aperçu indisponible'),el('p','',String(error?.message||error)));
