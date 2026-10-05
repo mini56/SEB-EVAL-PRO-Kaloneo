@@ -24,6 +24,10 @@
       <label>Créateur <span>*</span>
         <input id="parcours-creator" type="text" autocomplete="off" placeholder="Nom du créateur">
       </label>
+      <div class="meta-actions">
+        <button id="cancel-parcours" class="seb-action-btn seb-btn-danger" type="button">Annuler</button>
+        <button id="save-parcours" class="seb-action-btn seb-btn-nav" type="button">Enregistrer le parcours</button>
+      </div>
       <div id="builder-status" class="builder-status" role="status" aria-live="polite"></div>
     </section>
 
@@ -49,6 +53,7 @@
           </div>
         </div>
 
+        <div class="sequence-scroll">
         <div class="fixed-step intro-step">
           <div class="step-label">1 — Introduction de parcours</div>
           <div id="intro-slot" class="special-slot" data-role="introduction"></div>
@@ -64,6 +69,7 @@
           <div class="step-label">Fin de parcours</div>
           <div id="fin-slot" class="special-slot" data-role="fin"></div>
         </div>
+        </div>
       </section>
 
       <aside class="saved-panel">
@@ -77,14 +83,10 @@
       </aside>
     </section>
 
-    <footer class="builder-actions">
-      <button id="cancel-parcours" class="seb-action-btn seb-btn-danger" type="button">Annuler</button>
-      <button id="save-parcours" class="seb-action-btn seb-btn-nav" type="button">Enregistrer le parcours</button>
-    </footer>
   </main>
 
   <template id="library-card-template">
-    <article class="library-card" draggable="true" tabindex="0">
+    <article class="library-card" draggable="false" tabindex="0">
       <div class="card-main">
         <strong class="card-title"></strong>
         <span class="card-category"></span>
@@ -95,7 +97,7 @@
   </template>
 
   <template id="sequence-card-template">
-    <article class="sequence-card" draggable="true">
+    <article class="sequence-card" draggable="false">
       <div class="sequence-index"></div>
       <div class="sequence-text">
         <strong class="sequence-title"></strong>
