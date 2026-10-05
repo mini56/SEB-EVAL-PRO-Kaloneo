@@ -230,6 +230,32 @@ app.whenReady().then(async () => {
       return fail('enregistrement UI incorrect', {lastSavedPayload,savedUi});
     }
 
+    // Rechargement complet : le parcours enregistré doit rester visible avec son créateur.
+    await win.reload();
+    await wait(700);
+    const reloaded = await win.webContents.executeJavaScript(`(()=>({
+      saved:[...document.querySelectorAll('#saved-parcours .saved-card strong')].map(x=>String(x.textContent||'').trim()),
+      creators:[...document.querySelectorAll('#saved-parcours .saved-card span:first-of-type')].map(x=>String(x.textContent||'').trim()),
+      library:document.querySelectorAll('.library-card').length,
+      sequence:document.querySelectorAll('#tests-dropzone .sequence-card').length
+    }))()`);
+    if (!reloaded.saved.includes('Parcours long') ||
+        !reloaded.creators.some(text=>/Créateur smoke/.test(text)) ||
+        reloaded.library !== 3 ||
+        reloaded.sequence !== 0) {
+      return fail('rechargement du parcours enregistré incorrect', reloaded);
+    }
+
+    // Reconstruire le parcours pour vérifier le refus du nom déjà enregistré.
+    await win.webContents.executeJavaScript(`(()=>{
+      const add=(title)=>{const card=[...document.querySelectorAll('.library-card')].find(c=>c.querySelector('.card-title')?.textContent===title);card?.querySelector('.card-add')?.click();};
+      add('Test Alpha'); add('Test Bêta'); add('Test Gamma');
+      document.getElementById('parcours-name').value='Parcours long';
+      document.getElementById('parcours-creator').value='Créateur smoke';
+      return true;
+    })()`);
+    await wait(160);
+
     // Le même nom doit être refusé sans perdre le parcours en construction.
     await win.webContents.executeJavaScript(`document.getElementById('save-parcours').click();true`);
     await wait(170);
@@ -242,7 +268,7 @@ app.whenReady().then(async () => {
     }
 
     console.log('KALONEO_PARCOURS_ELECTRON=OK');
-    console.log(JSON.stringify({initial,afterAdd,afterRemove,reordered,afterDrag,savedUi,duplicate,lastSavedPayload}));
+    console.log(JSON.stringify({initial,afterAdd,afterRemove,reordered,afterDrag,savedUi,reloaded,duplicate,lastSavedPayload}));
 
     clearTimeout(timeout);
     win.destroy();
