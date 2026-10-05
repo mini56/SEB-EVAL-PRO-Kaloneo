@@ -316,13 +316,15 @@
       "proof": "builder-archetype",
       "blocks": [
         "text",
-        "html-js"
+        "text-editor"
       ],
       "layout": "50-50",
       "rules": [
         "Scénario 100%",
         "Consigne 100%",
-        "éditeur complet droite"
+        "éditeur KALONÉO réutilisable à droite",
+        "fenêtres Ouvrir/Image/Enregistrer internes à SEB EvalPro",
+        "profil SEB bureautique /8"
       ]
     },
     {
