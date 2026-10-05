@@ -68,6 +68,7 @@ const expected = {
   organisation_demenagement:'bilan.competences_techniques.planning.repartition_taches',
   ranger_stock:'bilan.competences_techniques.gestion_logistique.classement_multicritere',
   planning_cantine:'bilan.competences_techniques.planning.repartition_taches',
+  redaction_email:'bilan.tic.messagerie.echanger',
   gratte_ciel:'bilan.competences_techniques.carre_magique.resolution_contraintes'
 };
 for (const [testId,lineId] of Object.entries(expected)) {
