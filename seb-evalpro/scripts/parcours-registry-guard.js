@@ -59,6 +59,7 @@ const expectedPilotRoutes = {
   'stock':'kaltest-pilot2.html?fullParcours=1&segment=stock',
   'planning':'kaltest-pilot2.html?fullParcours=1&segment=planning',
   'genrenombres':'kaltest-pilot2.html?fullParcours=1&segment=genre-nombre',
+  'dictee':'kaltest-pilot2.html?fullParcours=1&segment=dictee',
   'nvmail':'kaltest-pilot2.html?fullParcours=1&segment=mail',
   'autoeval2':'kaltest-pilot2.html?fullParcours=1&segment=autoeval2',
   'paronymes':'kaltest-pilot2.html?fullParcours=1&segment=paronymes',
@@ -86,8 +87,8 @@ for (const step of [...api.legacySteps, ...api.pilot11Steps]) {
 }
 
 // Dictée obligatoire entre Genre/Nombre et Tri.
-if (api.nextFile('genrenombres') !== 'dictee.html') fail('genrenombres -> dictee modifié');
-if (api.nextFile('dictee') !== 'tri_de_cheville.html') fail('dictee -> tri modifié');
+if (api.nextUrl('genrenombres') !== 'kaltest-pilot2.html?fullParcours=1&segment=dictee') fail('genrenombres -> dictée KALTEST modifié');
+if (api.nextUrl('dictee') !== 'tri_de_cheville.html?fullParcours=1') fail('dictée KALTEST -> tri modifié');
 const dicteeContract = api.resultContractFor('dictee');
 if (!dicteeContract || dicteeContract.storage !== 'dictee_data') fail('contrat Résultats dictée modifié');
 
