@@ -44,6 +44,9 @@ jobs:
       - name: Verify Test Builder R4 in real Electron
         run: npx electron --no-sandbox scripts/kaloneo-builder-preview-electron-smoke-main.js
 
+      - name: Verify mask screen builder in real Electron
+        run: npx electron --no-sandbox scripts/kaloneo-mask-builder-electron-smoke-main.js
+
       - name: Verify full KALTEST candidate journey
         run: npx electron --no-sandbox scripts/full-pilot-journey-smoke-main.js
 
