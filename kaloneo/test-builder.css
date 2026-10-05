@@ -74,6 +74,14 @@ body {
   color: #004E70;
 }
 
+.preview-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .form-grid {
   display: grid;
   gap: 12px 14px;
