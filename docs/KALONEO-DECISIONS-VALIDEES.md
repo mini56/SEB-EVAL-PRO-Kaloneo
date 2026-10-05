@@ -2647,3 +2647,103 @@ La prochaine architecture fonctionnelle à reprendre est celle déjà validée :
 6. SEB EvalPro lance le modèle de parcours sélectionné.
 
 Le parcours de base actuel doit donc servir de **premier modèle livré**, et non de liste d’exercices codée en dur à conserver comme architecture définitive.
+
+---
+
+## 70. Bibliothèque KALTEST et créateur de parcours
+
+**Statut : DÉCISION VALIDÉE — 5 octobre 2026**
+
+La gestion des tests et des modèles de parcours devient une fonction Administrateur de SEB EvalPro.
+
+### 70.1 Stockage interne
+
+- la Bibliothèque de tests et les modèles de parcours ne sont **pas stockés dans Documents** ;
+- ils sont conservés dans l’espace de données interne géré par SEB EvalPro ;
+- l’utilisateur ne sélectionne jamais directement un fichier de test ou de parcours dans Windows ;
+- tout accès passe par **Admin → Tests / Parcours** ;
+- les données internes doivent être préservées lors des mises à jour de l’application.
+
+### 70.2 Structure obligatoire d’un parcours
+
+Un parcours comporte exactement :
+1. une **Introduction de parcours** en première position ;
+2. zéro, un ou plusieurs tests intermédiaires ;
+3. une **Fin de parcours** en dernière position.
+
+L’Introduction et la Fin sont des types spéciaux :
+- une Introduction peut être remplacée uniquement par une autre Introduction ;
+- une Fin peut être remplacée uniquement par une autre Fin ;
+- elles ne peuvent pas être remplacées par un test ordinaire.
+
+### 70.3 Tests intermédiaires et absence de doublons
+
+- tout test de la bibliothèque peut être glissé dans le parcours ;
+- l’ordre des tests est libre et modifiable ;
+- un même test ne peut apparaître qu’une seule fois dans un parcours ;
+- dès qu’un test est ajouté au parcours, sa vignette disparaît de la liste des tests disponibles ;
+- si ce test est retiré du parcours, sa vignette réapparaît ;
+- cette règle remplace l’ancienne idée d’une alerte « Test déjà présent ».
+
+### 70.4 Enregistrement du parcours
+
+Pour enregistrer un parcours :
+- le **nom du parcours** est obligatoire ;
+- ce nom doit être unique parmi les parcours existants, afin d’éviter toute confusion ;
+- le **nom du créateur** est obligatoire ;
+- le créateur est une donnée interne de gestion et n’est jamais affiché pendant le parcours candidat ;
+- le créateur peut être affiché dans la page Administrateur de gestion des parcours ;
+- le parcours peut être annulé sans enregistrement.
+
+Le parcours actuel issu de la migration devient le modèle système **Parcours de base**.
+
+### 70.5 Vignettes
+
+La bibliothèque utilise des vignettes déplaçables contenant au minimum les informations utiles du test :
+- nom ;
+- catégorie ;
+- version ;
+- caractère noté ou non noté ;
+- nombre de questions lorsqu’il existe.
+
+Les sections comprennent aussi explicitement :
+- **Introduction de parcours** ;
+- **Pages de fin**.
+
+### 70.6 Introduction de parcours
+
+L’Introduction de parcours porte obligatoirement les informations candidat nécessaires au fonctionnement de SEB EvalPro et à la création du dossier candidat.
+
+Le modèle de base conserve les champs d’identification validés :
+- Nom ;
+- Prénom ;
+- Date de naissance ;
+- 7 premiers chiffres du numéro de sécurité sociale ;
+- Ville ;
+- Groupe ;
+- Date de l’évaluation ;
+- nom du parcours en lecture seule.
+
+Les champs d’identification sont obligatoires avant de commencer le parcours.
+
+### 70.7 Fin de parcours
+
+Une page de type Fin :
+- n’accepte **aucune question** ;
+- peut contenir du texte, des images et/ou de la vidéo ;
+- embarque obligatoirement le mécanisme terminal officiel de SEB EvalPro.
+
+### 70.8 Outils réutilisables
+
+Les anciennes étapes de prise en main situées au début du parcours ne doivent plus être imposées comme tests fixes.
+
+Elles deviennent des outils KALONÉO réutilisables, activables dans une Introduction ou dans une page de test :
+- prise en main souris **Maison / Voiture** ;
+- compteur / chronomètre ;
+- calculatrice ;
+- audio.
+
+L’Éditeur de texte reste également un outil KALONÉO réutilisable.
+
+Principe : **le parcours choisit les pages ; chaque page choisit les outils dont elle a besoin.**
+
