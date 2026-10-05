@@ -63,18 +63,23 @@ async function assertNoOverflow(win, label) {
 
 async function perfectResult(win) {
   return win.webContents.executeJavaScript(
-    "(function(){const test=window.sebKaltestPilot2.currentTest();const answers={};for(const q of test.questions||[]){if(q.response?.type==='duration')answers[q.id]=q.acceptedMinutes+' min';else answers[q.id]=Array.isArray(q.acceptedAnswers)?q.acceptedAnswers[0]:'';}return window.sebKaltestPilot2.evaluateTest(test,{answers,units:{},supplemental:{}});})()",
+    "(function(){const test=window.sebKaltestPilot2.currentTest();const answers={};for(const q of test.questions||[]){if(q.response?.type==='duration')answers[q.id]=q.acceptedMinutes+' min';else answers[q.id]=Array.isArray(q.acceptedAnswers)?q.acceptedAnswers[0]:'';}for(const group of test.evaluation?.uniqueGroups||[]){(group.questionIds||[]).forEach((id,index)=>{answers[id]=(group.allowedValues||[])[index]||'';});}return window.sebKaltestPilot2.evaluateTest(test,{answers,units:{},supplemental:{}});})()",
     true
   );
 }
 
 async function fillOneAnswer(win) {
-  const choice = await win.webContents.executeJavaScript(
-    "Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.choiceTable)",
+  const mode = await win.webContents.executeJavaScript(
+    "({choice:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.choiceTable),fractions:Boolean(window.sebKaltestPilot2.currentTest()?.presentation?.fractionSelection)})",
     true
   );
 
-  if (choice) {
+  if (mode.fractions) {
+    await win.webContents.executeJavaScript(
+      "document.querySelector('.kaltest-fraction-item')?.click();true",
+      true
+    );
+  } else if (mode.choice) {
     await win.webContents.executeJavaScript(
       "(function(){const test=window.sebKaltestPilot2.currentTest();const q=test.questions[0];const row=document.querySelector('.kaltest-choice-table tbody tr');const cells=Array.from(row.querySelectorAll('.kaltest-choice'));const target=cells.find(cell=>cell.textContent.trim()===q.acceptedAnswers[0]);target.click();return true;})()",
       true
@@ -119,7 +124,7 @@ app.whenReady().then(async () => {
     );
 
     if (initial.page !== 'page-identification') throw new Error('Le parcours ne démarre pas par Identification.');
-    if (initial.tests !== 7) throw new Error('Le PILOTE 2 doit contenir les 7 migrations KALTEST validées.');
+    if (initial.tests !== 10) throw new Error('Le moteur doit contenir les 10 migrations KALTEST simples validées.');
     if (!initial.introVideo) throw new Error('Mini vidéo/animation d’introduction absente.');
     if (initial.introLegacyImage) throw new Error('L’ancienne image de couverture est encore présente sur Introduction.');
     if (initial.introCalculatorGuide) throw new Error('Le doublon de test calculatrice est encore présent sur Introduction.');
@@ -191,6 +196,9 @@ app.whenReady().then(async () => {
       'calculs_poids_volumes',
       'horaires_reception_controle',
       'texte_a_trous_stage_logistique',
+      'fractions_preparation_lots',
+      'organisation_demenagement',
+      'gestes_postures',
       'conversions_atelier_expedition',
       'genre_nombre',
       'paronymes_rapport'
@@ -212,7 +220,7 @@ app.whenReady().then(async () => {
       await assertNoOverflow(win, testId);
 
       const visualContract = await win.webContents.executeJavaScript(
-        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null};})()",
+        "(function(){const test=window.sebKaltestPilot2.currentTest();return {compatible:test.calculator?.compatible===true,calcDisplay:getComputedStyle(document.getElementById('kaltest-calculator')).display,durationPlaceholders:Array.from(document.querySelectorAll('[data-question-id]')).filter(el=>/ex\\./i.test(el.getAttribute('placeholder')||'')).length,textGapBreaks:document.querySelectorAll('.kaltest-inline-flow br').length,genreTables:document.querySelectorAll('.kaltest-two-tables .kaltest-grammar-table').length,choiceFont:document.querySelector('.kaltest-choice-table')?parseFloat(getComputedStyle(document.querySelector('.kaltest-choice-table')).fontSize):null,fractionItems:document.querySelectorAll('.kaltest-fraction-item').length,organisationRows:document.querySelectorAll('.kaltest-organisation-row').length,postureFields:document.querySelectorAll('.kaltest-postures-answer input').length};})()",
         true
       );
 
@@ -224,6 +232,15 @@ app.whenReady().then(async () => {
       }
       if (testId === 'texte_a_trous_stage_logistique' && visualContract.textGapBreaks !== 14) {
         throw new Error('Texte à trous : retours à la ligne de fin de phrase incorrects : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'fractions_preparation_lots' && visualContract.fractionItems !== 22) {
+        throw new Error('Fractions : 22 objets sélectionnables attendus : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'organisation_demenagement' && visualContract.organisationRows !== 8) {
+        throw new Error('Organisation : 8 actions attendues : ' + JSON.stringify(visualContract));
+      }
+      if (testId === 'gestes_postures' && visualContract.postureFields !== 3) {
+        throw new Error('Postures : 3 champs attendus : ' + JSON.stringify(visualContract));
       }
       if (testId === 'genre_nombre' && visualContract.genreTables !== 2) {
         throw new Error('Genre / Nombre : les deux tableaux Build #20 ne sont pas rendus.');
@@ -250,7 +267,7 @@ app.whenReady().then(async () => {
     if (await visiblePage(win) !== 'page-final') throw new Error('Page finale système attendue après les 7 tests.');
 
     const finalAudit = await win.webContents.executeJavaScript(
-      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.getElementById('page-final')?.textContent||''),date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null};})()",
+      "(function(){const sc=JSON.parse(sessionStorage.getItem('scores_data')||'{}');const cand=JSON.parse(sessionStorage.getItem('candidat_data')||'{}');return {congrats:/Félicitations/.test(document.getElementById('page-final')?.textContent||''),date:cand.date,requiredLegacy:['page2_q1','page2_1_q6','page3_q1','pageTexteTrous','page4','page5_q1','page5_1_q1','page6_q1'].every(k=>Object.prototype.hasOwnProperty.call(sc,k)),paronymes:sessionStorage.getItem('paronymes_score')!==null,genre:sessionStorage.getItem('erreurs_exercice')!==null};})()",
       true
     );
     if (!finalAudit.congrats) throw new Error('La page finale Félicitations du Build #20 n’est pas restaurée.');
@@ -260,8 +277,8 @@ app.whenReady().then(async () => {
 
     console.log('KALTEST_PILOT2_FUNCTIONAL_SMOKE: OK');
     console.log('PILOT2_REAL_SEB_VISUALS=Introduction video + Scenario/Consigne icons');
-    console.log('PILOT2_DYNAMIC_TESTS=7');
-    console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + supplemental fields + two tables + single choice');
+    console.log('PILOT2_DYNAMIC_TESTS=10');
+    console.log('PILOT2_RENDERERS=basic + duration table + inline gaps + fractions + organisation + postures + supplemental fields + two tables + single choice');
     console.log('PILOT2_FLOATING_CALCULATOR=OK');
     console.log('PILOT2_ABANDON_UI=4 reasons + admin password + NE');
     console.log('PILOT2_NO_VERTICAL_OVERFLOW=OK');
