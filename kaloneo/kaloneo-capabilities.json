@@ -60,6 +60,7 @@
   ],
   "questionResponseTypes": [
     "text",
+    "free-text",
     "number",
     "number-unit",
     "duration",
@@ -74,7 +75,8 @@
     "acceptedUnits": true,
     "points": true,
     "exampleQuestionZeroPoints": true,
-    "supplementalUnscoredFields": true
+    "supplementalUnscoredFields": true,
+    "freeTextManualEvaluation": true
   },
   "tables": {
     "insertable": true,
@@ -201,7 +203,9 @@
     "restore": true,
     "draftResume": true,
     "replay": true,
-    "historicalVersionPreservation": true
+    "historicalVersionPreservation": true,
+    "internalTestLibrary": true,
+    "generatedTestsAutoSavedToLibrary": true
   },
   "bilan": {
     "manualAndAutomaticLines": true,
@@ -225,6 +229,12 @@
       "II",
       "III",
       "Commentaires"
+    ],
+    "freeTextAdminLevels": [
+      "NE",
+      "I",
+      "II",
+      "III"
     ]
   },
   "packages": {
@@ -381,5 +391,20 @@
       "seb-bureautique-v1"
     ],
     "reusableAcrossTests": true
+  },
+  "maskScreens": {
+    "supported": true,
+    "librarySection": "Écrans de masquage",
+    "defaultId": "kaloneo-default",
+    "defaultName": "KALONÉO",
+    "allowedContent": [
+      "text",
+      "image",
+      "text+image"
+    ],
+    "parcoursSelectable": true,
+    "defaultWhenUnset": true,
+    "closeLabel": "Masquer l’écran d’accueil",
+    "neverParcoursStep": true
   }
 }
