@@ -2846,3 +2846,21 @@ body[data-seb-kaltest-id="dictee_professionnelle"] #kaltest-content{padding:7px 
 .kaltest-dictee-writing textarea:focus{outline:none;border-color:#1a73e8;box-shadow:0 0 0 3px rgba(26,115,232,.12)}
 .kaltest-dictee-validated{padding:7px 9px;border-radius:7px;background:#eaf7ef;color:#08783e;font-size:14px;font-weight:700}
 @media(max-height:760px){.kaltest-dictee-player,.kaltest-dictee-writing{padding:8px;gap:6px}.kaltest-dictee-controls button{padding:6px 8px}.kaltest-dictee-writing textarea{min-height:150px;font-size:16px}}
+
+
+/* PILOTE 21 — Tri de chevilles migré dans KALTEST. */
+body[data-seb-kaltest-id="tri_chevilles"] #kaltest-content{padding:5px 7px}
+.kaltest-tri-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.kaltest-tri-left,.kaltest-tri-right{min-width:0;min-height:0;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:#fff;padding:9px;box-sizing:border-box}
+.kaltest-tri-left{overflow:auto}.kaltest-tri-right{display:flex;flex-direction:column;gap:7px}
+.kaltest-tri-guide h3,.kaltest-tri-autoeval h3{margin:0 0 6px;color:#004e70;font-size:18px}.kaltest-tri-guide ul{margin:0;padding-left:23px;font-size:14px;line-height:1.25}.kaltest-tri-guide li{margin:4px 0}
+.kaltest-tri-autoeval{display:flex;flex-direction:column;gap:6px}.kaltest-tri-autoeval[hidden]{display:none!important}.kaltest-tri-autoeval>p{margin:0 0 3px;font-size:14px}
+.kaltest-tri-auto-choice{display:grid;grid-template-columns:20px minmax(0,1fr);gap:6px;align-items:start;padding:4px 6px;border-radius:6px;background:#f7fafc;font-size:13.5px;line-height:1.2}.kaltest-tri-auto-choice input{width:17px;height:17px;margin:0;accent-color:#004e70}
+.kaltest-tri-comment{display:flex;flex-direction:column;gap:3px;font-size:13.5px;font-weight:700}.kaltest-tri-comment textarea{resize:none;min-height:55px;border:1px solid #aab5c1;border-radius:7px;padding:6px}
+.kaltest-tri-auto-validate{align-self:center;margin-top:2px}
+.kaltest-tri-chrono-card{display:flex;flex-direction:column;align-items:center;gap:7px;padding:7px;border:1px solid #d7dee6;border-radius:9px;background:#f9fbfc}.kaltest-tri-display{font-size:44px!important;line-height:1}
+.kaltest-tri-chrono-buttons{display:flex;gap:8px;width:100%}.kaltest-tri-chrono-buttons button{flex:1}
+.kaltest-tri-table{display:flex;flex-direction:column;gap:3px}.kaltest-tri-row{display:grid;grid-template-columns:64px repeat(3,minmax(0,1fr));gap:5px;align-items:center}.kaltest-tri-row.head{font-weight:700;color:#475569;text-align:center;font-size:13px}.kaltest-tri-row>span{text-align:center}.kaltest-tri-row input{min-width:0;height:31px;padding:3px 5px;border:1px solid #aeb8c3;border-radius:6px;text-align:center;font-size:15px;box-sizing:border-box}.kaltest-tri-row input[readonly]{background:#f1f5f9}
+.kaltest-tri-results-button{align-self:center;padding:7px 14px;border:1px solid #1a73e8;border-radius:7px;background:#fff;color:#1a73e8;font-weight:700;cursor:pointer}.kaltest-tri-results-button:disabled{opacity:.45;cursor:not-allowed}
+.kaltest-tri-results{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:7px;border-radius:8px;background:#eef6fa;text-align:center;font-size:14px}.kaltest-tri-results[hidden]{display:none!important}
+@media(max-height:760px){.kaltest-tri-left,.kaltest-tri-right{padding:6px}.kaltest-tri-guide ul{font-size:12.5px}.kaltest-tri-guide li{margin:2px 0}.kaltest-tri-row input{height:27px}.kaltest-tri-display{font-size:40px!important}.kaltest-tri-auto-choice{font-size:12.5px;padding:3px 5px}.kaltest-tri-comment textarea{min-height:42px}}
