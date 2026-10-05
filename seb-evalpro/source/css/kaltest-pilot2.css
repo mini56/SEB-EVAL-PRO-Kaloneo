@@ -2807,3 +2807,26 @@ body[data-seb-kaltest-id="ranger_stock"] #kaltest-content{padding:5px 7px}
 .kaltest-stock-case{height:57px;border:2px dashed #a8b3bf;border-radius:6px;background:#f8fafc;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
 .kaltest-stock-case:has(.kaltest-stock-pot){border-style:solid;border-color:#7d8b99}
 @media(max-height:760px){.kaltest-stock-layout{grid-template-columns:minmax(205px,.34fr) minmax(0,1fr);gap:7px}.kaltest-stock-pot{width:37px;height:47px;flex-basis:37px;font-size:10px}.kaltest-stock-pot strong{font-size:11px}.kaltest-stock-case{height:49px}.kaltest-stock-level{grid-template-columns:70px minmax(0,1fr);margin-top:2px}.kaltest-stock-shelf-title{min-height:25px;font-size:12px}}
+
+
+/* PILOTE 21 — rédaction d'e-mail migrée dans KALTEST. */
+body[data-seb-kaltest-id="redaction_email"] #kaltest-content{padding:6px 8px}
+.kaltest-mail-layout{width:100%;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;position:relative}
+.kaltest-mail-instructions,.kaltest-mail-composer{min-width:0;min-height:0;border:1px solid rgba(0,78,112,.20);border-radius:12px;background:#fff;padding:10px 12px;box-sizing:border-box}
+.kaltest-mail-instructions{display:flex;flex-direction:column;justify-content:flex-start;overflow:auto}
+.kaltest-mail-instructions h3,.kaltest-mail-composer h3{margin:0 0 8px;color:#004e70;font-size:19px}
+.kaltest-mail-instruction-list{display:flex;flex-direction:column;gap:8px}
+.kaltest-mail-instruction-list p{margin:0;padding:7px 9px;border-left:4px solid #1a73e8;background:#f5f9fc;border-radius:5px;font-size:15px;line-height:1.25}
+.kaltest-mail-composer{display:flex;flex-direction:column;gap:6px;overflow:auto}
+.kaltest-mail-field{display:flex;flex-direction:column;gap:3px;font-weight:700;color:#374151;font-size:14px}
+.kaltest-mail-field input,.kaltest-mail-field textarea{width:100%;box-sizing:border-box;border:1.5px solid #94a3b8;border-radius:7px;padding:7px 8px;font:15px/1.25 Calibri,"Segoe UI",Arial,sans-serif;background:#fff}
+.kaltest-mail-message{min-height:0;flex:1}.kaltest-mail-message textarea{min-height:95px;flex:1;resize:none}
+.kaltest-mail-attachment{display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:center;gap:8px;font-size:14px}
+.kaltest-mail-browse{margin:0;padding:7px 11px;border:1px solid #1a73e8;border-radius:7px;background:#fff;color:#1a73e8;font-weight:700;cursor:pointer}
+.kaltest-mail-selected{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic;color:#4b5563}
+.kaltest-mail-overlay{position:fixed;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)}
+.kaltest-mail-overlay[hidden]{display:none!important}
+.kaltest-mail-modal{width:min(420px,80vw);display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:12px;background:#fff;box-shadow:0 14px 40px rgba(0,0,0,.24)}
+.kaltest-mail-modal h3{margin:0 0 6px;color:#004e70}.kaltest-mail-modal button{padding:9px 11px;border:1px solid #d1d5db;border-radius:7px;background:#fff;text-align:left;cursor:pointer}
+body[data-seb-kaltest-id="redaction_email"] #exercise-status{color:#08783e;font-weight:700}
+@media(max-height:760px){.kaltest-mail-instructions,.kaltest-mail-composer{padding:7px 9px}.kaltest-mail-instruction-list{gap:5px}.kaltest-mail-instruction-list p{padding:5px 7px;font-size:14px}.kaltest-mail-field input,.kaltest-mail-field textarea{padding:5px 7px}.kaltest-mail-message textarea{min-height:70px}}
