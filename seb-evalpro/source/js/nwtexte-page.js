@@ -111,6 +111,8 @@
     document.getElementById('btn-score')?.addEventListener('click', navigateNext);
   }
 
+  window.sebNwtextePage = Object.freeze({ install });
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once:true });
   else install();
 })();
