@@ -207,7 +207,7 @@ function renderTextEditor(block){
 }
 
 function renderMedia(block){
-  const wrap=el('section','kb-block');
+  const wrap=el('section','kb-block kb-media-block');
   const data=String(block.mediaData||'');
   if(!data){wrap.append(el('div','kb-empty',block.mediaPlaceholder||'Aucun média sélectionné'));return wrap;}
   if(block.type==='image'){
