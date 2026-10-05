@@ -1,0 +1,124 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.1.0-dev",
+  "builderVersion": "2.0.0",
+  "id": "introduction_parcours_base",
+  "version": "1.0.0",
+  "title": "Introduction de parcours — modèle de base",
+  "category": "introduction",
+  "pageRole": "introduction",
+  "description": "Page d’introduction de parcours avec identification candidat obligatoire et outils de prise en main réutilisables.",
+  "kind": "complex",
+  "scored": false,
+  "calculator": {
+    "compatible": true,
+    "defaultEnabled": false
+  },
+  "scenario": "",
+  "instruction": "Renseignez les informations obligatoires puis vérifiez, si nécessaire, les outils de prise en main avant de commencer.",
+  "candidateIdentity": {
+    "required": true,
+    "fields": [
+      {
+        "id": "nom",
+        "label": "Nom",
+        "inputType": "text",
+        "required": true,
+        "folderIdentity": true
+      },
+      {
+        "id": "prenom",
+        "label": "Prénom",
+        "inputType": "text",
+        "required": true,
+        "folderIdentity": true
+      },
+      {
+        "id": "naissance",
+        "label": "Date de naissance",
+        "inputType": "date",
+        "required": true
+      },
+      {
+        "id": "ss7",
+        "label": "7 premiers chiffres du n° de sécurité sociale",
+        "inputType": "text",
+        "inputMode": "numeric",
+        "maxLength": 7,
+        "required": true
+      },
+      {
+        "id": "lieu",
+        "label": "Ville",
+        "inputType": "text",
+        "required": true,
+        "folderIdentity": true
+      },
+      {
+        "id": "groupe",
+        "label": "Groupe",
+        "inputType": "text",
+        "required": true,
+        "folderIdentity": true
+      },
+      {
+        "id": "date",
+        "label": "Date de l’évaluation",
+        "inputType": "date",
+        "required": true
+      }
+    ],
+    "parcoursField": {
+      "id": "parcours",
+      "label": "Parcours",
+      "readonly": true,
+      "source": "selectedParcours"
+    }
+  },
+  "pageTools": {
+    "available": [
+      "mouse-practice",
+      "chrono",
+      "calculator",
+      "audio"
+    ],
+    "enabled": [
+      "mouse-practice",
+      "chrono",
+      "calculator",
+      "audio"
+    ]
+  },
+  "presentation": {
+    "layout": "single",
+    "introduction": {
+      "heading": "Bienvenue dans votre parcours",
+      "text": "Complétez les informations demandées. Les essais de prise en main ne sont pas notés."
+    }
+  },
+  "behavior": {
+    "introduction": true
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "outputs": [
+    {
+      "id": "status",
+      "type": "string"
+    }
+  ],
+  "bilanContributions": [],
+  "features": [
+    "runtime.basic",
+    "layout.single",
+    "candidate.identity",
+    "tool.mouse-practice",
+    "tool.chrono",
+    "tool.calculator",
+    "tool.audio"
+  ]
+}
