@@ -62,6 +62,11 @@
       startPhase:'exercise',
       ids:Object.freeze(['genre_nombre'])
     }),
+    dictee:Object.freeze({
+      stepId:'dictee',
+      startPhase:'exercise',
+      ids:Object.freeze(['dictee_professionnelle'])
+    }),
     mail:Object.freeze({
       stepId:'nvmail',
       startPhase:'exercise',
@@ -346,6 +351,24 @@
         Boolean(prenom && nom && messageNorm) && (messageNorm.includes(prenomNom) || messageNorm.includes(nomPrenom));
       if (details.mail_phone) details.mail_phone.correct =
         /(^|[^\d])0\d(?:[\s.,\/-]?\d{2}){4}(?!\d)/.test(message);
+    }
+
+    if (test.evaluation?.dictationEngine === 'seb-dictee-v3') {
+      const engine = window.sebKaltestDicteeEngine;
+      if (!engine?.evaluateText) throw new Error('Moteur Dictée KALTEST indisponible.');
+      const text = String(testState.answers?.dictee_text ?? '');
+      const dictation = engine.evaluateText(text);
+      if (details.dictee_text) {
+        details.dictee_text.correct = dictation.motsCorrects === dictation.motsTotal;
+        details.dictee_text.value = text;
+      }
+      return {
+        score:Number(dictation.scoreSur20) || 0,
+        scoreMax:20,
+        percentage:Math.max(0, Math.min(100, ((Number(dictation.scoreSur20) || 0) / 20) * 100)),
+        details,
+        dictation
+      };
     }
 
     let score = 0;
@@ -1219,6 +1242,164 @@
     return true;
   }
 
+  function renderDictation(test, host) {
+    const definition = test.presentation?.dictation;
+    if (!definition || !definition.questionId) return false;
+    const engine = window.sebKaltestDicteeEngine;
+    if (!engine) throw new Error('Moteur Dictée KALTEST indisponible.');
+
+    const testState = testStateFor(test);
+    if (!testState.dictation) testState.dictation = { ecoutes:0, audioPosition:0 };
+    const runtime = testState.dictation;
+    const completed = testState.status === 'COMPLETED';
+
+    const layout = document.createElement('div');
+    layout.className = 'kaltest-dictee-layout';
+
+    const player = document.createElement('section');
+    player.className = 'kaltest-dictee-player';
+    const playerTitle = document.createElement('h3');
+    playerTitle.textContent = 'Écouter la dictée';
+    const audio = document.createElement('audio');
+    audio.src = definition.audio || '';
+    audio.preload = 'auto';
+    audio.playbackRate = 1;
+    audio.defaultPlaybackRate = 1;
+
+    const controls = document.createElement('div');
+    controls.className = 'kaltest-dictee-controls';
+    function control(label, action) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.addEventListener('click', action);
+      controls.appendChild(button);
+      return button;
+    }
+    const play = control('▶ Lire / Reprendre', () => {
+      audio.playbackRate = 1;
+      const fromStart = (Number(audio.currentTime) || 0) < .35;
+      const promise = audio.play();
+      if (fromStart) {
+        runtime.ecoutes = (Number(runtime.ecoutes) || 0) + 1;
+        listen.textContent = String(runtime.ecoutes);
+        persist();
+      }
+      if (promise?.catch) promise.catch(() => { audioStatus.textContent = "Impossible de démarrer l'audio."; });
+    });
+    control('⏸ Pause', () => { audio.pause(); });
+    control('⏹ Stop', () => { audio.pause(); try { audio.currentTime = 0; } catch (_) {} });
+    control('↺ Recommencer', () => {
+      audio.pause();
+      try { audio.currentTime = 0; } catch (_) {}
+      audio.playbackRate = 1;
+      const promise = audio.play();
+      runtime.ecoutes = (Number(runtime.ecoutes) || 0) + 1;
+      listen.textContent = String(runtime.ecoutes);
+      persist();
+      if (promise?.catch) promise.catch(() => { audioStatus.textContent = "Impossible de démarrer l'audio."; });
+    });
+
+    const progressRow = document.createElement('div');
+    progressRow.className = 'kaltest-dictee-progress';
+    const progress = document.createElement('input');
+    progress.type = 'range';
+    progress.min = '0';
+    progress.max = '1000';
+    progress.value = '0';
+    progress.setAttribute('aria-label', "Progression de l'enregistrement");
+    const time = document.createElement('span');
+    time.textContent = '00:00 / 00:00';
+    progressRow.append(progress, time);
+
+    const count = document.createElement('div');
+    count.className = 'kaltest-dictee-listen-count';
+    count.append('Nombre de lectures depuis le début : ');
+    const listen = document.createElement('strong');
+    listen.textContent = String(Number(runtime.ecoutes) || 0);
+    count.appendChild(listen);
+    const audioStatus = document.createElement('div');
+    audioStatus.className = 'kaltest-dictee-audio-status';
+    audioStatus.textContent = 'Prêt.';
+
+    const formatTime = seconds => {
+      const value = Math.max(0, Math.floor(Number(seconds) || 0));
+      return String(Math.floor(value / 60)).padStart(2,'0') + ':' + String(value % 60).padStart(2,'0');
+    };
+    const updateAudio = () => {
+      audio.playbackRate = 1;
+      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+      const current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+      progress.value = duration > 0 ? String(Math.round((current / duration) * 1000)) : '0';
+      time.textContent = formatTime(current) + ' / ' + formatTime(duration);
+      runtime.audioPosition = current;
+    };
+    audio.addEventListener('loadedmetadata', () => {
+      if (Number(runtime.audioPosition) > 0 && Number(runtime.audioPosition) < audio.duration) {
+        try { audio.currentTime = Number(runtime.audioPosition); } catch (_) {}
+      }
+      updateAudio();
+    });
+    audio.addEventListener('timeupdate', () => {
+      updateAudio();
+      if (Math.floor(audio.currentTime) % 2 === 0) persist();
+    });
+    audio.addEventListener('ratechange', () => { if (audio.playbackRate !== 1) audio.playbackRate = 1; });
+    audio.addEventListener('play', () => { audioStatus.textContent = 'Lecture en cours…'; });
+    audio.addEventListener('pause', () => {
+      if (!audio.ended) audioStatus.textContent = audio.currentTime > 0 ? 'Lecture en pause.' : 'Prêt.';
+      updateAudio();
+      persist();
+    });
+    audio.addEventListener('ended', () => { audioStatus.textContent = 'Lecture terminée.'; updateAudio(); persist(); });
+    progress.addEventListener('input', () => {
+      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+      if (duration > 0) audio.currentTime = (Number(progress.value) / 1000) * duration;
+      updateAudio();
+      persist();
+    });
+
+    player.append(playerTitle, audio, controls, progressRow, count, audioStatus);
+
+    const writing = document.createElement('section');
+    writing.className = 'kaltest-dictee-writing';
+    const writingTitle = document.createElement('h3');
+    writingTitle.textContent = 'Votre texte';
+    const textarea = document.createElement('textarea');
+    textarea.className = 'step';
+    textarea.spellcheck = false;
+    textarea.autocomplete = 'off';
+    textarea.placeholder = 'Tapez ici le texte que vous entendez…';
+    textarea.value = String(testState.answers?.[definition.questionId] ?? '');
+    const counter = document.createElement('div');
+    counter.className = 'kaltest-dictee-counter';
+    const refreshCount = () => { counter.textContent = engine.tokens(textarea.value).length + ' mot(s) saisi(s)'; };
+    textarea.addEventListener('input', () => {
+      if (testState.status === 'COMPLETED') {
+        testState.answers[definition.questionId] = textarea.value;
+        persist();
+      } else {
+        saveAnswer(test, definition.questionId, textarea.value);
+      }
+      refreshCount();
+    });
+    refreshCount();
+
+    if (completed) {
+      const info = document.createElement('div');
+      info.className = 'kaltest-dictee-validated';
+      info.textContent = 'Dictée enregistrée. Vous pouvez encore corriger votre texte avant de cliquer sur « Suivant ».';
+      writing.append(writingTitle, textarea, counter, info);
+    } else {
+      writing.append(writingTitle, textarea, counter);
+    }
+
+    layout.append(player, writing);
+    host.appendChild(layout);
+    requestAnimationFrame(() => { if (!textarea.value) textarea.focus(); });
+    return true;
+  }
+
   function renderMail(test, host) {
     const definition = test.presentation?.mailComposer;
     if (!definition || !definition.fields) return false;
@@ -1938,6 +2119,30 @@
         savedAt:Date.now(),
         source:'kaltest'
       }));
+    } else if (test.id === 'dictee_professionnelle') {
+      const dictation = result.dictation || {};
+      const status = String(testState.status || '').startsWith('ABANDONED') ? 'abandoned' : 'verified';
+      sessionStorage.setItem('dictee_data', JSON.stringify({
+        status,
+        texte:String(testState.answers?.dictee_text ?? ''),
+        scoreSur20:Number(dictation.scoreSur20) || 0,
+        motsCorrects:Number(dictation.motsCorrects) || 0,
+        motsTotal:Number(dictation.motsTotal) || 80,
+        substitutions:Number(dictation.substitutions) || 0,
+        omissions:Number(dictation.omissions) || 0,
+        ajouts:Number(dictation.ajouts) || 0,
+        deplacements:Number(dictation.deplacements) || 0,
+        erreursNotees:Number(dictation.erreursNotees) || 0,
+        erreursPonctuation:Number(dictation.erreursPonctuation) || 0,
+        erreursMajuscules:Number(dictation.erreursMajuscules) || 0,
+        ecoutes:Number(testState.dictation?.ecoutes) || 0,
+        audioPosition:Number(testState.dictation?.audioPosition) || 0,
+        alignment:Array.isArray(dictation.alignment) ? dictation.alignment : [],
+        alignmentOriginal:Array.isArray(dictation.alignmentOriginal) ? dictation.alignmentOriginal : [],
+        classificationVersion:dictation.classificationVersion || 3,
+        updatedAt:new Date().toISOString()
+      }));
+      sessionStorage.setItem('seb_exercise_activity:dictee.html', '1');
     } else if (test.id === 'redaction_email') {
       const value = id => String(testState.answers?.[id] ?? '');
       const detail = id => testState.result?.details?.[id]?.correct ? 1 : 0;
@@ -2054,6 +2259,8 @@
 
     if (renderAutoevaluation(test, host)) {
       // Autoévaluations migrées dans le moteur KALTEST commun.
+    } else if (renderDictation(test, host)) {
+      // Dictée professionnelle migrée dans le moteur KALTEST commun.
     } else if (renderMail(test, host)) {
       // Rédaction e-mail migrée dans le moteur KALTEST commun.
     } else if (renderStock(test, host)) {
@@ -2131,6 +2338,16 @@
     if (!test || !testState) return;
 
     if (test.behavior?.validateBeforeAdvance === true && testState.status === 'COMPLETED') {
+      if (test.behavior?.revalidateOnAdvance === true) {
+        testState.result = evaluateTest(test, testState);
+        syncLegacyCompatibility(test, testState);
+        replay('EXERCISE_REVALIDATED', {
+          testId:test.id,
+          version:test.version,
+          score:testState.result.score,
+          scoreMax:testState.result.scoreMax
+        });
+      }
       await captureReplayPage();
       advance();
       return;
