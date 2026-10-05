@@ -542,8 +542,14 @@
   function initialize() {
     const container = document.getElementById(EDITOR_ID);
     if (!container || !window.Quill) {
-      console.error('SEB EvalPro nwtexte : Quill indisponible.');
-      return;
+      return false;
+    }
+    if (quill && quill.root && quill.root.isConnected && container.contains(quill.root)) {
+      return true;
+    }
+    if (quill && (!quill.root || !quill.root.isConnected || !container.contains(quill.root))) {
+      quill = null;
+      savedRange = null;
     }
 
     registerFormats();
@@ -611,9 +617,11 @@
 
     updateToolbarFromSelection();
     console.log('SEB EvalPro nwtexte : moteur Quill 2 unique actif.');
+    return true;
   }
 
   const editorApi = Object.freeze({
+    initialize,
     saveSelection,
     restoreSelection,
     format(command, value) {
