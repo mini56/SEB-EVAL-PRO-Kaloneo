@@ -342,10 +342,10 @@ const generatedTypesTest = BuilderCore.modelToDefinition({
     icon:null
   },
   blocks:[
-    {uid:'n',type:'question',zone:'left',question:{id:'ID1_types_builder',prompt:'Nombre et unité',responseType:'number-unit',acceptedAnswers:'2,5',units:'kg',points:1,example:false,options:'',unitInput:true,unitScored:false,supplementalFields:[]}},
-    {uid:'s',type:'question',zone:'left',question:{id:'ID2_types_builder',prompt:'Sélection',responseType:'select',acceptedAnswers:'B',points:1,example:false,options:'A; B; C',unitInput:false,unitScored:false,supplementalFields:[]}},
-    {uid:'m',type:'question',zone:'left',question:{id:'ID3_types_builder',prompt:'Choix multiples',responseType:'multiple-choice',acceptedAnswers:'A; C',points:1,example:false,options:'A; B; C',unitInput:false,unitScored:false,supplementalFields:[]}},
-    {uid:'d',type:'question',zone:'left',question:{id:'ID4_types_builder',prompt:'Durée',responseType:'duration',acceptedMinutes:75,normalizer:'duration-fr',points:1,example:false,options:'',unitInput:false,unitScored:false,supplementalFields:[]}}
+    {uid:'n',type:'question',zone:'left',question:{id:'id1_types_builder',prompt:'Nombre et unité',responseType:'number-unit',acceptedAnswers:'2,5',units:'kg',points:1,example:false,options:'',unitInput:true,unitScored:false,supplementalFields:[]}},
+    {uid:'s',type:'question',zone:'left',question:{id:'id2_types_builder',prompt:'Sélection',responseType:'select',acceptedAnswers:'B',points:1,example:false,options:'A; B; C',unitInput:false,unitScored:false,supplementalFields:[]}},
+    {uid:'m',type:'question',zone:'left',question:{id:'id3_types_builder',prompt:'Choix multiples',responseType:'multiple-choice',acceptedAnswers:'A; C',points:1,example:false,options:'A; B; C',unitInput:false,unitScored:false,supplementalFields:[]}},
+    {uid:'d',type:'question',zone:'left',question:{id:'id4_types_builder',prompt:'Durée',responseType:'duration',acceptedMinutes:75,normalizer:'duration-fr',points:1,example:false,options:'',unitInput:false,unitScored:false,supplementalFields:[]}}
   ]
 });
 assert.deepStrictEqual(validateTestDefinition(generatedTypesTest, catalog.definitions), {ok:true,errors:[]});
