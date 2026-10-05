@@ -742,3 +742,13 @@ body{
   .builder-preview{height:auto;overflow:visible}
   .candidate-preview{height:800px;min-height:650px}
 }
+
+
+/* R4 — ouverture explicite d’un test enregistré, sans auto-rechargement. */
+.test-library-dialog{width:min(760px,88vw);max-height:76vh;border:1px solid #c6d2de;border-radius:10px;padding:16px;background:#fff;color:#263746;box-shadow:0 14px 42px rgba(0,0,0,.22)}
+.test-library-dialog::backdrop{background:rgba(12,31,47,.28)}
+.test-library-dialog .dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.test-library-dialog h2{margin:0;color:#004e70}.test-library-dialog p{margin:3px 0 10px;color:#667788}
+.test-library-dialog label{display:flex;flex-direction:column;gap:5px;font-weight:700}.test-library-dialog input{height:38px;padding:7px 9px;border:1px solid #b8c4d1;border-radius:6px;font:16px Calibri,"Segoe UI",Arial,sans-serif}
+.test-library-list{margin-top:12px;display:flex;flex-direction:column;gap:7px;max-height:52vh;overflow-y:auto}
+.test-library-item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid #cbd6e2;border-radius:8px;padding:10px;background:#fbfdff;text-align:left;cursor:pointer}
+.test-library-item:hover{border-color:#0070c0;background:#f4faff}.test-library-item strong,.test-library-item span{display:block}.test-library-item span{font-size:12px;color:#657586;margin-top:2px}
