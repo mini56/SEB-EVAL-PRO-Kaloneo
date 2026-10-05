@@ -250,10 +250,7 @@
       file:'kaltest-pilot2.html',
       page:null
     }, { segment:'conversions' }),
-    fullParcoursStep({
-      ...legacyStep('autoeval1'),
-      file:'kaltest-pilot2.html'
-    }, { segment:'autoeval1' }),
+    fullParcoursStep(legacyStep('autoeval1')),
     fullParcoursStep(legacyStep('introbrique')),
     fullParcoursStep(legacyStep('brique')),
     fullParcoursStep(legacyStep('stock')),
@@ -266,10 +263,7 @@
     fullParcoursStep(legacyStep('tri-de-cheville')),
     fullParcoursStep(legacyStep('nwtexte')),
     fullParcoursStep(legacyStep('nvmail')),
-    fullParcoursStep({
-      ...legacyStep('autoeval2'),
-      file:'kaltest-pilot2.html'
-    }, { segment:'autoeval2' }),
+    fullParcoursStep(legacyStep('autoeval2')),
     fullParcoursStep({
       ...legacyStep('paronymes'),
       file:'kaltest-pilot2.html'
