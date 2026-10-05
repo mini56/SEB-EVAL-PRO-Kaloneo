@@ -2983,3 +2983,7 @@ body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtim
   margin:auto;
   object-fit:contain;
 }
+
+
+/* R4 — réponse texte libre, conservée telle quelle pour évaluation Administrateur. */
+.kaltest-free-text-answer{width:100%;min-height:132px;max-height:260px;resize:vertical;padding:10px 12px;box-sizing:border-box;font:18px Calibri,"Segoe UI",Arial,sans-serif;line-height:1.35}
