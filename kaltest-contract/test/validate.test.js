@@ -276,7 +276,7 @@ for (let row = 1; row <= 4; row += 1) {
   for (let col = 1; col <= 4; col += 1) {
     const cell = generatedGrid.table.cells[row][col];
     cell.kind = 'candidate-answer';
-    cell.questionId = 'ID' + (((row - 1) * 4) + col) + '_gratte_ciel';
+    cell.questionId = 'id' + (((row - 1) * 4) + col) + '_gratte_ciel';
     cell.acceptedAnswers = expectedGrid[row - 1][col - 1];
     cell.responseType = 'number';
     cell.points = 1;
