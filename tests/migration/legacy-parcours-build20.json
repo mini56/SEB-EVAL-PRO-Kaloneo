@@ -170,7 +170,9 @@
       "id": "carre",
       "file": "carre.html",
       "role": "test",
-      "status": "pending"
+      "status": "contract-fixture-ready",
+      "targetTestId": "gratte_ciel",
+      "fixturePath": "tests/fixtures/kaltests/gratte-ciel/1.0.0/test.json"
     },
     {
       "id": "qcm-11",
