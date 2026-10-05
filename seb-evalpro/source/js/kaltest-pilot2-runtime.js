@@ -42,6 +42,11 @@
       startPhase:'exercise',
       ids:Object.freeze(['conversions_atelier_expedition'])
     }),
+    planning:Object.freeze({
+      stepId:'planning',
+      startPhase:'exercise',
+      ids:Object.freeze(['planning_cantine'])
+    }),
     'genre-nombre':Object.freeze({
       stepId:'genrenombres',
       startPhase:'exercise',
@@ -1088,6 +1093,82 @@
     return wrapper;
   }
 
+  function renderPlanning(test, host) {
+    const definition = test.presentation?.planningGrid;
+    if (!definition || !Array.isArray(definition.rows)) return false;
+
+    const layout = document.createElement('div');
+    layout.className = 'kaltest-planning-layout';
+    if (definition.backgroundImage) layout.style.setProperty('--kaltest-planning-bg', 'url("' + definition.backgroundImage + '")');
+
+    const work = document.createElement('section');
+    work.className = 'kaltest-planning-work';
+
+    const table = document.createElement('table');
+    table.className = 'kaltest-table kaltest-planning-table';
+    const thead = document.createElement('thead');
+    const head = document.createElement('tr');
+    for (const header of definition.headers || []) {
+      const th = document.createElement('th');
+      th.textContent = header;
+      head.appendChild(th);
+    }
+    thead.appendChild(head);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    const testState = testStateFor(test);
+    for (const rowDefinition of definition.rows) {
+      const tr = document.createElement('tr');
+      const label = document.createElement('th');
+      label.textContent = rowDefinition.label || '';
+      tr.appendChild(label);
+      for (const questionId of rowDefinition.questionIds || []) {
+        const td = document.createElement('td');
+        const question = questionById(test, questionId);
+        if (question) {
+          const input = makeInput(test, question, { compact:true });
+          if (testState.status === 'COMPLETED') {
+            input.disabled = true;
+            const detail = testState.result?.details?.[question.id];
+            td.classList.add(detail?.correct ? 'kaltest-answer-correct' : 'kaltest-answer-incorrect');
+          }
+          td.appendChild(input);
+        }
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    work.appendChild(table);
+
+    const lists = document.createElement('div');
+    lists.className = 'kaltest-planning-lists';
+    const dish = document.createElement('p');
+    dish.innerHTML = '<strong>Liste des plats :</strong> ' + (definition.dishList || []).join(', ');
+    const dessert = document.createElement('p');
+    dessert.innerHTML = '<strong>Liste des desserts :</strong> ' + (definition.dessertList || []).join(', ');
+    lists.append(dish, dessert);
+    work.appendChild(lists);
+
+    const guide = document.createElement('aside');
+    guide.className = 'kaltest-planning-guide';
+    const title = document.createElement('h3');
+    title.textContent = 'Indications';
+    guide.appendChild(title);
+    const ol = document.createElement('ol');
+    for (const item of definition.guide || []) {
+      const li = document.createElement('li');
+      li.textContent = item;
+      ol.appendChild(li);
+    }
+    guide.appendChild(ol);
+
+    layout.append(work, guide);
+    host.appendChild(layout);
+    return true;
+  }
+
   function renderFractions(test, host) {
     const definition = test.presentation?.fractionSelection;
     if (!definition || !Array.isArray(definition.groups)) return false;
@@ -1413,6 +1494,27 @@
       sessionStorage.setItem('seb_evalpro_qcm_page5_1_state', JSON.stringify({ values, savedAt:Date.now(), source:'kaltest' }));
     } else if (test.id === 'conversions_atelier_expedition') {
       copyRange('page6_q', 'page6_q', 1, true, true);
+    } else if (test.id === 'planning_cantine') {
+      const correction = {};
+      const answers = {};
+      questions.forEach((question, offset) => {
+        const index = offset + 1;
+        const key = 'q' + index;
+        const value = String(testState.answers?.[question.id] ?? '');
+        const detail = result.details?.[question.id] || {};
+        const expected = String(Array.isArray(question.acceptedAnswers) && question.acceptedAnswers.length ? question.acceptedAnswers[0] : '');
+        answers[key] = value || '_';
+        correction[key] = { reponse:value || '_', attendu:expected, correct:Boolean(detail.correct) };
+      });
+      sessionStorage.setItem('planningScore', String(Number(result.score) || 0));
+      sessionStorage.setItem('planningCorrection', JSON.stringify(correction));
+      sessionStorage.setItem('seb_planning_validated', '1');
+      sessionStorage.setItem('seb_evalpro_planning_state', JSON.stringify({
+        answers,
+        validated:true,
+        savedAt:Date.now(),
+        source:'kaltest'
+      }));
     } else if (test.id === 'genre_nombre') {
       const answers = questions.map(question => String(testState.answers?.[question.id] ?? ''));
       const errors = Math.max(0, questions.length - (Number(result.score) || 0));
@@ -1481,7 +1583,12 @@
 
     const next = document.getElementById('kaltest-next');
     const isLastActiveTest = state.testIndex === ACTIVE_TESTS.length - 1;
-    next.textContent = isLastActiveTest && !PILOT11_MODE ? 'Terminer le parcours' : 'Suivant';
+    const testState = currentTestState();
+    if (test.behavior?.validateBeforeAdvance === true && testState?.status !== 'COMPLETED') {
+      next.textContent = test.behavior.validationLabel || 'Valider';
+    } else {
+      next.textContent = isLastActiveTest && !PILOT11_MODE ? 'Terminer le parcours' : 'Suivant';
+    }
 
     const status = document.getElementById('exercise-status');
     status.textContent = '';
@@ -1489,7 +1596,9 @@
     const host = document.getElementById('kaltest-content');
     host.innerHTML = '';
 
-    if (renderFractions(test, host)) {
+    if (renderPlanning(test, host)) {
+      // Planning cantine migré dans le moteur KALTEST commun.
+    } else if (renderFractions(test, host)) {
       // Migration KALTEST de l'ancienne page 4.
     } else if (renderOrganisation(test, host)) {
       // Migration KALTEST de l'ancienne page 5.
@@ -1559,6 +1668,12 @@
     const status = document.getElementById('exercise-status');
     if (!test || !testState) return;
 
+    if (test.behavior?.validateBeforeAdvance === true && testState.status === 'COMPLETED') {
+      await captureReplayPage();
+      advance();
+      return;
+    }
+
     if (!hasActivity(test, testState)) {
       status.textContent = 'Vous devez réaliser l’exercice avant de continuer. Si vous souhaitez l’arrêter, utilisez « Abandonner l’exercice ».';
       return;
@@ -1568,6 +1683,19 @@
     testState.status = 'COMPLETED';
     testState.abandon = null;
     syncLegacyCompatibility(test, testState);
+
+    if (test.behavior?.validateBeforeAdvance === true) {
+      replay('EXERCISE_VALIDATED', {
+        testId:test.id,
+        version:test.version,
+        score:testState.result.score,
+        scoreMax:testState.result.scoreMax
+      });
+      renderCurrentTest();
+      status.textContent = 'Exercice validé : ' + testState.result.score + '/' + testState.result.scoreMax + '. Cliquez sur « Suivant » pour continuer.';
+      return;
+    }
+
     replay('EXERCISE_COMPLETED', {
       testId:test.id,
       version:test.version,
