@@ -3699,6 +3699,7 @@
     get data() { return JSON.parse(JSON.stringify(DATA)); },
     get activeTests() { return ACTIVE_TESTS.map(test => test.id); },
     get segment() { return SEGMENT_KEY; },
+    get showCorrectionsDuringParcours() { return SHOW_CORRECTIONS_DURING_PARCOURS; },
     currentTest,
     evaluateTest,
     parseDurationFr,
