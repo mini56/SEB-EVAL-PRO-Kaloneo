@@ -62,7 +62,7 @@ app.whenReady().then(async () => {
     await win.loadFile(path.join(__dirname, '..', 'app', 'web', 'admin-bilan.html'));
     await new Promise((resolve) => setTimeout(resolve, 1800));
 
-    const code = "(function(){const host=document.getElementById('seb-bilan-synthese');const buttons=host?[...host.querySelectorAll('button')]:[];const visible=buttons.filter(b=>{const s=getComputedStyle(b);return s.display!=='none'&&s.visibility!=='hidden'&&!b.hidden});const aiState=document.getElementById('seb-synthese-status');const ids=['auto','save','word'];const finalButtons=Object.fromEntries(ids.map(id=>{const el=document.getElementById(id),css=el?getComputedStyle(el):null;return [id,{present:!!el,width:el?Math.round(el.getBoundingClientRect().width):0,background:css?css.backgroundColor:'',color:css?css.color:'',border:css?css.borderTopColor:''}]}));return {host:!!host,visibleButtonCount:visible.length,visibleButtonTexts:visible.map(b=>String(b.textContent||'').trim()),aiState:!!aiState,aiStateText:aiState?String(aiState.textContent||'').trim():'',buttons:finalButtons,pdf:!!document.getElementById('pdf')};})()";
+    const code = "(function(){const host=document.getElementById('seb-bilan-synthese');const buttons=host?[...host.querySelectorAll('button')]:[];const visible=buttons.filter(b=>{const s=getComputedStyle(b);return s.display!=='none'&&s.visibility!=='hidden'&&!b.hidden});const aiState=document.getElementById('seb-synthese-status');const ids=['auto','save','word'];const finalButtons=Object.fromEntries(ids.map(id=>{const el=document.getElementById(id),css=el?getComputedStyle(el):null;return [id,{present:!!el,width:el?Math.round(el.getBoundingClientRect().width):0,background:css?css.backgroundColor:'',color:css?css.color:'',border:css?css.borderTopColor:''}]}));const htmlStyle=getComputedStyle(document.documentElement);const bodyStyle=getComputedStyle(document.body);return {host:!!host,visibleButtonCount:visible.length,visibleButtonTexts:visible.map(b=>String(b.textContent||'').trim()),aiState:!!aiState,aiStateText:aiState?String(aiState.textContent||'').trim():'',buttons:finalButtons,pdf:!!document.getElementById('pdf'),htmlOverflowY:htmlStyle.overflowY,bodyOverflowY:bodyStyle.overflowY};})()";
     const result = await win.webContents.executeJavaScript(code, true);
 
     const blue = 'rgb(0, 112, 192)';
@@ -82,6 +82,10 @@ app.whenReady().then(async () => {
     }
     if (badStyle || result.pdf || result.buttons.save.width < 270) {
       fail('boutons Bilan Admin incorrects', result);
+      return;
+    }
+    if (result.htmlOverflowY === 'hidden' || result.bodyOverflowY === 'hidden') {
+      fail('scroll vertical du Bilan masqué', result);
       return;
     }
 
