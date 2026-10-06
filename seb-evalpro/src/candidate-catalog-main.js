@@ -468,6 +468,7 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
       lieu: c.lieu || c.ville || '',
       groupe: c.groupe || '',
       date: c.date || '',
+      parcours: c.parcours || c.parcoursName || '',
       status: String(record.manifest && record.manifest.status || ''),
       updatedAt: String(record.manifest && record.manifest.updatedAt || ''),
       bilanCount: bilans.length,
