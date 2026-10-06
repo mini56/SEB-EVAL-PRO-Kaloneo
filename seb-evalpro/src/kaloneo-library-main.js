@@ -41,6 +41,7 @@ function createKaloneoLibrary(options = {}) {
   const testsRoot = path.join(root, 'Bibliotheque-tests');
   const parcoursRoot = path.join(root, 'Parcours');
   const maskScreensRoot = path.join(root, 'Ecrans-masquage');
+  const selectedParcoursFile = path.join(root, 'selected-parcours.json');
 
   function ensureDirectory(directory) {
     fs.mkdirSync(directory, { recursive:true });
@@ -430,6 +431,127 @@ function createKaloneoLibrary(options = {}) {
       });
   }
 
+  function findParcours(id) {
+    const wanted = String(id || '').trim();
+    if (!wanted) return null;
+    return readAllParcours().find(item => String(item.id || '') === wanted) || null;
+  }
+
+  function getParcours(id) {
+    ensureSeed();
+    const value = findParcours(id);
+    if (!value) return { ok:false, error:'Parcours introuvable.' };
+    return { ok:true, parcours:JSON.parse(JSON.stringify(value)) };
+  }
+
+  function describeRef(ref, expectedRole) {
+    if (!ref) return null;
+    const definitions = scanLatestDefinitions();
+    try {
+      const definition = resolveDefinition(definitions, ref, expectedRole);
+      return toTestMetadata({ definition, file:'' });
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function describeMask(ref) {
+    const record = findMaskScreen(ref?.id, ref?.version);
+    return record ? toMaskMetadata(record) : null;
+  }
+
+  function parcoursDetails(item) {
+    const value = item && item.format === 'kaloneo-parcours' ? item : null;
+    if (!value) return null;
+    return {
+      id:String(value.id || ''),
+      name:String(value.name || ''),
+      creator:String(value.creator || ''),
+      createdAt:String(value.createdAt || ''),
+      updatedAt:String(value.updatedAt || ''),
+      systemProvided:value.systemProvided === true,
+      testCount:Array.isArray(value.tests) ? value.tests.length : 0,
+      maskScreen:value.maskScreen || defaultMaskRef(),
+      maskScreenMeta:describeMask(value.maskScreen || defaultMaskRef()),
+      introduction:value.introduction || null,
+      introductionMeta:describeRef(value.introduction, 'introduction'),
+      tests:(Array.isArray(value.tests) ? value.tests : []).map(ref => ({
+        ref:JSON.parse(JSON.stringify(ref)),
+        meta:describeRef(ref, 'test')
+      })),
+      fin:value.fin || null,
+      finMeta:describeRef(value.fin, 'fin')
+    };
+  }
+
+  function getParcoursDetails(id) {
+    ensureSeed();
+    const value = findParcours(id);
+    if (!value) return { ok:false, error:'Parcours introuvable.' };
+    return { ok:true, details:parcoursDetails(value) };
+  }
+
+  function readSelectedParcoursId() {
+    const saved = readJson(selectedParcoursFile);
+    const id = String(saved && saved.id || '').trim();
+    if (id && findParcours(id)) return id;
+    return 'parcours-de-base';
+  }
+
+  function getSelectedParcours() {
+    ensureSeed();
+    const id = readSelectedParcoursId();
+    const value = findParcours(id) || findParcours('parcours-de-base');
+    if (!value) return { ok:false, error:'Aucun parcours disponible.' };
+    return { ok:true, selected:parcoursDetails(value) };
+  }
+
+  function selectParcours(id) {
+    ensureSeed();
+    const value = findParcours(id);
+    if (!value) return { ok:false, error:'Parcours introuvable.' };
+    atomicWriteJson(selectedParcoursFile, {
+      format:'kaloneo-selected-parcours',
+      schemaVersion:1,
+      id:String(value.id),
+      selectedAt:now().toISOString()
+    });
+    return { ok:true, selected:parcoursDetails(value) };
+  }
+
+  function resolveParcoursRuntime(id = '') {
+    ensureSeed();
+    const selectedId = String(id || readSelectedParcoursId() || 'parcours-de-base');
+    const value = findParcours(selectedId) || findParcours('parcours-de-base');
+    if (!value) return { ok:false, error:'Parcours KALONÉO introuvable.' };
+
+    const definitions = scanLatestDefinitions();
+    try {
+      const introduction = resolveDefinition(definitions, value.introduction, 'introduction');
+      const tests = (Array.isArray(value.tests) ? value.tests : []).map(ref =>
+        resolveDefinition(definitions, ref, 'test')
+      );
+      const fin = resolveDefinition(definitions, value.fin, 'fin');
+      const mask = getMaskScreen(value.maskScreen || defaultMaskRef());
+      if (!mask.ok) throw new Error(mask.error || 'Écran de masquage introuvable.');
+      return {
+        ok:true,
+        runtime:{
+          id:String(value.id),
+          title:String(value.name || value.id),
+          creator:String(value.creator || ''),
+          maskScreen:value.maskScreen || defaultMaskRef(),
+          maskScreenDefinition:mask.maskScreen,
+          introduction:JSON.parse(JSON.stringify(introduction)),
+          tests:JSON.parse(JSON.stringify(tests)),
+          fin:JSON.parse(JSON.stringify(fin))
+        }
+      };
+    } catch (error) {
+      return { ok:false, error:error && error.message ? error.message : String(error) };
+    }
+  }
+
   function listParcours() {
     ensureSeed();
     return readAllParcours()
@@ -440,8 +562,10 @@ function createKaloneoLibrary(options = {}) {
         createdAt:String(item.createdAt || ''),
         updatedAt:String(item.updatedAt || ''),
         systemProvided:item.systemProvided === true,
+        selected:String(item.id || '') === readSelectedParcoursId(),
         testCount:Array.isArray(item.tests) ? item.tests.length : 0,
         maskScreen:item.maskScreen || defaultMaskRef(),
+        maskScreenMeta:describeMask(item.maskScreen || defaultMaskRef()),
         introduction:item.introduction || null,
         fin:item.fin || null
       }))
@@ -481,8 +605,15 @@ function createKaloneoLibrary(options = {}) {
     if (!creator) return { ok:false, error:'Le nom du créateur est obligatoire.' };
 
     const existing = readAllParcours();
+    const editingId = String(payload.id || '').trim();
+    const editing = editingId ? existing.find(item => String(item.id || '') === editingId) : null;
+    if (editingId && !editing) return { ok:false, error:'Le parcours à modifier est introuvable.' };
+    if (editing && editing.systemProvided === true) {
+      return { ok:false, error:'Le parcours fourni « Parcours de base » est protégé. Créez un nouveau parcours pour le modifier.' };
+    }
+
     const key = safeNameKey(name);
-    if (existing.some(item => safeNameKey(item.name) === key)) {
+    if (existing.some(item => String(item.id || '') !== editingId && safeNameKey(item.name) === key)) {
       return { ok:false, error:'Un parcours portant ce nom existe déjà.' };
     }
 
@@ -516,13 +647,16 @@ function createKaloneoLibrary(options = {}) {
     }
 
     const stamp = now().toISOString();
-    let id = 'parcours-' + slugify(name);
+    let id = editing ? String(editing.id) : 'parcours-' + slugify(name);
     let file = path.join(parcoursRoot, id + '.json');
-    let index = 2;
-    while (fs.existsSync(file)) {
-      id = 'parcours-' + slugify(name) + '-' + index;
-      file = path.join(parcoursRoot, id + '.json');
-      index += 1;
+
+    if (!editing) {
+      let index = 2;
+      while (fs.existsSync(file)) {
+        id = 'parcours-' + slugify(name) + '-' + index;
+        file = path.join(parcoursRoot, id + '.json');
+        index += 1;
+      }
     }
 
     const value = {
@@ -532,7 +666,7 @@ function createKaloneoLibrary(options = {}) {
       name,
       creator,
       systemProvided:false,
-      createdAt:stamp,
+      createdAt:String(editing?.createdAt || stamp),
       updatedAt:stamp,
       maskScreen,
       introduction:refFor(introduction),
@@ -541,7 +675,7 @@ function createKaloneoLibrary(options = {}) {
     };
 
     atomicWriteJson(file, value);
-    return { ok:true, parcours:value };
+    return { ok:true, updated:Boolean(editing), parcours:value };
   }
 
   ensureSeed();
@@ -556,7 +690,12 @@ function createKaloneoLibrary(options = {}) {
     getMaskScreen,
     saveMaskScreen,
     listParcours,
+    getParcours,
+    getParcoursDetails,
     saveParcours,
+    getSelectedParcours,
+    selectParcours,
+    resolveParcoursRuntime,
     defaultMaskRef
   });
 }
