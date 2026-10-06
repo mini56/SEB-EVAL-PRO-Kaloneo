@@ -1,13 +1,38 @@
 (function () {
   'use strict';
 
-  const DATA = window.sebKaltestPilot2Data;
+  const STATIC_DATA = window.sebKaltestPilot2Data;
+  let selectedRuntime = null;
+  try {
+    const result = window.sebEvalPro?.kaloneoSelectedParcoursRuntimeSync?.();
+    if (result && result.ok === true && result.runtime && Array.isArray(result.runtime.tests)) {
+      selectedRuntime = result.runtime;
+    }
+  } catch (_) {}
+
+  const CUSTOM_PARCOURS_MODE = Boolean(selectedRuntime);
+  const DATA = CUSTOM_PARCOURS_MODE
+    ? {
+        ...(STATIC_DATA || {}),
+        parcours:{
+          id:String(selectedRuntime.id || 'parcours-de-base'),
+          title:String(selectedRuntime.title || 'Parcours de base'),
+          creator:String(selectedRuntime.creator || '')
+        },
+        introduction:selectedRuntime.introduction || null,
+        tests:[
+          ...(Array.isArray(selectedRuntime.tests) ? selectedRuntime.tests : []),
+          ...(selectedRuntime.fin ? [selectedRuntime.fin] : [])
+        ]
+      }
+    : STATIC_DATA;
+
   const PARAMS = new URLSearchParams(window.location.search);
-  const FULL_PARCOURS_MODE = PARAMS.get('fullParcours') === '1';
-  const REQUESTED_SEGMENT = String(PARAMS.get('segment') || '').trim();
+  const FULL_PARCOURS_MODE = !CUSTOM_PARCOURS_MODE && PARAMS.get('fullParcours') === '1';
+  const REQUESTED_SEGMENT = CUSTOM_PARCOURS_MODE ? '' : String(PARAMS.get('segment') || '').trim();
 
   if (!DATA || !Array.isArray(DATA.tests) || !DATA.tests.length) {
-    throw new Error('Données KALTEST du PILOTE 2 absentes.');
+    throw new Error('Données KALTEST du parcours sélectionné absentes.');
   }
 
   const testById = new Map(DATA.tests.map(test => [test.id, test]));
@@ -114,7 +139,7 @@
     })
   });
 
-  const SEGMENT_KEY = REQUESTED_SEGMENT || (FULL_PARCOURS_MODE ? 'initial' : 'all');
+  const SEGMENT_KEY = CUSTOM_PARCOURS_MODE ? 'all' : (REQUESTED_SEGMENT || (FULL_PARCOURS_MODE ? 'initial' : 'all'));
   if (SEGMENT_KEY !== 'all' && !SEGMENTS[SEGMENT_KEY]) {
     throw new Error('Segment KALTEST PILOTE 11 inconnu : ' + SEGMENT_KEY);
   }
@@ -3647,7 +3672,9 @@
       tests:DATA.tests.map(test => test.id),
       activeTests:ACTIVE_TESTS.map(test => test.id),
       segment:SEGMENT_KEY,
-      parcours:DATA.parcours?.id || ''
+      parcours:DATA.parcours?.id || '',
+      parcoursTitle:DATA.parcours?.title || '',
+      customParcours:CUSTOM_PARCOURS_MODE
     });
   }
 
