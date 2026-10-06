@@ -205,6 +205,245 @@ function saveTableAnswers(pageNum) {
 /* === Affichage des résultats (version finale avec page 8 après texte à trous) === */
 
 
+
+const SEB_KALONEO_RESULTS_MANIFEST_KEY = 'seb_kaloneo_results_manifest';
+
+function sebReadKaloneoResultsManifest() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(SEB_KALONEO_RESULTS_MANIFEST_KEY) || 'null');
+    if (saved && Array.isArray(saved.tests) && saved.tests.length) return saved;
+  } catch (_) {}
+
+  // Compatibilité avec les candidats créés juste avant l'ajout du manifeste R8.
+  // Ce secours n'est utilisé que si le dossier ne contient pas encore son propre manifeste.
+  try {
+    const selected = window.sebEvalPro?.kaloneoSelectedParcoursRuntimeSync?.();
+    const runtime = selected && selected.ok === true ? selected.runtime : null;
+    if (runtime && Array.isArray(runtime.tests) && runtime.tests.length) {
+      return {
+        schemaVersion:1,
+        parcoursId:String(runtime.id || ''),
+        parcoursTitle:String(runtime.title || runtime.id || ''),
+        tests:runtime.tests.map(test => ({
+          id:String(test && test.id || ''),
+          version:String(test && test.version || ''),
+          title:String(test && test.title || test && test.id || ''),
+          category:String(test && test.category || 'Autres'),
+          scored:test && test.scored !== false
+        })).filter(test => test.id)
+      };
+    }
+  } catch (_) {}
+  return null;
+}
+
+function sebNormalizeResultText(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/gi, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function sebResultTestIdFromHeading(value) {
+  const label = sebNormalizeResultText(value);
+  if (!label) return '';
+  const rules = [
+    ['page 2 1', 'calculs_poids_volumes'],
+    ['page 2', 'calculs_commandes_atelier'],
+    ['page 3', 'horaires_reception_controle'],
+    ['texte a trous', 'texte_a_trous_stage_logistique'],
+    ['page 4', 'fractions_preparation_lots'],
+    ['page 5 1', 'gestes_postures'],
+    ['page 5', 'organisation_demenagement'],
+    ['page 6', 'conversions_atelier_expedition'],
+    ['genre et nombres', 'genre_nombre'],
+    ['paronymes', 'paronymes_rapport'],
+    ['dictee professionnelle', 'dictee_professionnelle'],
+    ['page 7', 'traitement_texte_bureautique'],
+    ['texte libre', 'traitement_texte_bureautique'],
+    ['page 8', 'redaction_email'],
+    ['planning de la cantine', 'planning_cantine'],
+    ['carre magique', 'gratte_ciel'],
+    ['rangement de stock', 'ranger_stock'],
+    ['resultats du tri de chevilles', 'tri_chevilles']
+  ];
+  const found = rules.find(([prefix]) => label.startsWith(prefix) || label.includes(prefix));
+  return found ? found[1] : '';
+}
+
+function sebResultTestIdFromStandaloneBlock(node) {
+  if (!node || node.nodeType !== 1) return '';
+  const text = sebNormalizeResultText(node.textContent);
+  if (text.includes('autoevaluation personnelle calcul et expression ecrite')) return 'autoevaluation_savoirs';
+  if (text.includes('autoevaluation traitement de texte et messagerie')) return 'autoevaluation_tic';
+  if (text.includes('construction a base de briques')) return 'construction_briques';
+  return '';
+}
+
+function sebResultCategoryLabel(value) {
+  const raw = String(value || 'Autres').trim();
+  const normalized = sebNormalizeResultText(raw);
+  const known = {
+    'math':'Mathématiques',
+    'maths':'Mathématiques',
+    'mathematique':'Mathématiques',
+    'mathematiques':'Mathématiques',
+    'calcul':'Mathématiques',
+    'calculs':'Mathématiques',
+    'expression ecrite':'Expression écrite',
+    'francais':'Français',
+    'dictee':'Dictée',
+    'organisation':'Organisation',
+    'competences techniques':'Compétences techniques',
+    'technique':'Compétences techniques',
+    'techniques':'Compétences techniques',
+    'autoevaluation':'Autoévaluation',
+    'bureautique':'Bureautique'
+  };
+  if (known[normalized]) return known[normalized];
+  return raw.replace(/[_-]+/g, ' ').replace(/^./, char => char.toUpperCase());
+}
+
+function sebApplyDynamicResultsLayout() {
+  const manifest = sebReadKaloneoResultsManifest();
+  const result = document.getElementById('resultat');
+  if (!manifest || !result || !Array.isArray(manifest.tests) || !manifest.tests.length) return false;
+
+  const selectedTests = manifest.tests.filter(test => test && test.id);
+  const selectedById = new Map(selectedTests.map(test => [String(test.id), test]));
+  const groupedNodes = new Map(selectedTests.map(test => [String(test.id), []]));
+  const preserved = [];
+  let currentId = '';
+  let pendingHr = null;
+
+  for (const node of Array.from(result.children)) {
+    if (node.tagName === 'STYLE') {
+      preserved.push(node);
+      continue;
+    }
+
+    if (node.tagName === 'HR') {
+      pendingHr = node;
+      currentId = '';
+      continue;
+    }
+
+    let identified = '';
+    if (/^H[1-6]$/.test(node.tagName || '')) {
+      identified = sebResultTestIdFromHeading(node.textContent);
+    }
+    if (!identified) identified = sebResultTestIdFromStandaloneBlock(node);
+
+    if (identified) {
+      currentId = selectedById.has(identified) ? identified : '';
+      pendingHr = null;
+      if (currentId) {
+        // Le vrai titre vient du catalogue KALONÉO, pas des anciens "Page 4 / Page 5".
+        if (/^H[1-6]$/.test(node.tagName || '')) {
+          node.textContent = String(selectedById.get(currentId).title || currentId);
+          node.dataset.sebCurrentTestTitle = '1';
+        }
+        groupedNodes.get(currentId).push(node);
+      }
+      continue;
+    }
+
+    const text = sebNormalizeResultText(node.textContent);
+    if (pendingHr) {
+      // Le score global historique additionnait même des pages hors parcours.
+      // Il est volontairement retiré : les scores restent présentés test par test.
+      if (text.startsWith('score final')) {
+        pendingHr = null;
+        currentId = '';
+        continue;
+      }
+      pendingHr = null;
+    }
+
+    if (currentId && selectedById.has(currentId)) {
+      groupedNodes.get(currentId).push(node);
+    } else if (
+      node.tagName === 'P' &&
+      (text.includes('identite du candidat') || text.includes('nom') && text.includes('prenom') && text.includes('groupe'))
+    ) {
+      preserved.push(node);
+    }
+  }
+
+  const fragment = document.createDocumentFragment();
+  preserved.forEach(node => fragment.appendChild(node));
+
+  if (manifest.parcoursTitle) {
+    const parcours = document.createElement('div');
+    parcours.className = 'seb-results-parcours-title';
+    parcours.style.cssText = 'margin:12px 0 18px;padding:10px 12px;border:1px solid #9cc2e5;border-radius:6px;background:#f7fbff;color:#1f4e79;font-weight:700;';
+    parcours.textContent = 'Parcours réalisé : ' + String(manifest.parcoursTitle);
+    fragment.appendChild(parcours);
+  }
+
+  const categories = new Map();
+  selectedTests.forEach(test => {
+    const category = sebResultCategoryLabel(test.category);
+    if (!categories.has(category)) categories.set(category, []);
+    categories.get(category).push(test);
+  });
+
+  categories.forEach((tests, category) => {
+    const section = document.createElement('section');
+    section.className = 'seb-results-category';
+    section.dataset.category = category;
+    section.style.cssText = 'margin:18px 0 24px;';
+
+    const title = document.createElement('h2');
+    title.textContent = category;
+    title.style.cssText = 'margin:0 0 10px;padding:8px 10px;background:#d9eaf7;color:#1f4e79;border-radius:5px;font-size:20px;';
+    section.appendChild(title);
+
+    tests.forEach(test => {
+      const card = document.createElement('article');
+      card.className = 'seb-result-test-card';
+      card.dataset.testId = String(test.id);
+      card.style.cssText = 'margin:0 0 12px;padding:12px 14px;border:1px solid #d6dce6;border-radius:7px;background:#fff;';
+
+      const nodes = groupedNodes.get(String(test.id)) || [];
+      let currentTitleUsed = false;
+      nodes.forEach(node => {
+        if (/^H[1-6]$/.test(node.tagName || '') && node.dataset.sebCurrentTestTitle === '1') {
+          if (currentTitleUsed) return;
+          currentTitleUsed = true;
+          node.style.marginTop = '0';
+        }
+        card.appendChild(node);
+      });
+
+      if (!currentTitleUsed) {
+        const testTitle = document.createElement('h3');
+        testTitle.textContent = String(test.title || test.id);
+        testTitle.style.marginTop = '0';
+        card.prepend(testTitle);
+      }
+
+      if (!nodes.length) {
+        const empty = document.createElement('p');
+        empty.className = 'commentaire';
+        empty.textContent = test.scored === false
+          ? 'Étape non notée — aucun résultat chiffré.'
+          : 'Aucun résultat enregistré pour ce test.';
+        card.appendChild(empty);
+      }
+
+      section.appendChild(card);
+    });
+
+    fragment.appendChild(section);
+  });
+
+  result.replaceChildren(fragment);
+  return true;
+}
+
 function afficherResultat() {
   console.log("🧩 Initialisation de l'affichage des résultats...");
 
@@ -1039,6 +1278,8 @@ try {
     console.warn("Erreur tri de chevilles :", e);
 }
 
+  // R8 : filtrer et classer à partir du parcours réellement exécuté.
+  sebApplyDynamicResultsLayout();
 }
 /*-------------------------------------------------------------------------------------------------------------------------------*/
 
