@@ -63,6 +63,45 @@ function pageName() {
   }
 }
 
+const KALONEO_RESULTS_MANIFEST_KEY = 'seb_kaloneo_results_manifest';
+
+function ensureKaloneoResultsManifest() {
+  if (adminCandidateWorkspace || adminCandidateResultsWorkspace) return null;
+  if (isAdminCandidatesPage() || isTestsParcoursWorkspacePage() || isAdminBilanPage()) return null;
+
+  try {
+    const existingRaw = window.sessionStorage.getItem(KALONEO_RESULTS_MANIFEST_KEY);
+    if (existingRaw) {
+      const existing = JSON.parse(existingRaw);
+      if (existing && Array.isArray(existing.tests) && existing.tests.length) return existing;
+    }
+  } catch (_) {}
+
+  try {
+    const selected = ipcRenderer.sendSync('kaloneo-library:selected-runtime-sync');
+    const runtime = selected && selected.ok === true ? selected.runtime : null;
+    if (!runtime || !Array.isArray(runtime.tests)) return null;
+
+    const manifest = {
+      schemaVersion:1,
+      parcoursId:String(runtime.id || ''),
+      parcoursTitle:String(runtime.title || runtime.id || ''),
+      tests:runtime.tests.map((test) => ({
+        id:String(test && test.id || ''),
+        version:String(test && test.version || ''),
+        title:String(test && test.title || test && test.id || ''),
+        category:String(test && test.category || 'Autres'),
+        scored:test && test.scored !== false
+      })).filter((test) => test.id),
+      capturedAt:new Date().toISOString()
+    };
+    window.sessionStorage.setItem(KALONEO_RESULTS_MANIFEST_KEY, JSON.stringify(manifest));
+    return manifest;
+  } catch (_) {
+    return null;
+  }
+}
+
 function isAdminBilanPage(page = pageName()) {
   return ['admin-bilan.html', 'bilan.html'].includes(String(page || '').toLowerCase());
 }
@@ -1893,6 +1932,9 @@ try {
   }
   objectToStorage(window.sessionStorage, restoredState.sessionStorage);
   objectToStorage(window.localStorage, restoredState.localStorage);
+  // Figer le parcours réellement exécuté avec le dossier candidat. La page
+  // Résultats ne doit jamais dépendre d'un parcours sélectionné plus tard.
+  ensureKaloneoResultsManifest();
 } catch (_) {}
 
 function showReadOnlyCandidateResults() {
