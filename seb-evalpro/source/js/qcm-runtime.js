@@ -454,7 +454,7 @@ function sebApplyDynamicResultsLayout() {
       ...test,
       // Le catalogue courant est la référence pour les libellés et sections.
       title:String(meta.title || test.title || id),
-      category:String(meta.category || test.category || 'autres'),
+      category:id === 'planning_cantine' ? 'planification' : String(meta.category || test.category || 'autres'),
       scored:meta.scored !== undefined ? meta.scored !== false : test.scored !== false
     });
   });
@@ -467,7 +467,7 @@ function sebApplyDynamicResultsLayout() {
         id:String(id),
         version:String(meta.version || ''),
         title:String(meta.title || id).replace(/^./, char => char.toUpperCase()),
-        category:String(meta.category || 'autres'),
+        category:String(id) === 'planning_cantine' ? 'planification' : String(meta.category || 'autres'),
         scored:meta.scored !== false
       });
     }
