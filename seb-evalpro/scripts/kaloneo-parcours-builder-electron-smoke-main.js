@@ -123,8 +123,20 @@ async function pointerDrag(win, sourceSelector, targetSelector) {
       const sourceScroller=source.closest('.sequence-scroll');
       const targetScroller=target.closest('.sequence-scroll');
       if(sourceScroller && sourceScroller===targetScroller) {
-        centerInScroller(target,targetScroller);
-        centerInScroller(source,sourceScroller);
+        const sr=sourceScroller.getBoundingClientRect();
+        const ar=source.getBoundingClientRect();
+        const br=target.getBoundingClientRect();
+        const scroll=sourceScroller.scrollTop;
+        const aTop=ar.top-sr.top+scroll;
+        const bTop=br.top-sr.top+scroll;
+        const minTop=Math.min(aTop,bTop);
+        const maxBottom=Math.max(aTop+ar.height,bTop+br.height);
+        const span=maxBottom-minTop;
+        if(span<=sourceScroller.clientHeight-20) {
+          sourceScroller.scrollTop=Math.max(0,minTop-10);
+        } else {
+          centerInScroller(source,sourceScroller);
+        }
       }
     }
     window.__sebDragTrace={down:0,move:0,up:0,downTarget:'',moveTarget:'',upTarget:''};
@@ -143,8 +155,13 @@ async function pointerDrag(win, sourceSelector, targetSelector) {
     const visibleBottom=Math.min(a.bottom,sourceClip.bottom)-6;
     const sx=Math.round(Math.max(visibleLeft,Math.min(visibleRight,a.left+a.width/2)));
     const sy=Math.round(Math.max(visibleTop,Math.min(visibleBottom,a.top+Math.min(a.height/2,22))));
-    const tx=Math.round(b.left+Math.min(Math.max(20,b.width/2),Math.max(20,b.width-10)));
-    const ty=Math.round(b.top+Math.min(Math.max(20,b.height/2),Math.max(20,b.height-10)));
+    const targetClip=target.closest('.library-sections,.sequence-scroll')?.getBoundingClientRect()||b;
+    const targetLeft=Math.max(b.left,targetClip.left)+6;
+    const targetRight=Math.min(b.right,targetClip.right)-6;
+    const targetTop=Math.max(b.top,targetClip.top)+6;
+    const targetBottom=Math.min(b.bottom,targetClip.bottom)-6;
+    const tx=Math.round(Math.max(targetLeft,Math.min(targetRight,b.left+b.width/2)));
+    const ty=Math.round(Math.max(targetTop,Math.min(targetBottom,b.top+b.height/2)));
     const describe=(n)=>n?{id:n.id||'',className:String(n.className||''),tag:n.tagName||''}:null;
     return {sx,sy,tx,ty,sourceHit:describe(document.elementFromPoint(sx,sy)),targetHit:describe(document.elementFromPoint(tx,ty))};
   })()`);
