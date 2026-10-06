@@ -1081,7 +1081,7 @@
       }
 
       /* La barre prend sa propre place : aucune page ne doit être plus haute que la zone utile. */
-      html{height:100dvh!important;overflow:hidden!important}
+      html:has(body.seb-kaloneo-nav-active){height:100dvh!important;overflow:hidden!important}
       body.seb-kaloneo-nav-active{
         width:100%!important;
         height:var(--kaloneo-work-height)!important;
