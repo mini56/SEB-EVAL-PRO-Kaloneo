@@ -33,7 +33,6 @@ function section(text, start, end) {
 // commit ff12d5a7a1f51a68d336cc165d1583876b373275
 
 const exactBuild21 = {
-  'src/candidate-catalog-main.js': '0b9573e5691a136b2a74b44ea2bfee796108fcb8',
   'src/replay-preload.js': 'a26aba2415935793382d76857bdd2fe24454c7b7',
   'src/replay-main.js': '004baf83051d805bdd47c3fe865d5ffd6175f38c',
   'src/bilan-history-preload.js': '7f53efab6addbf19a1cb8b42aff5233ff4db5416',
@@ -94,6 +93,16 @@ const closeSection = section(sessionClose, "ipcMain.handle('admin:close-session'
 const quitSection = section(sessionClose, "ipcMain.handle('admin:quit-application'", "});");
 assert(closeSection && !closeSection.includes('app.quit'), 'Fermer la session active ferme encore le programme.');
 assert(quitSection && quitSection.includes('app.quit'), 'Quitter ne ferme plus le programme.');
+
+const catalogMain = read('src/candidate-catalog-main.js');
+assert(catalogMain.includes("ipcMain.handle('candidate-catalog:list'"), 'catalogue candidat : liste IPC absente.');
+assert(catalogMain.includes("ipcMain.handle('candidate-catalog:detail'"), 'catalogue candidat : détail IPC absent.');
+assert(catalogMain.includes("ipcMain.handle('candidate-catalog:delete'"), 'catalogue candidat : suppression protégée absente.');
+assert(catalogMain.includes("candidateId: record.candidateId"), 'catalogue candidat : identité technique candidateId absente.');
+assert(catalogMain.includes("parcours: c.parcours || c.parcoursName || ''"), 'catalogue candidat : nom du parcours effectué absent.');
+assert(catalogMain.includes("replayCount: replays.length"), 'catalogue candidat : comptage Replay absent.');
+assert(catalogMain.includes("bilanCount: bilans.length"), 'catalogue candidat : comptage Bilan absent.');
+assert(catalogMain.includes("if (active && String(active.candidateId || '') === String(record.candidateId || ''))"), 'catalogue candidat : protection suppression candidat actif absente.');
 
 const catalog = read('src/candidate-catalog-preload.js');
 assert(catalog.includes("button.textContent = 'Lister les candidats'"), 'bouton Lister les candidats absent du catalogue stable.');
