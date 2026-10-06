@@ -858,8 +858,13 @@ async function createParcoursChoiceDialog() {
   }
 
   let selectedId = '';
+  let selectedShowCorrections = false;
   const current = await ipcRenderer.invoke('kaloneo-library:get-selected-parcours').catch(() => null);
-  if (current && current.ok === true) selectedId = String(current.selected?.id || '');
+  if (current && current.ok === true) {
+    selectedId = String(current.selected?.id || '');
+    selectedShowCorrections = current.selected?.launchOptions?.showCorrectionsDuringParcours === true;
+  }
+  let showCorrectionsDuringParcours = selectedShowCorrections;
 
   const layer = document.createElement('div');
   layer.id = 'seb-evalpro-parcours-choice-dialog';
@@ -884,7 +889,12 @@ async function createParcoursChoiceDialog() {
       #seb-evalpro-parcours-choice-dialog ol{margin:7px 0 0;padding-left:25px}
       #seb-evalpro-parcours-choice-dialog li{padding:3px 0}
       #seb-evalpro-parcours-choice-dialog .pc-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 18px;border-top:1px solid #d6dce6;background:#fbfcfe}
+      #seb-evalpro-parcours-choice-dialog .pc-foot-left{display:flex;align-items:center;gap:18px;min-width:0;flex-wrap:wrap}
       #seb-evalpro-parcours-choice-dialog .pc-selected{font-weight:700;color:#167a4a}
+      #seb-evalpro-parcours-choice-dialog .pc-corrections{display:flex;align-items:center;gap:6px;font-size:14px;color:#24425b}
+      #seb-evalpro-parcours-choice-dialog .pc-corrections strong{white-space:nowrap}
+      #seb-evalpro-parcours-choice-dialog button.pc-toggle{min-height:32px;padding:5px 12px;border:1px solid #7f9db9;border-radius:6px;background:#fff;color:#24425b;font-weight:700;cursor:pointer}
+      #seb-evalpro-parcours-choice-dialog button.pc-toggle.active{background:#0070c0;color:#fff;border-color:#0070c0}
       #seb-evalpro-parcours-choice-dialog .pc-actions{display:flex;gap:8px}
       #seb-evalpro-parcours-choice-dialog button.pc-action{min-height:38px;padding:7px 14px;border:1.5px solid #0070c0;border-radius:7px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
       #seb-evalpro-parcours-choice-dialog button.pc-primary{background:#0070c0;color:#fff}
@@ -900,7 +910,14 @@ async function createParcoursChoiceDialog() {
         <div class="pc-detail" id="pc-detail"><p>Sélectionnez un parcours dans la liste.</p></div>
       </div>
       <div class="pc-foot">
-        <div class="pc-selected" id="pc-selected"></div>
+        <div class="pc-foot-left">
+          <div class="pc-selected" id="pc-selected"></div>
+          <div class="pc-corrections" aria-label="Afficher les corrections pendant le parcours">
+            <strong>Afficher les corrections pendant le parcours :</strong>
+            <button class="pc-toggle" id="pc-corrections-no" type="button">Non</button>
+            <button class="pc-toggle" id="pc-corrections-yes" type="button">Oui</button>
+          </div>
+        </div>
         <div class="pc-actions">
           <button class="pc-action" id="pc-open" type="button" disabled>Ouvrir / modifier</button>
           <button class="pc-action pc-primary" id="pc-choose" type="button" disabled>Choisir ce parcours</button>
@@ -914,19 +931,35 @@ async function createParcoursChoiceDialog() {
   const chosenLabel = layer.querySelector('#pc-selected');
   const openButton = layer.querySelector('#pc-open');
   const chooseButton = layer.querySelector('#pc-choose');
+  const correctionsNoButton = layer.querySelector('#pc-corrections-no');
+  const correctionsYesButton = layer.querySelector('#pc-corrections-yes');
   let focused = null;
   let focusedDetails = null;
 
+  const refreshCorrectionChoice = () => {
+    correctionsNoButton.classList.toggle('active', !showCorrectionsDuringParcours);
+    correctionsYesButton.classList.toggle('active', showCorrectionsDuringParcours);
+    correctionsNoButton.setAttribute('aria-pressed', showCorrectionsDuringParcours ? 'false' : 'true');
+    correctionsYesButton.setAttribute('aria-pressed', showCorrectionsDuringParcours ? 'true' : 'false');
+  };
+
+  const refreshChooseState = () => {
+    chooseButton.disabled = !focused ||
+      (String(focused.id) === selectedId && showCorrectionsDuringParcours === selectedShowCorrections);
+  };
+
   const refreshSelectedLabel = () => {
     const meta = (listResult.parcours || []).find(item => String(item.id) === selectedId);
-    chosenLabel.textContent = meta ? 'Parcours sélectionné : ' + meta.name : 'Aucun parcours sélectionné';
+    chosenLabel.textContent = meta
+      ? 'Parcours sélectionné : ' + meta.name + ' • corrections : ' + (selectedShowCorrections ? 'Oui' : 'Non')
+      : 'Aucun parcours sélectionné';
   };
 
   const renderDetails = async (meta) => {
     focused = meta;
     focusedDetails = null;
     openButton.disabled = !meta;
-    chooseButton.disabled = !meta || String(meta.id) === selectedId;
+    refreshChooseState();
     [...list.querySelectorAll('.pc-item')].forEach(node => node.classList.toggle('active', node.dataset.id === String(meta?.id || '')));
     if (!meta) {
       detail.innerHTML = '<p>Sélectionnez un parcours dans la liste.</p>';
@@ -970,8 +1003,20 @@ async function createParcoursChoiceDialog() {
   }
 
   refreshSelectedLabel();
+  refreshCorrectionChoice();
   const first = (listResult.parcours || []).find(item => String(item.id) === selectedId) || (listResult.parcours || [])[0] || null;
   if (first) await renderDetails(first);
+
+  correctionsNoButton.addEventListener('click', () => {
+    showCorrectionsDuringParcours = false;
+    refreshCorrectionChoice();
+    refreshChooseState();
+  });
+  correctionsYesButton.addEventListener('click', () => {
+    showCorrectionsDuringParcours = true;
+    refreshCorrectionChoice();
+    refreshChooseState();
+  });
 
   layer.querySelector('#pc-close').addEventListener('click', () => layer.remove());
   layer.addEventListener('click', event => { if (event.target === layer) layer.remove(); });
@@ -979,18 +1024,24 @@ async function createParcoursChoiceDialog() {
   chooseButton.addEventListener('click', async () => {
     if (!focused) return;
     chooseButton.disabled = true;
-    const result = await ipcRenderer.invoke('kaloneo-library:select-parcours', focused.id).catch(() => null);
+    const result = await ipcRenderer.invoke('kaloneo-library:select-parcours', {
+      id:focused.id,
+      launchOptions:{ showCorrectionsDuringParcours }
+    }).catch(() => null);
     if (!result || result.ok !== true) {
       chooseButton.disabled = false;
       await showTransferMessage('Choix du parcours', result?.error || 'Le parcours n’a pas pu être sélectionné.', true);
       return;
     }
     selectedId = String(result.selected?.id || focused.id);
+    selectedShowCorrections = result.selected?.launchOptions?.showCorrectionsDuringParcours === true;
+    showCorrectionsDuringParcours = selectedShowCorrections;
+    refreshCorrectionChoice();
     refreshSelectedLabel();
     chooseButton.textContent = 'Parcours choisi ✓';
     setTimeout(() => {
       chooseButton.textContent = 'Choisir ce parcours';
-      chooseButton.disabled = String(focused?.id || '') === selectedId;
+      refreshChooseState();
     }, 1000);
   });
 
@@ -2013,7 +2064,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   kaloneoGetParcours: (id) => ipcRenderer.invoke('kaloneo-library:get-parcours', id),
   kaloneoGetParcoursDetails: (id) => ipcRenderer.invoke('kaloneo-library:get-parcours-details', id),
   kaloneoGetSelectedParcours: () => ipcRenderer.invoke('kaloneo-library:get-selected-parcours'),
-  kaloneoSelectParcours: (id) => ipcRenderer.invoke('kaloneo-library:select-parcours', id),
+  kaloneoSelectParcours: (id, launchOptions = {}) => ipcRenderer.invoke('kaloneo-library:select-parcours', { id, launchOptions }),
   kaloneoSelectedParcoursRuntime: () => ipcRenderer.invoke('kaloneo-library:selected-runtime'),
   kaloneoSelectedParcoursRuntimeSync: () => ipcRenderer.sendSync('kaloneo-library:selected-runtime-sync'),
   kaloneoSaveParcours: (payload) => ipcRenderer.invoke('kaloneo-library:save-parcours', payload),
