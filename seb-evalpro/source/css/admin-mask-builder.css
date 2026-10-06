@@ -1,9 +1,9 @@
 html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Calibri,"Segoe UI",Arial,sans-serif;background:linear-gradient(180deg,#fff 0%,#edf1f6 100%);color:#202a36}
 *{box-sizing:border-box}
-body{padding-top:62px}
-.mask-topbar{position:fixed;inset:0 0 auto 0;z-index:20;min-height:60px;padding:8px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;border-bottom:1px solid #d6dce6;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-.mask-topbar h1{margin:0;color:#0070c0;font-size:23px}.mask-topbar p{margin:2px 0 0;color:#52606d;font-size:14px}.top-actions{display:flex;gap:8px}
-.mask-shell{width:min(1540px,calc(100vw - 24px));height:calc(100vh - 74px);margin:10px auto 2px;display:grid;grid-template-columns:minmax(250px,.7fr) minmax(360px,1fr) minmax(420px,1.25fr);gap:12px;min-height:0}
+body{display:grid;grid-template-rows:auto minmax(0,1fr);padding:0}
+.mask-topbar{position:relative;z-index:20;min-height:64px;padding:9px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;border-bottom:1px solid #d6dce6;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.mask-topbar h1{margin:0;color:#0070c0;font-size:23px;line-height:1.1}.mask-topbar p{margin:3px 0 0;color:#52606d;font-size:14px;line-height:1.2}.top-actions{display:flex;gap:8px}
+.mask-shell{width:min(1540px,calc(100vw - 24px));height:auto;margin:12px auto;display:grid;grid-template-columns:minmax(250px,.7fr) minmax(360px,1fr) minmax(420px,1.25fr);gap:12px;min-height:0;align-self:stretch}
 .seb-card{background:#fff;border:1px solid #d7dee8;border-radius:10px;box-shadow:0 5px 18px rgba(0,0,0,.07)}
 .mask-library,.mask-editor,.mask-preview{padding:14px;min-height:0;overflow:hidden}.mask-library{display:flex;flex-direction:column}.mask-list{display:flex;flex-direction:column;gap:8px;overflow-y:auto;min-height:0;padding-right:4px}
 .mask-item{border:1px solid #cbd6e2;border-radius:8px;background:#fbfdff;padding:10px;text-align:left;cursor:pointer}.mask-item:hover{border-color:#0070c0}.mask-item strong,.mask-item span{display:block}.mask-item span{font-size:12px;color:#667788;margin-top:3px}.mask-item.system{background:#f2f9fd;border-color:#9fc5db}
