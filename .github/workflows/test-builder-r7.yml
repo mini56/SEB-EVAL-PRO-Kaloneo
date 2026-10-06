@@ -1,0 +1,84 @@
+name: Test Builder R7 checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test-builder-r7
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 85
+    defaults:
+      run:
+        working-directory: seb-evalpro
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Verify parcours library selection launch options and runtime
+        run: npm run test:parcours-builder
+
+      - name: Generate KALTEST data
+        run: node scripts/build-kaltest-pilot2-data.js
+
+      - name: Rebuild real web application and guards
+        run: npm run prepare:web
+
+      - name: Verify corrections policy Planning Stock Paronymes
+        run: npx electron --no-sandbox scripts/kaloneo-correction-policy-electron-smoke-main.js
+
+      - name: Verify dynamic final page closes active candidate
+        run: npx electron --no-sandbox scripts/kaloneo-final-completion-electron-smoke-main.js
+
+      - name: Verify Admin Bilan keeps vertical scrolling
+        run: npx electron --no-sandbox scripts/admin-bilan-windows-smoke.js
+
+      - name: Verify candidate catalog including parcours name
+        run: node scripts/candidate-catalog-smoke.js
+
+      - name: Verify onboarding resume layout in real Electron
+        run: npx electron --no-sandbox scripts/kaloneo-onboarding-resume-layout-smoke-main.js
+
+      - name: Verify Tests Parcours alignment in real Electron
+        run: npx electron --no-sandbox scripts/kaloneo-tests-parcours-layout-smoke-main.js
+
+      - name: Verify saved parcours opening and editing in real Electron
+        run: npx electron --no-sandbox scripts/kaloneo-parcours-builder-electron-smoke-main.js
+
+      - name: Verify Admin parcours choice correction toggle and lock
+        run: npx electron --no-sandbox scripts/kaloneo-parcours-choice-electron-smoke-main.js
+
+      - name: Verify selected parcours candidate runtime in real Electron
+        run: npx electron --no-sandbox scripts/kaloneo-selected-parcours-electron-smoke-main.js
+
+      - name: Verify Test Builder in real Electron
+        run: npx electron --no-sandbox scripts/kaloneo-builder-preview-electron-smoke-main.js
+
+      - name: Verify mask builder and true Electron preview
+        run: npx electron --no-sandbox scripts/kaloneo-mask-builder-electron-smoke-main.js
+
+      - name: Verify manual free-text Bilan in real Electron
+        run: npx electron --no-sandbox scripts/kaloneo-manual-bilan-electron-smoke-main.js
+
+      - name: Verify historical full KALTEST candidate journey
+        run: npx electron --no-sandbox scripts/full-pilot-journey-smoke-main.js
+
+      - name: Verify Admin foundation
+        run: npm run test:admin-foundation
+
+      - name: Verify existing parcours registry
+        run: npm run test:parcours
