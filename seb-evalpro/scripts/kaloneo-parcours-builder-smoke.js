@@ -91,13 +91,29 @@ try {
   const selectedResult = library.selectParcours(saved.parcours.id);
   assert.strictEqual(selectedResult.ok, true, selectedResult.error || 'sélection du parcours impossible');
   assert.strictEqual(library.getSelectedParcours().selected.id, saved.parcours.id);
+  assert.strictEqual(
+    library.getSelectedParcours().selected.launchOptions.showCorrectionsDuringParcours,
+    false,
+    'les corrections doivent être masquées par défaut'
+  );
 
-  const runtime = library.resolveParcoursRuntime();
+  let runtime = library.resolveParcoursRuntime();
   assert.strictEqual(runtime.ok, true, runtime.error || 'résolution runtime impossible');
   assert.strictEqual(runtime.runtime.title, 'Parcours long');
   assert.strictEqual(runtime.runtime.tests.length, 3);
   assert.strictEqual(runtime.runtime.fin.id, fins[0].id);
   assert.strictEqual(runtime.runtime.maskScreenDefinition.name, 'Masque smoke');
+  assert.strictEqual(runtime.runtime.launchOptions.showCorrectionsDuringParcours, false);
+
+  const selectedWithCorrections = library.selectParcours(saved.parcours.id, {showCorrectionsDuringParcours:true});
+  assert.strictEqual(selectedWithCorrections.ok, true, selectedWithCorrections.error || 'sélection avec corrections impossible');
+  assert.strictEqual(selectedWithCorrections.selected.launchOptions.showCorrectionsDuringParcours, true);
+  runtime = library.resolveParcoursRuntime();
+  assert.strictEqual(runtime.runtime.launchOptions.showCorrectionsDuringParcours, true, 'le choix Admin Oui doit arriver au runtime');
+
+  library.selectParcours(saved.parcours.id, {showCorrectionsDuringParcours:false});
+  runtime = library.resolveParcoursRuntime();
+  assert.strictEqual(runtime.runtime.launchOptions.showCorrectionsDuringParcours, false, 'le choix Admin Non doit être restauré');
 
   const updated = library.saveParcours({
     ...payload,
