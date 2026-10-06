@@ -457,7 +457,12 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
   }
 
   function serialize(record) {
-    const c = record.candidate || {};
+    // Les anciens dossiers peuvent n'avoir l'identité complète que dans le manifest.
+    // Fusionner les deux sources permet aussi de conserver le nom du parcours effectué.
+    const c = {
+      ...((record.manifest && record.manifest.candidat) || {}),
+      ...(record.candidate || {})
+    };
     const bilans = bilanEntries(record.candidateDir);
     const replays = replayEntries(record.candidateDir);
     return {
