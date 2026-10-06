@@ -2101,6 +2101,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   captureReplay: () => replayNavigationCapture.captureNow('kaltest-explicit'),
   closeTestsParcours: () => ipcRenderer.invoke('admin:close-tests-parcours'),
   kaloneoListTests: () => ipcRenderer.invoke('kaloneo-library:list-tests'),
+  kaloneoTestMetadataSync: () => ipcRenderer.sendSync('kaloneo-library:test-metadata-sync'),
   kaloneoGetTest: (id, version) => ipcRenderer.invoke('kaloneo-library:get-test', { id, version }),
   kaloneoSaveTest: (definition, overwrite) => ipcRenderer.invoke('kaloneo-library:save-test', { definition, overwrite:overwrite === true }),
   kaloneoListMaskScreens: () => ipcRenderer.invoke('kaloneo-library:list-mask-screens'),
