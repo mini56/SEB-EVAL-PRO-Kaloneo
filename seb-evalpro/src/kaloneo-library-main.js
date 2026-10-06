@@ -136,11 +136,14 @@ function createKaloneoLibrary(options = {}) {
     if (definition.calculator && definition.calculator.compatible) tools.push('calculator');
     if (definition.chrono && definition.chrono.enabled) tools.push('chrono');
 
+    const rawCategory = String(definition.category || (role === 'introduction' ? 'introduction' : role === 'fin' ? 'fin' : 'autres'));
+    const category = String(definition.id) === 'planning_cantine' ? 'planification' : rawCategory;
+
     return {
       id:String(definition.id),
       version:String(definition.version),
       title:String(definition.title || definition.id),
-      category:String(definition.category || (role === 'introduction' ? 'introduction' : role === 'fin' ? 'fin' : 'autres')),
+      category,
       role,
       kind:String(definition.kind || 'complex'),
       scored:definition.scored !== false,
@@ -558,9 +561,11 @@ function createKaloneoLibrary(options = {}) {
     const definitions = scanLatestDefinitions();
     try {
       const introduction = resolveDefinition(definitions, value.introduction, 'introduction');
-      const tests = (Array.isArray(value.tests) ? value.tests : []).map(ref =>
-        resolveDefinition(definitions, ref, 'test')
-      );
+      const tests = (Array.isArray(value.tests) ? value.tests : []).map(ref => {
+        const definition = JSON.parse(JSON.stringify(resolveDefinition(definitions, ref, 'test')));
+        if (String(definition.id) === 'planning_cantine') definition.category = 'planification';
+        return definition;
+      });
       const fin = resolveDefinition(definitions, value.fin, 'fin');
       const mask = getMaskScreen(value.maskScreen || defaultMaskRef());
       if (!mask.ok) throw new Error(mask.error || 'Écran de masquage introuvable.');
