@@ -59,6 +59,16 @@ function pageDescriptor() {
   return { pageKey: file, title: String(document.title || file).trim() || file };
 }
 
+function transitionPageVisible() {
+  try {
+    if (document.body?.classList?.contains('seb-kaltest-transition-video')) return true;
+    const id = String(document.body?.dataset?.sebKaltestId || '').trim();
+    return id === 'transition_video_f1';
+  } catch (_) {
+    return false;
+  }
+}
+
 function replayBlocked() {
   try {
     if (window.sessionStorage.getItem('seb_evalpro_replay_archive_file')) return true;
@@ -95,7 +105,7 @@ function adminInteractionTarget(target) {
 }
 
 async function captureNow(reason) {
-  if (!document.body || replayBlocked() || adminWorkBlocked()) return false;
+  if (!document.body || transitionPageVisible() || replayBlocked() || adminWorkBlocked()) return false;
   const descriptor = pageDescriptor();
   try {
     const result = await ipcRenderer.invoke('replay:capture-page', {
