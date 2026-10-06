@@ -303,6 +303,7 @@ function sebResultCategoryLabel(value) {
     'bureautique':'Bureautique',
     'tic':'TIC / Bureautique',
     'raisonnement':'Raisonnement',
+    'planification':'Planification',
     'francais':'Français',
     'communication':'Communication',
     'technique':'Compétences techniques',
@@ -427,22 +428,29 @@ function sebApplyDynamicResultsLayout() {
   // avant R10, les métadonnées du catalogue servent uniquement à restituer le
   // vrai titre et la vraie section — jamais à ajouter un test non exécuté.
   const catalog = sebReadCatalogMetadata();
-  const selectedTests = manifest.tests.filter(test => test && test.id);
+  const selectedTests = manifest.tests.filter(test => {
+    if (!test || !test.id) return false;
+    const meta = catalog.get(String(test.id)) || {};
+    const category = sebNormalizeResultText(meta.category || test.category || '');
+    return category !== 'transition';
+  });
   const byId = new Map();
   selectedTests.forEach(test => {
     const id = String(test.id);
     const meta = catalog.get(id) || {};
     byId.set(id, {
       ...test,
-      title:String(test.title && test.title !== id ? test.title : meta.title || test.title || id),
-      category:String(test.category && sebNormalizeResultText(test.category) !== 'autres' ? test.category : meta.category || test.category || 'autres'),
-      scored:test.scored !== undefined ? test.scored : meta.scored !== false
+      // Le catalogue courant est la référence pour les libellés et sections.
+      title:String(meta.title || test.title || id),
+      category:String(meta.category || test.category || 'autres'),
+      scored:meta.scored !== undefined ? meta.scored !== false : test.scored !== false
     });
   });
   Object.keys(canonicalTests).forEach(id => {
     if (String(id) === 'fin_parcours') return;
+    const meta = catalog.get(String(id)) || {};
+    if (sebNormalizeResultText(meta.category || '') === 'transition') return;
     if (!byId.has(String(id))) {
-      const meta = catalog.get(String(id)) || {};
       byId.set(String(id), {
         id:String(id),
         version:String(meta.version || ''),
