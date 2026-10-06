@@ -92,7 +92,7 @@ function ensureKaloneoResultsManifest() {
         title:String(test && test.title || test && test.id || ''),
         category:String(test && test.category || 'Autres'),
         scored:test && test.scored !== false
-      })).filter((test) => test.id),
+      })).filter((test) => test.id && String(test.category || '').toLowerCase() !== 'transition'),
       capturedAt:new Date().toISOString()
     };
     window.sessionStorage.setItem(KALONEO_RESULTS_MANIFEST_KEY, JSON.stringify(manifest));
