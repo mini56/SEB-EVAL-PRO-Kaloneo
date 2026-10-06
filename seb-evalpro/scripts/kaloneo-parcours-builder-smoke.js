@@ -78,6 +78,46 @@ try {
   assert.strictEqual(saved.parcours.tests.length, 3);
   assert.deepStrictEqual(saved.parcours.maskScreen, {id:'masque-smoke',version:'1.0.0'});
 
+  const opened = library.getParcours(saved.parcours.id);
+  assert.strictEqual(opened.ok, true, opened.error || 'réouverture du parcours impossible');
+  assert.strictEqual(opened.parcours.tests.length, 3);
+
+  const details = library.getParcoursDetails(saved.parcours.id);
+  assert.strictEqual(details.ok, true, details.error || 'détail du parcours impossible');
+  assert.strictEqual(details.details.maskScreenMeta.name, 'Masque smoke');
+  assert.strictEqual(details.details.tests.length, 3);
+  assert.strictEqual(details.details.tests[0].meta.title, selected[0].title);
+
+  const selectedResult = library.selectParcours(saved.parcours.id);
+  assert.strictEqual(selectedResult.ok, true, selectedResult.error || 'sélection du parcours impossible');
+  assert.strictEqual(library.getSelectedParcours().selected.id, saved.parcours.id);
+
+  const runtime = library.resolveParcoursRuntime();
+  assert.strictEqual(runtime.ok, true, runtime.error || 'résolution runtime impossible');
+  assert.strictEqual(runtime.runtime.title, 'Parcours long');
+  assert.strictEqual(runtime.runtime.tests.length, 3);
+  assert.strictEqual(runtime.runtime.fin.id, fins[0].id);
+  assert.strictEqual(runtime.runtime.maskScreenDefinition.name, 'Masque smoke');
+
+  const updated = library.saveParcours({
+    ...payload,
+    id:saved.parcours.id,
+    name:'Parcours long modifié',
+    tests:selected.slice(0,2).map(item=>({id:item.id,version:item.version}))
+  });
+  assert.strictEqual(updated.ok, true, updated.error || 'mise à jour du parcours refusée');
+  assert.strictEqual(updated.updated, true);
+  assert.strictEqual(updated.parcours.tests.length, 2);
+  assert.strictEqual(library.getParcours(saved.parcours.id).parcours.name, 'Parcours long modifié');
+
+  const protectedBaseUpdate = library.saveParcours({
+    ...payload,
+    id:'parcours-de-base',
+    name:'Parcours de base',
+    creator:'SEB EvalPro / KALONÉO'
+  });
+  assert.strictEqual(protectedBaseUpdate.ok, false, 'le parcours de base doit rester protégé');
+
   const duplicateName = library.saveParcours({ ...payload, name:'  PARCOURS   LONG  ' });
   assert.strictEqual(duplicateName.ok, false, 'le nom de parcours doit être unique');
   assert.match(duplicateName.error, /existe déjà/i);
