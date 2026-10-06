@@ -1052,6 +1052,7 @@
     table.appendChild(thead);
 
     const testState = testStateFor(test);
+    const completed = testState.status === 'COMPLETED';
     const tbody = document.createElement('tbody');
 
     for (const question of test.questions || []) {
@@ -1064,13 +1065,24 @@
       for (const option of question.response?.options || []) {
         const td = document.createElement('td');
         td.className = 'kaltest-choice';
+        td.dataset.questionId = question.id;
         td.textContent = option;
-        if (normalizeText(testState.answers[question.id]) === normalizeText(option)) td.classList.add('selected');
-        td.addEventListener('click', () => {
-          Array.from(tr.querySelectorAll('.kaltest-choice')).forEach(cell => cell.classList.remove('selected'));
-          td.classList.add('selected');
-          saveAnswer(test, question.id, option);
-        });
+        const selected = normalizeText(testState.answers[question.id]) === normalizeText(option);
+        const expected = (question.acceptedAnswers || []).some(answer => normalizeText(answer) === normalizeText(option));
+        if (selected) td.classList.add('selected');
+        if (completed) {
+          td.setAttribute('aria-disabled', 'true');
+          if (showCorrectionDuringParcours()) {
+            if (expected) td.classList.add('kaltest-answer-correct');
+            else if (selected) td.classList.add('kaltest-answer-incorrect');
+          }
+        } else {
+          td.addEventListener('click', () => {
+            Array.from(tr.querySelectorAll('.kaltest-choice')).forEach(cell => cell.classList.remove('selected'));
+            td.classList.add('selected');
+            saveAnswer(test, question.id, option);
+          });
+        }
         tr.appendChild(td);
       }
 
@@ -1220,22 +1232,33 @@
           const option = String(cellDefinition.value || '');
           td.className = 'kaltest-choice';
           td.textContent = option;
-          if (question && normalizeText(testState.answers[question.id]) === normalizeText(option)) td.classList.add('selected');
           if (question) {
-            td.tabIndex = 0;
-            td.setAttribute('role', 'button');
-            const choose = () => {
-              Array.from(tr.querySelectorAll('.kaltest-choice')).forEach(node => node.classList.remove('selected'));
-              td.classList.add('selected');
-              saveAnswer(test, question.id, option);
-            };
-            td.addEventListener('click', choose);
-            td.addEventListener('keydown', event => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                choose();
+            td.dataset.questionId = question.id;
+            const selected = normalizeText(testState.answers[question.id]) === normalizeText(option);
+            const expected = (question.acceptedAnswers || []).some(answer => normalizeText(answer) === normalizeText(option));
+            if (selected) td.classList.add('selected');
+            if (testState.status === 'COMPLETED') {
+              td.setAttribute('aria-disabled', 'true');
+              if (showCorrectionDuringParcours()) {
+                if (expected) td.classList.add('kaltest-answer-correct');
+                else if (selected) td.classList.add('kaltest-answer-incorrect');
               }
-            });
+            } else {
+              td.tabIndex = 0;
+              td.setAttribute('role', 'button');
+              const choose = () => {
+                Array.from(tr.querySelectorAll('.kaltest-choice')).forEach(node => node.classList.remove('selected'));
+                td.classList.add('selected');
+                saveAnswer(test, question.id, option);
+              };
+              td.addEventListener('click', choose);
+              td.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  choose();
+                }
+              });
+            }
           }
         } else if (cellDefinition.kind === 'image') {
           const img = document.createElement('img');
