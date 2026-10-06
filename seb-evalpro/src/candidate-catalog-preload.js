@@ -164,7 +164,7 @@ async function openCandidateDetail(candidateId, onChanged) {
       <div class="seb-cc-head"><div class="seb-cc-title">${escapeHtml(item.nom)} ${escapeHtml(item.prenom)}</div><div class="seb-cc-badge">DOSSIER CANDIDAT</div></div>
       <div class="seb-cc-meta">
         <div><b>Ville :</b> ${escapeHtml(item.lieu)}</div><div><b>Groupe :</b> ${escapeHtml(item.groupe)}</div><div><b>Date :</b> ${escapeHtml(item.date)}</div>
-        <div><b>Bilans :</b> ${item.bilanCount}</div><div><b>Révisions :</b> ${item.revisionCount}</div><div><b>Parcours :</b> ${item.replayCount}</div>
+        <div><b>Bilans :</b> ${item.bilanCount}</div><div><b>Révisions :</b> ${item.revisionCount}</div><div><b>Parcours :</b> ${escapeHtml(item.parcours || '—')}</div>
       </div>
       <div class="seb-cc-body">
         <div class="seb-cc-section"><h3>Bilan et révisions</h3><div id="seb-cc-detail-bilans"></div></div>
@@ -225,7 +225,10 @@ async function openCandidateDetail(candidateId, onChanged) {
     result.replays.forEach((filename, index) => {
       const row = document.createElement('div');
       row.className = 'seb-cc-bilan-row';
-      row.innerHTML = `<div><strong>Parcours ${index + 1}</strong><small>${escapeHtml(filename)}</small></div><div></div><div></div><div></div>`;
+      const parcoursLabel = item.parcours
+        ? (result.replays.length > 1 ? item.parcours + ' — parcours ' + (index + 1) : item.parcours)
+        : ('Parcours ' + (index + 1));
+      row.innerHTML = `<div><strong>${escapeHtml(parcoursLabel)}</strong><small>${escapeHtml(filename)}</small></div><div></div><div></div><div></div>`;
       const open = document.createElement('button');
       open.type = 'button';
       open.className = 'primary';
