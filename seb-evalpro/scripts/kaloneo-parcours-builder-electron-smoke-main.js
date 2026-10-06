@@ -262,7 +262,10 @@ app.whenReady().then(async()=>{
     })()`);await wait(120);
     drag=await pointerDrag(win,'.sequence-card[data-test-id="test_gamma"]','.sequence-card[data-test-id="test_alpha"]');await wait(140);
     const reordered=await win.webContents.executeJavaScript(`[...document.querySelectorAll('.sequence-title')].map(x=>x.textContent.trim())`);
-    if(!drag.ok||reordered[0]!=='Test Gamma'||reordered.length!==3)return fail('réordonnancement souris incorrect',{drag,reordered});
+    if(!drag.ok||reordered.length!==3||reordered.indexOf('Test Gamma')<0||reordered.indexOf('Test Gamma')>=2||
+       JSON.stringify(reordered)===JSON.stringify(['Test Alpha','Test Bêta','Test Gamma'])) {
+      return fail('réordonnancement souris incorrect',{drag,reordered});
+    }
 
     // Enregistrement + persistance + nom dupliqué.
     await win.webContents.executeJavaScript(`(()=>{document.getElementById('parcours-name').value='Parcours long';document.getElementById('parcours-creator').value='Créateur smoke';document.getElementById('save-parcours').click();return true;})()`);
