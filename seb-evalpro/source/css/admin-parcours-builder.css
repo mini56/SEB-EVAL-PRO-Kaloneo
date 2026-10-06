@@ -57,3 +57,10 @@ body{height:100vh;padding-top:60px}
 .mask-step{border-color:#9fc5db;background:#f5fbfe}
 .mask-step .step-label{color:#004e70}
 .step-help{margin:4px 0 9px;color:#607386;font-size:12px;line-height:1.3}
+
+
+/* R6 — consultation/modification explicite des parcours enregistrés. */
+.saved-card{display:flex;flex-direction:column;align-items:stretch}
+.saved-actions{display:flex;justify-content:flex-end;margin-top:8px}
+.saved-open{min-height:32px;padding:5px 10px;border:1px solid #0070c0;border-radius:6px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
+.saved-open:hover{background:#f2f8fc}
