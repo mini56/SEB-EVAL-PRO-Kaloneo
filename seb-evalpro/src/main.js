@@ -32,6 +32,7 @@ let candidateTransfer = null;
 let candidateProtection = null;
 let kaloneoLibrary = null;
 let kaloneoBuilderPreviewDefinition = null;
+let kaloneoMaskPreviewDefinition = null;
 let adminExportCandidateDir = null;
 let adminCandidateResultsMode = false;
 let lastCandidateSaveError = '';
@@ -384,7 +385,7 @@ function isAdminKaloneoBuilderPage(pageName) {
 }
 
 function isAdminMaskBuilderPage(pageName) {
-  return String(pageName || '').toLowerCase() === 'admin-mask-builder.html';
+  return ['admin-mask-builder.html','admin-mask-preview.html'].includes(String(pageName || '').toLowerCase());
 }
 
 function isAdminKaloneoBuilderPreviewPage(pageName) {
@@ -1168,6 +1169,56 @@ ipcMain.handle('kaloneo-library:save-parcours', (_event, payload) => {
   } catch (error) {
     return { ok:false, error:error && error.message ? error.message : String(error) };
   }
+});
+
+ipcMain.handle('kaloneo-mask:open-preview', (_event, definition) => {
+  if (!mainWindow || mainWindow.isDestroyed() || !adminSessionUnlocked) {
+    return { ok:false, error:'Accès administrateur requis.' };
+  }
+  if (getCandidateStore().getActiveCandidate()) {
+    return { ok:false, error:'Impossible d’ouvrir un aperçu pendant une évaluation active.' };
+  }
+  if (!definition || typeof definition !== 'object') {
+    return { ok:false, error:'Définition de l’écran de masquage absente.' };
+  }
+  const text = String(definition.content?.text || '');
+  const image = String(definition.content?.image || '');
+  if (!text.trim() && !image.trim()) {
+    return { ok:false, error:'Ajoutez un texte, une image, ou les deux avant l’aperçu.' };
+  }
+  const target = path.join(__dirname, '..', 'app', 'web', 'admin-mask-preview.html');
+  if (!fs.existsSync(target)) return { ok:false, error:'Page d’aperçu de masquage absente.' };
+  try {
+    kaloneoMaskPreviewDefinition = JSON.parse(JSON.stringify(definition));
+    adminCandidateResultsMode = false;
+    mainWindow.loadFile(target);
+    return { ok:true };
+  } catch (error) {
+    kaloneoMaskPreviewDefinition = null;
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-mask:get-preview', () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (!kaloneoMaskPreviewDefinition) return { ok:false, error:'Aucun aperçu de masquage en cours.' };
+  return { ok:true, definition:JSON.parse(JSON.stringify(kaloneoMaskPreviewDefinition)) };
+});
+
+ipcMain.handle('kaloneo-mask:consume-preview', () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (!kaloneoMaskPreviewDefinition) return { ok:false, error:'Aucun aperçu de masquage à restaurer.' };
+  const definition = JSON.parse(JSON.stringify(kaloneoMaskPreviewDefinition));
+  kaloneoMaskPreviewDefinition = null;
+  return { ok:true, definition };
+});
+
+ipcMain.handle('kaloneo-mask:close-preview', () => {
+  if (!mainWindow || mainWindow.isDestroyed() || !adminSessionUnlocked) return false;
+  const target = path.join(__dirname, '..', 'app', 'web', 'admin-mask-builder.html');
+  if (!fs.existsSync(target)) return false;
+  mainWindow.loadFile(target, { query:{ resume:'preview' } });
+  return true;
 });
 
 ipcMain.handle('kaloneo-builder:open-preview', (_event, definition) => {
