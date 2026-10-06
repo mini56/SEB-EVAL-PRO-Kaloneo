@@ -5,7 +5,7 @@
   "id": "planning_cantine",
   "version": "1.0.0",
   "title": "Planification — Le restaurant",
-  "category": "organisation",
+  "category": "planification",
   "description": "Construire le planning hebdomadaire de la cantine en respectant les contraintes de personnel et de menus.",
   "kind": "questionnaire",
   "scored": true,
