@@ -67,14 +67,29 @@ app.whenReady().then(async()=>{
   try{
     await win.loadFile(target);
     await wait(650);
-    const initial=await win.webContents.executeJavaScript(`(()=>({
-      title:document.querySelector('.mask-topbar h1')?.textContent.trim(),
-      count:document.querySelectorAll('.mask-item').length,
-      first:document.querySelector('.mask-item strong')?.textContent.trim(),
-      closeLabel:document.querySelector('.mask-close-preview')?.textContent.trim(),
-      privacy:document.getElementById('seb-evalpro-privacy-toggle')?getComputedStyle(document.getElementById('seb-evalpro-privacy-toggle')).display:'absent'
-    }))()`);
-    if(initial.title!=='Écrans de masquage'||initial.count!==1||initial.first!=='KALONÉO'||initial.closeLabel!=='Masquer l’écran d’accueil'||!['none','absent'].includes(initial.privacy))return fail('état initial incorrect',initial);
+    const initial=await win.webContents.executeJavaScript(`(()=> {
+      const rect=sel=>document.querySelector(sel)?.getBoundingClientRect()||null;
+      const topbar=rect('.mask-topbar');
+      const shell=rect('.mask-shell');
+      const headings=[...document.querySelectorAll('.mask-library h2,.mask-editor h2,.mask-preview h2')].map(el=>{
+        const r=el.getBoundingClientRect();
+        return {text:el.textContent.trim(),top:r.top,bottom:r.bottom};
+      });
+      return {
+        title:document.querySelector('.mask-topbar h1')?.textContent.trim(),
+        count:document.querySelectorAll('.mask-item').length,
+        first:document.querySelector('.mask-item strong')?.textContent.trim(),
+        closeLabel:document.querySelector('.mask-close-preview')?.textContent.trim(),
+        privacy:document.getElementById('seb-evalpro-privacy-toggle')?getComputedStyle(document.getElementById('seb-evalpro-privacy-toggle')).display:'absent',
+        topbar:{top:topbar?.top,bottom:topbar?.bottom,height:topbar?.height},
+        shell:{top:shell?.top,bottom:shell?.bottom,height:shell?.height},
+        headings,
+        viewport:window.innerHeight
+      };
+    })()`);
+    const headingsVisible=initial.headings.length===3&&initial.headings.every(h=>h.top>=initial.topbar.bottom+2&&h.bottom<=initial.viewport);
+    const shellVisible=initial.shell.top>=initial.topbar.bottom+6&&initial.shell.bottom<=initial.viewport+1;
+    if(initial.title!=='Écrans de masquage'||initial.count!==1||initial.first!=='KALONÉO'||initial.closeLabel!=='Masquer l’écran d’accueil'||!['none','absent'].includes(initial.privacy)||!headingsVisible||!shellVisible)return fail('état initial / mise en page incorrecte',initial);
 
     await win.webContents.executeJavaScript(`(()=>{
       const set=(id,value)=>{const e=document.getElementById(id);e.value=value;e.dispatchEvent(new Event('input',{bubbles:true}));};
