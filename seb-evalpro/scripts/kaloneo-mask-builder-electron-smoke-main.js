@@ -18,6 +18,8 @@ const maskDefinitions={
   'kaloneo-default@1.0.0':{id:'kaloneo-default',version:'1.0.0',name:'KALONÉO',systemProvided:true,content:{text:'KALONÉO\\nAu cœur d’un nouvel élan',image:''}}
 };
 let lastSaved=null;
+let previewDraft=null;
+let win=null;
 
 ipcMain.on('app:edition-sync',e=>{e.returnValue={edition:'unified',canBilan:true,canAi:true,canImport:true,canExport:true};});
 ipcMain.on('state:load-sync',e=>{e.returnValue=state;});
@@ -56,6 +58,25 @@ ipcMain.handle('kaloneo-library:save-mask-screen',(_e,payload)=>{
   return {ok:true,replaced:index>=0,maskScreen:meta};
 });
 
+ipcMain.handle('kaloneo-mask:open-preview',(_e,definition)=>{
+  previewDraft=JSON.parse(JSON.stringify(definition||null));
+  const target=path.join(__dirname,'..','app','web','admin-mask-preview.html');
+  setTimeout(()=>{ if(win&&!win.isDestroyed()) win.loadFile(target); },0);
+  return {ok:true};
+});
+ipcMain.handle('kaloneo-mask:get-preview',()=>previewDraft?{ok:true,definition:JSON.parse(JSON.stringify(previewDraft))}:{ok:false,error:'absent'});
+ipcMain.handle('kaloneo-mask:consume-preview',()=>{
+  if(!previewDraft)return {ok:false,error:'absent'};
+  const definition=JSON.parse(JSON.stringify(previewDraft));
+  previewDraft=null;
+  return {ok:true,definition};
+});
+ipcMain.handle('kaloneo-mask:close-preview',()=>{
+  const target=path.join(__dirname,'..','app','web','admin-mask-builder.html');
+  setTimeout(()=>{ if(win&&!win.isDestroyed()) win.loadFile(target,{query:{resume:'preview'}}); },0);
+  return true;
+});
+
 const timeout=setTimeout(()=>fail('délai global dépassé'),30000);
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
@@ -63,7 +84,7 @@ app.whenReady().then(async()=>{
   const root=path.join(__dirname,'..');
   const target=path.join(root,'app','web','admin-mask-builder.html');
   if(!fs.existsSync(target))return fail('admin-mask-builder.html absent de app/web');
-  const win=new BrowserWindow({show:true,width:1366,height:768,webPreferences:{preload:path.join(root,'src','preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:false}});
+  win=new BrowserWindow({show:true,width:1366,height:768,webPreferences:{preload:path.join(root,'src','preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:false}});
   try{
     await win.loadFile(target);
     await wait(650);
@@ -107,13 +128,38 @@ app.whenReady().then(async()=>{
     }))()`);
     if(!lastSaved||lastSaved.name!=='Pause smoke'||lastSaved.content?.text!=='Texte smoke'||after.count!==2||after.preview!=='Texte smoke'||!/enregistré/i.test(after.status))return fail('enregistrement texte incorrect',{lastSaved,after});
 
+    // Vrai aperçu Electron, puis retour au brouillon sans perte.
+    await win.webContents.executeJavaScript(`document.getElementById('open-real-mask-preview').click();true`);
+    await wait(420);
+    const realPreview=await win.webContents.executeJavaScript(`(()=>({
+      title:document.title,
+      text:document.getElementById('mask-preview-text')?.textContent.trim()||'',
+      close:document.getElementById('mask-preview-close')?.textContent.trim()||'',
+      imageHidden:document.getElementById('mask-preview-image')?.hidden
+    }))()`);
+    if(!/Aperçu écran de masquage/.test(realPreview.title)||realPreview.text!=='Texte smoke'||realPreview.close!=='Masquer l’écran d’accueil'||realPreview.imageHidden!==true) {
+      return fail('vrai aperçu écran de masquage incorrect',realPreview);
+    }
+
+    await win.webContents.executeJavaScript(`document.getElementById('mask-preview-close').click();true`);
+    await wait(420);
+    const resumed=await win.webContents.executeJavaScript(`(()=>({
+      page:document.title,
+      name:document.getElementById('mask-name')?.value||'',
+      text:document.getElementById('mask-text')?.value||'',
+      status:document.getElementById('mask-status')?.textContent.trim()||''
+    }))()`);
+    if(!/Écrans de masquage/.test(resumed.page)||resumed.name!=='Pause smoke'||resumed.text!=='Texte smoke'||!/Retour de l’aperçu réel/.test(resumed.status)) {
+      return fail('retour du vrai aperçu sans perte incorrect',resumed);
+    }
+
     await win.webContents.executeJavaScript(`document.querySelector('.mask-item.system')?.click();true`);
     await wait(120);
     const protectedState=await win.webContents.executeJavaScript(`({disabled:document.getElementById('save-mask').disabled,status:document.getElementById('mask-status').textContent.trim()})`);
     if(!protectedState.disabled||!/protégé/i.test(protectedState.status))return fail('écran KALONÉO par défaut non protégé',protectedState);
 
     console.log('KALONEO_MASK_BUILDER_ELECTRON=OK');
-    console.log(JSON.stringify({initial,after,protectedState,lastSaved}));
+    console.log(JSON.stringify({initial,after,realPreview,resumed,protectedState,lastSaved}));
     clearTimeout(timeout);win.destroy();app.exit(0);
   }catch(error){fail(String(error?.stack||error));}
 });
