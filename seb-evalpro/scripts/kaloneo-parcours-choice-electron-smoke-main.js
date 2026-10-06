@@ -140,9 +140,11 @@ app.whenReady().then(async()=>{
       exists:!!document.getElementById('seb-evalpro-parcours-choice-dialog'),
       items:[...document.querySelectorAll('#seb-evalpro-parcours-choice-dialog .pc-item strong')].map(x=>x.textContent.trim()),
       selected:document.querySelector('#pc-selected')?.textContent.trim()||'',
-      detail:document.querySelector('#pc-detail')?.textContent.replace(/\\s+/g,' ').trim()||''
+      detail:document.querySelector('#pc-detail')?.textContent.replace(/\\s+/g,' ').trim()||'',
+      correctionsNo:document.getElementById('pc-corrections-no')?.classList.contains('active')||false,
+      correctionsYes:document.getElementById('pc-corrections-yes')?.classList.contains('active')||false
     }))()`,true);
-    if(!dialog.exists||dialog.items.length!==2||!dialog.items.includes('Parcours court')||!/Parcours sélectionné : Parcours de base/.test(dialog.selected)||!/Test A/.test(dialog.detail)) {
+    if(!dialog.exists||dialog.items.length!==2||!dialog.items.includes('Parcours court')||!/Parcours sélectionné : Parcours de base/.test(dialog.selected)||!/corrections : Non/.test(dialog.selected)||!/Test A/.test(dialog.detail)||!dialog.correctionsNo||dialog.correctionsYes) {
       return fail('bibliothèque de choix incorrecte',dialog);
     }
 
@@ -161,17 +163,22 @@ app.whenReady().then(async()=>{
       return fail('détail du parcours court incorrect',detail);
     }
 
+    await win.webContents.executeJavaScript(`document.getElementById('pc-corrections-yes').click();true`,true);
+    await wait(60);
+    const toggle=await win.webContents.executeJavaScript(`(()=>({yes:document.getElementById('pc-corrections-yes')?.classList.contains('active')||false,no:document.getElementById('pc-corrections-no')?.classList.contains('active')||false,chooseDisabled:document.getElementById('pc-choose')?.disabled}))()`,true);
+    if(!toggle.yes||toggle.no||toggle.chooseDisabled)return fail('choix Oui corrections incorrect',toggle);
+
     await win.webContents.executeJavaScript(`document.getElementById('pc-choose').click();true`,true);
     await wait(180);
     const chosen=await win.webContents.executeJavaScript(`document.getElementById('pc-selected')?.textContent.trim()||''`,true);
-    if(selectedId!=='parcours-court'||!/Parcours court/.test(chosen))return fail('choix non enregistré',{selectedId,chosen});
+    if(selectedId!=='parcours-court'||!showCorrectionsDuringParcours||!/Parcours court/.test(chosen)||!/corrections : Oui/.test(chosen))return fail('choix non enregistré',{selectedId,showCorrectionsDuringParcours,chosen});
 
     await win.webContents.executeJavaScript(`document.getElementById('pc-close').click();document.getElementById('seb-evalpro-admin').click();true`,true);
     await wait(260);
     if(lockCount!==1||selectedId!=='parcours-court')return fail('verrouillage après choix incorrect',{lockCount,selectedId});
 
     console.log('KALONEO_PARCOURS_CHOICE_ELECTRON=OK');
-    console.log(JSON.stringify({initial,dialog,detail,chosen,selectedId,lockCount}));
+    console.log(JSON.stringify({initial,dialog,detail,toggle,chosen,selectedId,showCorrectionsDuringParcours,lockCount}));
     clearTimeout(timeout);
     win.destroy();
     app.exit(0);
