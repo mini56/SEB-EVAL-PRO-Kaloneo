@@ -19,7 +19,8 @@ const candidate = {
   prenom:'YY',
   lieu:'Lorient',
   groupe:'7',
-  date:'2026-09-18'
+  date:'2026-09-18',
+  parcours:'Parcours long'
 };
 
 function writeJson(file, value) {
@@ -120,6 +121,7 @@ try {
   assert.strictEqual(first[0].candidateId, 'candidate-xx');
   assert.strictEqual(first[0].replayCount, 1, 'Le parcours historique doit être rattaché au dossier candidat.');
   assert.strictEqual(first[0].bilanCount, 1, 'Le bilan historique doit être rattaché au dossier candidat.');
+  assert.strictEqual(first[0].parcours, 'Parcours long', 'Le nom du parcours effectué doit être exposé dans la fiche candidat.');
 
   const newDir = path.join(sebRoot, 'Candidats', codedFolderName('candidate-xx'));
   assert(fs.existsSync(newDir), 'La copie autonome du candidat doit exister.');
@@ -227,6 +229,7 @@ try {
 
   const d = detail(null, 'candidate-xx');
   assert(d && d.ok);
+  assert.strictEqual(d.candidate.parcours, 'Parcours long');
   assert.strictEqual(d.bilans.length, 1);
   assert.strictEqual(d.bilans[0].integrityOk, false, 'Un bilan corrompu doit être signalé.');
 
