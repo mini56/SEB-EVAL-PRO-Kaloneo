@@ -50,11 +50,9 @@
     requestAnimationFrame(()=>$('mask-name').focus());
   }
 
-  async function openMask(meta) {
-    const result=await window.sebEvalPro?.kaloneoGetMaskScreen?.({id:meta.id,version:meta.version});
-    if(!result||result.ok!==true) return setStatus(result?.error||'Lecture impossible.',true);
-    const value=result.maskScreen||{};
-    state.editing={id:value.id,version:value.version,systemProvided:value.systemProvided===true};
+  function applyDefinition(value, statusMessage='Écran ouvert') {
+    value=value||{};
+    state.editing=value.id?{id:value.id,version:value.version||'1.0.0',systemProvided:value.systemProvided===true}:null;
     state.image=String(value.content?.image||'');
     state.imageName=state.image?'Image embarquée':'';
     $('mask-name').value=String(value.name||'');
@@ -68,8 +66,36 @@
     $('mask-image-file').disabled=locked;
     $('remove-mask-image').disabled=locked;
     $('save-mask').disabled=locked;
-    setStatus(locked?'Écran KALONÉO par défaut — protégé':'Écran ouvert');
+    setStatus(locked?'Écran KALONÉO par défaut — protégé':statusMessage);
     updatePreview();
+  }
+
+  async function openMask(meta) {
+    const result=await window.sebEvalPro?.kaloneoGetMaskScreen?.({id:meta.id,version:meta.version});
+    if(!result||result.ok!==true) return setStatus(result?.error||'Lecture impossible.',true);
+    applyDefinition(result.maskScreen||{});
+  }
+
+  function currentDefinition() {
+    const name=String($('mask-name').value||'').trim()||'Aperçu écran de masquage';
+    const version=String($('mask-version').value||'1.0.0').trim()||'1.0.0';
+    const id=String($('mask-id').value||cleanId(name));
+    return {
+      format:'kaloneo-mask-screen',
+      schemaVersion:1,
+      id,version,name,
+      systemProvided:Boolean(state.editing?.systemProvided),
+      content:{text:String($('mask-text').value||''),image:state.image}
+    };
+  }
+
+  async function openRealPreview() {
+    const definition=currentDefinition();
+    if(!definition.content.text.trim()&&!definition.content.image) {
+      return setStatus('Ajoutez un texte, une image, ou les deux avant l’aperçu.',true);
+    }
+    const result=await window.sebEvalPro?.kaloneoOpenMaskPreview?.(definition);
+    if(!result||result.ok!==true) setStatus(result?.error||'Aperçu impossible.',true);
   }
 
   function renderList() {
@@ -136,7 +162,7 @@
     await refreshList();
   }
 
-  function ready() {
+  async function ready() {
     $('back-tests-parcours').addEventListener('click',()=>{window.location.href='admin-tests-parcours.html';});
     $('new-mask').addEventListener('click',reset);
     $('mask-name').addEventListener('input',()=>{
@@ -151,9 +177,18 @@
     });
     $('remove-mask-image').addEventListener('click',()=>{state.image='';state.imageName='';updatePreview();});
     $('save-mask').addEventListener('click',()=>{save().catch(error=>setStatus(error?.message||String(error),true));});
+    $('open-real-mask-preview').addEventListener('click',()=>{openRealPreview().catch(error=>setStatus(error?.message||String(error),true));});
     reset();
-    refreshList().catch(error=>setStatus(error?.message||String(error),true));
+    try { await refreshList(); }
+    catch(error) { setStatus(error?.message||String(error),true); }
+
+    if(new URLSearchParams(location.search).get('resume')==='preview') {
+      const result=await window.sebEvalPro?.kaloneoConsumeMaskPreview?.();
+      if(result&&result.ok===true&&result.definition) {
+        applyDefinition(result.definition,'Retour de l’aperçu réel.');
+      }
+    }
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{ready();},{once:true});else ready();
 })();
