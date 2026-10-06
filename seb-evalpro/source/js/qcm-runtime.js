@@ -411,6 +411,7 @@ function sebApplyDynamicResultsLayout() {
   const selectedTests = manifest.tests.filter(test => test && test.id);
   const byId = new Map(selectedTests.map(test => [String(test.id), test]));
   Object.keys(canonicalTests).forEach(id => {
+    if (String(id) === 'fin_parcours') return;
     if (!byId.has(String(id))) {
       byId.set(String(id), {
         id:String(id),
