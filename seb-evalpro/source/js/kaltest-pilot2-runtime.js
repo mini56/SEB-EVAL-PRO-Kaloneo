@@ -351,6 +351,10 @@
     return (question.acceptedAnswers || []).some(answer => actual === normalizeText(answer));
   }
 
+  function showCorrectionDuringParcours(test) {
+    return test?.behavior?.showCorrectionDuringParcours === true;
+  }
+
   function evaluateTest(test, testState) {
     let scoreMax = 0;
     const details = {};
@@ -1202,8 +1206,10 @@
             const input = makeInput(test, question, { compact:true });
             if (testState.status === 'COMPLETED') {
               input.disabled = true;
-              const detail = testState.result?.details?.[question.id];
-              td.classList.add(detail?.correct ? 'kaltest-answer-correct' : 'kaltest-answer-incorrect');
+              if (showCorrectionDuringParcours(test)) {
+                const detail = testState.result?.details?.[question.id];
+                td.classList.add(detail?.correct ? 'kaltest-answer-correct' : 'kaltest-answer-incorrect');
+              }
             }
             td.appendChild(input);
           }
@@ -2545,7 +2551,7 @@
       if (pot.example) {
         node.classList.add('example');
         node.setAttribute('aria-label', 'Exemple ' + code.textContent + ' ' + pct.textContent);
-      } else if (completed) {
+      } else if (completed && showCorrectionDuringParcours(test)) {
         const detail = testState.result?.details?.[pot.questionId];
         node.classList.add(detail?.correct ? 'correct' : 'incorrect');
       }
@@ -2666,8 +2672,10 @@
           const input = makeInput(test, question, { compact:true });
           if (testState.status === 'COMPLETED') {
             input.disabled = true;
-            const detail = testState.result?.details?.[question.id];
-            td.classList.add(detail?.correct ? 'kaltest-answer-correct' : 'kaltest-answer-incorrect');
+            if (showCorrectionDuringParcours(test)) {
+              const detail = testState.result?.details?.[question.id];
+              td.classList.add(detail?.correct ? 'kaltest-answer-correct' : 'kaltest-answer-incorrect');
+            }
           }
           td.appendChild(input);
         }
@@ -3526,7 +3534,9 @@
       });
       renderCurrentTest();
       status.textContent = test.behavior?.validationSuccessMessage ||
-        ('Exercice validé : ' + testState.result.score + '/' + testState.result.scoreMax + '. Cliquez sur « Suivant » pour continuer.');
+        (showCorrectionDuringParcours(test)
+          ? ('Exercice validé : ' + testState.result.score + '/' + testState.result.scoreMax + '. Cliquez sur « Suivant » pour continuer.')
+          : 'Exercice validé. Cliquez sur « Suivant » pour continuer.');
       return;
     }
 
