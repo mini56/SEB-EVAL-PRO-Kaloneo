@@ -37,7 +37,7 @@ const saved=library.saveParcours({
   fin:{id:fin.id,version:fin.version}
 });
 if(!saved.ok) fail('création parcours impossible',saved);
-library.selectParcours(saved.parcours.id);
+library.selectParcours(saved.parcours.id,{showCorrectionsDuringParcours:true});
 
 ipcMain.on('smoke:selected-runtime-sync',e=>{e.returnValue=library.resolveParcoursRuntime();});
 
@@ -63,11 +63,12 @@ app.whenReady().then(async()=>{
       title:document.getElementById('parcours')?.value||'',
       dataTitle:window.sebKaltestPilot2?.data?.parcours?.title||'',
       active:window.sebKaltestPilot2?.activeTests||[],
-      phase:document.querySelector('.pilot2-page.visible')?.id||''
+      phase:document.querySelector('.pilot2-page.visible')?.id||'',
+      corrections:window.sebKaltestPilot2?.showCorrectionsDuringParcours===true
     }))()`,true);
     const expected=[...tests.map(x=>x.id),fin.id];
     if(!value.ready||value.title!=='Parcours smoke sélectionné'||value.dataTitle!=='Parcours smoke sélectionné'||
-       JSON.stringify(value.active)!==JSON.stringify(expected)||value.phase!=='page-identification'){
+       JSON.stringify(value.active)!==JSON.stringify(expected)||value.phase!=='page-identification'||value.corrections!==true){
       return fail('le parcours choisi n’est pas utilisé par le candidat',{value,expected});
     }
     console.log('KALONEO_SELECTED_PARCOURS_ELECTRON=OK');
