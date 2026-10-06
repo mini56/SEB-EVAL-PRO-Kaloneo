@@ -2007,8 +2007,20 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   async function loadPrivacyMask(){
     if (privacyMaskLoaded) return;
     privacyMaskLoaded = true;
+    let ref = privacyMaskRef();
     try {
-      const result = await ipcRenderer.invoke('kaloneo-library:get-mask-screen', privacyMaskRef());
+      const runtime = await ipcRenderer.invoke('kaloneo-library:selected-runtime');
+      if (runtime && runtime.ok === true && runtime.runtime?.maskScreen) {
+        ref = runtime.runtime.maskScreen;
+        try {
+          const raw = JSON.stringify(ref);
+          sessionStorage.setItem(MASK_REF_KEY, raw);
+          localStorage.setItem(MASK_REF_KEY, raw);
+        } catch (_) {}
+      }
+    } catch (_) {}
+    try {
+      const result = await ipcRenderer.invoke('kaloneo-library:get-mask-screen', ref);
       if (result && result.ok === true && result.maskScreen) privacyMaskScreen = result.maskScreen;
     } catch (_) {}
     try { renderPrivacyContent(document.getElementById('seb-evalpro-privacy-layer'), privacyMode); } catch (_) {}
