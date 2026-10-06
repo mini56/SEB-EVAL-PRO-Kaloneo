@@ -57,6 +57,7 @@ ipcMain.handle('bilan-history:list',()=>[]);
 ipcMain.handle('candidate-catalog:list',()=>[]);
 ipcMain.handle('candidate-catalog:sync',()=>({ok:true}));
 ipcMain.handle('candidate-catalog:detail',()=>({ok:false}));
+ipcMain.handle('kaloneo-library:selected-runtime',()=>({ok:false,error:'Aucun runtime candidat dans ce smoke Builder.'}));
 ipcMain.handle('kaloneo-library:list-tests',()=>({ok:true,tests:library}));
 ipcMain.handle('kaloneo-library:list-mask-screens',()=>({ok:true,maskScreens:masks}));
 ipcMain.handle('kaloneo-library:get-mask-screen',(_e,ref)=>{
@@ -106,16 +107,24 @@ async function pointerDrag(win, sourceSelector, targetSelector) {
     const source=document.querySelector(${JSON.stringify(sourceSelector)});
     const target=document.querySelector(${JSON.stringify(targetSelector)});
     if(!source||!target) return null;
-    if(source.closest('.library-sections')) {
-      source.scrollIntoView({block:'center',inline:'nearest'});
+    const centerInScroller=(element,scroller)=>{
+      if(!element||!scroller)return;
+      const er=element.getBoundingClientRect();
+      const sr=scroller.getBoundingClientRect();
+      const delta=(er.top+er.height/2)-(sr.top+sr.height/2);
+      scroller.scrollTop += delta;
+    };
+    const libScroller=source.closest('.library-sections');
+    if(libScroller) {
+      centerInScroller(source,libScroller);
     } else if(source.closest('.sequence-scroll') && target.closest('.library-panel')) {
-      source.scrollIntoView({block:'center',inline:'nearest'});
+      centerInScroller(source,source.closest('.sequence-scroll'));
     } else {
       const sourceScroller=source.closest('.sequence-scroll');
       const targetScroller=target.closest('.sequence-scroll');
       if(sourceScroller && sourceScroller===targetScroller) {
-        target.scrollIntoView({block:'start',inline:'nearest'});
-        source.scrollIntoView({block:'nearest',inline:'nearest'});
+        centerInScroller(target,targetScroller);
+        centerInScroller(source,sourceScroller);
       }
     }
     window.__sebDragTrace={down:0,move:0,up:0,downTarget:'',moveTarget:'',upTarget:''};
@@ -127,8 +136,13 @@ async function pointerDrag(win, sourceSelector, targetSelector) {
     }
     const a=source.getBoundingClientRect();
     const b=target.getBoundingClientRect();
-    const sx=Math.round(a.left+Math.min(a.width/2,40));
-    const sy=Math.round(a.top+Math.min(a.height/2,22));
+    const sourceClip=source.closest('.library-sections,.sequence-scroll')?.getBoundingClientRect()||a;
+    const visibleLeft=Math.max(a.left,sourceClip.left)+6;
+    const visibleRight=Math.min(a.right,sourceClip.right)-6;
+    const visibleTop=Math.max(a.top,sourceClip.top)+6;
+    const visibleBottom=Math.min(a.bottom,sourceClip.bottom)-6;
+    const sx=Math.round(Math.max(visibleLeft,Math.min(visibleRight,a.left+a.width/2)));
+    const sy=Math.round(Math.max(visibleTop,Math.min(visibleBottom,a.top+Math.min(a.height/2,22))));
     const tx=Math.round(b.left+Math.min(Math.max(20,b.width/2),Math.max(20,b.width-10)));
     const ty=Math.round(b.top+Math.min(Math.max(20,b.height/2),Math.max(20,b.height-10)));
     const describe=(n)=>n?{id:n.id||'',className:String(n.className||''),tag:n.tagName||''}:null;
