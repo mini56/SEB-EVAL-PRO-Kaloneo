@@ -6,6 +6,8 @@
     library: [],
     maskScreens: [],
     saved: [],
+    editingId: null,
+    editingSystemProvided: false,
     maskScreen: null,
     introduction: null,
     fin: null,
@@ -518,8 +520,17 @@
       const creator = document.createElement('span');
       creator.textContent = 'Créateur : ' + (item.creator || '—');
       const meta = document.createElement('span');
-      meta.textContent = item.testCount + ' test' + (item.testCount > 1 ? 's' : '') + (item.systemProvided ? ' • modèle fourni' : '');
-      card.append(title, creator, meta);
+      const maskName=item.maskScreenMeta?.name||'KALONÉO';
+      meta.textContent = item.testCount + ' test' + (item.testCount > 1 ? 's' : '') + ' • masque : ' + maskName + (item.systemProvided ? ' • modèle fourni' : '') + (item.selected ? ' • sélectionné' : '');
+      const actions=document.createElement('div');
+      actions.className='saved-actions';
+      const open=document.createElement('button');
+      open.type='button';
+      open.className='saved-open';
+      open.textContent=item.systemProvided?'Ouvrir':'Ouvrir / modifier';
+      open.addEventListener('click',()=>loadParcours(item.id));
+      actions.appendChild(open);
+      card.append(title, creator, meta, actions);
       root.appendChild(card);
     }
   }
@@ -582,6 +593,53 @@
     });
   }
 
+  function resetParcours() {
+    state.editingId=null;
+    state.editingSystemProvided=false;
+    state.maskScreen=state.maskScreens.find(item=>item.systemProvided)||state.maskScreens[0]||null;
+    state.introduction=state.library.find(item=>item.role==='introduction')||null;
+    state.fin=state.library.find(item=>item.role==='fin')||null;
+    state.tests=[];
+    $('parcours-name').value='';
+    $('parcours-creator').value='';
+    $('save-parcours').disabled=false;
+    $('save-parcours').textContent='Enregistrer le parcours';
+    document.querySelector('.page-topbar h1').textContent='Création de parcours';
+    setStatus('Nouveau parcours.');
+    render();
+    requestAnimationFrame(()=>$('parcours-name').focus());
+  }
+
+  async function loadParcours(id) {
+    try {
+      const result=await api().kaloneoGetParcours?.(id);
+      if(!result||result.ok===false) throw new Error(result?.error||'Parcours introuvable.');
+      const value=result.parcours;
+      state.editingId=String(value.id||'');
+      state.editingSystemProvided=value.systemProvided===true;
+      state.maskScreen=libraryItem(value.maskScreen?.id,value.maskScreen?.version) || state.maskScreens.find(item=>item.systemProvided) || null;
+      state.introduction=libraryItem(value.introduction?.id,value.introduction?.version);
+      state.fin=libraryItem(value.fin?.id,value.fin?.version);
+      state.tests=(Array.isArray(value.tests)?value.tests:[])
+        .map(ref=>libraryItem(ref?.id,ref?.version))
+        .filter(Boolean);
+      $('parcours-name').value=String(value.name||'');
+      $('parcours-creator').value=String(value.creator||'');
+      $('save-parcours').disabled=state.editingSystemProvided;
+      $('save-parcours').textContent=state.editingSystemProvided?'Modèle fourni protégé':'Enregistrer les modifications';
+      document.querySelector('.page-topbar h1').textContent=state.editingSystemProvided?'Consultation du parcours':'Modification de parcours';
+      render();
+      setStatus(
+        state.editingSystemProvided
+          ? 'Parcours de base ouvert en consultation. Il est protégé ; utilisez « Nouveau parcours » pour créer une variante.'
+          : 'Parcours « '+value.name+' » ouvert.',
+        state.editingSystemProvided?'':'ok'
+      );
+    } catch(error) {
+      setStatus(error?.message||String(error),'error');
+    }
+  }
+
   async function refreshSaved() {
     const result = await api().kaloneoListParcours?.();
     if (!result || result.ok === false) {
@@ -607,7 +665,12 @@
       state.fin = state.library.find(item => item.role === 'fin') || null;
       await refreshSaved();
       render();
-      setStatus('Bibliothèque chargée : ' + state.library.filter(item => item.role === 'test').length + ' tests et ' + state.maskScreens.length + ' écran(s) de masquage.');
+      const editId=new URLSearchParams(location.search).get('edit');
+      if(editId) {
+        await loadParcours(editId);
+      } else {
+        setStatus('Bibliothèque chargée : ' + state.library.filter(item => item.role === 'test').length + ' tests et ' + state.maskScreens.length + ' écran(s) de masquage.');
+      }
     } catch (error) {
       setStatus(error && error.message ? error.message : String(error), 'error');
     }
@@ -628,6 +691,7 @@
     setStatus('Enregistrement du parcours…');
     try {
       const result = await api().kaloneoSaveParcours?.({
+        id:state.editingId || undefined,
         name,
         creator,
         maskScreen:refOf(state.maskScreen),
@@ -638,9 +702,13 @@
       if (!result || result.ok === false) {
         throw new Error(result && result.error ? result.error : 'Enregistrement impossible.');
       }
+      state.editingId=String(result.parcours?.id||state.editingId||'');
+      state.editingSystemProvided=false;
+      $('save-parcours').textContent='Enregistrer les modifications';
+      document.querySelector('.page-topbar h1').textContent='Modification de parcours';
       await refreshSaved();
       renderSaved();
-      setStatus('Parcours « ' + name + ' » enregistré.', 'ok');
+      setStatus(result.updated ? 'Parcours « ' + name + ' » mis à jour.' : 'Parcours « ' + name + ' » enregistré.', 'ok');
     } catch (error) {
       setStatus(error && error.message ? error.message : String(error), 'error');
     } finally {
@@ -650,6 +718,7 @@
 
   function ready() {
     $('back-tests-parcours').addEventListener('click', () => { window.location.href = 'admin-tests-parcours.html'; });
+    $('new-parcours').addEventListener('click', resetParcours);
     $('cancel-parcours').addEventListener('click', () => { window.location.href = 'admin-tests-parcours.html'; });
     $('save-parcours').addEventListener('click', saveParcours);
     $('library-search').addEventListener('input', renderLibrary);
