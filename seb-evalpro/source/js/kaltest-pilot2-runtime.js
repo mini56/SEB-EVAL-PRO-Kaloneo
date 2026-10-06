@@ -11,6 +11,8 @@
   } catch (_) {}
 
   const CUSTOM_PARCOURS_MODE = Boolean(selectedRuntime);
+  const SHOW_CORRECTIONS_DURING_PARCOURS =
+    selectedRuntime?.launchOptions?.showCorrectionsDuringParcours === true;
   const DATA = CUSTOM_PARCOURS_MODE
     ? {
         ...(STATIC_DATA || {}),
@@ -351,8 +353,8 @@
     return (question.acceptedAnswers || []).some(answer => actual === normalizeText(answer));
   }
 
-  function showCorrectionDuringParcours(test) {
-    return test?.behavior?.showCorrectionDuringParcours === true;
+  function showCorrectionDuringParcours() {
+    return SHOW_CORRECTIONS_DURING_PARCOURS;
   }
 
   function evaluateTest(test, testState) {
