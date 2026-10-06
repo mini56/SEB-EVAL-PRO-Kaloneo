@@ -300,12 +300,30 @@ function sebResultCategoryLabel(value) {
     'technique':'Compétences techniques',
     'techniques':'Compétences techniques',
     'autoevaluation':'Autoévaluation',
-    'bureautique':'Bureautique'
+    'bureautique':'Bureautique',
+    'tic':'TIC / Bureautique',
+    'raisonnement':'Raisonnement',
+    'francais':'Français',
+    'communication':'Communication',
+    'technique':'Compétences techniques',
+    'techniques':'Compétences techniques',
+    'competences techniques':'Compétences techniques',
+    'autres':'Autres'
   };
   if (known[normalized]) return known[normalized];
   return raw.replace(/[_-]+/g, ' ').replace(/^./, char => char.toUpperCase());
 }
 
+
+function sebReadCatalogMetadata() {
+  try {
+    const payload = window.sebEvalPro?.kaloneoTestMetadataSync?.();
+    const tests = payload && payload.ok === true && Array.isArray(payload.tests) ? payload.tests : [];
+    return new Map(tests.map(test => [String(test.id || ''), test]).filter(([id]) => id));
+  } catch (_) {
+    return new Map();
+  }
+}
 
 function sebReadCanonicalKaltestState() {
   const candidates = [];
@@ -376,7 +394,7 @@ function sebDescribeCanonicalResult(test, testState) {
       const line = document.createElement('p');
       line.className = 'ligne';
       let shown = 0;
-      for (const [key, value] of entries) {
+      for (const [, value] of entries) {
         if (shown >= 12) break;
         const span = document.createElement('span');
         const correct = value.correct === true;
@@ -384,7 +402,7 @@ function sebDescribeCanonicalResult(test, testState) {
         span.className = correct ? 'correct' : (answered ? 'incorrect' : 'commentaire');
         const raw = value.answer ?? value.user ?? value.value ?? '';
         const display = String(raw == null ? '' : raw).replace(/\s+/g, ' ').trim();
-        span.textContent = key + (display ? ' : ' + display : '') + (correct ? ' ✓' : '');
+        span.textContent = 'Q' + String(shown + 1) + (display ? ' : ' + display : '') + (correct ? ' ✓' : ' ✗');
         line.appendChild(span);
         shown += 1;
       }
@@ -405,20 +423,32 @@ function sebApplyDynamicResultsLayout() {
     ? canonicalState.tests
     : {};
 
-  // Le manifeste est la liste officielle du parcours. Si une ancienne sauvegarde R8
-  // est incomplète, on ajoute uniquement les tests réellement présents dans l'état
-  // KALTEST du candidat afin de ne jamais perdre un résultat effectué.
+  // Le manifeste est la liste officielle du parcours. Pour les dossiers créés
+  // avant R10, les métadonnées du catalogue servent uniquement à restituer le
+  // vrai titre et la vraie section — jamais à ajouter un test non exécuté.
+  const catalog = sebReadCatalogMetadata();
   const selectedTests = manifest.tests.filter(test => test && test.id);
-  const byId = new Map(selectedTests.map(test => [String(test.id), test]));
+  const byId = new Map();
+  selectedTests.forEach(test => {
+    const id = String(test.id);
+    const meta = catalog.get(id) || {};
+    byId.set(id, {
+      ...test,
+      title:String(test.title && test.title !== id ? test.title : meta.title || test.title || id),
+      category:String(test.category && sebNormalizeResultText(test.category) !== 'autres' ? test.category : meta.category || test.category || 'autres'),
+      scored:test.scored !== undefined ? test.scored : meta.scored !== false
+    });
+  });
   Object.keys(canonicalTests).forEach(id => {
     if (String(id) === 'fin_parcours') return;
     if (!byId.has(String(id))) {
+      const meta = catalog.get(String(id)) || {};
       byId.set(String(id), {
         id:String(id),
-        version:'',
-        title:String(id).replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()),
-        category:'Autres',
-        scored:true
+        version:String(meta.version || ''),
+        title:String(meta.title || id).replace(/^./, char => char.toUpperCase()),
+        category:String(meta.category || 'autres'),
+        scored:meta.scored !== false
       });
     }
   });
@@ -519,26 +549,27 @@ function sebApplyDynamicResultsLayout() {
       card.style.cssText = 'margin:0 0 12px;padding:12px 14px;border:1px solid #d6dce6;border-radius:7px;background:#fff;';
 
       const nodes = groupedNodes.get(String(test.id)) || [];
-      let currentTitleUsed = false;
+
+      // Le nom du test est toujours le premier élément du bloc.
+      const testTitle = document.createElement('h3');
+      testTitle.textContent = String(test.title || test.id);
+      testTitle.style.cssText = 'margin:0 0 8px;color:#0b567d;font-size:18px;';
+      card.appendChild(testTitle);
 
       const canonicalSummary = sebDescribeCanonicalResult(test, canonicalTests[String(test.id)]);
       if (canonicalSummary) card.appendChild(canonicalSummary);
 
+      // Les anciens blocs restent utiles pour les commentaires/détails lisibles,
+      // mais leurs titres et scores doublons ne doivent plus polluer l'affichage.
       nodes.forEach(node => {
-        if (/^H[1-6]$/.test(node.tagName || '') && node.dataset.sebCurrentTestTitle === '1') {
-          if (currentTitleUsed) return;
-          currentTitleUsed = true;
-          node.style.marginTop = '0';
-        }
+        if (/^H[1-6]$/.test(node.tagName || '')) return;
+        const nodeText = sebNormalizeResultText(node.textContent);
+        if (
+          node.tagName === 'P' &&
+          (nodeText.startsWith('score ') || nodeText.startsWith('score:') || nodeText.startsWith('score total'))
+        ) return;
         card.appendChild(node);
       });
-
-      if (!currentTitleUsed) {
-        const testTitle = document.createElement('h3');
-        testTitle.textContent = String(test.title || test.id);
-        testTitle.style.marginTop = '0';
-        card.prepend(testTitle);
-      }
 
       if (!nodes.length && !canonicalSummary) {
         const empty = document.createElement('p');
