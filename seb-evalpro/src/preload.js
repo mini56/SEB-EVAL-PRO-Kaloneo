@@ -796,6 +796,7 @@ function sebSyncAdminBarState() {
   const exportCandidatesButton = document.getElementById('seb-evalpro-export-candidates');
   const importCandidatesButton = document.getElementById('seb-evalpro-import-candidates');
   const testsParcoursButton = document.getElementById('seb-evalpro-tests-parcours');
+  const chooseParcoursButton = document.getElementById('seb-evalpro-choose-parcours');
   const showPrivacyButton = document.getElementById('seb-evalpro-show-privacy');
   const closeSessionButton = document.getElementById('seb-evalpro-close-session');
   const quitApplicationButton = document.getElementById('seb-evalpro-quit-application');
@@ -824,6 +825,14 @@ function sebSyncAdminBarState() {
       }).catch(() => { testsParcoursButton.hidden = true; });
     }
   }
+  if (chooseParcoursButton) {
+    chooseParcoursButton.hidden = true;
+    if (adminUnlocked && !onAdminDetail) {
+      ipcRenderer.invoke('candidate:active').then((active) => {
+        chooseParcoursButton.hidden = !!active;
+      }).catch(() => { chooseParcoursButton.hidden = true; });
+    }
+  }
   if (showPrivacyButton) showPrivacyButton.hidden = !adminUnlocked || isTestsParcoursWorkspacePage();
   const finishCandidateButton = document.getElementById('seb-evalpro-finish-candidate');
   if (finishCandidateButton) finishCandidateButton.hidden = true;
@@ -836,6 +845,163 @@ function sebSyncAdminBarState() {
     }
   }
   if (quitApplicationButton) quitApplicationButton.hidden = !adminUnlocked;
+}
+
+async function createParcoursChoiceDialog() {
+  const existing = document.getElementById('seb-evalpro-parcours-choice-dialog');
+  if (existing) existing.remove();
+
+  const listResult = await ipcRenderer.invoke('kaloneo-library:list-parcours').catch(() => null);
+  if (!listResult || listResult.ok !== true) {
+    await showTransferMessage('Choix du parcours', listResult?.error || 'La bibliothèque des parcours est inaccessible.', true);
+    return null;
+  }
+
+  let selectedId = '';
+  const current = await ipcRenderer.invoke('kaloneo-library:get-selected-parcours').catch(() => null);
+  if (current && current.ok === true) selectedId = String(current.selected?.id || '');
+
+  const layer = document.createElement('div');
+  layer.id = 'seb-evalpro-parcours-choice-dialog';
+  layer.innerHTML = `
+    <style>
+      #seb-evalpro-parcours-choice-dialog{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+      #seb-evalpro-parcours-choice-dialog .pc-card{width:min(1100px,94vw);height:min(700px,88vh);background:#fff;border:1px solid #8ea5b9;border-radius:10px;box-shadow:0 16px 44px rgba(0,0,0,.28);display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+      #seb-evalpro-parcours-choice-dialog .pc-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 18px;border-bottom:1px solid #d6dce6}
+      #seb-evalpro-parcours-choice-dialog h2{margin:0;color:#0070c0;font-size:24px}
+      #seb-evalpro-parcours-choice-dialog .pc-sub{margin:3px 0 0;color:#5d6d79;font-size:13px}
+      #seb-evalpro-parcours-choice-dialog .pc-main{display:grid;grid-template-columns:minmax(260px,.82fr) minmax(0,1.5fr);min-height:0}
+      #seb-evalpro-parcours-choice-dialog .pc-list{border-right:1px solid #d6dce6;padding:12px;overflow:auto;background:#f7f9fc}
+      #seb-evalpro-parcours-choice-dialog .pc-item{display:block;width:100%;text-align:left;border:1px solid #cbd6e2;border-radius:8px;background:#fff;padding:10px 12px;margin-bottom:8px;cursor:pointer;color:#263746}
+      #seb-evalpro-parcours-choice-dialog .pc-item.active{border-color:#0070c0;background:#eef7fd;box-shadow:inset 0 0 0 1px #0070c0}
+      #seb-evalpro-parcours-choice-dialog .pc-item strong,#seb-evalpro-parcours-choice-dialog .pc-item span{display:block}
+      #seb-evalpro-parcours-choice-dialog .pc-item span{font-size:12px;color:#607080;margin-top:3px}
+      #seb-evalpro-parcours-choice-dialog .pc-detail{padding:18px;overflow:auto}
+      #seb-evalpro-parcours-choice-dialog .pc-detail h3{margin:0 0 5px;color:#004e70;font-size:23px}
+      #seb-evalpro-parcours-choice-dialog .pc-meta{color:#607080;margin-bottom:14px}
+      #seb-evalpro-parcours-choice-dialog .pc-grid{display:grid;grid-template-columns:170px 1fr;gap:7px 12px;margin-bottom:16px}
+      #seb-evalpro-parcours-choice-dialog .pc-label{font-weight:700;color:#24425b}
+      #seb-evalpro-parcours-choice-dialog ol{margin:7px 0 0;padding-left:25px}
+      #seb-evalpro-parcours-choice-dialog li{padding:3px 0}
+      #seb-evalpro-parcours-choice-dialog .pc-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 18px;border-top:1px solid #d6dce6;background:#fbfcfe}
+      #seb-evalpro-parcours-choice-dialog .pc-selected{font-weight:700;color:#167a4a}
+      #seb-evalpro-parcours-choice-dialog .pc-actions{display:flex;gap:8px}
+      #seb-evalpro-parcours-choice-dialog button.pc-action{min-height:38px;padding:7px 14px;border:1.5px solid #0070c0;border-radius:7px;background:#fff;color:#0070c0;font-weight:700;cursor:pointer}
+      #seb-evalpro-parcours-choice-dialog button.pc-primary{background:#0070c0;color:#fff}
+      #seb-evalpro-parcours-choice-dialog button.pc-action:disabled{opacity:.5;cursor:default}
+    </style>
+    <div class="pc-card" role="dialog" aria-modal="true" aria-labelledby="pc-title">
+      <div class="pc-head">
+        <div><h2 id="pc-title">Choix du parcours</h2><div class="pc-sub">Sélectionnez un parcours après avoir vérifié son contenu.</div></div>
+        <button class="pc-action" id="pc-close" type="button">Fermer</button>
+      </div>
+      <div class="pc-main">
+        <div class="pc-list" id="pc-list"></div>
+        <div class="pc-detail" id="pc-detail"><p>Sélectionnez un parcours dans la liste.</p></div>
+      </div>
+      <div class="pc-foot">
+        <div class="pc-selected" id="pc-selected"></div>
+        <div class="pc-actions">
+          <button class="pc-action" id="pc-open" type="button" disabled>Ouvrir / modifier</button>
+          <button class="pc-action pc-primary" id="pc-choose" type="button" disabled>Choisir ce parcours</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(layer);
+
+  const list = layer.querySelector('#pc-list');
+  const detail = layer.querySelector('#pc-detail');
+  const chosenLabel = layer.querySelector('#pc-selected');
+  const openButton = layer.querySelector('#pc-open');
+  const chooseButton = layer.querySelector('#pc-choose');
+  let focused = null;
+  let focusedDetails = null;
+
+  const refreshSelectedLabel = () => {
+    const meta = (listResult.parcours || []).find(item => String(item.id) === selectedId);
+    chosenLabel.textContent = meta ? 'Parcours sélectionné : ' + meta.name : 'Aucun parcours sélectionné';
+  };
+
+  const renderDetails = async (meta) => {
+    focused = meta;
+    focusedDetails = null;
+    openButton.disabled = !meta;
+    chooseButton.disabled = !meta || String(meta.id) === selectedId;
+    [...list.querySelectorAll('.pc-item')].forEach(node => node.classList.toggle('active', node.dataset.id === String(meta?.id || '')));
+    if (!meta) {
+      detail.innerHTML = '<p>Sélectionnez un parcours dans la liste.</p>';
+      return;
+    }
+    detail.innerHTML = '<p>Chargement du contenu…</p>';
+    const result = await ipcRenderer.invoke('kaloneo-library:get-parcours-details', meta.id).catch(() => null);
+    if (!result || result.ok !== true) {
+      detail.innerHTML = '<p>Contenu du parcours inaccessible.</p>';
+      return;
+    }
+    focusedDetails = result.details;
+    const d = result.details;
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    const tests = (d.tests || []).map((entry,index) => '<li><b>'+(index+1)+'.</b> '+esc(entry.meta?.title || entry.ref?.id || 'Test introuvable')+' <small>v'+esc(entry.meta?.version || entry.ref?.version || '')+'</small></li>').join('');
+    detail.innerHTML = `
+      <h3>${esc(d.name)}</h3>
+      <div class="pc-meta">Créateur : ${esc(d.creator || '—')} • ${d.testCount} test${d.testCount>1?'s':''}${d.systemProvided?' • modèle fourni':''}</div>
+      <div class="pc-grid">
+        <div class="pc-label">Écran de masquage</div><div>${esc(d.maskScreenMeta?.name || 'KALONÉO')}</div>
+        <div class="pc-label">Introduction</div><div>${esc(d.introductionMeta?.title || d.introduction?.id || '—')}</div>
+        <div class="pc-label">Page de fin</div><div>${esc(d.finMeta?.title || d.fin?.id || '—')}</div>
+      </div>
+      <div class="pc-label">Tests dans l’ordre</div>
+      <ol>${tests || '<li>Aucun test intermédiaire</li>'}</ol>`;
+  };
+
+  for (const meta of listResult.parcours || []) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'pc-item';
+    button.dataset.id = String(meta.id);
+    const maskName = meta.maskScreenMeta?.name || 'KALONÉO';
+    button.innerHTML = '<strong></strong><span></span>';
+    button.querySelector('strong').textContent = meta.name;
+    button.querySelector('span').textContent =
+      meta.testCount + ' test' + (meta.testCount > 1 ? 's' : '') + ' • masque : ' + maskName +
+      (meta.systemProvided ? ' • modèle fourni' : '');
+    button.addEventListener('click', () => renderDetails(meta));
+    list.appendChild(button);
+  }
+
+  refreshSelectedLabel();
+  const first = (listResult.parcours || []).find(item => String(item.id) === selectedId) || (listResult.parcours || [])[0] || null;
+  if (first) await renderDetails(first);
+
+  layer.querySelector('#pc-close').addEventListener('click', () => layer.remove());
+  layer.addEventListener('click', event => { if (event.target === layer) layer.remove(); });
+
+  chooseButton.addEventListener('click', async () => {
+    if (!focused) return;
+    chooseButton.disabled = true;
+    const result = await ipcRenderer.invoke('kaloneo-library:select-parcours', focused.id).catch(() => null);
+    if (!result || result.ok !== true) {
+      chooseButton.disabled = false;
+      await showTransferMessage('Choix du parcours', result?.error || 'Le parcours n’a pas pu être sélectionné.', true);
+      return;
+    }
+    selectedId = String(result.selected?.id || focused.id);
+    refreshSelectedLabel();
+    chooseButton.textContent = 'Parcours choisi ✓';
+    setTimeout(() => {
+      chooseButton.textContent = 'Choisir ce parcours';
+      chooseButton.disabled = String(focused?.id || '') === selectedId;
+    }, 1000);
+  });
+
+  openButton.addEventListener('click', () => {
+    if (!focused) return;
+    adminNavigationLeaving = true;
+    layer.remove();
+    window.location.href = 'admin-parcours-builder.html?edit=' + encodeURIComponent(focused.id);
+  });
+
+  return layer;
 }
 
 function injectAdminBar() {
@@ -853,6 +1019,7 @@ function injectAdminBar() {
     <button id="seb-evalpro-export-candidates" type="button" hidden>↑ Exporter dossiers</button>
     <button id="seb-evalpro-import-candidates" type="button" hidden>↓ Importer dossiers</button>
     <button id="seb-evalpro-tests-parcours" type="button" hidden>Tests / Parcours</button>
+    <button id="seb-evalpro-choose-parcours" type="button" hidden>Choix du parcours</button>
     <button id="seb-evalpro-show-privacy" type="button" hidden>Afficher l’écran d’accueil</button>
     <button id="seb-evalpro-finish-candidate" type="button" hidden>Terminer le parcours du candidat</button>
     <button id="seb-evalpro-quit-application" type="button" hidden>Quitter</button>
@@ -986,6 +1153,7 @@ function injectAdminBar() {
   const exportCandidatesButton = bar.querySelector('#seb-evalpro-export-candidates');
   const importCandidatesButton = bar.querySelector('#seb-evalpro-import-candidates');
   const testsParcoursButton = bar.querySelector('#seb-evalpro-tests-parcours');
+  const chooseParcoursButton = bar.querySelector('#seb-evalpro-choose-parcours');
   const showPrivacyButton = bar.querySelector('#seb-evalpro-show-privacy');
   const finishCandidateButton = bar.querySelector('#seb-evalpro-finish-candidate');
   const quitApplicationButton = bar.querySelector('#seb-evalpro-quit-application');
@@ -1039,6 +1207,7 @@ function injectAdminBar() {
       'seb-evalpro-export-candidates': 'Copie les dossiers candidats vers une clé USB ou un dossier.',
       'seb-evalpro-import-candidates': 'Importe dans SEB EvalPro des dossiers candidats provenant d’un autre poste.',
       'seb-evalpro-tests-parcours': 'Ouvre la page de gestion des tests et des parcours KALONÉO.',
+      'seb-evalpro-choose-parcours': 'Ouvre la bibliothèque des parcours, affiche leur contenu et choisit celui du prochain candidat.',
       'seb-evalpro-show-privacy': 'Affiche l’écran d’accueil SEB EvalPro afin de masquer temporairement les informations affichées.',
       'seb-evalpro-close-session': 'Termine définitivement le parcours candidat en cours et revient à l’espace Administrateur.',
       'seb-evalpro-quit-application': 'Ferme SEB EvalPro. Un parcours encore actif est sauvegardé pour pouvoir être repris.',
@@ -1189,6 +1358,7 @@ function injectAdminBar() {
     exportCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canExport;
     importCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canImport;
     testsParcoursButton.hidden = true;
+    chooseParcoursButton.hidden = true;
     showPrivacyButton.hidden = !adminUnlocked;
     // Une seule commande de fin de parcours : "Fermer la session active".
     // L'ancien bouton "Terminer le parcours du candidat" reste volontairement masqué.
@@ -1201,10 +1371,12 @@ function injectAdminBar() {
       ipcRenderer.invoke('candidate:active').then((active) => {
         closeSessionButton.hidden = !active;
         testsParcoursButton.hidden = !!active || onAdminDetail || isAdminTestsParcoursPage();
+        chooseParcoursButton.hidden = !!active || onAdminDetail;
         finishCandidateButton.hidden = true;
       }).catch(() => {
         closeSessionButton.hidden = true;
         testsParcoursButton.hidden = true;
+        chooseParcoursButton.hidden = true;
         finishCandidateButton.hidden = true;
       });
     }
@@ -1235,6 +1407,15 @@ function injectAdminBar() {
         adminCandidateWorkspace = null;
       }
       await ipcRenderer.invoke('candidate:set-admin-export-context', '').catch(() => false);
+      const activeBeforeLock = await ipcRenderer.invoke('candidate:active').catch(() => null);
+      if (!activeBeforeLock) {
+        const selectedRuntime = await ipcRenderer.invoke('kaloneo-library:selected-runtime').catch(() => null);
+        if (!selectedRuntime || selectedRuntime.ok !== true) {
+          adminNavigationLeaving = false;
+          await showTransferMessage('Verrouillage impossible', selectedRuntime?.error || 'Aucun parcours valide n’est sélectionné.', true);
+          return;
+        }
+      }
       try { window.localStorage.setItem('seb_evalpro_privacy_screen', 'temporary'); } catch (_) {}
       await ipcRenderer.invoke('admin:lock');
       adminUnlocked = false;
@@ -1299,6 +1480,18 @@ function injectAdminBar() {
   showPrivacyButton.addEventListener('click', () => {
     showBar();
     window.dispatchEvent(new CustomEvent('seb-evalpro-show-privacy'));
+  });
+
+  chooseParcoursButton.addEventListener('click', async () => {
+    showBar();
+    const active = await ipcRenderer.invoke('candidate:active').catch(() => null);
+    if (active) {
+      chooseParcoursButton.hidden = true;
+      await showTransferMessage('Choix du parcours', 'Le parcours ne peut plus être changé pendant une évaluation active.');
+      scheduleHideBar();
+      return;
+    }
+    await createParcoursChoiceDialog();
   });
 
   testsParcoursButton.addEventListener('click', async () => {
