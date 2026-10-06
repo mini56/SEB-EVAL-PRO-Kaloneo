@@ -1106,6 +1106,60 @@ ipcMain.handle('kaloneo-library:list-parcours', () => {
   }
 });
 
+ipcMain.handle('kaloneo-library:get-parcours', (_event, id) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible d’ouvrir un parcours pendant une évaluation active.' };
+  try {
+    return getKaloneoLibrary().getParcours(id);
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:get-parcours-details', (_event, id) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de consulter les parcours pendant une évaluation active.' };
+  try {
+    return getKaloneoLibrary().getParcoursDetails(id);
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:get-selected-parcours', () => {
+  try {
+    return getKaloneoLibrary().getSelectedParcours();
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:select-parcours', (_event, id) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de changer de parcours pendant une évaluation active.' };
+  try {
+    return getKaloneoLibrary().selectParcours(id);
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:selected-runtime', () => {
+  try {
+    return getKaloneoLibrary().resolveParcoursRuntime();
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.on('kaloneo-library:selected-runtime-sync', (event) => {
+  try {
+    event.returnValue = getKaloneoLibrary().resolveParcoursRuntime();
+  } catch (error) {
+    event.returnValue = { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
 ipcMain.handle('kaloneo-library:save-parcours', (_event, payload) => {
   if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
   if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les parcours pendant une évaluation active.' };
