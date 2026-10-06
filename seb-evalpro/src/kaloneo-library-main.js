@@ -491,37 +491,67 @@ function createKaloneoLibrary(options = {}) {
     return { ok:true, details:parcoursDetails(value) };
   }
 
+  function readSelectedParcoursSelection() {
+    const saved = readJson(selectedParcoursFile) || {};
+    const id = String(saved.id || '').trim();
+    const selectedId = id && findParcours(id) ? id : 'parcours-de-base';
+    return {
+      id:selectedId,
+      launchOptions:{
+        // Règle KALONÉO : aucune correction pendant le parcours sauf choix explicite Admin.
+        showCorrectionsDuringParcours:saved.launchOptions?.showCorrectionsDuringParcours === true
+      }
+    };
+  }
+
   function readSelectedParcoursId() {
-    const saved = readJson(selectedParcoursFile);
-    const id = String(saved && saved.id || '').trim();
-    if (id && findParcours(id)) return id;
-    return 'parcours-de-base';
+    return readSelectedParcoursSelection().id;
   }
 
   function getSelectedParcours() {
     ensureSeed();
-    const id = readSelectedParcoursId();
-    const value = findParcours(id) || findParcours('parcours-de-base');
+    const selection = readSelectedParcoursSelection();
+    const value = findParcours(selection.id) || findParcours('parcours-de-base');
     if (!value) return { ok:false, error:'Aucun parcours disponible.' };
-    return { ok:true, selected:parcoursDetails(value) };
+    return {
+      ok:true,
+      selected:{
+        ...parcoursDetails(value),
+        launchOptions:JSON.parse(JSON.stringify(selection.launchOptions))
+      }
+    };
   }
 
-  function selectParcours(id) {
+  function selectParcours(id, options = {}) {
     ensureSeed();
     const value = findParcours(id);
     if (!value) return { ok:false, error:'Parcours introuvable.' };
+    const launchOptions = {
+      showCorrectionsDuringParcours:options.showCorrectionsDuringParcours === true
+    };
     atomicWriteJson(selectedParcoursFile, {
       format:'kaloneo-selected-parcours',
-      schemaVersion:1,
+      schemaVersion:2,
       id:String(value.id),
+      launchOptions,
       selectedAt:now().toISOString()
     });
-    return { ok:true, selected:parcoursDetails(value) };
+    return {
+      ok:true,
+      selected:{
+        ...parcoursDetails(value),
+        launchOptions:JSON.parse(JSON.stringify(launchOptions))
+      }
+    };
   }
 
   function resolveParcoursRuntime(id = '') {
     ensureSeed();
-    const selectedId = String(id || readSelectedParcoursId() || 'parcours-de-base');
+    const persistedSelection = readSelectedParcoursSelection();
+    const selectedId = String(id || persistedSelection.id || 'parcours-de-base');
+    const launchOptions = id
+      ? {showCorrectionsDuringParcours:false}
+      : persistedSelection.launchOptions;
     const value = findParcours(selectedId) || findParcours('parcours-de-base');
     if (!value) return { ok:false, error:'Parcours KALONÉO introuvable.' };
 
@@ -540,6 +570,9 @@ function createKaloneoLibrary(options = {}) {
           id:String(value.id),
           title:String(value.name || value.id),
           creator:String(value.creator || ''),
+          launchOptions:{
+            showCorrectionsDuringParcours:launchOptions.showCorrectionsDuringParcours === true
+          },
           maskScreen:value.maskScreen || defaultMaskRef(),
           maskScreenDefinition:mask.maskScreen,
           introduction:JSON.parse(JSON.stringify(introduction)),
