@@ -84,7 +84,7 @@ function isAdminKaloneoBuilderPage(page = pageName()) {
 }
 
 function isAdminMaskBuilderPage(page = pageName()) {
-  return String(page || '').toLowerCase() === 'admin-mask-builder.html';
+  return ['admin-mask-builder.html','admin-mask-preview.html'].includes(String(page || '').toLowerCase());
 }
 
 function isAdminKaloneoBuilderPreviewPage(page = pageName()) {
@@ -2005,6 +2005,10 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   kaloneoListMaskScreens: () => ipcRenderer.invoke('kaloneo-library:list-mask-screens'),
   kaloneoGetMaskScreen: (ref) => ipcRenderer.invoke('kaloneo-library:get-mask-screen', ref || null),
   kaloneoSaveMaskScreen: (maskScreen, overwrite) => ipcRenderer.invoke('kaloneo-library:save-mask-screen', { maskScreen, overwrite:overwrite === true }),
+  kaloneoOpenMaskPreview: (definition) => ipcRenderer.invoke('kaloneo-mask:open-preview', definition),
+  kaloneoGetMaskPreview: () => ipcRenderer.invoke('kaloneo-mask:get-preview'),
+  kaloneoConsumeMaskPreview: () => ipcRenderer.invoke('kaloneo-mask:consume-preview'),
+  kaloneoCloseMaskPreview: () => ipcRenderer.invoke('kaloneo-mask:close-preview'),
   kaloneoListParcours: () => ipcRenderer.invoke('kaloneo-library:list-parcours'),
   kaloneoGetParcours: (id) => ipcRenderer.invoke('kaloneo-library:get-parcours', id),
   kaloneoGetParcoursDetails: (id) => ipcRenderer.invoke('kaloneo-library:get-parcours-details', id),
