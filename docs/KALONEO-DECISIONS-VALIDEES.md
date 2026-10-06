@@ -2791,3 +2791,30 @@ Décisions validées le 05/10/2026 après test réel du Test Builder R3 :
 - le bouton de fermeture conserve le libellé validé existant : « Masquer l’écran d’accueil » ;
 - fermer l’écran de masquage ramène au test en cours sans changer de route, réponse, état ou position dans le parcours ;
 - les pages Admin, Test Builder et aperçus restent sans bouton candidat « Afficher l’écran d’accueil ».
+
+
+## 73. PILOTE 22 R6 — consultation, choix et lancement des parcours personnalisés
+
+Décisions validées le 06/10/2026 :
+
+- la barre Administrateur comporte une commande **« Choix du parcours »** lorsque l’Administration est déverrouillée et qu’aucune évaluation candidat n’est active ;
+- cette commande ouvre la bibliothèque des parcours enregistrés avec une vue détaillée avant sélection : nom, créateur, nombre de tests, écran de masquage, introduction, tests dans l’ordre et page de fin ;
+- la bibliothèque propose **« Choisir ce parcours »** et **« Ouvrir / modifier »** ;
+- le parcours sélectionné est conservé dans le stockage interne KALONÉO ; en l’absence de choix explicite, **Parcours de base** reste le choix par défaut ;
+- le bouton existant **« Verrouiller »** valide le choix du parcours puis verrouille simultanément la barre Administrateur ; le candidat reçoit alors le parcours sélectionné et n’a aucun accès aux fonctions Admin ;
+- dès qu’une évaluation candidat est active, le choix du parcours devient indisponible jusqu’à la fermeture de la session active ;
+- l’introduction candidat affiche en lecture seule le vrai nom du parcours sélectionné ;
+- le moteur candidat charge dynamiquement les tests du parcours dans l’ordre enregistré, puis sa page de fin ;
+- l’écran de masquage du parcours sélectionné devient automatiquement celui du bouton candidat « Afficher l’écran d’accueil » ;
+- un parcours enregistré peut être rouvert dans le Builder : écran de masquage, introduction, tests dans l’ordre et fin sont restaurés ;
+- un parcours personnalisé peut être modifié puis enregistré dans le même modèle ; **Parcours de base** reste protégé ;
+- l’éditeur d’écrans de masquage dispose désormais de **« Voir la vraie page dans Electron »** ;
+- ce vrai aperçu reprend exactement le rendu candidat du masque et son bouton **« Masquer l’écran d’accueil »**, puis revient au brouillon sans perte ;
+- les corrections R5 sont incluses : reprise stable des objets Maison/Voiture après zoom, alignement des boutons Tests / Parcours et correction du chevauchement vertical dans Écrans de masquage.
+
+Validation automatique R6 :
+- ouverture et modification d’un parcours enregistré : Electron réel ;
+- bibliothèque « Choix du parcours » + détail + sélection + Verrouiller : Electron réel ;
+- parcours sélectionné effectivement chargé côté candidat : Electron réel ;
+- vrai aperçu d’écran de masquage + retour sans perte : Electron réel ;
+- parcours historique, Test Builder, Bilan texte libre, Admin et protections existantes : non-régression.
