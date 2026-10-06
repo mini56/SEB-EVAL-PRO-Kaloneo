@@ -72,6 +72,9 @@ assert(preload.includes("#seb-evalpro-topbar #seb-evalpro-bilan,") && preload.in
 assert(preload.includes("overflow:hidden;background:#0070c0"), 'barre Admin ne masque pas les débordements.');
 assert(!preload.includes("if (button.parentElement !== bar) bar.appendChild(button);"), 'bouton de confidentialité encore injecté dans la barre Admin.');
 assert(preload.includes('id="seb-evalpro-tests-parcours"'), 'bouton Tests / Parcours absent de la barre Admin.');
+assert(preload.includes('id="seb-evalpro-choose-parcours"'), 'bouton Choix du parcours absent de la barre Admin.');
+assert(preload.includes("kaloneo-library:select-parcours"), 'sélection du parcours non câblée.');
+assert(preload.includes("kaloneo-library:selected-runtime"), 'runtime du parcours sélectionné non vérifié avant verrouillage.');
 assert(preload.includes('id="seb-evalpro-show-privacy"'), 'bouton Afficher l’écran d’accueil absent de la barre Admin.');
 assert(preload.includes("window.dispatchEvent(new CustomEvent('seb-evalpro-show-privacy'))"), 'action écran d’accueil de la barre non câblée.');
 assert(preload.includes("window.addEventListener('seb-evalpro-show-privacy'"), 'écran de confidentialité ne reçoit pas la commande de la barre.');
@@ -108,6 +111,9 @@ assert(main.includes("ipcMain.handle('admin:close-tests-parcours'"), 'IPC Fermer
 assert(main.includes("admin-tests-parcours.html"), 'page Tests / Parcours non référencée par le main.');
 assert(main.includes("kaloneo-library:list-tests"), 'bibliothèque KALONÉO non exposée par le main.');
 assert(main.includes("kaloneo-library:save-parcours"), 'enregistrement des parcours non exposé par le main.');
+assert(main.includes("kaloneo-library:get-parcours-details"), 'détail des parcours non exposé par le main.');
+assert(main.includes("kaloneo-library:select-parcours"), 'choix du parcours non exposé par le main.');
+assert(main.includes("kaloneo-library:selected-runtime-sync"), 'runtime synchrone du parcours sélectionné absent.');
 
 const testsPage = read('overrides/admin-tests-parcours.html');
 const testsScript = read('source/js/admin-tests-parcours.js');
