@@ -33,7 +33,6 @@ function section(text, start, end) {
 // commit ff12d5a7a1f51a68d336cc165d1583876b373275
 
 const exactBuild21 = {
-  'src/replay-preload.js': 'a26aba2415935793382d76857bdd2fe24454c7b7',
   'src/replay-main.js': '004baf83051d805bdd47c3fe865d5ffd6175f38c',
   'src/bilan-history-preload.js': '7f53efab6addbf19a1cb8b42aff5233ff4db5416',
   'src/bilan-history-main.js': '2e5f549fa0623c64029eb0e6f29cb6af5a9c6848',
@@ -45,6 +44,16 @@ const exactBuild21 = {
 for (const [rel, expected] of Object.entries(exactBuild21)) {
   assert(gitBlobSha(rel) === expected, rel + ' ne correspond plus au module de référence Build #21.');
 }
+
+// replay-preload.js conserve le socle Build #21, mais peut évoluer pour les
+// règles Replay validées ensuite (ex. exclusion des pages de transition).
+const replayPreload = read('src/replay-preload.js');
+assert(replayPreload.includes("ipcRenderer.invoke('replay:capture-page'"), 'capture Replay Build #21 absente.');
+assert(replayPreload.includes('function createVisualReplayViewer'), 'viewer Replay visuel Build #21 absent.');
+assert(replayPreload.includes("ipcRenderer.invoke('admin:load-candidate-parcours'"), 'chargement Replay candidat Build #21 absent.');
+assert(replayPreload.includes('ensureFinalArchive'), 'archivage final Replay Build #21 absent.');
+assert(replayPreload.includes('transitionPageVisible'), 'règle validée : transition non exclue du Replay.');
+assert(replayPreload.includes("!key.includes('transition_video_f1')"), 'anciennes captures de transition non masquées dans le Replay.');
 
 const preload = read('src/preload.js');
 assert(preload.includes('const BAR_HIDE_DELAY = 1000;'), 'temporisation de barre Admin différente de 1000 ms.');
