@@ -41,6 +41,9 @@ jobs:
       - name: Verify onboarding resume layout in real Electron
         run: npx electron --no-sandbox scripts/kaloneo-onboarding-resume-layout-smoke-main.js
 
+      - name: Verify Tests Parcours alignment in real Electron
+        run: npx electron --no-sandbox scripts/kaloneo-tests-parcours-layout-smoke-main.js
+
       - name: Verify parcours builder in real Electron
         run: npx electron --no-sandbox scripts/kaloneo-parcours-builder-electron-smoke-main.js
 
