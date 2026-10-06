@@ -20,7 +20,21 @@ const masks=[
   {id:'kaloneo-default',version:'1.0.0',name:'KALONÉO',systemProvided:true,hasText:true,hasImage:false},
   {id:'masque-smoke',version:'1.0.0',name:'Masque Smoke',systemProvided:false,hasText:true,hasImage:true}
 ];
-const saved=[{id:'parcours-de-base',name:'Parcours de base',creator:'SEB EvalPro / KALONÉO',systemProvided:true,testCount:3,maskScreen:{id:'kaloneo-default',version:'1.0.0'}}];
+const saved=[{id:'parcours-de-base',name:'Parcours de base',creator:'SEB EvalPro / KALONÉO',systemProvided:true,testCount:3,maskScreen:{id:'kaloneo-default',version:'1.0.0'},maskScreenMeta:{name:'KALONÉO'}}];
+const savedDefinitions={
+  'parcours-de-base':{
+    format:'kaloneo-parcours',schemaVersion:2,id:'parcours-de-base',name:'Parcours de base',
+    creator:'SEB EvalPro / KALONÉO',systemProvided:true,
+    maskScreen:{id:'kaloneo-default',version:'1.0.0'},
+    introduction:{id:'introduction_parcours_base',version:'1.0.0'},
+    tests:[
+      {id:'test_alpha',version:'1.0.0'},
+      {id:'test_beta',version:'1.0.0'},
+      {id:'test_gamma',version:'1.0.0'}
+    ],
+    fin:{id:'fin_parcours',version:'1.0.0'}
+  }
+};
 let lastSavedPayload=null;
 
 ipcMain.on('app:edition-sync',e=>{e.returnValue={edition:'unified',canBilan:true,canAi:true,canImport:true,canExport:true};});
@@ -50,13 +64,38 @@ ipcMain.handle('kaloneo-library:get-mask-screen',(_e,ref)=>{
   return {ok:true,maskScreen:{...meta,format:'kaloneo-mask-screen',content:{text:meta.name,image:''}}};
 });
 ipcMain.handle('kaloneo-library:list-parcours',()=>({ok:true,parcours:saved}));
+ipcMain.handle('kaloneo-library:get-parcours',(_e,id)=>{
+  const value=savedDefinitions[String(id||'')];
+  return value?{ok:true,parcours:JSON.parse(JSON.stringify(value))}:{ok:false,error:'Parcours introuvable.'};
+});
 ipcMain.handle('kaloneo-library:save-parcours',(_e,payload)=>{
+  const editingId=String(payload?.id||'');
   const key=String(payload?.name||'').trim().toLocaleLowerCase('fr-FR');
-  if(saved.some(x=>String(x.name||'').trim().toLocaleLowerCase('fr-FR')===key)) return {ok:false,error:'Un parcours portant ce nom existe déjà.'};
+  if(saved.some(x=>String(x.id)!==editingId&&String(x.name||'').trim().toLocaleLowerCase('fr-FR')===key)) {
+    return {ok:false,error:'Un parcours portant ce nom existe déjà.'};
+  }
+  if(editingId==='parcours-de-base') return {ok:false,error:'Le parcours fourni est protégé.'};
+
   lastSavedPayload=JSON.parse(JSON.stringify(payload||{}));
-  const item={id:'parcours-smoke',name:String(payload.name||''),creator:String(payload.creator||''),systemProvided:false,testCount:Array.isArray(payload.tests)?payload.tests.length:0};
-  saved.push(item);
-  return {ok:true,parcours:item};
+  const id=editingId||'parcours-smoke';
+  const value={
+    format:'kaloneo-parcours',schemaVersion:2,id,
+    name:String(payload.name||''),creator:String(payload.creator||''),
+    systemProvided:false,
+    maskScreen:payload.maskScreen,
+    introduction:payload.introduction,
+    tests:Array.isArray(payload.tests)?payload.tests:[],
+    fin:payload.fin
+  };
+  savedDefinitions[id]=JSON.parse(JSON.stringify(value));
+  const item={
+    id,name:value.name,creator:value.creator,systemProvided:false,
+    testCount:value.tests.length,maskScreen:value.maskScreen,
+    maskScreenMeta:{name:(masks.find(x=>x.id===value.maskScreen?.id)?.name)||'KALONÉO'}
+  };
+  const index=saved.findIndex(x=>x.id===id);
+  if(index>=0)saved[index]=item;else saved.push(item);
+  return {ok:true,updated:Boolean(editingId),parcours:value};
 });
 
 const timeout=setTimeout(()=>fail('délai global dépassé'),45000);
@@ -201,19 +240,55 @@ app.whenReady().then(async()=>{
     if(!lastSavedPayload||lastSavedPayload.maskScreen?.id!=='masque-smoke'||lastSavedPayload.tests?.length!==3||new Set(lastSavedPayload.tests.map(x=>x.id)).size!==3||!/enregistré/i.test(savedUi.status)||!savedUi.saved.includes('Parcours long'))return fail('enregistrement incorrect',{lastSavedPayload,savedUi});
 
     await win.reload();await wait(750);
-    const reloaded=await win.webContents.executeJavaScript(`({saved:[...document.querySelectorAll('.saved-card strong')].map(x=>x.textContent.trim()),creators:[...document.querySelectorAll('.saved-card span:first-of-type')].map(x=>x.textContent.trim())})`);
-    if(!reloaded.saved.includes('Parcours long')||!reloaded.creators.some(x=>/Créateur smoke/.test(x)))return fail('persistance incorrecte',reloaded);
+    const reloaded=await win.webContents.executeJavaScript(`({saved:[...document.querySelectorAll('.saved-card strong')].map(x=>x.textContent.trim()),creators:[...document.querySelectorAll('.saved-card span:first-of-type')].map(x=>x.textContent.trim()),openButtons:document.querySelectorAll('.saved-open').length})`);
+    if(!reloaded.saved.includes('Parcours long')||!reloaded.creators.some(x=>/Créateur smoke/.test(x))||reloaded.openButtons<2)return fail('persistance / ouverture incorrecte',reloaded);
 
+    // Ouvrir le parcours enregistré et retrouver exactement son contenu.
     await win.webContents.executeJavaScript(`(()=>{
-      const add=t=>[...document.querySelectorAll('.library-card')].find(c=>c.querySelector('.card-title')?.textContent===t)?.querySelector('.card-add')?.click();
-      add('Test Alpha');add('Test Bêta');add('Test Gamma');
-      document.getElementById('parcours-name').value='Parcours long';document.getElementById('parcours-creator').value='Créateur smoke';document.getElementById('save-parcours').click();return true;
-    })()`);await wait(180);
+      const card=[...document.querySelectorAll('.saved-card')].find(x=>x.querySelector('strong')?.textContent==='Parcours long');
+      card?.querySelector('.saved-open')?.click();
+      return true;
+    })()`);
+    await wait(250);
+    const opened=await win.webContents.executeJavaScript(`(()=>({
+      title:document.querySelector('.page-topbar h1')?.textContent.trim()||'',
+      name:document.getElementById('parcours-name')?.value||'',
+      creator:document.getElementById('parcours-creator')?.value||'',
+      mask:document.querySelector('#mask-slot .special-card strong')?.textContent.trim()||'',
+      tests:[...document.querySelectorAll('.sequence-title')].map(x=>x.textContent.trim()),
+      saveLabel:document.getElementById('save-parcours')?.textContent.trim()||''
+    }))()`);
+    if(opened.title!=='Modification de parcours'||opened.name!=='Parcours long'||opened.creator!=='Créateur smoke'||
+       opened.mask!=='Masque Smoke'||JSON.stringify(opened.tests)!==JSON.stringify(reordered)||
+       opened.saveLabel!=='Enregistrer les modifications')return fail('réouverture du parcours incorrecte',{opened,reordered});
+
+    // Modifier puis sauvegarder le même parcours.
+    await win.webContents.executeJavaScript(`(()=>{
+      document.getElementById('parcours-name').value='Parcours long modifié';
+      document.querySelector('.sequence-card .remove-test')?.click();
+      document.getElementById('save-parcours').click();
+      return true;
+    })()`);
+    await wait(220);
+    const updated=await win.webContents.executeJavaScript(`({status:document.getElementById('builder-status').textContent.trim(),sequence:document.querySelectorAll('.sequence-card').length,saved:[...document.querySelectorAll('.saved-card strong')].map(x=>x.textContent.trim())})`);
+    if(!/mis à jour/i.test(updated.status)||updated.sequence!==2||!updated.saved.includes('Parcours long modifié')||savedDefinitions['parcours-smoke'].tests.length!==2) {
+      return fail('modification du parcours incorrecte',{updated,definition:savedDefinitions['parcours-smoke']});
+    }
+
+    // Un nouveau parcours ne peut pas reprendre le même nom.
+    await win.webContents.executeJavaScript(`(()=>{
+      document.getElementById('new-parcours').click();
+      document.getElementById('parcours-name').value='Parcours long modifié';
+      document.getElementById('parcours-creator').value='Autre créateur';
+      document.getElementById('save-parcours').click();
+      return true;
+    })()`);
+    await wait(180);
     const duplicate=await win.webContents.executeJavaScript(`({status:document.getElementById('builder-status').textContent.trim(),sequence:document.querySelectorAll('.sequence-card').length})`);
-    if(!/existe déjà/i.test(duplicate.status)||duplicate.sequence!==3)return fail('nom dupliqué incorrect',duplicate);
+    if(!/existe déjà/i.test(duplicate.status))return fail('nom dupliqué incorrect',duplicate);
 
     console.log('KALONEO_PARCOURS_ELECTRON=OK');
-    console.log(JSON.stringify({initial,afterPointer,reordered,savedUi,reloaded,duplicate,lastSavedPayload}));
+    console.log(JSON.stringify({initial,afterPointer,reordered,savedUi,reloaded,opened,updated,duplicate,lastSavedPayload}));
     clearTimeout(timeout);win.destroy();app.exit(0);
   }catch(error){fail(String(error?.stack||error));}
 });
