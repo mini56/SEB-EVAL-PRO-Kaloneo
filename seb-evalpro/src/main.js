@@ -1135,11 +1135,13 @@ ipcMain.handle('kaloneo-library:get-selected-parcours', () => {
   }
 });
 
-ipcMain.handle('kaloneo-library:select-parcours', (_event, id) => {
+ipcMain.handle('kaloneo-library:select-parcours', (_event, payload) => {
   if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
   if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de changer de parcours pendant une évaluation active.' };
   try {
-    return getKaloneoLibrary().selectParcours(id);
+    const id = typeof payload === 'string' ? payload : payload?.id;
+    const options = typeof payload === 'object' && payload ? payload.launchOptions || {} : {};
+    return getKaloneoLibrary().selectParcours(id, options);
   } catch (error) {
     return { ok:false, error:error && error.message ? error.message : String(error) };
   }
