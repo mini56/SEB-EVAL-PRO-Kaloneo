@@ -218,11 +218,13 @@
   }
 
   function replay(type, detail) {
+    const active = currentTest();
+    if (active?.presentation?.transitionVideo) return;
     state.replay.push({
       type,
       phase: state.phase,
       testIndex: state.testIndex,
-      testId: currentTest()?.id || null,
+      testId: active?.id || null,
       detail: detail || null,
       at: Date.now()
     });
