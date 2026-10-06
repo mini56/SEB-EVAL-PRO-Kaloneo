@@ -306,14 +306,124 @@ function sebResultCategoryLabel(value) {
   return raw.replace(/[_-]+/g, ' ').replace(/^./, char => char.toUpperCase());
 }
 
+
+function sebReadCanonicalKaltestState() {
+  const candidates = [];
+  try {
+    for (let i = 0; i < sessionStorage.length; i += 1) {
+      const key = sessionStorage.key(i);
+      if (key && key.startsWith('seb_kaltest_pilot2_state_v1')) candidates.push(key);
+    }
+  } catch (_) {}
+  if (!candidates.length) candidates.push('seb_kaltest_pilot2_state_v1');
+  for (const key of candidates) {
+    try {
+      const state = JSON.parse(sessionStorage.getItem(key) || 'null');
+      if (state && state.tests && typeof state.tests === 'object') return state;
+    } catch (_) {}
+  }
+  return null;
+}
+
+function sebDescribeCanonicalResult(test, testState) {
+  if (!testState || typeof testState !== 'object') return null;
+  const status = String(testState.status || 'PENDING').toUpperCase();
+  const result = testState.result && typeof testState.result === 'object' ? testState.result : null;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'seb-canonical-result-summary';
+
+  if (!result) {
+    const p = document.createElement('p');
+    p.className = 'commentaire';
+    p.textContent = status.startsWith('ABANDONED')
+      ? 'Exercice abandonné.'
+      : status === 'COMPLETED'
+        ? 'Exercice terminé — aucun score chiffré.'
+        : 'Aucun résultat enregistré pour ce test.';
+    wrap.appendChild(p);
+    return wrap;
+  }
+
+  const score = Number(result.score);
+  const scoreMax = Number(result.scoreMax);
+  const pct = Number(result.percentage);
+
+  if (Number.isFinite(score) && Number.isFinite(scoreMax) && scoreMax > 0) {
+    const p = document.createElement('p');
+    const strong = document.createElement('strong');
+    strong.textContent = 'Score : ';
+    p.appendChild(strong);
+    p.appendChild(document.createTextNode(String(score) + '/' + String(scoreMax)));
+    if (Number.isFinite(pct)) {
+      p.appendChild(document.createTextNode(' — ' + String(Math.round(pct * 100) / 100) + ' %'));
+    }
+    if (status.startsWith('ABANDONED')) p.appendChild(document.createTextNode(' — Exercice abandonné'));
+    wrap.appendChild(p);
+  } else {
+    const p = document.createElement('p');
+    p.className = 'commentaire';
+    p.textContent = status.startsWith('ABANDONED')
+      ? 'Exercice abandonné.'
+      : 'Exercice terminé — étape non notée.';
+    wrap.appendChild(p);
+  }
+
+  const details = result.details && typeof result.details === 'object' ? result.details : null;
+  if (details) {
+    const entries = Object.entries(details).filter(([, value]) => value && typeof value === 'object');
+    if (entries.length) {
+      const line = document.createElement('p');
+      line.className = 'ligne';
+      let shown = 0;
+      for (const [key, value] of entries) {
+        if (shown >= 12) break;
+        const span = document.createElement('span');
+        const correct = value.correct === true;
+        const answered = value.answer !== undefined || value.user !== undefined || value.value !== undefined;
+        span.className = correct ? 'correct' : (answered ? 'incorrect' : 'commentaire');
+        const raw = value.answer ?? value.user ?? value.value ?? '';
+        const display = String(raw == null ? '' : raw).replace(/\s+/g, ' ').trim();
+        span.textContent = key + (display ? ' : ' + display : '') + (correct ? ' ✓' : '');
+        line.appendChild(span);
+        shown += 1;
+      }
+      if (shown) wrap.appendChild(line);
+    }
+  }
+
+  return wrap;
+}
+
 function sebApplyDynamicResultsLayout() {
   const manifest = sebReadKaloneoResultsManifest();
   const result = document.getElementById('resultat');
   if (!manifest || !result || !Array.isArray(manifest.tests) || !manifest.tests.length) return false;
 
+  const canonicalState = sebReadCanonicalKaltestState();
+  const canonicalTests = canonicalState && canonicalState.tests && typeof canonicalState.tests === 'object'
+    ? canonicalState.tests
+    : {};
+
+  // Le manifeste est la liste officielle du parcours. Si une ancienne sauvegarde R8
+  // est incomplète, on ajoute uniquement les tests réellement présents dans l'état
+  // KALTEST du candidat afin de ne jamais perdre un résultat effectué.
   const selectedTests = manifest.tests.filter(test => test && test.id);
-  const selectedById = new Map(selectedTests.map(test => [String(test.id), test]));
-  const groupedNodes = new Map(selectedTests.map(test => [String(test.id), []]));
+  const byId = new Map(selectedTests.map(test => [String(test.id), test]));
+  Object.keys(canonicalTests).forEach(id => {
+    if (!byId.has(String(id))) {
+      byId.set(String(id), {
+        id:String(id),
+        version:'',
+        title:String(id).replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()),
+        category:'Autres',
+        scored:true
+      });
+    }
+  });
+  const effectiveTests = Array.from(byId.values());
+  const selectedById = new Map(effectiveTests.map(test => [String(test.id), test]));
+  const groupedNodes = new Map(effectiveTests.map(test => [String(test.id), []]));
   const preserved = [];
   let currentId = '';
   let pendingHr = null;
@@ -384,7 +494,7 @@ function sebApplyDynamicResultsLayout() {
   }
 
   const categories = new Map();
-  selectedTests.forEach(test => {
+  effectiveTests.forEach(test => {
     const category = sebResultCategoryLabel(test.category);
     if (!categories.has(category)) categories.set(category, []);
     categories.get(category).push(test);
@@ -409,6 +519,10 @@ function sebApplyDynamicResultsLayout() {
 
       const nodes = groupedNodes.get(String(test.id)) || [];
       let currentTitleUsed = false;
+
+      const canonicalSummary = sebDescribeCanonicalResult(test, canonicalTests[String(test.id)]);
+      if (canonicalSummary) card.appendChild(canonicalSummary);
+
       nodes.forEach(node => {
         if (/^H[1-6]$/.test(node.tagName || '') && node.dataset.sebCurrentTestTitle === '1') {
           if (currentTitleUsed) return;
@@ -425,7 +539,7 @@ function sebApplyDynamicResultsLayout() {
         card.prepend(testTitle);
       }
 
-      if (!nodes.length) {
+      if (!nodes.length && !canonicalSummary) {
         const empty = document.createElement('p');
         empty.className = 'commentaire';
         empty.textContent = test.scored === false
