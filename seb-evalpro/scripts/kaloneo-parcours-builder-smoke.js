@@ -118,7 +118,7 @@ try {
   });
   assert.strictEqual(protectedBaseUpdate.ok, false, 'le parcours de base doit rester protégé');
 
-  const duplicateName = library.saveParcours({ ...payload, name:'  PARCOURS   LONG  ' });
+  const duplicateName = library.saveParcours({ ...payload, name:'  PARCOURS   LONG   MODIFIÉ  ' });
   assert.strictEqual(duplicateName.ok, false, 'le nom de parcours doit être unique');
   assert.match(duplicateName.error, /existe déjà/i);
 
