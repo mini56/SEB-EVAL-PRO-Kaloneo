@@ -357,6 +357,40 @@
     return SHOW_CORRECTIONS_DURING_PARCOURS;
   }
 
+  function hasAutomaticCorrection(test) {
+    if (!test || test.scored === false) return false;
+    if (test.evaluation?.dictationEngine) return true;
+    return (test.questions || []).some(question => {
+      if (question?.example === true || question?.manualEvaluation === true || question?.response?.type === 'free-text') return false;
+      if (question?.response?.type === 'duration') return Number.isFinite(Number(question.acceptedMinutes));
+      if (question?.response?.type === 'multiple-choice' && Number.isInteger(Number(question.acceptedCount))) return true;
+      return Array.isArray(question.acceptedAnswers) && question.acceptedAnswers.length > 0;
+    });
+  }
+
+  function shouldPauseForValidation(test) {
+    return test?.behavior?.validateBeforeAdvance === true ||
+      (showCorrectionDuringParcours() && hasAutomaticCorrection(test));
+  }
+
+  function applyVisibleCorrection(test, host) {
+    if (!showCorrectionDuringParcours() || !host) return;
+    const testState = testStateFor(test);
+    if (testState.status !== 'COMPLETED' || !testState.result?.details) return;
+
+    host.querySelectorAll('[data-question-id]').forEach(node => {
+      if (node.classList.contains('kaltest-stock-pot') || node.classList.contains('kaltest-choice')) return;
+      const questionId = String(node.dataset.questionId || '');
+      const detail = testState.result.details?.[questionId];
+      if (!detail || detail.manual || detail.correct == null) return;
+      const target = node.closest('td,th,label,.kaltest-fraction-row,.kaltest-organisation-row,.kaltest-postures-answer') || node;
+      target.classList.remove('kaltest-answer-correct','kaltest-answer-incorrect');
+      target.classList.add(detail.correct ? 'kaltest-answer-correct' : 'kaltest-answer-incorrect');
+      if ('disabled' in node) node.disabled = true;
+      node.querySelectorAll?.('input,select,textarea,button').forEach(control => { control.disabled = true; });
+    });
+  }
+
   function evaluateTest(test, testState) {
     let scoreMax = 0;
     const details = {};
@@ -621,6 +655,7 @@
     if (type === 'multiple-choice') {
       const group = document.createElement('div');
       group.className = 'kaltest-multiple-choice';
+      group.dataset.questionId = question.id;
       const selected = new Set(Array.isArray(testState.answers[question.id]) ? testState.answers[question.id] : []);
       for (const value of question.response?.options || []) {
         const label = document.createElement('label');
@@ -2755,6 +2790,7 @@
       if (!question) continue;
       const row = document.createElement('section');
       row.className = 'kaltest-fraction-row';
+      row.dataset.questionId = question.id;
 
       const title = document.createElement('div');
       title.className = 'kaltest-fraction-title';
@@ -3388,8 +3424,8 @@
     const next = document.getElementById('kaltest-next');
     const isLastActiveTest = state.testIndex === ACTIVE_TESTS.length - 1;
     const testState = currentTestState();
-    if (test.behavior?.validateBeforeAdvance === true && testState?.status !== 'COMPLETED') {
-      next.textContent = test.behavior.validationLabel || 'Valider';
+    if (shouldPauseForValidation(test) && testState?.status !== 'COMPLETED') {
+      next.textContent = test.behavior?.validationLabel || 'Valider';
     } else {
       next.textContent = isLastActiveTest && !PILOT11_MODE ? 'Terminer le parcours' : 'Suivant';
     }
@@ -3450,6 +3486,8 @@
     } else {
       renderBasic(test, host);
     }
+
+    applyVisibleCorrection(test, host);
   }
 
   function validateIdentity() {
@@ -3499,7 +3537,7 @@
     const status = document.getElementById('exercise-status');
     if (!test || !testState) return;
 
-    if (test.behavior?.validateBeforeAdvance === true && testState.status === 'COMPLETED') {
+    if (shouldPauseForValidation(test) && testState.status === 'COMPLETED') {
       if (test.behavior?.revalidateOnAdvance === true) {
         testState.result = evaluateTest(test, testState);
         syncLegacyCompatibility(test, testState);
@@ -3550,7 +3588,7 @@
     testState.abandon = null;
     syncLegacyCompatibility(test, testState);
 
-    if (test.behavior?.validateBeforeAdvance === true) {
+    if (shouldPauseForValidation(test)) {
       replay('EXERCISE_VALIDATED', {
         testId:test.id,
         version:test.version,
