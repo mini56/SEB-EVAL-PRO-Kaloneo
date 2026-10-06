@@ -53,6 +53,7 @@ ipcMain.handle('bilan-history:list',()=>[]);
 ipcMain.handle('candidate-catalog:list',()=>[]);
 ipcMain.handle('candidate-catalog:sync',()=>({ok:true}));
 ipcMain.handle('candidate-catalog:detail',()=>({ok:false}));
+ipcMain.handle('kaloneo-library:selected-runtime',()=>({ok:false,error:'Aucun runtime candidat dans ce smoke Builder.'}));
 ipcMain.handle('kaloneo-library:list-tests',()=>({ok:true,tests:[]}));
 ipcMain.handle('kaloneo-library:save-test',(_e,payload)=>{
   savedLibraryDefinition=JSON.parse(JSON.stringify(payload?.definition||null));
@@ -261,13 +262,22 @@ app.whenReady().then(async()=>{
       return fail('calculatrice commune de l’aperçu incorrecte avant déplacement',calcBefore);
     }
 
-    win.webContents.sendInputEvent({type:'mouseDown',x:calcBefore.x,y:calcBefore.y,button:'left',clickCount:1});
-    await wait(45);
-    win.webContents.sendInputEvent({type:'mouseMove',x:calcBefore.x+35,y:calcBefore.y+22,button:'left',movementX:35,movementY:22});
-    await wait(45);
-    win.webContents.sendInputEvent({type:'mouseMove',x:calcBefore.x+70,y:calcBefore.y+45,button:'left',movementX:35,movementY:23});
-    await wait(55);
-    win.webContents.sendInputEvent({type:'mouseUp',x:calcBefore.x+70,y:calcBefore.y+45,button:'left',clickCount:1});
+    const dragTrace=await win.webContents.executeJavaScript(`(()=>{
+      const bar=document.querySelector('#calc-container .seb-calc-dragbar');
+      if(!bar)return {ok:false};
+      const r=bar.getBoundingClientRect();
+      const x=r.left+30,y=r.top+Math.min(18,r.height/2);
+      const fire=(type,cx,cy,buttons)=>bar.dispatchEvent(new PointerEvent(type,{
+        bubbles:true,cancelable:true,pointerId:41,pointerType:'mouse',isPrimary:true,
+        button:type==='pointermove'?-1:0,buttons,clientX:cx,clientY:cy
+      }));
+      fire('pointerdown',x,y,1);
+      fire('pointermove',x+35,y+22,1);
+      fire('pointermove',x+70,y+45,1);
+      fire('pointerup',x+70,y+45,0);
+      return {ok:true};
+    })()`,true);
+    if(!dragTrace.ok)return fail('barre de déplacement de la calculatrice absente',dragTrace);
     await wait(120);
 
     const calcOpen=await win.webContents.executeJavaScript(`(()=>{
