@@ -12,6 +12,7 @@ function fail(message, detail) {
 
 let state={version:1,sessionStorage:{},localStorage:{},lastPage:'kaltest-pilot2.html',lastEvaluationPage:'kaltest-pilot2.html'};
 let selectedId='parcours-de-base';
+let showCorrectionsDuringParcours=false;
 let lockCount=0;
 
 const parcours=[
@@ -59,7 +60,7 @@ ipcMain.on('state:save-sync',(e,p)=>{state={...state,...(p||{})};e.returnValue={
 ipcMain.on('candidate-catalog:workspace-load-sync',e=>{e.returnValue={ok:false};});
 ipcMain.on('candidate-catalog:workspace-save-sync',e=>{e.returnValue={ok:true};});
 ipcMain.on('candidate-catalog:results-workspace-load-sync',e=>{e.returnValue={ok:false};});
-ipcMain.on('kaloneo-library:selected-runtime-sync',e=>{e.returnValue={ok:true,runtime:{id:selectedId,title:details[selectedId].name,tests:[],fin:null,maskScreen:details[selectedId].maskScreen}};});
+ipcMain.on('kaloneo-library:selected-runtime-sync',e=>{e.returnValue={ok:true,runtime:{id:selectedId,title:details[selectedId].name,launchOptions:{showCorrectionsDuringParcours},tests:[],fin:null,maskScreen:details[selectedId].maskScreen}};});
 
 ipcMain.handle('state:save',(_e,p)=>{state={...state,...(p||{})};return {ok:true,state};});
 ipcMain.handle('admin:status',()=>true);
@@ -89,17 +90,19 @@ ipcMain.handle('kaloneo-library:list-parcours',()=>({
   ok:true,
   parcours:parcours.map(item=>({...item,selected:item.id===selectedId}))
 }));
-ipcMain.handle('kaloneo-library:get-selected-parcours',()=>({ok:true,selected:details[selectedId]}));
+ipcMain.handle('kaloneo-library:get-selected-parcours',()=>({ok:true,selected:{...details[selectedId],launchOptions:{showCorrectionsDuringParcours}}}));
 ipcMain.handle('kaloneo-library:get-parcours-details',(_e,id)=>({ok:true,details:details[id]}));
-ipcMain.handle('kaloneo-library:select-parcours',(_e,id)=>{
+ipcMain.handle('kaloneo-library:select-parcours',(_e,payload)=>{
+  const id=typeof payload==='string'?payload:payload?.id;
   if(!details[id])return {ok:false,error:'introuvable'};
   selectedId=id;
-  return {ok:true,selected:details[id]};
+  showCorrectionsDuringParcours=payload?.launchOptions?.showCorrectionsDuringParcours===true;
+  return {ok:true,selected:{...details[id],launchOptions:{showCorrectionsDuringParcours}}};
 });
 ipcMain.handle('kaloneo-library:selected-runtime',()=>({
   ok:true,
   runtime:{
-    id:selectedId,title:details[selectedId].name,tests:[],fin:null,
+    id:selectedId,title:details[selectedId].name,launchOptions:{showCorrectionsDuringParcours},tests:[],fin:null,
     maskScreen:details[selectedId].maskScreen
   }
 }));
