@@ -250,12 +250,38 @@
     }
   }
 
+  function realignPlacedObjects() {
+    if (state.housePlaced) moveToTarget(byId('pilot2-drag-house'), byId('pilot2-house-target'));
+    if (state.carPlaced) moveToTarget(byId('pilot2-drag-car'), byId('pilot2-car-target'));
+  }
+
+  let realignFrame = 0;
+  let realignTimers = [];
+
+  function scheduleRealign() {
+    if (realignFrame) cancelAnimationFrame(realignFrame);
+    realignTimers.forEach(timer => clearTimeout(timer));
+    realignTimers = [];
+
+    // Deux frames laissent le navigateur terminer la mise en page courante.
+    realignFrame = requestAnimationFrame(() => {
+      realignFrame = requestAnimationFrame(() => {
+        realignFrame = 0;
+        realignPlacedObjects();
+      });
+    });
+
+    // Electron applique encore son zoom adaptatif après did-finish-load.
+    // On recale donc aussi après les changements tardifs de viewport/zoom.
+    [80, 220, 500].forEach(delay => {
+      realignTimers.push(setTimeout(realignPlacedObjects, delay));
+    });
+  }
+
   function restore() {
     updateMouseStatus();
     renderChrono();
-
-    if (state.housePlaced) moveToTarget(byId('pilot2-drag-house'), byId('pilot2-house-target'));
-    if (state.carPlaced) moveToTarget(byId('pilot2-drag-car'), byId('pilot2-car-target'));
+    scheduleRealign();
 
     if (state.chronoTested) {
       const status = byId('pilot2-chrono-status');
@@ -295,10 +321,18 @@
       persist();
     });
 
-    window.addEventListener('resize', () => {
-      if (state.housePlaced) moveToTarget(byId('pilot2-drag-house'), byId('pilot2-house-target'));
-      if (state.carPlaced) moveToTarget(byId('pilot2-drag-car'), byId('pilot2-car-target'));
-    });
+    window.addEventListener('resize', scheduleRealign);
+
+    const scene = byId('pilot2-mouse-scene');
+    if (scene && typeof ResizeObserver === 'function') {
+      const observer = new ResizeObserver(() => scheduleRealign());
+      observer.observe(scene);
+    }
+
+    window.addEventListener('load', scheduleRealign, { once:true });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(scheduleRealign).catch(() => {});
+    }
 
     restore();
     if (chronoController) chronoController.setSeconds(state.chronoSeconds);
