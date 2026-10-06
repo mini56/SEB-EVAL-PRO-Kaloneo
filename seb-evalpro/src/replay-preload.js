@@ -72,6 +72,16 @@ function currentPageDescriptor() {
   return { pageKey: file, title: titleFromElement(document.body, file) };
 }
 
+function transitionPageVisible() {
+  try {
+    if (document.body?.classList?.contains('seb-kaltest-transition-video')) return true;
+    const id = String(document.body?.dataset?.sebKaltestId || '').trim();
+    return id === 'transition_video_f1';
+  } catch (_) {
+    return false;
+  }
+}
+
 function privacyLayerVisible() {
   const layer = document.getElementById('seb-evalpro-privacy-layer');
   if (!layer) return false;
@@ -116,6 +126,7 @@ function stopReplayCaptureAfterResults() {
 
 async function captureCurrentPage(reason = 'state', force = false) {
   if (!document.body) return { ok: false };
+  if (transitionPageVisible()) return { ok:false, transition:true };
   if (replayCaptureStopped() && reason !== 'final-results') return { ok: false, resultsComplete: true };
   if (adminWorkBlocked()) return { ok: false, adminWorkBlocked: true };
   if (window.sessionStorage.getItem('seb_evalpro_replay_archive_file')) return { ok: false, archived: true };
@@ -411,7 +422,11 @@ function createVisualReplayViewer(filename, archive, legacy, warning, candidateI
     addReplayStyle();
     const old = document.getElementById('seb-replay-viewer');
     if (old) old.remove();
-    const slides = Array.isArray(archive && archive.slides) ? archive.slides : [];
+    const slides = (Array.isArray(archive && archive.slides) ? archive.slides : []).filter(slide => {
+      const key = String(slide && slide.pageKey || '').toLowerCase();
+      const title = String(slide && slide.title || '').toLowerCase();
+      return !key.includes('transition_video_f1') && !title.includes('transition vidéo f1') && !title.includes('transition video f1');
+    });
     let index = 0;
     let renderToken = 0;
     const backdrop = document.createElement('div');
