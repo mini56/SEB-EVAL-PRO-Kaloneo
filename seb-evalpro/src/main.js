@@ -1049,6 +1049,18 @@ ipcMain.handle('kaloneo-library:list-tests', () => {
   }
 });
 
+ipcMain.on('kaloneo-library:test-metadata-sync', (event) => {
+  if (!adminSessionUnlocked) {
+    event.returnValue = { ok:false, error:'Accès administrateur requis.' };
+    return;
+  }
+  try {
+    event.returnValue = { ok:true, tests:getKaloneoLibrary().listTests() };
+  } catch (error) {
+    event.returnValue = { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
 ipcMain.handle('kaloneo-library:get-test', (_event, payload) => {
   if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
   if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les tests pendant une évaluation active.' };
