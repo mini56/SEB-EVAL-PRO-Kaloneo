@@ -368,7 +368,19 @@ function sebDescribeCanonicalResult(test, testState) {
   const scoreMax = Number(result.scoreMax);
   const pct = Number(result.percentage);
 
-  if (Number.isFinite(score) && Number.isFinite(scoreMax) && scoreMax > 0) {
+  // Certains exercices sont évalués sur des indicateurs métier et non sur
+  // une note chiffrée. Ils ne doivent pas être présentés comme "non notés".
+  if (result.tri && typeof result.tri === 'object') {
+    const p = document.createElement('p');
+    p.className = 'commentaire';
+    p.textContent = 'Évaluation par temps et nombre d’erreurs.';
+    wrap.appendChild(p);
+  } else if (result.bricks && typeof result.bricks === 'object') {
+    const p = document.createElement('p');
+    p.className = 'commentaire';
+    p.textContent = 'Évaluation technique par temps et nombre d’erreurs.';
+    wrap.appendChild(p);
+  } else if (Number.isFinite(score) && Number.isFinite(scoreMax) && scoreMax > 0) {
     const p = document.createElement('p');
     const strong = document.createElement('strong');
     strong.textContent = 'Score : ';
