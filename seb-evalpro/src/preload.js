@@ -1938,12 +1938,20 @@ function showReadOnlyCandidateResults() {
 async function completeCandidateFromFinalPage() {
   if (candidateJourneyCompleted || candidateCompletionInFlight || adminUnlocked || adminCandidateWorkspace || adminCandidateResultsWorkspace) return;
   if (isAdminCandidatesPage() || isAdminBilanPage()) return;
-  const finalPage = document.getElementById('pageFinale') || document.getElementById('page-final') || document.querySelector('.kaltest-terminal-page');
+  const finalPages = [
+    document.getElementById('pageFinale'),
+    document.getElementById('page-final'),
+    document.querySelector('.kaltest-terminal-page')
+  ].filter(Boolean);
+  if (!finalPages.length) return;
+  const finalPage = finalPages.find((page) => {
+    const style = window.getComputedStyle(page);
+    const rect = page.getBoundingClientRect();
+    return page.classList.contains('visible') ||
+      (style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || '1') !== 0 &&
+       rect.width > 0 && rect.height > 0);
+  });
   if (!finalPage) return;
-  const style = window.getComputedStyle(finalPage);
-  const visible = finalPage.classList.contains('visible')
-    || (style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || '1') !== 0);
-  if (!visible) return;
 
   candidateCompletionInFlight = true;
   try {
