@@ -79,6 +79,7 @@ try {
     getPath(name) {
       if (name === 'documents') return documentsPath;
       if (name === 'userData') return userDataPath;
+      if (name === 'temp') return path.join(tmp, 'temp');
       throw new Error('Chemin non simulé: ' + name);
     }
   };
@@ -88,6 +89,7 @@ try {
     app,
     ipcMain,
     getAdminUnlocked:() => true,
+    getAdminDocumentPassword:() => 'SVG56',
     getActiveCandidate:() => activeCandidateForDelete,
     dataRoot:sebRoot
   });
