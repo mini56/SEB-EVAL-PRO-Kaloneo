@@ -97,7 +97,7 @@ jobs:
           $candidatePage = Get-Content source/kaltest-pilot2.html -Raw
           if (-not $candidatePage.Contains('class="pilot2-brand" src="assets/kaloneo-logo-bar.svg"')) { throw 'Logo KALONÉO absent de la page de démarrage.' }
           $logoAsset = Get-Content source/assets/kaloneo-logo-bar.svg -Raw
-          if (-not $logoAsset.Contains('KALONEO_REFERENCE_LOGO_WITH_CHAMELEON')) { throw 'Le logo KALONÉO de référence avec caméléon n’est pas embarqué.' }
+          if (-not $logoAsset.Contains('KALONEO_REFERENCE_LOGO_WITH_CHAMELEON')) { throw "Le logo KALONÉO de référence avec caméléon n est pas embarqué." }
           $runtimeBilan = Get-Content source/js/admin-bilan-runtime.js -Raw
           if (-not $runtimeBilan.Contains("filename:base()+'.docx'")) { throw 'Export Bilan non configuré en DOCX.' }
           if (-not $runtimeBilan.Contains('comment:selectedComment')) { throw 'Commentaire institutionnel absent du payload DOCX.' }
