@@ -15,8 +15,8 @@ const EXISTING_ROW_SOURCES=Object.freeze({
   'briques-identification':['construction_briques'],
   'briques-manipulation':['construction_briques'],
   'carre':['gratte_ciel'],
-  'organisation':['organisation_demenagement','ranger_stock'],
-  'planning':['planning_cantine'],
+  'organisation':['ranger_stock'],
+  'planning':['organisation_demenagement','planning_cantine'],
   'tri-temps':['tri_chevilles'],
   'tri-erreurs':['tri_chevilles'],
   'texte':['traitement_texte_bureautique'],
@@ -508,32 +508,26 @@ function autoInstitutional(){
     }
   }
 
-  // Organisation : les scores des exercices de la même famille s'additionnent
-  // et n'alimentent que la ligne institutionnelle Organisation.
-  if(hasAny(['organisation_demenagement','ranger_stock'])){
-    const org=aggregate(['organisation_demenagement','ranger_stock']);
-    if(org){
-      let level='';
-      const onlyStock=has('ranger_stock')&&!has('organisation_demenagement');
-      const onlyMove=has('organisation_demenagement')&&!has('ranger_stock');
-      if(onlyStock){
-        const errors=Math.max(0,org.max-org.score);
-        level=errors<=2?'I':errors<=4?'II':'III';
-      }else if(onlyMove){
-        level=org.score>=7?'I':org.score>=6?'II':'III';
-      }else{
-        level=org.pct>=87?'I':org.pct>=74?'II':'III';
-      }
-      const errors=Math.max(0,Math.round((org.max-org.score)*100)/100);
+  // Gestion logistique « Ranger le stock » : cette ligne institutionnelle
+  // est alimentée uniquement par l'exercice Ranger le stock.
+  if(has('ranger_stock')){
+    const pair=scorePair('ranger_stock');
+    if(pair){
+      const errors=Math.max(0,Math.round((pair.max-pair.score)*100)/100);
+      const level=errors<=2?'I':errors<=4?'II':'III';
       applyInstitutional('organisation',level,errors+' erreur'+(errors===1?'':'s'));
     }
   }
 
-  if(has('planning_cantine')){
-    const pair=scorePair('planning_cantine');
-    if(pair){
-      const errors=Math.max(0,pair.max-pair.score);
-      applyInstitutional('planning',pair.score>=13?'I':pair.score>=11?'II':'III',errors+' erreur'+(errors===1?'':'s'));
+  // Gestion de plannings sous contraintes : logique institutionnelle historique.
+  // Les 8 points d'Organisation d'une activité et les 15 points du Restaurant
+  // s'additionnent sur cette seule ligne (maximum 23).
+  if(hasAny(['organisation_demenagement','planning_cantine'])){
+    const planning=aggregate(['organisation_demenagement','planning_cantine']);
+    if(planning){
+      const errors=Math.max(0,Math.round((planning.max-planning.score)*100)/100);
+      const level=planning.score>=20?'I':planning.score>=17?'II':'III';
+      applyInstitutional('planning',level,errors+' erreur'+(errors===1?'':'s'));
     }
   }
 
