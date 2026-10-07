@@ -212,7 +212,7 @@
       }
       if(type==='text') return {uid:'content_'+index,type,zone,text:item.text||''};
       if(type==='html') return {uid:'content_'+index,type,zone,html:item.html||''};
-      if(type==='html-js') return {uid:'content_'+index,type,zone,html:item.html||'',js:item.script||''};
+      if(type==='html-js') return {uid:'content_'+index,type,zone,html:item.html||'',js:item.script||'',preset:item.preset||''};
       if(['image','audio','video'].includes(type)){
         const r=item.resource||{};
         return {
@@ -273,6 +273,7 @@
         scored:def.scored!==false,
         icon:def.icon?clone(def.icon):null,
         layout:layoutFromDefinition(def),
+        legacyFullPage:def.presentation?.legacyFullPage===true,
         scenario:def.scenario||'',
         instruction:def.instruction||'',
         calculatorCompatible:def.calculator?.compatible===true,
@@ -413,7 +414,7 @@
       }
       if(block.type==='text') return {type:'text',zone:block.zone||'left',text:block.text||''};
       if(block.type==='html') return {type:'html',zone:block.zone||'left',html:block.html||''};
-      if(block.type==='html-js') return {type:'html-js',zone:block.zone||'left',html:block.html||'',script:block.js||''};
+      if(block.type==='html-js') return {type:'html-js',zone:block.zone||'left',html:block.html||'',script:block.js||'',preset:block.preset||undefined};
       if(['image','audio','video'].includes(block.type)) return {
         type:block.type,zone:block.zone||'left',
         resource:{name:block.mediaName||'',mime:block.mediaType||'',data:block.mediaData||'',alt:block.mediaAlt||''}
@@ -430,6 +431,7 @@
     });
     return {
       layout:m.layout||'single',
+      legacyFullPage:Boolean(m.legacyFullPage),
       blockSizing:m.layout==='chars-rest'?{
         mode:'characters-and-remainder',
         blocks:[
