@@ -217,13 +217,15 @@ function getKaloneoLibrary() {
   return kaloneoLibrary;
 }
 
-function bilanDocumentsDir() {
-  return sebDocumentsRoot();
+function internalBilanExportsDir() {
+  return path.join(sebInternalRoot(), 'Bilans');
 }
 
 function ensureSebDocumentsFolders() {
-  fs.mkdirSync(sebDocumentsRoot(), { recursive: true });
+  // R17 : plus aucun stockage actif SEB EvalPro dans Documents.
+  // Les données et exports Word restent dans le stockage interne protégé.
   getCandidateStore().ensureRoots();
+  fs.mkdirSync(internalBilanExportsDir(), { recursive:true });
 }
 
 function uniqueOutputPath(directory, filename) {
@@ -257,24 +259,15 @@ function installDownloadRouting() {
     if (!/\.docx?$/i.test(filename)) return;
     try {
       ensureSebDocumentsFolders();
-      const candidateExportDir = adminExportCandidateDir || getCandidateStore().getActiveExportDir();
-      const visibleDirectory = bilanDocumentsDir();
-      const visibleTarget = /^Evaluation_.+\.docx?$/i.test(filename)
-        ? path.join(visibleDirectory, filename)
-        : uniqueOutputPath(visibleDirectory, filename);
-      item.setSavePath(visibleTarget);
+      const targetDirectory = adminExportCandidateDir || getCandidateStore().getActiveExportDir() || internalBilanExportsDir();
+      fs.mkdirSync(targetDirectory, { recursive:true });
+      const target = /^Evaluation_.+\.docx?$/i.test(filename)
+        ? path.join(targetDirectory, filename)
+        : uniqueOutputPath(targetDirectory, filename);
+      item.setSavePath(target);
       item.once('done', (_downloadEvent, state) => {
         if (state !== 'completed') return;
-        cleanupNumberedCandidateWordCopies(visibleDirectory, filename);
-        if (!candidateExportDir) return;
-        try {
-          fs.mkdirSync(candidateExportDir, { recursive:true });
-          const archiveTarget = path.join(candidateExportDir, path.basename(visibleTarget));
-          fs.copyFileSync(visibleTarget, archiveTarget);
-          cleanupNumberedCandidateWordCopies(candidateExportDir, path.basename(archiveTarget));
-        } catch (error) {
-          console.error('Archivage interne du Word impossible:', error && error.message ? error.message : String(error));
-        }
+        cleanupNumberedCandidateWordCopies(targetDirectory, path.basename(target));
       });
     } catch (_) {}
   });
@@ -812,8 +805,8 @@ function startApplication() {
       console.warn('SEB EvalPro 0.3.8 : migration Documents incomplète, anciennes données conservées.', migration);
     } else {
       console.log(
-        'SEB EvalPro 0.3.8 : stockage interne migré ; dossiers Documents retirés=' +
-        migration.removedDirectories + ', fichiers Word visibles conservés=' + migration.wordExports + '.'
+        'SEB EvalPro : stockage interne migré ; dossiers Documents retirés=' +
+        migration.removedDirectories + ', exports Word migrés=' + migration.wordExports + '.'
       );
     }
 
@@ -1288,20 +1281,13 @@ ipcMain.handle('admin:export-bilan-docx', async (_event, payload) => {
     ensureSebDocumentsFolders();
     const requested = path.basename(String(payload?.filename || 'Evaluation.docx'));
     const filename = /\.docx$/i.test(requested) ? requested : requested.replace(/\.[^.]+$/,'') + '.docx';
-    const visibleDirectory = bilanDocumentsDir();
-    const visibleTarget = path.join(visibleDirectory, filename);
+    const targetDirectory = adminExportCandidateDir || getCandidateStore().getActiveExportDir() || internalBilanExportsDir();
+    fs.mkdirSync(targetDirectory, { recursive:true });
+    const target = path.join(targetDirectory, filename);
     const buffer = await buildBilanDocxBuffer(payload || {});
-    fs.writeFileSync(visibleTarget, buffer);
-    cleanupNumberedCandidateWordCopies(visibleDirectory, filename);
-
-    const candidateExportDir = adminExportCandidateDir || getCandidateStore().getActiveExportDir();
-    if (candidateExportDir) {
-      fs.mkdirSync(candidateExportDir, { recursive:true });
-      const archiveTarget = path.join(candidateExportDir, filename);
-      fs.copyFileSync(visibleTarget, archiveTarget);
-      cleanupNumberedCandidateWordCopies(candidateExportDir, filename);
-    }
-    return { ok:true, filename, filePath:visibleTarget };
+    fs.writeFileSync(target, buffer);
+    cleanupNumberedCandidateWordCopies(targetDirectory, filename);
+    return { ok:true, filename };
   } catch (error) {
     return { ok:false, error:error && error.message ? error.message : String(error) };
   }
