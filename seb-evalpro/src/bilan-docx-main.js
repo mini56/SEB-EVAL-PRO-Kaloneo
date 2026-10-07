@@ -230,11 +230,39 @@ function buildBilanDocx(payload) {
   });
 }
 
-async function buildBilanDocxBuffer(payload) {
-  return Packer.toBuffer(buildBilanDocx(payload));
+async function officeCrypto() {
+  return import('ooxml-core/crypto');
+}
+
+async function buildBilanDocxBuffer(payload, password = '') {
+  const plain=await Packer.toBuffer(buildBilanDocx(payload));
+  const secret=String(password||'');
+  if(!secret)return plain;
+  const { encryptOoxmlPackage }=await officeCrypto();
+  const encrypted=await encryptOoxmlPackage(new Uint8Array(plain),secret);
+  return Buffer.from(encrypted);
+}
+
+async function decryptBilanDocxBuffer(buffer, password) {
+  const { decryptOoxmlPackage }=await officeCrypto();
+  const plain=await decryptOoxmlPackage(new Uint8Array(buffer),String(password||''));
+  return Buffer.from(plain);
+}
+
+async function isEncryptedBilanDocxBuffer(buffer) {
+  const { isEncryptedOoxmlPackage }=await officeCrypto();
+  return !!isEncryptedOoxmlPackage(new Uint8Array(buffer));
+}
+
+async function verifyBilanDocxPassword(buffer, password) {
+  const { verifyOoxmlPackagePassword }=await officeCrypto();
+  return !!(await verifyOoxmlPackagePassword(new Uint8Array(buffer),String(password||'')));
 }
 
 module.exports={
   buildBilanDocx,
-  buildBilanDocxBuffer
+  buildBilanDocxBuffer,
+  decryptBilanDocxBuffer,
+  isEncryptedBilanDocxBuffer,
+  verifyBilanDocxPassword
 };
