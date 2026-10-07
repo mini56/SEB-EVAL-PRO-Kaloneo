@@ -1347,7 +1347,6 @@ require('./replay-main')({
   app,
   ipcMain,
   getAdminUnlocked: () => adminSessionUnlocked,
-  getAdminDocumentPassword: () => adminSessionDocumentPassword,
   getActiveCandidate: () => getCandidateStore().getActiveCandidate(),
   buildNumber: APP_BUILD_NUMBER
 });
@@ -1362,6 +1361,7 @@ require('./candidate-catalog-main')({
   app,
   ipcMain,
   getAdminUnlocked: () => adminSessionUnlocked,
+  getAdminDocumentPassword: () => adminSessionDocumentPassword,
   getActiveCandidate: () => getCandidateStore().getActiveCandidate(),
   dataRoot: sebInternalRoot()
 });
@@ -1371,7 +1371,11 @@ require('./session-close')({
   ipcMain,
   getMainWindow: () => mainWindow,
   getAdminUnlocked: () => adminSessionUnlocked,
-  setAdminUnlocked: (value) => { adminSessionUnlocked = !!value; applyAdminWindowMode(adminSessionUnlocked); }
+  setAdminUnlocked: (value) => {
+    adminSessionUnlocked = !!value;
+    if (!adminSessionUnlocked) adminSessionDocumentPassword = '';
+    applyAdminWindowMode(adminSessionUnlocked);
+  }
 });
 
 app.whenReady().then(() => {
