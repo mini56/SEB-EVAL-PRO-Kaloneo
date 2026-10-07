@@ -3,9 +3,15 @@
 const fs=require('fs');
 const os=require('os');
 const path=require('path');
-const { buildBilanDocxBuffer }=require('../src/bilan-docx-main');
+const {
+  buildBilanDocxBuffer,
+  decryptBilanDocxBuffer,
+  isEncryptedBilanDocxBuffer,
+  verifyBilanDocxPassword
+}=require('../src/bilan-docx-main');
 
 (async()=>{
+  const password='SVG56';
   const payload={
     filename:'Evaluation_TEST_R17.docx',
     candidate:{nom:'TEST',prenom:'R17',date:'2026-10-07'},
@@ -34,13 +40,25 @@ const { buildBilanDocxBuffer }=require('../src/bilan-docx-main');
     summary:'Synthèse de test. Autoévaluation du candidat : repères déclarés par la personne.',
     feeling:''
   };
-  const buffer=await buildBilanDocxBuffer(payload);
-  if(!Buffer.isBuffer(buffer)||buffer.length<5000)throw new Error('Buffer DOCX invalide ou trop petit.');
-  if(buffer[0]!==0x50||buffer[1]!==0x4b)throw new Error('Le document généré n’est pas une archive DOCX/ZIP.');
-  const target=path.join(process.env.RUNNER_TEMP||os.tmpdir(),'seb-evalpro-r17-bilan-smoke.docx');
-  fs.writeFileSync(target,buffer);
+
+  const encrypted=await buildBilanDocxBuffer(payload,password);
+  if(!Buffer.isBuffer(encrypted)||encrypted.length<5000)throw new Error('Buffer DOCX protégé invalide ou trop petit.');
+  if(!(await isEncryptedBilanDocxBuffer(encrypted)))throw new Error('Le document Word n’est pas protégé par mot de passe.');
+  if(await verifyBilanDocxPassword(encrypted,'MAUVAIS'))throw new Error('Un mauvais mot de passe ouvre le document.');
+  if(!(await verifyBilanDocxPassword(encrypted,password)))throw new Error('Le mot de passe administrateur ne déverrouille pas le document.');
+
+  const plain=await decryptBilanDocxBuffer(encrypted,password);
+  if(plain[0]!==0x50||plain[1]!==0x4b)throw new Error('Le contenu déchiffré n’est pas un DOCX/ZIP valide.');
+
+  const root=process.env.RUNNER_TEMP||os.tmpdir();
+  const target=path.join(root,'seb-evalpro-r17-bilan-smoke-protected.docx');
+  const plainTarget=path.join(root,'seb-evalpro-r17-bilan-smoke-plain.docx');
+  fs.writeFileSync(target,encrypted);
+  fs.writeFileSync(plainTarget,plain);
+
   console.log('BILAN_DOCX_SMOKE=OK');
   console.log('BILAN_DOCX_SMOKE_PATH='+target);
+  console.log('BILAN_DOCX_SMOKE_PLAIN_PATH='+plainTarget);
 })().catch(error=>{
   console.error('BILAN_DOCX_SMOKE=FAIL');
   console.error(error&&error.stack||error);
