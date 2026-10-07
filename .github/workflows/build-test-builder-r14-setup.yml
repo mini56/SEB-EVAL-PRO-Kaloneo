@@ -72,7 +72,7 @@ jobs:
           if ($practical.bilanContributions.Count -ne 5) { throw 'Grille historique Structure 3D incomplète.' }
           $results = Get-Content source/js/qcm-runtime.js -Raw
           if (-not $results.Contains("'activite pratique':'Activités pratiques'")) { throw 'Section Activités pratiques absente de Résultats.' }
-          if (-not $results.Contains('grille d’évaluation à compléter dans le Bilan administrateur')) { throw 'Rappel Bilan absent de Résultats pour les activités pratiques.' }
+          if (-not $results.Contains("grille d’évaluation à compléter dans le Bilan administrateur")) { throw 'Rappel Bilan absent de Résultats pour les activités pratiques.' }
           if (-not $bilan.Contains("'activite pratique':'Activités pratiques'")) { throw 'Section Activités pratiques absente du Bilan.' }
           if (-not $bilan.Contains('structure_3d_papier:Object.freeze')) { throw 'Grille Structure 3D non raccordée au Bilan.' }
 
