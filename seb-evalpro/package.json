@@ -63,7 +63,8 @@
   },
   "dependencies": {
     "quill": "2.0.3",
-    "docx": "9.8.1"
+    "docx": "9.8.1",
+    "ooxml-core": "0.23.0"
   },
   "devDependencies": {
     "electron": "44.3.0",
