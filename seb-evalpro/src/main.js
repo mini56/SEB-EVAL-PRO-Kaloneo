@@ -14,6 +14,7 @@ const { configureLocalKey, readJsonFile, encodeJson, migrateJsonFile, migrateJso
 const { createCandidateLocalProtection } = require('./candidate-local-protection');
 const { internalStorageRoot, documentsWordRoot, migrateLegacyDocumentsStorage } = require('./storage-layout');
 const kaloneoFullParcoursRoute = require('./kaloneo-full-parcours-route');
+const { buildBilanDocxBuffer } = require('./bilan-docx-main');
 
 const ADMIN_PASSWORD_SHA256 = 'c800892ba3f11b33d36eedf7d3c4297f2b6c02e2c347dda8954b4c577f6666b5';
 const STATE_VERSION = 1;
@@ -1277,6 +1278,33 @@ ipcMain.handle('kaloneo-builder:close-preview', () => {
   kaloneoBuilderPreviewDefinition = null;
   mainWindow.loadFile(target, { query:{ resume:'preview' } });
   return true;
+});
+
+ipcMain.handle('admin:export-bilan-docx', async (_event, payload) => {
+  if (!editionCapabilities.canBilan || !adminSessionUnlocked) {
+    return { ok:false, error:'Accès administrateur requis.' };
+  }
+  try {
+    ensureSebDocumentsFolders();
+    const requested = path.basename(String(payload?.filename || 'Evaluation.docx'));
+    const filename = /\.docx$/i.test(requested) ? requested : requested.replace(/\.[^.]+$/,'') + '.docx';
+    const visibleDirectory = bilanDocumentsDir();
+    const visibleTarget = path.join(visibleDirectory, filename);
+    const buffer = await buildBilanDocxBuffer(payload || {});
+    fs.writeFileSync(visibleTarget, buffer);
+    cleanupNumberedCandidateWordCopies(visibleDirectory, filename);
+
+    const candidateExportDir = adminExportCandidateDir || getCandidateStore().getActiveExportDir();
+    if (candidateExportDir) {
+      fs.mkdirSync(candidateExportDir, { recursive:true });
+      const archiveTarget = path.join(candidateExportDir, filename);
+      fs.copyFileSync(visibleTarget, archiveTarget);
+      cleanupNumberedCandidateWordCopies(candidateExportDir, filename);
+    }
+    return { ok:true, filename, filePath:visibleTarget };
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
 });
 
 ipcMain.handle('admin:open-bilan', () => {
