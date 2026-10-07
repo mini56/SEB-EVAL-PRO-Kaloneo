@@ -26,6 +26,7 @@ let mainWindow = null;
 let splashWindow = null;
 let splashStartedAt = 0;
 let adminSessionUnlocked = false;
+let adminSessionDocumentPassword = '';
 let downloadRoutingInstalled = false;
 const editionCapabilities = getEditionCapabilities();
 let candidateStore = null;
@@ -854,13 +855,16 @@ ipcMain.handle('admin:verify', (_event, password) => {
   const ok = verifyAdminPassword(password);
   if (ok) {
     adminSessionUnlocked = true;
+    adminSessionDocumentPassword = String(password || '');
     applyAdminWindowMode(true);
   }
   return ok;
 });
 
 ipcMain.handle('admin:verify-password', (_event, password) => {
-  return verifyAdminPassword(password);
+  const ok = verifyAdminPassword(password);
+  if (ok && adminSessionUnlocked) adminSessionDocumentPassword = String(password || '');
+  return ok;
 });
 
 ipcMain.handle('admin:status', () => adminSessionUnlocked);
@@ -870,6 +874,7 @@ ipcMain.handle('app:edition', () => ({ ...editionCapabilities }));
 ipcMain.handle('admin:lock', () => {
   // SEB_ADMIN_LOCK_RETURNS_TO_PRIVACY
   adminSessionUnlocked = false;
+  adminSessionDocumentPassword = '';
   adminExportCandidateDir = null;
   adminCandidateResultsMode = false;
   applyAdminWindowMode(false);
@@ -1284,7 +1289,10 @@ ipcMain.handle('admin:export-bilan-docx', async (_event, payload) => {
     const targetDirectory = adminExportCandidateDir || getCandidateStore().getActiveExportDir() || internalBilanExportsDir();
     fs.mkdirSync(targetDirectory, { recursive:true });
     const target = path.join(targetDirectory, filename);
-    const buffer = await buildBilanDocxBuffer(payload || {});
+    if (!adminSessionDocumentPassword) {
+      return { ok:false, error:'Mot de passe administrateur indisponible pour protéger le document Word.' };
+    }
+    const buffer = await buildBilanDocxBuffer(payload || {}, adminSessionDocumentPassword);
     fs.writeFileSync(target, buffer);
     cleanupNumberedCandidateWordCopies(targetDirectory, filename);
     return { ok:true, filename };
@@ -1339,6 +1347,7 @@ require('./replay-main')({
   app,
   ipcMain,
   getAdminUnlocked: () => adminSessionUnlocked,
+  getAdminDocumentPassword: () => adminSessionDocumentPassword,
   getActiveCandidate: () => getCandidateStore().getActiveCandidate(),
   buildNumber: APP_BUILD_NUMBER
 });
@@ -1372,6 +1381,7 @@ app.whenReady().then(() => {
 
 app.on('before-quit', () => {
   allowApplicationExit = true;
+  adminSessionDocumentPassword = '';
   stopCandidateKeyGuard();
 });
 
