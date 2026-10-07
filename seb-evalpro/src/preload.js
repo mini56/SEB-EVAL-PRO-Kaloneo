@@ -2123,6 +2123,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   kaloneoGetPreviewDefinition: () => ipcRenderer.invoke('kaloneo-builder:get-preview'),
   kaloneoClosePreview: () => ipcRenderer.invoke('kaloneo-builder:close-preview'),
   closeAdminBilan: () => closeAdminBilanPage(),
+  exportBilanDocx: (payload) => ipcRenderer.invoke('admin:export-bilan-docx', payload),
   verifyAdminPassword: (password) => ipcRenderer.invoke('admin:verify-password', password),
   sebIaStatus: () => ipcRenderer.invoke('ai:status')
 });
