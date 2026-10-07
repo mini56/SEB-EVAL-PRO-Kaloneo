@@ -134,8 +134,8 @@ app.whenReady().then(async()=>{
     const forbiddenRows=['carre','texte','mail','expression','math-problemes'];
     if(forbiddenRows.some(id=>before.visibleRows.includes(id))) return fail('ligne institutionnelle hors parcours encore visible',before);
     if(before.fabrication.length!==5||before.fabrication.some(x=>x.hidden)) return fail('grille manuelle Structure 3D incomplète',before);
-    if(!before.visibleSections.includes('Compétences techniques')||!before.visibleSections.includes('Savoirs fondamentaux')||!before.visibleSections.includes('Autoévaluation')) {
-      return fail('sections institutionnelles / complémentaire incorrectes',before);
+    if(!before.visibleSections.includes('Compétences techniques')||!before.visibleSections.includes('Savoirs fondamentaux')) {
+      return fail('sections institutionnelles attendues incorrectes',before);
     }
     if(before.visibleSections.some(x=>/techniques de l'information/i.test(x))) return fail('section TIC visible sans exercice TIC',before);
     if(before.autoRowPresent||before.autoSectionPresent) return fail('Autoévaluation visible dans le tableau institutionnel',before);
