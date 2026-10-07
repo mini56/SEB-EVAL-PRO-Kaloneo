@@ -449,7 +449,19 @@
       def.id=m.id||def.id;
       def.version=m.version||def.version;
       def.category=m.category||def.category;
-      def.scored=m.scored!==false;
+      const practical=def.category==='activite_pratique';
+      def.scored=practical?false:(m.scored!==false);
+      if(practical){
+        def.activityType='practical';
+        def.allowEmptyCompletion=true;
+        def.behavior=Object.assign({},def.behavior||{},{practicalActivity:true});
+      }else{
+        if(def.activityType==='practical') delete def.activityType;
+        if(def.behavior?.practicalActivity===true){
+          def.behavior=Object.assign({},def.behavior);
+          delete def.behavior.practicalActivity;
+        }
+      }
       if(m.icon) def.icon=clone(m.icon);
       else if(Object.prototype.hasOwnProperty.call(def,'icon')) delete def.icon;
       def.scenario=m.scenario||'';
@@ -562,8 +574,11 @@
       version:m.version||'1.0.0',
       title:m.title||'',
       category:m.category||'',
+      activityType:m.category==='activite_pratique'?'practical':undefined,
       kind:questions.length?'questionnaire':'complex',
-      scored:m.scored!==false,
+      scored:m.category==='activite_pratique'?false:(m.scored!==false),
+      allowEmptyCompletion:m.category==='activite_pratique'?true:undefined,
+      behavior:m.category==='activite_pratique'?{practicalActivity:true}:undefined,
       icon:m.icon?clone(m.icon):undefined,
       features:[...new Set(features)],
       scenario:m.scenario||'',
