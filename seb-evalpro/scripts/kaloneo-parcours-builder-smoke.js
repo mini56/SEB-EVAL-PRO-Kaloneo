@@ -21,10 +21,15 @@ try {
   const normal = tests.filter(item => item.role === 'test');
   const fins = tests.filter(item => item.role === 'fin');
 
-  assert.strictEqual(tests.length, 23, '23 éléments attendus : 1 introduction + 21 tests + 1 fin');
+  assert.strictEqual(tests.length, 24, '24 éléments attendus : 1 introduction + 21 tests du parcours de base + 1 activité pratique + 1 fin');
   assert.strictEqual(intro.length, 1, 'une introduction de base attendue');
-  assert.strictEqual(normal.length, 21, '21 tests intermédiaires attendus');
+  assert.strictEqual(normal.length, 22, '22 éléments intermédiaires attendus, dont Structure 3D en papier');
   assert.strictEqual(fins.length, 1, 'une page de fin attendue');
+  const practical = normal.find(item => item.id === 'structure_3d_papier');
+  assert.ok(practical, 'Structure 3D en papier absente de la bibliothèque');
+  assert.strictEqual(practical.category, 'activite_pratique');
+  assert.strictEqual(practical.activityType, 'practical');
+  assert.strictEqual(practical.scored, false);
 
   assert.ok(fs.existsSync(path.join(temp, 'KALONEO', 'Bibliotheque-tests')), 'bibliothèque interne absente');
   assert.ok(fs.existsSync(path.join(temp, 'KALONEO', 'Parcours')), 'dossier interne Parcours absent');
