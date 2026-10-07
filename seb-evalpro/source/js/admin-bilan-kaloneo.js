@@ -61,7 +61,7 @@ function norm(value){
 function json(key,fallback){try{return JSON.parse(sessionStorage.getItem(key)||'null')??fallback}catch(_){return fallback}}
 function categoryFor(id,value){
   if(String(id)==='planning_cantine')return'planification';
-  return norm(value)||'autres';
+  return norm(value).replace(/[_-]+/g,' ')||'autres';
 }
 function categoryLabel(value){
   const n=norm(value);
