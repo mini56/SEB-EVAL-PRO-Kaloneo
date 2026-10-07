@@ -98,10 +98,10 @@ jobs:
           if (-not $tail.Contains('summarySelfEvaluation')) { throw 'Autoévaluation non raccordée à la synthèse.' }
           node --check src/bilan-docx-main.js
           $main = Get-Content src/main.js -Raw
-          if ($main.Contains("'SVG56'") -or $main.Contains('"SVG56"')) { throw 'Mot de passe administrateur codé en clair dans le programme.' }
-          if (-not $main.Contains('adminSessionDocumentPassword')) { throw 'Mot de passe de session Admin non raccordé à la protection Word.' }
+          if ($main.Contains("'SVG56'") -or $main.Contains([char]34 + "SVG56" + [char]34)) { throw "Mot de passe administrateur codé en clair dans le programme." }
+          if (-not $main.Contains("adminSessionDocumentPassword")) { throw "Mot de passe de session Admin non raccordé à la protection Word." }
           $catalog = Get-Content src/candidate-catalog-main.js -Raw
-          if (-not $catalog.Contains('decryptBilanDocxBuffer')) { throw 'Ouverture transparente du Word protégé absente de l’Admin.' }
+          if (-not $catalog.Contains("decryptBilanDocxBuffer")) { throw "Ouverture transparente du Word protégé absente de l Admin." }
 
       - name: Verify native DOCX package and exported table content
         shell: pwsh
