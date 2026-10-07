@@ -16,6 +16,7 @@ const manifest = {
   tests:[
     {id:'calculs_commandes_atelier',title:'Calculs commandes atelier',category:'mathematiques',scored:true},
     {id:'organisation_demenagement',title:'Organisation d’une activité',category:'organisation',scored:true},
+    {id:'ranger_stock',title:'Ranger le stock de produits',category:'organisation',scored:true},
     {id:'planning_cantine',title:'Planification — Le restaurant',category:'organisation',scored:true},
     {id:'construction_briques',title:'Construction à base de briques',category:'technique',scored:false},
     {id:'gestes_postures',title:'Gestes et postures',category:'technique',scored:true},
@@ -30,6 +31,7 @@ const kaltest = {
   tests:{
     calculs_commandes_atelier:{status:'COMPLETED',result:{score:4,scoreMax:5,percentage:80,details:{}}},
     organisation_demenagement:{status:'COMPLETED',result:{score:7,scoreMax:8,percentage:87.5,details:{}}},
+    ranger_stock:{status:'COMPLETED',result:{score:0,scoreMax:33,percentage:0,details:{}}},
     planning_cantine:{status:'COMPLETED',result:{score:12,scoreMax:15,percentage:80,details:{}}},
     construction_briques:{status:'COMPLETED',result:{score:0,scoreMax:0,percentage:0,details:{},bricks:{temps:10,erreurs:2}}},
     gestes_postures:{status:'COMPLETED',result:{score:3,scoreMax:3,percentage:100,details:{}}},
@@ -74,6 +76,7 @@ ipcMain.on('candidate-catalog:workspace-save-sync',event=>{event.returnValue={ok
 ipcMain.on('kaloneo-library:test-metadata-sync',event=>{event.returnValue={ok:true,tests:[
   {id:'calculs_commandes_atelier',title:'Calculs de commandes en atelier',category:'mathematiques',scored:true},
   {id:'organisation_demenagement',title:'Organisation d’une activité',category:'organisation',scored:true},
+  {id:'ranger_stock',title:'Ranger le stock de produits',category:'organisation',scored:true},
   {id:'planning_cantine',title:'Planification — Le restaurant',category:'planification',scored:true},
   {id:'construction_briques',title:'Construction à base de briques',category:'technique',scored:false},
   {id:'gestes_postures',title:'Gestes et postures',category:'technique',scored:true},
@@ -173,7 +176,7 @@ app.whenReady().then(async()=>{
       status:document.getElementById('status')?.textContent||''
     }))()`,true);
 
-    if(after.levels.organisation!=='I') return fail('niveau institutionnel Organisation incorrect',after);
+    if(after.levels.organisation!=='III') return fail('Ranger le stock avec 33 erreurs doit être niveau III rouge',after);
     if(after.levels.planning!=='II') return fail('niveau institutionnel Planification incorrect',after);
     if(after.levels.triTemps!=='I'||after.levels.triErreurs!=='I') return fail('niveaux institutionnels Tri incorrects',after);
     if(after.levels.mathEnonce!=='I'||after.levels.gestures!=='I') return fail('agrégation institutionnelle incorrecte',after);
@@ -189,7 +192,7 @@ app.whenReady().then(async()=>{
     if(after.levels.bricksManipulation!=='I') return fail('niveau manipulation Briques incorrect',after);
     if(after.details.bricksTime!=='Temps de construction : 00:10') return fail('temps de construction Briques mal affiché',after);
     if(after.details.bricksErrors!=='2 erreurs') return fail('pluriel du nombre d’erreurs Briques incorrect',after);
-    if(!/erreur/.test(after.details.organisation)||/Organisation d’une activité|Ranger le stock/.test(after.details.organisation)) return fail('détail Organisation doit rester factuel sans nom de test',after);
+    if(after.details.organisation!=='33 erreurs') return fail('Ranger le stock doit afficher exactement 33 erreurs',after);
     if(!/erreur/.test(after.details.planning)||/Planification/.test(after.details.planning)) return fail('détail Planning doit rester factuel sans nom de test',after);
     if(after.details.mathEnonce!=='80 % de réussite') return fail('pourcentage Maths mal affiché sous le commentaire',after);
 
