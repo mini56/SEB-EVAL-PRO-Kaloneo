@@ -95,7 +95,8 @@ jobs:
           if (-not $bilan.Contains("progress:'Je pense avoir progressé dans mes compétences de base.'")) { throw 'Libellé autoévaluation savoirs absent.' }
           if (-not $bilan.Contains("stressmessage:'Messagerie : Je me suis senti(e) stressé(e) ou bloqué(e) à certains moments lors de cette activité.'")) { throw 'Libellé autoévaluation messagerie absent.' }
           $candidatePage = Get-Content source/kaltest-pilot2.html -Raw
-          if (-not $candidatePage.Contains('class="pilot2-brand" src="data:image/jpeg;base64,')) { throw 'Logo KALONÉO embarqué absent de la page de démarrage.' }
+          if (-not $candidatePage.Contains('class="pilot2-brand" src="assets/kaloneo-logo-app.png"')) { throw 'Logo KALONÉO PNG absent de la page de démarrage.' }
+          if (-not (Test-Path source/assets/kaloneo-logo-app.png)) { throw 'Fichier PNG du logo KALONÉO absent.' }
           $runtimeBilan = Get-Content source/js/admin-bilan-runtime.js -Raw
           if (-not $runtimeBilan.Contains("filename:base()+'.docx'")) { throw 'Export Bilan non configuré en DOCX.' }
           if (-not $runtimeBilan.Contains('comment:selectedComment')) { throw 'Commentaire institutionnel absent du payload DOCX.' }
@@ -208,7 +209,7 @@ jobs:
           Setup Windows de TEST — PILOTE 22 R20.
 
           KALONÉO PILOTE 22 R20 :
-          - Correction du placeholder du logo : le logo KALONÉO fourni est désormais embarqué comme image JPEG directe, sans SVG intermédiaire.
+          - Correction du placeholder du logo : utilisation directe du PNG KALONÉO validé, réellement décodable par Electron.
           - Contrôle Electron : l’image doit être réellement chargée avec des dimensions naturelles non nulles.
           - Les corrections R18/R19 sur le Tri, la Synthèse et le Word protégé sont conservées.
 
