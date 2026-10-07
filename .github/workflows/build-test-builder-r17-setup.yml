@@ -1,4 +1,5 @@
 name: Build Windows KALONÉO PILOTE 22 R17
+# R17 candidate catalog protected Word temp smoke
 
 on:
   workflow_dispatch:
