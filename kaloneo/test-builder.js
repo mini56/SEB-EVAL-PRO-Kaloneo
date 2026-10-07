@@ -1304,6 +1304,20 @@
     loadDefinition(JSON.parse(text),'Test KALTEST importé sans perte');
   }
 
+  function libraryCategoryLabel(value) {
+    const labels={
+      mathematiques:'Mathématiques',
+      francais:'Français',
+      organisation:'Organisation',
+      numerique:'Numérique',
+      technique:'Technique',
+      planification:'Planification',
+      activite_pratique:'Activités pratiques'
+    };
+    const raw=String(value||'Autres');
+    return labels[raw]||raw.replace(/[_-]+/g,' ').replace(/^./,char=>char.toUpperCase());
+  }
+
   function renderLibraryTests(items) {
     const root=$('test-library-list');
     if(!root)return;
@@ -1320,7 +1334,7 @@
       button.className='test-library-item';
       const text=document.createElement('div');
       const title=document.createElement('strong');title.textContent=item.title;
-      const meta=document.createElement('span');meta.textContent=item.category+' • v'+item.version+(item.scored?' • noté':' • non noté');
+      const meta=document.createElement('span');meta.textContent=libraryCategoryLabel(item.category)+' • v'+item.version+(item.category==='activite_pratique'?' • activité pratique':(item.scored?' • noté':' • non noté'));
       text.append(title,meta);
       const open=document.createElement('span');open.textContent='Ouvrir';
       button.append(text,open);
