@@ -146,6 +146,7 @@ function createKaloneoLibrary(options = {}) {
       category,
       role,
       kind:String(definition.kind || 'complex'),
+      activityType:String(definition.activityType || ''),
       scored:definition.scored !== false,
       description:String(definition.description || ''),
       questionCount:questions,
