@@ -302,7 +302,8 @@ function installInstitutionalFilter(){
   });
 
   installGesturesRow(tbody);
-  installAutoevaluationSection(tbody);
+  // L'autoévaluation ne fait pas partie du tableau institutionnel.
+  // Elle reste disponible pour la synthèse SEB-IA uniquement.
   installUnknownSections(tbody);
 
   // Les titres institutionnels restent exactement ceux du document d’origine.
@@ -409,24 +410,8 @@ function installGesturesRow(tbody){
   target.hidden=false;
   target.dataset.sebKaloneoExcluded='0';
 }
-function installAutoevaluationSection(tbody){
-  const ids=['autoevaluation_savoirs','autoevaluation_tic'].filter(has);
-  if(!ids.length)return;
-  const header=sectionHeader('Autoévaluation');
-  header.dataset.kaloneoAutoevaluation='1';
-  const target=createInstitutionalRow({
-    id:'kaloneo-autoevaluation',
-    title:'Autoévaluation du candidat',
-    capacity:'Capacité à identifier ses points d’appui, ses difficultés et ses besoins.',
-    options:{
-      I:'I. La personne identifie de manière cohérente ses points d’appui et ses difficultés.',
-      II:'II. La personne identifie partiellement ses acquis, ses difficultés ou ses besoins.',
-      III:'III. La personne a besoin d’accompagnement pour identifier ses acquis et ses difficultés.'
-    },
-    detail:selfEvalText(ids)
-  });
-  target.dataset.kaloneoAutoevaluation='1';
-  tbody.append(header,target);
+function summarySelfEvaluation(){
+  return selfEvalText(['autoevaluation_savoirs','autoevaluation_tic'].filter(has));
 }
 function knownIds(){
   const ids=new Set(['gestes_postures','autoevaluation_savoirs','autoevaluation_tic']);
@@ -638,6 +623,7 @@ window.SEB_KALONEO_BILAN=Object.freeze({
   hasAny,
   auto:autoInstitutional,
   stripExcludedFromClone,
+  summarySelfEvaluation,
   visibleTestIds:()=>context.tests.map(test=>test.id),
   visibleInstitutionalRows
 });
