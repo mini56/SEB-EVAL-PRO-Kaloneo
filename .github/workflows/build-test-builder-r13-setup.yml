@@ -71,6 +71,9 @@ jobs:
       - name: Prepare real web app and regression guards
         run: npm run prepare:web
 
+      - name: Verify dynamic KALONEO Bilan from executed parcours
+        run: npx electron --no-sandbox scripts/kaloneo-bilan-dynamic-smoke-main.js
+
       - name: Verify dynamic final page closes active candidate
         run: npx electron --no-sandbox scripts/kaloneo-final-completion-electron-smoke-main.js
 
