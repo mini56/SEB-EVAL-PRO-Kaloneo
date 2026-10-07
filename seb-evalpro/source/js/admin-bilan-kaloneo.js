@@ -4,6 +4,15 @@
 const MANIFEST_KEY='seb_kaloneo_results_manifest';
 const STATE_PREFIX='seb_kaltest_pilot2_state_v1';
 const EXCLUDED_IDS=new Set(['fin_parcours','transition_video_f1']);
+const PRACTICAL_ROWS=Object.freeze({
+  structure_3d_papier:Object.freeze([
+    'fabrication-plan',
+    'fabrication-tracage',
+    'fabrication-decoupe',
+    'fabrication-assemblage',
+    'fabrication-finition'
+  ])
+});
 
 const LEGACY_GROUPS={
   'briques-identification':['construction_briques'],
@@ -29,6 +38,7 @@ const CATEGORY_LABELS={
   dictee:'Dictée',
   organisation:'Organisation',
   planification:'Planification',
+  'activite pratique':'Activités pratiques',
   raisonnement:'Raisonnement',
   technique:'Compétences techniques',
   techniques:'Compétences techniques',
@@ -215,6 +225,7 @@ function selfEvalDetail(testState){
 }
 function evaluationFor(test){
   const id=test.id,status=statusFor(id),state=stateFor(id),result=resultFor(id);
+  if(test.category==='activite pratique')return{level:'',detail:'Activité pratique — évaluation manuelle à compléter dans le Bilan administrateur.'};
   if(status==='ABANDONED_NE')return{level:'NE',detail:'Exercice abandonné — non évalué.'};
   if(status.startsWith('ABANDONED')&&!result)return{level:'NE',detail:'Exercice abandonné.'};
 
@@ -329,6 +340,21 @@ function markLegacyRows(tbody){
     }
   });
 }
+
+function installPracticalRows(tbody,test,anchor){
+  const ids=PRACTICAL_ROWS[String(test?.id||'')]||[];
+  let installed=0;
+  for(const id of ids){
+    const row=document.querySelector('tr[data-r="'+id+'"]');
+    if(!row)continue;
+    row.hidden=false;
+    delete row.dataset.sebKaloneoCompat;
+    row.dataset.kaloneoPracticalTestId=String(test.id||'');
+    tbody.insertBefore(row,anchor);
+    installed+=1;
+  }
+  return installed;
+}
 function installDynamicRows(){
   if(!context.enabled)return false;
   const table=document.getElementById('bilan');
@@ -348,6 +374,9 @@ function installDynamicRows(){
   for(const [label,tests] of groups){
     tbody.insertBefore(createSection(label),anchor);
     for(const test of tests){
+      if(test.category==='activite pratique' && installPracticalRows(tbody,test,anchor)>0){
+        continue;
+      }
       const row=createTestRow(test,stripe++);
       tbody.insertBefore(row,anchor);
       const ev=evaluationFor(test);
@@ -360,7 +389,7 @@ function installDynamicRows(){
   const info=document.createElement('p');
   info.id='seb-kaloneo-bilan-parcours';
   info.className='note';
-  info.textContent='Parcours réalisé : '+(context.parcoursTitle||'KALONÉO')+' — '+context.tests.length+' test(s) pris en compte dans ce bilan.';
+  info.textContent='Parcours réalisé : '+(context.parcoursTitle||'KALONÉO')+' — '+context.tests.length+' élément(s) pris en compte dans ce bilan.';
   table.insertAdjacentElement('beforebegin',info);
   return true;
 }
@@ -441,6 +470,7 @@ function persistDynamic(){
 function auto(){
   if(!context.enabled)return false;
   for(const test of context.tests){
+    if(test.category==='activite pratique')continue;
     const row=rowsForTest(test.id)[0];
     if(!row)continue;
     const ev=evaluationFor(test);
