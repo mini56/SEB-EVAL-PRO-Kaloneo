@@ -350,7 +350,9 @@ function installDynamicRows(){
       const row=createTestRow(test,stripe++);
       tbody.insertBefore(row,anchor);
       const ev=evaluationFor(test);
-      setRowLevel(row,ev.level,ev.detail,'');
+      // Le détail du résultat est visible immédiatement ; le niveau I/II/III
+      // n'est appliqué qu'au clic sur « Compléter automatiquement le bilan ».
+      setRowLevel(row,'',ev.detail,'');
     }
   }
 
