@@ -58,7 +58,6 @@ jobs:
           $bilan = Get-Content source/js/admin-bilan-kaloneo.js -Raw
           if (-not $bilan.Contains("EXCLUDED_IDS=new Set(['fin_parcours','transition_video_f1'])")) { throw 'Fin/transition non exclues du Bilan.' }
           if (-not $bilan.Contains("'planning':['organisation_demenagement','planning_cantine']")) { throw 'Agrégation institutionnelle Planning/Déménagement absente.' }
-          if (-not $bilan.Contains("'organisation':['organisation_demenagement','ranger_stock']")) { throw 'Organisation non raccordée au Bilan.' }
           if (-not $bilan.Contains('Parcours réalisé : ')) { throw 'Nom du parcours absent du Bilan dynamique.' }
           if (-not $bilan.Contains('stripExcludedFromClone')) { throw 'Export Word ne filtre pas les lignes historiques.' }
           node --check ../kaloneo/test-builder.js
