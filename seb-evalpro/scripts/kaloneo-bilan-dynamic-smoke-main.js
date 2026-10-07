@@ -183,7 +183,7 @@ app.whenReady().then(async()=>{
     if(after.levels.fabrication.some(Boolean)) return fail('Structure 3D remplie automatiquement alors qu’elle doit rester manuelle',after);
     if(after.levels.autoevaluation) return fail('Autoévaluation transformée en niveau automatique',after);
 
-    if(!/gestion de stock multicritère/i.test(after.selected.organisation)) return fail('commentaire institutionnel Organisation remplacé',after);
+    if(!/nombreuses erreurs nécessitant un accompagnement/i.test(after.selected.organisation)) return fail('commentaire institutionnel Organisation niveau III incorrect',after);
     if(!/ordre d.exécution de tâches/i.test(after.selected.planning)) return fail('commentaire institutionnel Planification remplacé',after);
     if(!/Fiabilité satisfaisante/i.test(after.selected.triErrors)) return fail('commentaire institutionnel Tri remplacé',after);
     if(!/Comprend et exécute une consigne unique/i.test(after.selected.mathEnonce)) return fail('commentaire institutionnel Maths remplacé',after);
