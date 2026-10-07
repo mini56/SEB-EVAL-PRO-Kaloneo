@@ -57,7 +57,7 @@ jobs:
           if (-not $bilanPage.Contains('js/admin-bilan-kaloneo.js')) { throw 'Filtre Bilan KALONÉO non chargé.' }
           $bilan = Get-Content source/js/admin-bilan-kaloneo.js -Raw
           if (-not $bilan.Contains("EXCLUDED_IDS=new Set(['fin_parcours','transition_video_f1'])")) { throw 'Fin/transition non exclues du Bilan.' }
-          if (-not $bilan.Contains("'planning':['planning_cantine']")) { throw 'Planification non isolée dans le Bilan.' }
+          if (-not $bilan.Contains("'planning':['organisation_demenagement','planning_cantine']")) { throw 'Agrégation institutionnelle Planning/Déménagement absente.' }
           if (-not $bilan.Contains("'organisation':['organisation_demenagement','ranger_stock']")) { throw 'Organisation non raccordée au Bilan.' }
           if (-not $bilan.Contains('Parcours réalisé : ')) { throw 'Nom du parcours absent du Bilan dynamique.' }
           if (-not $bilan.Contains('stripExcludedFromClone')) { throw 'Export Word ne filtre pas les lignes historiques.' }
@@ -75,7 +75,7 @@ jobs:
           if (-not $results.Contains("grille d’évaluation à compléter dans le Bilan administrateur")) { throw 'Rappel Bilan absent de Résultats pour les activités pratiques.' }
           if (-not $bilan.Contains("'activite pratique':'Activités pratiques'")) { throw 'Section Activités pratiques absente du Bilan.' }
           if (-not $bilan.Contains("EXISTING_ROW_SOURCES=Object.freeze")) { throw 'Mapping Bilan institutionnel absent.' }
-          if (-not $bilan.Contains("'organisation':['organisation_demenagement','ranger_stock']")) { throw 'Agrégation Organisation absente.' }
+          if (-not $bilan.Contains("'organisation':['ranger_stock']")) { throw 'Ranger le stock doit alimenter seul la ligne Gestion logistique.' }
           if (-not $bilan.Contains("'math-enonce':['calculs_commandes_atelier','calculs_poids_volumes']")) { throw 'Agrégation Mathématiques énoncé absente.' }
           if (-not $bilan.Contains("'math-problemes':['horaires_reception_controle','fractions_preparation_lots','conversions_atelier_expedition']")) { throw 'Agrégation Mathématiques problèmes absente.' }
           if (-not $bilan.Contains("'expression':['texte_a_trous_stage_logistique','genre_nombre','paronymes_rapport','dictee_professionnelle']")) { throw 'Agrégation Expression écrite absente.' }
@@ -87,6 +87,8 @@ jobs:
           if (-not $bilan.Contains("Temps de construction : ")) { throw 'Temps de construction Briques absent du détail commentaire.' }
           if (-not $bilan.Contains("+' erreur'+(errors===1?'':'s')")) { throw 'Gestion singulier/pluriel erreurs absente.' }
           if (-not $bilan.Contains("return pct+' % de réussite'")) { throw 'Pourcentage de réussite institutionnel absent.' }
+          if (-not $bilan.Contains("const level=errors<=2?'I':errors<=4?'II':'III'")) { throw 'Seuil historique Ranger le stock absent.' }
+          if (-not $bilan.Contains("planning.score>=20?'I':planning.score>=17?'II':'III'")) { throw 'Seuil historique Planning 23 points absent.' }
 
       - name: Verify parcours library selection launch options and runtime
         run: npm run test:parcours-builder
