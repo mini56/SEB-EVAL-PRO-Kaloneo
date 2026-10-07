@@ -1,20 +1,16 @@
-/* KALONÉO Bilan dynamique — source parcours exécuté */
+/* KALONÉO — adaptation du parcours dynamique au Bilan institutionnel existant */
 (()=>{'use strict';
 
 const MANIFEST_KEY='seb_kaloneo_results_manifest';
 const STATE_PREFIX='seb_kaltest_pilot2_state_v1';
 const EXCLUDED_IDS=new Set(['fin_parcours','transition_video_f1']);
-const PRACTICAL_ROWS=Object.freeze({
-  structure_3d_papier:Object.freeze([
-    'fabrication-plan',
-    'fabrication-tracage',
-    'fabrication-decoupe',
-    'fabrication-assemblage',
-    'fabrication-finition'
-  ])
-});
 
-const LEGACY_GROUPS={
+const EXISTING_ROW_SOURCES=Object.freeze({
+  'fabrication-plan':['structure_3d_papier'],
+  'fabrication-tracage':['structure_3d_papier'],
+  'fabrication-decoupe':['structure_3d_papier'],
+  'fabrication-assemblage':['structure_3d_papier'],
+  'fabrication-finition':['structure_3d_papier'],
   'briques-identification':['construction_briques'],
   'briques-manipulation':['construction_briques'],
   'carre':['gratte_ciel'],
@@ -27,9 +23,9 @@ const LEGACY_GROUPS={
   'expression':['texte_a_trous_stage_logistique','genre_nombre','paronymes_rapport','dictee_professionnelle'],
   'math-enonce':['calculs_commandes_atelier','calculs_poids_volumes'],
   'math-problemes':['horaires_reception_controle','fractions_preparation_lots','conversions_atelier_expedition']
-};
+});
 
-const CATEGORY_LABELS={
+const CATEGORY_LABELS=Object.freeze({
   mathematiques:'Mathématiques',
   math:'Mathématiques',
   maths:'Mathématiques',
@@ -43,25 +39,44 @@ const CATEGORY_LABELS={
   technique:'Compétences techniques',
   techniques:'Compétences techniques',
   'competences techniques':'Compétences techniques',
-  tic:'TIC / Bureautique',
-  bureautique:'TIC / Bureautique',
-  communication:'Communication',
+  tic:'Utilisation des techniques de l’information et de la communication',
+  numerique:'Utilisation des techniques de l’information et de la communication',
+  bureautique:'Utilisation des techniques de l’information et de la communication',
+  communication:'Utilisation des techniques de l’information et de la communication',
   autoevaluation:'Autoévaluation',
   autres:'Autres'
-};
+});
 
-const LEVEL_RANK={I:1,II:2,III:3,NE:4};
+const INSTITUTIONAL_SECTION_BY_ROW=Object.freeze({
+  'fabrication-plan':'Compétences techniques',
+  'fabrication-tracage':'Compétences techniques',
+  'fabrication-decoupe':'Compétences techniques',
+  'fabrication-assemblage':'Compétences techniques',
+  'fabrication-finition':'Compétences techniques',
+  'briques-identification':'Compétences techniques',
+  'briques-manipulation':'Compétences techniques',
+  'carre':'Compétences techniques',
+  'organisation':'Compétences techniques',
+  'planning':'Compétences techniques',
+  'tri-temps':'Compétences techniques',
+  'tri-erreurs':'Compétences techniques',
+  'texte':'Utilisation des techniques de l’information et de la communication',
+  'mail':'Utilisation des techniques de l’information et de la communication',
+  'expression':'Savoirs fondamentaux',
+  'math-enonce':'Savoirs fondamentaux',
+  'math-problemes':'Savoirs fondamentaux'
+});
 
 function clean(value){return String(value==null?'':value).replace(/\s+/g,' ').trim()}
 function norm(value){
   let s=clean(value).toLocaleLowerCase('fr-FR');
   try{s=s.normalize('NFD').replace(/[\u0300-\u036f]/g,'')}catch(_){}
-  return s;
+  return s.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
 }
 function json(key,fallback){try{return JSON.parse(sessionStorage.getItem(key)||'null')??fallback}catch(_){return fallback}}
 function categoryFor(id,value){
   if(String(id)==='planning_cantine')return'planification';
-  return norm(value).replace(/[_-]+/g,' ')||'autres';
+  return norm(value)||'autres';
 }
 function categoryLabel(value){
   const n=norm(value);
@@ -110,6 +125,7 @@ function buildContext(){
       category:cat,
       categoryLabel:categoryLabel(cat),
       scored:m.scored!==undefined?m.scored!==false:rawTest.scored!==false,
+      activityType:clean(m.activityType||rawTest.activityType||''),
       version:clean(m.version||rawTest.version||'')
     };
     if(!byId.has(id))order.push(id);
@@ -118,11 +134,11 @@ function buildContext(){
 
   if(manifest&&Array.isArray(manifest.tests))manifest.tests.forEach(add);
 
-  // Compatibilité des candidats R8/R9 : le manifeste pouvait être incomplet.
+  // Compatibilité avec les dossiers R8/R9 dont le manifeste pouvait être incomplet.
   Object.keys(states).forEach(id=>{
     if(EXCLUDED_IDS.has(String(id)))return;
     const m=meta.get(String(id))||{};
-    add({id:String(id),title:m.title||id,category:m.category||'autres',scored:m.scored});
+    add({id:String(id),title:m.title||id,category:m.category||'autres',scored:m.scored,activityType:m.activityType});
   });
 
   const tests=order.map(id=>byId.get(id)).filter(Boolean);
@@ -147,14 +163,23 @@ function fmtSeconds(value){
   const sec=Math.max(0,Math.round(Number(value)||0));
   return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
 }
-function scoreDetail(result){
-  if(!result)return'';
-  const score=Number(result.score),max=Number(result.scoreMax),pct=Number(result.percentage);
-  if(Number.isFinite(score)&&Number.isFinite(max)&&max>0){
-    const pc=Number.isFinite(pct)?Math.round(pct*100)/100:Math.round((score/max)*10000)/100;
-    return 'Score : '+score+'/'+max+' — '+pc+' %';
+function scorePair(id){
+  if(!has(id))return null;
+  const result=resultFor(id);
+  if(!result)return null;
+  const score=Number(result.score),max=Number(result.scoreMax);
+  if(!Number.isFinite(score)||!Number.isFinite(max)||max<=0)return null;
+  return{score:Math.max(0,score),max:Math.max(0,max)};
+}
+function aggregate(ids){
+  let score=0,max=0,count=0;
+  for(const id of ids||[]){
+    const pair=scorePair(id);
+    if(!pair)continue;
+    score+=pair.score;max+=pair.max;count+=1;
   }
-  return'';
+  if(!count||max<=0)return null;
+  return{score,max,pct:(score/max)*100,count};
 }
 function genericLevel(pct){
   const p=Number(pct);
@@ -163,91 +188,142 @@ function genericLevel(pct){
   if(p>=45)return'II';
   return'III';
 }
-function scoredLevel(id,result){
-  if(!result)return'';
-  const score=Number(result.score),max=Number(result.scoreMax);
-  if(!Number.isFinite(score)||!Number.isFinite(max)||max<=0)return'';
-
-  if(id==='traitement_texte_bureautique')return score>=7?'I':score>=3?'II':'III';
-  if(id==='redaction_email')return score>=5?'I':score>=3?'II':'III';
-  if(id==='planning_cantine')return score>=13?'I':score>=11?'II':'III';
-  if(id==='organisation_demenagement')return score>=7?'I':score>=6?'II':'III';
-  if(id==='ranger_stock'){
-    const errors=Math.max(0,max-score);
-    return errors<=2?'I':errors<=4?'II':'III';
+function row(id){return document.querySelector('tr[data-r="'+CSS.escape(String(id))+'"]')}
+function setLevel(target,level){
+  if(!target)return;
+  target.dataset.level=level||'';
+  target.querySelectorAll('.level').forEach(cell=>cell.classList.toggle('on',cell.dataset.l===level));
+}
+function applyInstitutional(id,level,detail){
+  const target=row(id);
+  if(!target)return;
+  setLevel(target,level);
+  const select=target.querySelector('.csel');
+  const textarea=target.querySelector('.ctxt');
+  if(select&&level){
+    const option=[...select.options].find(item=>item.dataset.l===level);
+    if(option){
+      select.value=option.value;
+      if(textarea)textarea.value=option.value;
+    }
   }
-  if(id==='gratte_ciel'){
-    const details=result.details&&typeof result.details==='object'?Object.values(result.details):[];
-    const answered=details.filter(x=>x&&typeof x==='object'&&x.correct!=null);
-    const errors=answered.filter(x=>x.correct===false).length;
-    if(answered.length)return errors<=2?'I':errors<=4?'II':'III';
+  if(detail!==undefined){
+    const node=target.querySelector('.detail');
+    if(node)node.textContent=detail||'';
   }
-  return genericLevel((score/max)*100);
 }
-function triInfo(result){
-  const tri=result?.tri;
-  if(!tri||typeof tri!=='object')return null;
-  const t=Number(tri.temps_moyen)||0;
-  const e=Number(tri.moyenne_erreurs)||0;
-  const timeLevel=t<=720?'I':t<=840?'II':'III';
-  const errorLevel=e<=1.6?'I':e<=3.2?'II':'III';
-  const overall=(LEVEL_RANK[timeLevel]>=LEVEL_RANK[errorLevel])?timeLevel:errorLevel;
-  return{
-    level:overall,
-    timeLevel,
-    errorLevel,
-    detail:(Number(tri.completedCount)||0)+' tri(s) — temps moyen '+fmtSeconds(t)+' — moyenne erreurs '+(Math.round(e*100)/100)
-  };
+function errorDetail(value){
+  const n=Math.max(0,Number(value)||0);
+  return'- '+n+' erreur'+(n===1?'':'s');
 }
-function bricksInfo(result){
-  const b=result?.bricks;
-  if(!b||typeof b!=='object')return null;
-  const errors=Math.max(0,Math.floor(Number(b.erreurs)||0));
-  return{
-    level:errors<=2?'I':errors<=4?'II':'III',
-    detail:'Temps '+fmtSeconds(b.temps||0)+' — '+errors+' erreur'+(errors===1?'':'s')
-  };
+function percentDetail(value,score,max){
+  const pct=Math.round(Number(value)||0);
+  if(Number.isFinite(Number(score))&&Number.isFinite(Number(max))){
+    return'- '+pct+' % de réponses correctes ('+Math.round(Number(score)*100)/100+'/'+Math.round(Number(max)*100)/100+')';
+  }
+  return'- '+pct+' % de réponses correctes';
 }
-function selfEvalDetail(testState){
-  if(!testState)return'';
+function clearAutomaticRows(){
+  const manualRows=new Set([
+    'fabrication-plan','fabrication-tracage','fabrication-decoupe','fabrication-assemblage','fabrication-finition',
+    'briques-identification'
+  ]);
+  Object.keys(EXISTING_ROW_SOURCES).forEach(id=>{
+    if(manualRows.has(id))return;
+    const target=row(id);
+    if(!target||target.hidden)return;
+    setLevel(target,'');
+    const detail=target.querySelector('.detail');
+    if(detail)detail.textContent='';
+  });
+}
+function triData(){
+  if(!has('tri_chevilles'))return null;
+  const state=stateFor('tri_chevilles')||{};
+  const result=resultFor('tri_chevilles')||{};
+  let rows=Array.isArray(state.tri?.rows)?state.tri.rows.slice(0,5):[];
+  rows=rows.filter(item=>Number.isFinite(Number(item?.seconds))&&item?.errors!==null&&item?.errors!==undefined&&String(item.errors).trim()!=='');
+  if(!rows.length&&Array.isArray(result.tri?.temps_essais)){
+    rows=result.tri.temps_essais.slice(0,5).map((seconds,index)=>({
+      seconds:Number(seconds)||0,
+      errors:index===0?Number(result.tri?.erreurs_total)||0:0
+    }));
+  }
+  if(!rows.length)return null;
+  const totalSeconds=rows.reduce((sum,item)=>sum+Math.max(0,Number(item.seconds)||0),0);
+  const totalErrors=rows.reduce((sum,item)=>sum+Math.max(0,Number(item.errors)||0),0);
+  const averageSeconds=Math.round(totalSeconds/rows.length);
+  const averageErrors=totalErrors/rows.length;
+  return{rows,totalSeconds,totalErrors,averageSeconds,averageErrors};
+}
+function selfEvalText(ids){
   const parts=[];
-  const answers=testState.answers&&typeof testState.answers==='object'?testState.answers:{};
-  for(const value of Object.values(answers)){
-    if(Array.isArray(value)&&value.length)parts.push(value.map(clean).filter(Boolean).join(', '));
-    else if(clean(value))parts.push(clean(value));
+  for(const id of ids||[]){
+    if(!has(id))continue;
+    const test=context.byId.get(id);
+    const state=stateFor(id)||{};
+    const values=[];
+    const walk=value=>{
+      if(Array.isArray(value)){value.forEach(walk);return}
+      if(value&&typeof value==='object'){Object.values(value).forEach(walk);return}
+      const s=clean(value);
+      if(s)values.push(s);
+    };
+    walk(state.answers||{});
+    walk(state.supplemental||{});
+    if(values.length)parts.push((test?.title||id)+' : '+[...new Set(values)].join(', '));
   }
-  const supplemental=testState.supplemental&&typeof testState.supplemental==='object'?testState.supplemental:{};
-  for(const fields of Object.values(supplemental)){
-    if(!fields||typeof fields!=='object')continue;
-    for(const value of Object.values(fields))if(clean(value))parts.push(clean(value));
-  }
-  return[...new Set(parts)].join(' — ');
+  return parts.join(' | ');
 }
-function evaluationFor(test){
-  const id=test.id,status=statusFor(id),state=stateFor(id),result=resultFor(id);
-  if(test.category==='activite pratique')return{level:'',detail:'Activité pratique — évaluation manuelle à compléter dans le Bilan administrateur.'};
-  if(status==='ABANDONED_NE')return{level:'NE',detail:'Exercice abandonné — non évalué.'};
-  if(status.startsWith('ABANDONED')&&!result)return{level:'NE',detail:'Exercice abandonné.'};
 
-  if(id==='tri_chevilles'){
-    const info=triInfo(result);
-    if(info)return info;
-  }
-  if(id==='construction_briques'){
-    const info=bricksInfo(result);
-    if(info)return info;
-  }
+function findSectionRows(){
+  const tbody=document.querySelector('#bilan tbody');
+  if(!tbody)return[];
+  const groups=[];
+  let current=null;
+  [...tbody.children].forEach(node=>{
+    if(node.matches?.('tr.section,tr.section2')){
+      current={header:node,label:clean(node.textContent),rows:[]};
+      groups.push(current);
+    }else if(node.matches?.('tr[data-r]')&&current){
+      current.rows.push(node);
+    }
+  });
+  return groups;
+}
+function installInstitutionalFilter(){
+  if(!context.enabled)return false;
+  const table=document.getElementById('bilan');
+  const tbody=table?.querySelector('tbody');
+  if(!tbody)return false;
 
-  if(result){
-    const level=scoredLevel(id,result);
-    const detail=scoreDetail(result);
-    if(level)return{level,detail:detail+(status.startsWith('ABANDONED')?' — exercice abandonné':'')};
-  }
+  // On conserve les vraies lignes institutionnelles. Seules les lignes sans
+  // exercice correspondant dans le parcours sont masquées.
+  Object.entries(EXISTING_ROW_SOURCES).forEach(([id,sources])=>{
+    const target=row(id);
+    if(!target)return;
+    const visible=hasAny(sources);
+    target.hidden=!visible;
+    target.dataset.sebKaloneoExcluded=visible?'0':'1';
+  });
 
-  const auto=selfEvalDetail(state);
-  if(auto)return{level:'',detail:'Autoévaluation du candidat : '+auto};
-  if(status==='COMPLETED')return{level:'',detail:'Exercice terminé — aucun niveau automatique.'};
-  return{level:'',detail:'Aucun résultat exploitable enregistré.'};
+  installGesturesRow(tbody);
+  installAutoevaluationSection(tbody);
+  installUnknownSections(tbody);
+
+  // Les titres institutionnels restent exactement ceux du document d’origine.
+  findSectionRows().forEach(group=>{
+    const visible=group.rows.some(item=>!item.hidden);
+    group.header.hidden=!visible;
+    group.header.dataset.sebKaloneoExcluded=visible?'0':'1';
+  });
+
+  const info=document.createElement('p');
+  info.id='seb-kaloneo-bilan-parcours';
+  info.className='note';
+  info.textContent='Parcours réalisé : '+(context.parcoursTitle||'KALONÉO')+' — le Bilan institutionnel est alimenté uniquement par les activités présentes dans ce parcours.';
+  table.insertAdjacentElement('beforebegin',info);
+  return true;
 }
 
 function createLevelCell(level){
@@ -257,207 +333,295 @@ function createLevelCell(level){
   td.title='Attribuer le niveau '+level;
   return td;
 }
-function createSelect(){
-  const select=document.createElement('select');
-  select.className='csel';
-  const options=[
-    ['', 'Choisissez un élément.'],
-    ['NE','Non évalué.'],
-    ['I','I. Résultat satisfaisant au regard de l’exercice.'],
-    ['II','II. Résultat intermédiaire ; des repères ou vérifications restent utiles.'],
-    ['III','III. Des difficultés importantes apparaissent dans cet exercice.']
-  ];
-  options.forEach(([level,text])=>{
-    const o=document.createElement('option');
-    o.value=text;
-    o.textContent=text;
-    if(level)o.dataset.l=level;
-    select.appendChild(o);
-  });
-  return select;
-}
-function createTestRow(test,index){
-  const row=document.createElement('tr');
-  row.dataset.r='kaloneo-test-'+test.id;
-  row.dataset.kaloneoTestId=test.id;
-  row.dataset.kaloneoCategory=test.category;
-  if(index%2)row.classList.add('alt');
+function createInstitutionalRow({id,title,capacity,options,detail}){
+  const tr=document.createElement('tr');
+  tr.dataset.r=id;
+  tr.dataset.kaloneoGenerated='1';
 
   const module=document.createElement('td');
-  const strong=document.createElement('b');
-  strong.textContent=test.title||test.id;
-  module.appendChild(strong);
-  row.appendChild(module);
-  ['NE','I','II','III'].forEach(level=>row.appendChild(createLevelCell(level)));
+  if(title){
+    const strong=document.createElement('b');
+    strong.textContent=title;
+    module.appendChild(strong);
+    if(capacity)module.append(document.createElement('br'));
+  }
+  if(capacity)module.appendChild(document.createTextNode(capacity));
+  tr.appendChild(module);
+  ['NE','I','II','III'].forEach(level=>tr.appendChild(createLevelCell(level)));
 
   const comments=document.createElement('td');
-  const select=createSelect();
+  const select=document.createElement('select');
+  select.className='csel';
+  const entries=[
+    ['', 'Choisissez un élément.'],
+    ['NE','Non évalué.'],
+    ['I',options?.I||'I. La compétence est mobilisée de manière satisfaisante.'],
+    ['II',options?.II||'II. La compétence est partiellement mobilisée et nécessite encore des repères.'],
+    ['III',options?.III||'III. La compétence reste difficile à mobiliser et nécessite un accompagnement.']
+  ];
+  entries.forEach(([level,text])=>{
+    const option=document.createElement('option');
+    option.textContent=text;
+    if(level)option.dataset.l=level;
+    select.appendChild(option);
+  });
   const textarea=document.createElement('textarea');
   textarea.className='ctxt';
   textarea.placeholder='Commentaire Administrateur (facultatif)';
-  const detail=document.createElement('div');
-  detail.className='detail';
-  comments.append(select,textarea,detail);
-  row.appendChild(comments);
-  return row;
+  const detailNode=document.createElement('div');
+  detailNode.className='detail';
+  detailNode.textContent=detail||'';
+  comments.append(select,textarea,detailNode);
+  tr.appendChild(comments);
+  return tr;
 }
-function setRowLevel(row,level,detail,comment){
-  if(!row)return;
-  row.dataset.level=level||'';
-  row.querySelectorAll('.level').forEach(cell=>cell.classList.toggle('on',cell.dataset.l===level));
-  const select=row.querySelector('.csel');
-  if(select&&level){
-    const option=[...select.options].find(o=>o.dataset.l===level);
-    if(option)select.value=option.value;
-  }
-  if(detail!==undefined){
-    const node=row.querySelector('.detail');
-    if(node)node.textContent=detail||'';
-  }
-  if(comment!==undefined){
-    const node=row.querySelector('.ctxt');
-    if(node)node.value=comment||'';
-  }
-}
-function createSection(label){
+function sectionHeader(label){
   const tr=document.createElement('tr');
-  tr.className='section2 seb-kaloneo-dynamic-section';
-  tr.dataset.kaloneoSection='1';
+  tr.className='section2';
+  tr.dataset.kaloneoGenerated='1';
   const td=document.createElement('td');
   td.colSpan=6;
   td.textContent=label;
   tr.appendChild(td);
   return tr;
 }
-function markLegacyRows(tbody){
-  [...tbody.children].forEach(node=>{
-    if(node.matches?.('tr[data-r]')&&!node.dataset.kaloneoTestId&&!node.dataset.kaltestManual){
-      node.hidden=true;
-      node.dataset.sebKaloneoCompat='1';
-    }else if(node.matches?.('tr.section,tr.section2')){
-      node.hidden=true;
-      node.dataset.sebKaloneoCompat='1';
-    }
-  });
+function insertBeforeSectionEnd(tbody,sectionLabel,node){
+  const groups=findSectionRows();
+  const group=groups.find(item=>norm(item.label)===norm(sectionLabel));
+  if(!group){tbody.appendChild(node);return}
+  const last=group.rows[group.rows.length-1];
+  if(last?.nextSibling)tbody.insertBefore(node,last.nextSibling);
+  else tbody.appendChild(node);
+  group.header.hidden=false;
+  group.header.dataset.sebKaloneoExcluded='0';
 }
-
-function installPracticalRows(tbody,test,anchor){
-  const ids=PRACTICAL_ROWS[String(test?.id||'')]||[];
-  let installed=0;
-  for(const id of ids){
-    const row=document.querySelector('tr[data-r="'+id+'"]');
-    if(!row)continue;
-    row.hidden=false;
-    delete row.dataset.sebKaloneoCompat;
-    row.dataset.kaloneoPracticalTestId=String(test.id||'');
-    tbody.insertBefore(row,anchor);
-    installed+=1;
+function installGesturesRow(tbody){
+  const id='kaloneo-gestes-postures';
+  let target=row(id);
+  if(!has('gestes_postures')){
+    if(target){target.hidden=true;target.dataset.sebKaloneoExcluded='1'}
+    return;
   }
-  return installed;
-}
-function installDynamicRows(){
-  if(!context.enabled)return false;
-  const table=document.getElementById('bilan');
-  const tbody=table?.querySelector('tbody');
-  if(!tbody)return false;
-
-  markLegacyRows(tbody);
-
-  const anchor=tbody.firstChild;
-  const groups=new Map();
-  context.tests.forEach(test=>{
-    if(!groups.has(test.categoryLabel))groups.set(test.categoryLabel,[]);
-    groups.get(test.categoryLabel).push(test);
-  });
-
-  let stripe=0;
-  for(const [label,tests] of groups){
-    tbody.insertBefore(createSection(label),anchor);
-    for(const test of tests){
-      if(test.category==='activite pratique' && installPracticalRows(tbody,test,anchor)>0){
-        continue;
+  if(!target){
+    target=createInstitutionalRow({
+      id,
+      title:'Gestes et postures',
+      capacity:'Capacité à identifier les gestes et postures adaptés à une situation professionnelle.',
+      options:{
+        I:'I. Identifie les gestes et postures adaptés aux situations proposées.',
+        II:'II. Identifie partiellement les gestes et postures adaptés et nécessite quelques repères.',
+        III:'III. A des difficultés à identifier les gestes et postures adaptés aux situations proposées.'
       }
-      const row=createTestRow(test,stripe++);
-      tbody.insertBefore(row,anchor);
-      const ev=evaluationFor(test);
-      // Le détail du résultat est visible immédiatement ; le niveau I/II/III
-      // n'est appliqué qu'au clic sur « Compléter automatiquement le bilan ».
-      setRowLevel(row,'',ev.detail,'');
+    });
+    insertBeforeSectionEnd(tbody,'Compétences techniques',target);
+  }
+  target.hidden=false;
+  target.dataset.sebKaloneoExcluded='0';
+}
+function installAutoevaluationSection(tbody){
+  const ids=['autoevaluation_savoirs','autoevaluation_tic'].filter(has);
+  if(!ids.length)return;
+  const header=sectionHeader('Autoévaluation');
+  header.dataset.kaloneoAutoevaluation='1';
+  const target=createInstitutionalRow({
+    id:'kaloneo-autoevaluation',
+    title:'Autoévaluation du candidat',
+    capacity:'Capacité à identifier ses points d’appui, ses difficultés et ses besoins.',
+    options:{
+      I:'I. La personne identifie de manière cohérente ses points d’appui et ses difficultés.',
+      II:'II. La personne identifie partiellement ses acquis, ses difficultés ou ses besoins.',
+      III:'III. La personne a besoin d’accompagnement pour identifier ses acquis et ses difficultés.'
+    },
+    detail:selfEvalText(ids)
+  });
+  target.dataset.kaloneoAutoevaluation='1';
+  tbody.append(header,target);
+}
+function knownIds(){
+  const ids=new Set(['gestes_postures','autoevaluation_savoirs','autoevaluation_tic']);
+  Object.values(EXISTING_ROW_SOURCES).flat().forEach(id=>ids.add(id));
+  return ids;
+}
+function genericOptions(category){
+  const cat=norm(category);
+  if(cat==='activite pratique')return{
+    I:'I. Réalise l’activité pratique de manière autonome et conformément aux consignes.',
+    II:'II. Réalise l’activité pratique avec quelques erreurs ou avec des repères supplémentaires.',
+    III:'III. Rencontre des difficultés importantes et nécessite un accompagnement dans la réalisation.'
+  };
+  if(cat==='organisation')return{
+    I:'I. Organise la tâche de manière autonome en tenant compte des contraintes.',
+    II:'II. Organise partiellement la tâche mais nécessite encore des repères.',
+    III:'III. Rencontre des difficultés importantes pour organiser la tâche et prendre en compte les contraintes.'
+  };
+  if(cat==='planification')return{
+    I:'I. Planifie les étapes de manière cohérente et autonome.',
+    II:'II. Planifie les principales étapes mais commet des erreurs ou nécessite des repères.',
+    III:'III. Rencontre des difficultés importantes pour ordonner et planifier les étapes.'
+  };
+  return{
+    I:'I. Les compétences attendues dans cette section sont mobilisées de manière satisfaisante.',
+    II:'II. Les compétences attendues sont partiellement mobilisées et nécessitent encore des repères.',
+    III:'III. Les compétences attendues restent difficiles à mobiliser et nécessitent un accompagnement.'
+  };
+}
+function installUnknownSections(tbody){
+  const known=knownIds();
+  const groups=new Map();
+  context.tests.filter(test=>!known.has(test.id)).forEach(test=>{
+    const label=test.categoryLabel||categoryLabel(test.category);
+    if(!groups.has(label))groups.set(label,[]);
+    groups.get(label).push(test);
+  });
+  for(const [label,tests] of groups){
+    const header=sectionHeader(label);
+    header.dataset.kaloneoUnknownSection='1';
+    const ids=tests.map(test=>test.id);
+    const target=createInstitutionalRow({
+      id:'kaloneo-section-'+norm(label).replace(/\s+/g,'-'),
+      title:label,
+      capacity:'Appréciation des compétences mobilisées dans les activités de cette section.',
+      options:genericOptions(tests[0]?.category),
+      detail:'Activités prises en compte : '+tests.map(test=>test.title).join(', ')
+    });
+    target.dataset.kaloneoUnknownSection='1';
+    target.dataset.kaloneoSourceIds=ids.join(',');
+    tbody.append(header,target);
+  }
+}
+function autoInstitutional(){
+  if(!context.enabled)return false;
+  clearAutomaticRows();
+
+  // Construction à base de briques : la lecture du schéma reste une appréciation
+  // administrateur ; les erreurs de manipulation alimentent uniquement la ligne dédiée.
+  if(has('construction_briques')){
+    const b=resultFor('construction_briques')?.bricks;
+    if(b&&Number.isFinite(Number(b.erreurs))){
+      const errors=Math.max(0,Math.floor(Number(b.erreurs)||0));
+      const level=errors<=2?'I':errors<=4?'II':'III';
+      applyInstitutional('briques-manipulation',level,'- Temps '+fmtSeconds(b.temps||0)+' - '+errors+' erreur'+(errors===1?'':'s'));
     }
   }
 
-  const info=document.createElement('p');
-  info.id='seb-kaloneo-bilan-parcours';
-  info.className='note';
-  info.textContent='Parcours réalisé : '+(context.parcoursTitle||'KALONÉO')+' — '+context.tests.length+' élément(s) pris en compte dans ce bilan.';
-  table.insertAdjacentElement('beforebegin',info);
+  if(has('gratte_ciel')){
+    const pair=scorePair('gratte_ciel');
+    if(pair){
+      const errors=Math.max(0,pair.max-pair.score);
+      applyInstitutional('carre',errors<=2?'I':errors<=4?'II':'III',errorDetail(errors));
+    }
+  }
+
+  // Organisation : les scores des exercices de la même famille s'additionnent
+  // et n'alimentent que la ligne institutionnelle Organisation.
+  if(hasAny(['organisation_demenagement','ranger_stock'])){
+    const org=aggregate(['organisation_demenagement','ranger_stock']);
+    if(org){
+      let level='';
+      const onlyStock=has('ranger_stock')&&!has('organisation_demenagement');
+      const onlyMove=has('organisation_demenagement')&&!has('ranger_stock');
+      if(onlyStock){
+        const errors=Math.max(0,org.max-org.score);
+        level=errors<=2?'I':errors<=4?'II':'III';
+      }else if(onlyMove){
+        level=org.score>=7?'I':org.score>=6?'II':'III';
+      }else{
+        level=org.pct>=87?'I':org.pct>=74?'II':'III';
+      }
+      applyInstitutional('organisation',level,percentDetail(org.pct,org.score,org.max));
+    }
+  }
+
+  if(has('planning_cantine')){
+    const pair=scorePair('planning_cantine');
+    if(pair){
+      const errors=Math.max(0,pair.max-pair.score);
+      applyInstitutional('planning',pair.score>=13?'I':pair.score>=11?'II':'III',errorDetail(errors));
+    }
+  }
+
+  const tri=triData();
+  if(tri){
+    const timeLevel=tri.averageSeconds<=720?'I':tri.averageSeconds<=840?'II':'III';
+    const errorLevel=tri.averageErrors<=1.6?'I':tri.averageErrors<=3.2?'II':'III';
+    applyInstitutional('tri-temps',timeLevel);
+    applyInstitutional('tri-erreurs',errorLevel,'');
+    const avg=document.getElementById('triAvg');
+    const times=document.getElementById('triTimes');
+    const errors=document.getElementById('triErr');
+    if(avg)avg.textContent=fmtSeconds(tri.averageSeconds);
+    if(times)times.innerHTML=tri.rows.map((item,index)=>{
+      const seconds=Math.max(0,Math.floor(Number(item.seconds)||0));
+      const minutes=Math.floor(seconds/60);
+      const rest=seconds%60;
+      return'N°'+(index+1)+' : '+String(minutes).padStart(2,'0')+' min '+String(rest).padStart(2,'0')+' s';
+    }).join('<br>');
+    if(errors)errors.textContent=tri.totalErrors+' erreur'+(tri.totalErrors===1?'':'s');
+    const detail=row('tri-erreurs')?.querySelector('.detail');
+    if(detail)detail.textContent='- moyenne '+(Math.round(tri.averageErrors*100)/100)+' erreur'+(tri.averageErrors===1?'':'s')+' par tri';
+  }
+
+  if(has('traitement_texte_bureautique')){
+    const pair=scorePair('traitement_texte_bureautique');
+    if(pair){
+      const errors=Math.max(0,pair.max-pair.score);
+      applyInstitutional('texte',pair.score>=7?'I':pair.score>=3?'II':'III',errorDetail(errors));
+    }
+  }
+
+  if(has('redaction_email')){
+    const pair=scorePair('redaction_email');
+    if(pair){
+      const errors=Math.max(0,pair.max-pair.score);
+      applyInstitutional('mail',errors<=1?'I':errors<=3?'II':'III',errorDetail(errors));
+    }
+  }
+
+  const expression=aggregate(['texte_a_trous_stage_logistique','genre_nombre','paronymes_rapport','dictee_professionnelle']);
+  if(expression){
+    applyInstitutional('expression',genericLevel(expression.pct),percentDetail(expression.pct,expression.score,expression.max));
+  }
+
+  const mathStatement=aggregate(['calculs_commandes_atelier','calculs_poids_volumes']);
+  if(mathStatement){
+    applyInstitutional('math-enonce',genericLevel(mathStatement.pct),percentDetail(mathStatement.pct,mathStatement.score,mathStatement.max));
+  }
+
+  const mathProblems=aggregate(['horaires_reception_controle','fractions_preparation_lots','conversions_atelier_expedition']);
+  if(mathProblems){
+    applyInstitutional('math-problemes',genericLevel(mathProblems.pct),percentDetail(mathProblems.pct,mathProblems.score,mathProblems.max));
+  }
+
+  if(has('gestes_postures')){
+    const pair=scorePair('gestes_postures');
+    if(pair){
+      const level=pair.score>=3?'I':pair.score>=2?'II':'III';
+      applyInstitutional('kaloneo-gestes-postures',level,percentDetail((pair.score/pair.max)*100,pair.score,pair.max));
+    }
+  }
+
+  // Les lignes d'activités pratiques, la lecture du schéma des briques et
+  // l'autoévaluation restent volontairement manuelles.
+  document.querySelectorAll('tr[data-kaloneo-unknown-section="1"]').forEach(target=>{
+    const ids=String(target.dataset.kaloneoSourceIds||'').split(',').filter(Boolean);
+    const group=aggregate(ids);
+    if(!group)return;
+    applyInstitutional(target.dataset.r,genericLevel(group.pct),percentDetail(group.pct,group.score,group.max));
+  });
+
+  persist();
+  const status=document.getElementById('status');
+  if(status)status.textContent='Bilan institutionnel complété à partir des activités réellement présentes dans le parcours — complétez les lignes manuelles.';
   return true;
 }
-
-function rowsForTest(id){
-  return [...document.querySelectorAll('tr[data-kaloneo-test-id="'+CSS.escape(String(id))+'"]')];
-}
-function dynamicLevel(id){
-  const row=rowsForTest(id)[0];
-  return String(row?.dataset.level||'');
-}
-function dynamicComment(id){
-  const row=rowsForTest(id)[0];
-  if(!row)return'';
-  return clean([row.querySelector('.ctxt')?.value,row.querySelector('.detail')?.textContent].filter(Boolean).join(' '));
-}
-function groupLevel(ids){
-  const values=(ids||[]).filter(has).map(id=>dynamicLevel(id)).filter(Boolean);
-  const evaluated=values.filter(v=>['I','II','III'].includes(v));
-  if(evaluated.length){
-    return evaluated.sort((a,b)=>(LEVEL_RANK[b]||0)-(LEVEL_RANK[a]||0))[0];
-  }
-  return values.includes('NE')?'NE':'';
-}
-function groupComment(ids){
-  return(ids||[]).filter(has).map(id=>{
-    const test=context.byId.get(id);
-    const comment=dynamicComment(id);
-    return comment?((test?.title||id)+' : '+comment):'';
-  }).filter(Boolean).join(' | ');
-}
-function applyCompat(key,level,comment){
-  const row=document.querySelector('tr[data-r="'+key+'"]');
-  if(!row)return;
-  row.dataset.level=level||'';
-  row.querySelectorAll('.level').forEach(cell=>cell.classList.toggle('on',cell.dataset.l===level));
-  const select=row.querySelector('.csel');
-  if(select&&level){
-    const option=[...select.options].find(o=>o.dataset.l===level);
-    if(option)select.value=option.value;
-  }
-  const textarea=row.querySelector('.ctxt');
-  if(textarea)textarea.value=comment||'';
-}
-function syncCompatibility(){
-  if(!context.enabled)return;
-  for(const [key,ids] of Object.entries(LEGACY_GROUPS)){
-    let level=groupLevel(ids),comment=groupComment(ids);
-    if(key==='tri-temps'&&has('tri_chevilles')){
-      const info=triInfo(resultFor('tri_chevilles'));
-      if(info){level=info.timeLevel;comment=info.detail}
-    }else if(key==='tri-erreurs'&&has('tri_chevilles')){
-      const info=triInfo(resultFor('tri_chevilles'));
-      if(info){level=info.errorLevel;comment=info.detail}
-    }
-    applyCompat(key,level,comment);
-  }
-}
-function persistDynamic(){
-  let data=json('admin_bilan_state',{rows:{}});
-  if(!data||typeof data!=='object')data={rows:{}};
-  if(!data.rows)data.rows={};
-  document.querySelectorAll('tr[data-r]').forEach(row=>{
-    data.rows[row.dataset.r]={
-      level:row.dataset.level||'',
-      select:row.querySelector('.csel')?.value||'',
-      comment:row.querySelector('.ctxt')?.value||'',
-      detail:row.querySelector('.detail')?.textContent||''
+function persist(){
+  const data={rows:{}};
+  document.querySelectorAll('tr[data-r]').forEach(target=>{
+    data.rows[target.dataset.r]={
+      level:target.dataset.level||'',
+      select:target.querySelector('.csel')?.value||'',
+      comment:target.querySelector('.ctxt')?.value||'',
+      detail:target.querySelector('.detail')?.textContent||''
     };
   });
   const avg=document.getElementById('triAvg'),err=document.getElementById('triErr'),times=document.getElementById('triTimes');
@@ -467,23 +631,11 @@ function persistDynamic(){
   sessionStorage.setItem('admin_bilan_state',JSON.stringify(data));
   try{window.sebEvalPro?.save?.()}catch(_){}
 }
-function auto(){
-  if(!context.enabled)return false;
-  for(const test of context.tests){
-    if(test.category==='activite pratique')continue;
-    const row=rowsForTest(test.id)[0];
-    if(!row)continue;
-    const ev=evaluationFor(test);
-    setRowLevel(row,ev.level,ev.detail,'');
-  }
-  syncCompatibility();
-  persistDynamic();
-  const status=document.getElementById('status');
-  if(status)status.textContent='Bilan complété à partir des tests réellement présents dans le parcours.';
-  return true;
-}
 function stripExcludedFromClone(root){
-  root?.querySelectorAll?.('[data-seb-kaloneo-compat="1"]').forEach(node=>node.remove());
+  root?.querySelectorAll?.('[data-seb-kaloneo-excluded="1"]').forEach(node=>node.remove());
+}
+function visibleInstitutionalRows(){
+  return[...document.querySelectorAll('#bilan tr[data-r]')].filter(target=>!target.hidden).map(target=>target.dataset.r);
 }
 
 window.SEB_KALONEO_BILAN=Object.freeze({
@@ -491,24 +643,11 @@ window.SEB_KALONEO_BILAN=Object.freeze({
   context,
   hasTest:has,
   hasAny,
-  evaluationFor,
-  auto,
-  syncCompatibility,
+  auto:autoInstitutional,
   stripExcludedFromClone,
-  visibleTestIds:()=>context.tests.map(test=>test.id)
+  visibleTestIds:()=>context.tests.map(test=>test.id),
+  visibleInstitutionalRows
 });
 
-if(context.enabled){
-  installDynamicRows();
-
-  document.addEventListener('click',event=>{
-    if(event.target?.closest?.('tr[data-kaloneo-test-id] .level'))setTimeout(()=>{syncCompatibility();persistDynamic()},0);
-  },true);
-  document.addEventListener('change',event=>{
-    if(event.target?.closest?.('tr[data-kaloneo-test-id]'))setTimeout(()=>{syncCompatibility();persistDynamic()},0);
-  },true);
-  document.addEventListener('input',event=>{
-    if(event.target?.closest?.('tr[data-kaloneo-test-id]'))setTimeout(()=>{syncCompatibility();persistDynamic()},0);
-  },true);
-}
+if(context.enabled)installInstitutionalFilter();
 })();
