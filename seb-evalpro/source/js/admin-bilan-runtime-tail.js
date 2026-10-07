@@ -11,7 +11,7 @@ function sebIaRow(key){
   return{
     key,
     level:String(row.dataset.level||row.querySelector('.level.on')?.dataset.l||''),
-    comment:String(row.querySelector('.ctxt')?.value||'').trim(),
+    comment:String(row.querySelector('.csel')?.value||row.querySelector('.ctxt')?.value||'').trim(),
     detail:String(row.querySelector('.detail')?.textContent||'').trim(),
     moduleText:String(row.querySelector('td')?.innerText||row.querySelector('td')?.textContent||'').trim()
   };
