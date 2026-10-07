@@ -118,7 +118,9 @@ app.whenReady().then(async()=>{
       visibleSections:[...document.querySelectorAll('#bilan tbody tr.section,#bilan tbody tr.section2')]
         .filter(x=>!x.hidden).map(x=>x.textContent.trim()),
       fabrication:[...document.querySelectorAll('tr[data-r^="fabrication-"]')].map(x=>({id:x.dataset.r,hidden:x.hidden,level:x.dataset.level||''})),
-      autoDetail:document.querySelector('tr[data-r="kaloneo-autoevaluation"] .detail')?.textContent||'',
+      autoRowPresent:!!document.querySelector('tr[data-r="kaloneo-autoevaluation"]'),
+      autoSectionPresent:[...document.querySelectorAll('#bilan tbody tr.section,#bilan tbody tr.section2')].some(x=>/Autoévaluation/i.test(x.textContent||'')),
+      autoSummary:window.SEB_KALONEO_BILAN?.summarySelfEvaluation?.()||'',
       parcours:document.getElementById('seb-kaloneo-bilan-parcours')?.textContent||''
     }))()`,true);
 
@@ -127,7 +129,7 @@ app.whenReady().then(async()=>{
     if(before.generatedPerTest!==0) return fail('le Bilan est encore construit avec une ligne par exercice',before);
     if(before.textareas!==0) return fail('une zone texte supplémentaire est encore présente dans la colonne Commentaires',before);
     const mustRows=['fabrication-plan','fabrication-tracage','fabrication-decoupe','fabrication-assemblage','fabrication-finition',
-      'briques-identification','briques-manipulation','organisation','planning','tri-temps','tri-erreurs','math-enonce','kaloneo-gestes-postures','kaloneo-autoevaluation'];
+      'briques-identification','briques-manipulation','organisation','planning','tri-temps','tri-erreurs','math-enonce','kaloneo-gestes-postures'];
     if(mustRows.some(id=>!before.visibleRows.includes(id))) return fail('lignes institutionnelles attendues absentes',before);
     const forbiddenRows=['carre','texte','mail','expression','math-problemes'];
     if(forbiddenRows.some(id=>before.visibleRows.includes(id))) return fail('ligne institutionnelle hors parcours encore visible',before);
@@ -136,7 +138,8 @@ app.whenReady().then(async()=>{
       return fail('sections institutionnelles / complémentaire incorrectes',before);
     }
     if(before.visibleSections.some(x=>/techniques de l'information/i.test(x))) return fail('section TIC visible sans exercice TIC',before);
-    if(!/Calculs/.test(before.autoDetail)||!/Orthographe/.test(before.autoDetail)) return fail('détails autoévaluation perdus',before);
+    if(before.autoRowPresent||before.autoSectionPresent) return fail('Autoévaluation visible dans le tableau institutionnel',before);
+    if(!/Calculs/.test(before.autoSummary)||!/Orthographe/.test(before.autoSummary)) return fail('Autoévaluation non disponible pour la synthèse',before);
     if(!/Parcours smoke R16 institutionnel/.test(before.parcours)) return fail('nom du parcours absent',before);
 
     await win.webContents.executeJavaScript(`document.getElementById('auto').click()`,true);
@@ -152,7 +155,6 @@ app.whenReady().then(async()=>{
         triErreurs:document.querySelector('tr[data-r="tri-erreurs"]')?.dataset.level||'',
         mathEnonce:document.querySelector('tr[data-r="math-enonce"]')?.dataset.level||'',
         gestures:document.querySelector('tr[data-r="kaloneo-gestes-postures"]')?.dataset.level||'',
-        autoevaluation:document.querySelector('tr[data-r="kaloneo-autoevaluation"]')?.dataset.level||'',
         fabrication:[...document.querySelectorAll('tr[data-r^="fabrication-"]')].map(x=>x.dataset.level||'')
       },
       selected:{
@@ -181,7 +183,6 @@ app.whenReady().then(async()=>{
     if(after.levels.triTemps!=='I'||after.levels.triErreurs!=='I') return fail('niveaux institutionnels Tri incorrects',after);
     if(after.levels.mathEnonce!=='I'||after.levels.gestures!=='I') return fail('agrégation institutionnelle incorrecte',after);
     if(after.levels.fabrication.some(Boolean)) return fail('Structure 3D remplie automatiquement alors qu’elle doit rester manuelle',after);
-    if(after.levels.autoevaluation) return fail('Autoévaluation transformée en niveau automatique',after);
 
     if(!/nombreuses erreurs nécessitant un accompagnement/i.test(after.selected.organisation)) return fail('commentaire institutionnel Organisation niveau III incorrect',after);
     if(!/ordre d.exécution de tâches/i.test(after.selected.planning)) return fail('commentaire institutionnel Planification remplacé',after);
