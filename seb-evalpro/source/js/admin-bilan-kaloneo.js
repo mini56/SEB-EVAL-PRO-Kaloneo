@@ -1,4 +1,4 @@
-/* R16 — commentaires institutionnels sans zone texte supplémentaire */
+/* R18 — Bilan institutionnel : autoévaluation lisible, tri sans moyenne d’erreurs affichée */
 /* KALONÉO — adaptation du parcours dynamique au Bilan institutionnel existant */
 (()=>{'use strict';
 
@@ -250,24 +250,55 @@ function triData(){
   const averageErrors=totalErrors/rows.length;
   return{rows,totalSeconds,totalErrors,averageSeconds,averageErrors};
 }
+const AUTOEVAL_LABELS=Object.freeze({
+  autoevaluation_savoirs:Object.freeze({
+    ease:'Je me suis senti(e) à l’aise dans les exercices proposés.',
+    difficulties:'J’ai rencontré des difficultés sur certaines consignes ou calculs.',
+    progress:'Je pense avoir progressé dans mes compétences de base.',
+    motivation:'Cette activité m’a donné envie d’en apprendre davantage.',
+    stress:'Je me suis senti(e) stressé(e) ou bloqué(e) à certains moments.'
+  }),
+  autoevaluation_tic:Object.freeze({
+    stress:'Traitement de texte : Je me suis senti(e) stressé(e) ou bloqué(e) à certains moments lors de cette activité.',
+    outilstexte:'Traitement de texte : Je n’utilise jamais cet outil, c’est donc compliqué pour moi.',
+    difficultetexte:'Traitement de texte : Je n’ai pas de difficulté avec cet outil, c’est facile pour moi.',
+    stressmessage:'Messagerie : Je me suis senti(e) stressé(e) ou bloqué(e) à certains moments lors de cette activité.',
+    outilsmessage:'Messagerie : Je n’utilise jamais cet outil, c’est donc compliqué pour moi.',
+    difficultemessage:'Messagerie : Je n’ai pas de difficulté avec cet outil, c’est facile pour moi.'
+  })
+});
+const AUTOEVAL_TITLES=Object.freeze({
+  autoevaluation_savoirs:'Savoirs fondamentaux',
+  autoevaluation_tic:'Outils numériques'
+});
+function collectPrimitiveStrings(value,out){
+  if(Array.isArray(value)){value.forEach(item=>collectPrimitiveStrings(item,out));return}
+  if(value&&typeof value==='object'){Object.values(value).forEach(item=>collectPrimitiveStrings(item,out));return}
+  const s=clean(value);
+  if(s)out.push(s);
+}
 function selfEvalText(ids){
-  const parts=[];
+  const sections=[];
   for(const id of ids||[]){
     if(!has(id))continue;
-    const test=context.byId.get(id);
     const state=stateFor(id)||{};
-    const values=[];
-    const walk=value=>{
-      if(Array.isArray(value)){value.forEach(walk);return}
-      if(value&&typeof value==='object'){Object.values(value).forEach(walk);return}
-      const s=clean(value);
-      if(s)values.push(s);
-    };
-    walk(state.answers||{});
-    walk(state.supplemental||{});
-    if(values.length)parts.push((test?.title||id)+' : '+[...new Set(values)].join(', '));
+    const labels=AUTOEVAL_LABELS[id]||{};
+    const answerValues=[];
+    collectPrimitiveStrings(state.answers||{},answerValues);
+    const selected=[...new Set(answerValues.map(value=>labels[value]||'').filter(Boolean))];
+
+    const supplementalValues=[];
+    collectPrimitiveStrings(state.supplemental||{},supplementalValues);
+    const comments=[...new Set(supplementalValues.filter(value=>!labels[value]))];
+
+    const readable=[];
+    selected.forEach(label=>readable.push('« '+label+' »'));
+    comments.forEach(comment=>readable.push('Commentaire : « '+comment+' »'));
+    if(readable.length){
+      sections.push((AUTOEVAL_TITLES[id]||'Autoévaluation')+' — '+readable.join(' ; '));
+    }
   }
-  return parts.join(' | ');
+  return sections.join(' | ');
 }
 
 function findSectionRows(){
@@ -534,10 +565,7 @@ function autoInstitutional(){
     }).join('<br>');
     if(errors)errors.textContent=tri.totalErrors+' erreur'+(tri.totalErrors===1?'':'s');
     const detail=row('tri-erreurs')?.querySelector('.detail');
-    if(detail){
-      const avgErrors=Math.round(tri.averageErrors*100)/100;
-      detail.textContent='Moyenne : '+avgErrors+' erreur'+(avgErrors===1?'':'s')+' par tri';
-    }
+    if(detail)detail.textContent='';
   }
 
   if(has('traitement_texte_bureautique')){
