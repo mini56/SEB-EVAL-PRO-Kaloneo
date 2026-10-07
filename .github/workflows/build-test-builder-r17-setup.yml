@@ -97,6 +97,11 @@ jobs:
           if (-not $tail.Contains("row.querySelector('.csel')?.value")) { throw 'SEB-IA ne lit pas le commentaire institutionnel sélectionné.' }
           if (-not $tail.Contains('summarySelfEvaluation')) { throw 'Autoévaluation non raccordée à la synthèse.' }
           node --check src/bilan-docx-main.js
+          $main = Get-Content src/main.js -Raw
+          if ($main.Contains("'SVG56'") -or $main.Contains('"SVG56"')) { throw 'Mot de passe administrateur codé en clair dans le programme.' }
+          if (-not $main.Contains('adminSessionDocumentPassword')) { throw 'Mot de passe de session Admin non raccordé à la protection Word.' }
+          $catalog = Get-Content src/candidate-catalog-main.js -Raw
+          if (-not $catalog.Contains('decryptBilanDocxBuffer')) { throw 'Ouverture transparente du Word protégé absente de l’Admin.' }
 
       - name: Verify native DOCX package and exported table content
         shell: pwsh
@@ -104,12 +109,18 @@ jobs:
           $output = node scripts/bilan-docx-smoke.js
           $output | Write-Host
           $line = $output | Where-Object { $_ -like 'BILAN_DOCX_SMOKE_PATH=*' } | Select-Object -First 1
-          if (-not $line) { throw 'Chemin DOCX smoke absent.' }
+          $plainLine = $output | Where-Object { $_ -like 'BILAN_DOCX_SMOKE_PLAIN_PATH=*' } | Select-Object -First 1
+          if (-not $line) { throw 'Chemin DOCX protégé smoke absent.' }
+          if (-not $plainLine) { throw 'Chemin DOCX déchiffré smoke absent.' }
           $docx = $line.Substring('BILAN_DOCX_SMOKE_PATH='.Length)
-          if (-not (Test-Path $docx)) { throw 'Fichier DOCX smoke introuvable.' }
-          $zip = "$docx.zip"
-          $outDir = "$docx-unpacked"
-          Copy-Item $docx $zip -Force
+          $plainDocx = $plainLine.Substring('BILAN_DOCX_SMOKE_PLAIN_PATH='.Length)
+          if (-not (Test-Path $docx)) { throw 'Fichier DOCX protégé smoke introuvable.' }
+          if (-not (Test-Path $plainDocx)) { throw 'Fichier DOCX déchiffré smoke introuvable.' }
+          $header = [System.IO.File]::ReadAllBytes($docx)[0..7]
+          if ($header[0] -eq 0x50 -and $header[1] -eq 0x4B) { throw 'Le DOCX stocké est encore lisible sans protection Office.' }
+          $zip = "$plainDocx.zip"
+          $outDir = "$plainDocx-unpacked"
+          Copy-Item $plainDocx $zip -Force
           if (Test-Path $outDir) { Remove-Item $outDir -Recurse -Force }
           Expand-Archive -Path $zip -DestinationPath $outDir -Force
           $xml = Get-Content (Join-Path $outDir 'word/document.xml') -Raw
@@ -193,6 +204,9 @@ jobs:
           Bilan institutionnel KALONÉO — export Word corrigé :
           - l’autoévaluation ne figure plus dans le tableau du Bilan ; elle alimente uniquement la synthèse ;
           - l’export Word produit désormais un vrai fichier .docx, et non un document HTML déguisé en Word ;
+          - chaque nouveau DOCX est protégé par le mot de passe administrateur pour toute ouverture directe hors de SEB EvalPro ;
+          - depuis l’Admin, l’ouverture reste transparente après déverrouillage de la barre administrateur ;
+          - le mot de passe n’est pas stocké en clair dans le programme : celui saisi au déverrouillage est conservé uniquement pendant la session ;
           - la colonne Commentaires du DOCX conserve le commentaire institutionnel sélectionné ;
           - l’indicateur factuel (temps, erreurs, moyenne ou pourcentage de réussite) reste affiché sous ce commentaire ;
           - les niveaux et couleurs institutionnels sont conservés dans le tableau Word ;
