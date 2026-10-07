@@ -469,8 +469,6 @@ window.SEB_KALONEO_BILAN=Object.freeze({
 
 if(context.enabled){
   installDynamicRows();
-  const later=()=>setTimeout(()=>{syncCompatibility();persistDynamic()},40);
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',later,{once:true});else later();
 
   document.addEventListener('click',event=>{
     if(event.target?.closest?.('tr[data-kaloneo-test-id] .level'))setTimeout(()=>{syncCompatibility();persistDynamic()},0);
