@@ -199,13 +199,9 @@ function applyInstitutional(id,level,detail){
   if(!target)return;
   setLevel(target,level);
   const select=target.querySelector('.csel');
-  const textarea=target.querySelector('.ctxt');
   if(select&&level){
     const option=[...select.options].find(item=>item.dataset.l===level);
-    if(option){
-      select.value=option.value;
-      if(textarea)textarea.value=option.value;
-    }
+    if(option)select.value=option.value;
   }
   if(detail!==undefined){
     const node=target.querySelector('.detail');
@@ -216,12 +212,9 @@ function errorDetail(value){
   const n=Math.max(0,Number(value)||0);
   return'- '+n+' erreur'+(n===1?'':'s');
 }
-function percentDetail(value,score,max){
+function percentDetail(value){
   const pct=Math.round(Number(value)||0);
-  if(Number.isFinite(Number(score))&&Number.isFinite(Number(max))){
-    return'- '+pct+' % de réponses correctes ('+Math.round(Number(score)*100)/100+'/'+Math.round(Number(max)*100)/100+')';
-  }
-  return'- '+pct+' % de réponses correctes';
+  return pct+' % de réussite';
 }
 function clearAutomaticRows(){
   const manualRows=new Set([
@@ -365,13 +358,10 @@ function createInstitutionalRow({id,title,capacity,options,detail}){
     if(level)option.dataset.l=level;
     select.appendChild(option);
   });
-  const textarea=document.createElement('textarea');
-  textarea.className='ctxt';
-  textarea.placeholder='Commentaire Administrateur (facultatif)';
   const detailNode=document.createElement('div');
   detailNode.className='detail';
   detailNode.textContent=detail||'';
-  comments.append(select,textarea,detailNode);
+  comments.append(select,detailNode);
   tr.appendChild(comments);
   return tr;
 }
@@ -497,10 +487,15 @@ function autoInstitutional(){
   // administrateur ; les erreurs de manipulation alimentent uniquement la ligne dédiée.
   if(has('construction_briques')){
     const b=resultFor('construction_briques')?.bricks;
-    if(b&&Number.isFinite(Number(b.erreurs))){
+    if(b){
+      const seconds=Math.max(0,Math.floor(Number(b.temps)||0));
       const errors=Math.max(0,Math.floor(Number(b.erreurs)||0));
-      const level=errors<=2?'I':errors<=4?'II':'III';
-      applyInstitutional('briques-manipulation',level,'- Temps '+fmtSeconds(b.temps||0)+' - '+errors+' erreur'+(errors===1?'':'s'));
+      const first=row('briques-identification')?.querySelector('.detail');
+      if(first)first.textContent='Temps de construction : '+fmtSeconds(seconds);
+      if(Number.isFinite(Number(b.erreurs))){
+        const level=errors<=2?'I':errors<=4?'II':'III';
+        applyInstitutional('briques-manipulation',level,errors+' erreur'+(errors===1?'':'s'));
+      }
     }
   }
 
@@ -508,7 +503,7 @@ function autoInstitutional(){
     const pair=scorePair('gratte_ciel');
     if(pair){
       const errors=Math.max(0,pair.max-pair.score);
-      applyInstitutional('carre',errors<=2?'I':errors<=4?'II':'III',errorDetail(errors));
+      applyInstitutional('carre',errors<=2?'I':errors<=4?'II':'III',errors+' erreur'+(errors===1?'':'s'));
     }
   }
 
@@ -528,7 +523,8 @@ function autoInstitutional(){
       }else{
         level=org.pct>=87?'I':org.pct>=74?'II':'III';
       }
-      applyInstitutional('organisation',level,percentDetail(org.pct,org.score,org.max));
+      const errors=Math.max(0,Math.round((org.max-org.score)*100)/100);
+      applyInstitutional('organisation',level,errors+' erreur'+(errors===1?'':'s'));
     }
   }
 
@@ -536,7 +532,7 @@ function autoInstitutional(){
     const pair=scorePair('planning_cantine');
     if(pair){
       const errors=Math.max(0,pair.max-pair.score);
-      applyInstitutional('planning',pair.score>=13?'I':pair.score>=11?'II':'III',errorDetail(errors));
+      applyInstitutional('planning',pair.score>=13?'I':pair.score>=11?'II':'III',errors+' erreur'+(errors===1?'':'s'));
     }
   }
 
@@ -558,14 +554,17 @@ function autoInstitutional(){
     }).join('<br>');
     if(errors)errors.textContent=tri.totalErrors+' erreur'+(tri.totalErrors===1?'':'s');
     const detail=row('tri-erreurs')?.querySelector('.detail');
-    if(detail)detail.textContent='- moyenne '+(Math.round(tri.averageErrors*100)/100)+' erreur'+(tri.averageErrors===1?'':'s')+' par tri';
+    if(detail){
+      const avgErrors=Math.round(tri.averageErrors*100)/100;
+      detail.textContent='Moyenne : '+avgErrors+' erreur'+(avgErrors===1?'':'s')+' par tri';
+    }
   }
 
   if(has('traitement_texte_bureautique')){
     const pair=scorePair('traitement_texte_bureautique');
     if(pair){
       const errors=Math.max(0,pair.max-pair.score);
-      applyInstitutional('texte',pair.score>=7?'I':pair.score>=3?'II':'III',errorDetail(errors));
+      applyInstitutional('texte',pair.score>=7?'I':pair.score>=3?'II':'III',errors+' erreur'+(errors===1?'':'s'));
     }
   }
 
@@ -573,7 +572,7 @@ function autoInstitutional(){
     const pair=scorePair('redaction_email');
     if(pair){
       const errors=Math.max(0,pair.max-pair.score);
-      applyInstitutional('mail',errors<=1?'I':errors<=3?'II':'III',errorDetail(errors));
+      applyInstitutional('mail',errors<=1?'I':errors<=3?'II':'III',errors+' erreur'+(errors===1?'':'s'));
     }
   }
 
@@ -620,7 +619,6 @@ function persist(){
     data.rows[target.dataset.r]={
       level:target.dataset.level||'',
       select:target.querySelector('.csel')?.value||'',
-      comment:target.querySelector('.ctxt')?.value||'',
       detail:target.querySelector('.detail')?.textContent||''
     };
   });
