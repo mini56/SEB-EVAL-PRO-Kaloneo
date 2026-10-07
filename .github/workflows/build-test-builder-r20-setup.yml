@@ -95,9 +95,7 @@ jobs:
           if (-not $bilan.Contains("progress:'Je pense avoir progressé dans mes compétences de base.'")) { throw 'Libellé autoévaluation savoirs absent.' }
           if (-not $bilan.Contains("stressmessage:'Messagerie : Je me suis senti(e) stressé(e) ou bloqué(e) à certains moments lors de cette activité.'")) { throw 'Libellé autoévaluation messagerie absent.' }
           $candidatePage = Get-Content source/kaltest-pilot2.html -Raw
-          if (-not $candidatePage.Contains('class="pilot2-brand" src="assets/kaloneo-logo-app.jpg"')) { throw 'Logo KALONÉO JPEG absent de la page de démarrage.' }
-          if (-not (Test-Path source/assets/kaloneo-logo-app.jpg)) { throw 'Fichier image du logo KALONÉO absent.' }
-          if ((Get-Item source/assets/kaloneo-logo-app.jpg).Length -lt 5000) { throw 'Fichier image du logo KALONÉO anormalement petit.' }
+          if (-not $candidatePage.Contains('class="pilot2-brand" src="data:image/jpeg;base64,')) { throw 'Logo KALONÉO embarqué absent de la page de démarrage.' }
           $runtimeBilan = Get-Content source/js/admin-bilan-runtime.js -Raw
           if (-not $runtimeBilan.Contains("filename:base()+'.docx'")) { throw 'Export Bilan non configuré en DOCX.' }
           if (-not $runtimeBilan.Contains('comment:selectedComment')) { throw 'Commentaire institutionnel absent du payload DOCX.' }
