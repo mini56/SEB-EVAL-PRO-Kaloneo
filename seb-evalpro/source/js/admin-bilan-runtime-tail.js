@@ -51,8 +51,12 @@ function sebIaInstall(){
         if(status)status.textContent='SEB-IA : synthèse non appliquée — '+reason+'.';
         return;
       }
-      area.value=result.text;
-      sessionStorage.setItem('seb_evalpro_bilan_synthese',result.text);
+      const selfEval=String(window.SEB_KALONEO_BILAN?.summarySelfEvaluation?.()||'').trim();
+      const finalText=selfEval
+        ? String(result.text||'').trim()+'\n\nAutoévaluation du candidat : '+selfEval+'.'
+        : String(result.text||'').trim();
+      area.value=finalText;
+      sessionStorage.setItem('seb_evalpro_bilan_synthese',finalText);
       sessionStorage.setItem('seb_evalpro_bilan_synthese_engine',result.version||'SEB-IA');
       sessionStorage.setItem('seb_evalpro_bilan_synthese_fingerprint',result.fingerprint||'');
       area.dispatchEvent(new Event('input',{bubbles:true}));
