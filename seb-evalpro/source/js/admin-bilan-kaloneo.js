@@ -1,3 +1,4 @@
+/* R16 — commentaires institutionnels sans zone texte supplémentaire */
 /* KALONÉO — adaptation du parcours dynamique au Bilan institutionnel existant */
 (()=>{'use strict';
 
