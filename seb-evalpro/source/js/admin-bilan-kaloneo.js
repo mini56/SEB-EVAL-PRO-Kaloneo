@@ -1,3 +1,4 @@
+/* KALONÉO Bilan dynamique — source parcours exécuté */
 (()=>{'use strict';
 
 const MANIFEST_KEY='seb_kaloneo_results_manifest';
