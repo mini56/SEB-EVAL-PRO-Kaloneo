@@ -26,15 +26,21 @@ function wordPaint(el,bg,fg){if(!el)return;el.style.backgroundColor=bg;el.setAtt
     const levelTexts={};
     tr.querySelectorAll('.level[data-l]').forEach(cell=>{levelTexts[cell.dataset.l]=String(cell.innerText||cell.textContent||'').trim()});
     const select=tr.querySelector('.csel');
+    const level=String(tr.dataset.level||tr.querySelector('.level.on')?.dataset.l||'');
+    let selectedComment=String(select?.value||'').trim();
+    if(!selectedComment&&select&&level){
+      const option=[...select.options].find(item=>item.dataset.l===level);
+      selectedComment=String(option?.value||option?.textContent||'').trim();
+    }
     const detail=String(tr.querySelector('.detail')?.innerText||tr.querySelector('.detail')?.textContent||'').trim();
     const triTimes=String(tr.querySelector('#triTimes')?.innerText||tr.querySelector('#triTimes')?.textContent||'').trim();
     out.push({
       type:'row',
       id:String(tr.dataset.r||''),
       module:String(cells[0]?.innerText||cells[0]?.textContent||'').trim(),
-      level:String(tr.dataset.level||tr.querySelector('.level.on')?.dataset.l||''),
+      level,
       levelTexts,
-      comment:String(select?.value||'').trim(),
+      comment:selectedComment,
       detail,
       extra:triTimes,
       alternate:tr.classList.contains('alt')
@@ -67,4 +73,4 @@ async function word(){
     status('Export Word impossible : '+String(error&&error.message?error.message:error));
   }
 }
-document.addEventListener('DOMContentLoaded',()=>{const c=cand();$('#nom').textContent=c.nom;$('#prenom').textContent=c.prenom;$('#date').textContent=c.date;restore();document.querySelectorAll('.level').forEach(x=>x.onclick=()=>{level(x.closest('tr'),x.dataset.l);save()});document.querySelectorAll('.csel').forEach(x=>x.onchange=()=>{const r=x.closest('tr'),o=x.options[x.selectedIndex];if(o.dataset.l)level(r,o.dataset.l);save()});$('#auto').onclick=auto;$('#save').onclick=save;$('#word').onclick=word});})();
+document.addEventListener('DOMContentLoaded',()=>{const c=cand();$('#nom').textContent=c.nom;$('#prenom').textContent=c.prenom;$('#date').textContent=c.date;restore();document.querySelectorAll('.level').forEach(x=>x.onclick=()=>{const r=x.closest('tr');level(r,x.dataset.l);syncComment(r,x.dataset.l);save()});document.querySelectorAll('.csel').forEach(x=>x.onchange=()=>{const r=x.closest('tr'),o=x.options[x.selectedIndex];if(o.dataset.l)level(r,o.dataset.l);save()});$('#auto').onclick=auto;$('#save').onclick=save;$('#word').onclick=word});})();
