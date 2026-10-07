@@ -24,6 +24,7 @@ ipcMain.on('state:save-sync', (event, payload) => {
 ipcMain.on('candidate-catalog:workspace-load-sync', (event) => { event.returnValue = { ok:false }; });
 ipcMain.on('candidate-catalog:results-workspace-load-sync', (event) => { event.returnValue = { ok:false }; });
 ipcMain.on('candidate-catalog:workspace-save-sync', (event) => { event.returnValue = { ok:true }; });
+ipcMain.on('kaloneo-library:test-metadata-sync', (event) => { event.returnValue = { ok:true, tests:[] }; });
 ipcMain.handle('state:save', (_event, payload) => {
   smokeState = { ...smokeState, ...(payload || {}) };
   return { ok: true, state: smokeState };
