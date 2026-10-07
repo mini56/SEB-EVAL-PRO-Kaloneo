@@ -59,9 +59,12 @@ body {
 
 .pilot2-brand {
   width: auto;
-  height: 68px;
-  max-width: 340px;
+  height: 86px;
+  max-width: 220px;
   object-fit: contain;
+  object-position: right top;
+  flex: 0 0 auto;
+  margin-top: -4px;
 }
 
 .pilot2-card {
