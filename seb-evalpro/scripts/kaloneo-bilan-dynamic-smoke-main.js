@@ -23,6 +23,7 @@ const manifest = {
     {id:'tri_chevilles',title:'Tri de chevilles',category:'technique',scored:false},
     {id:'structure_3d_papier',title:'Structure 3D en papier',category:'activite_pratique',scored:false},
     {id:'autoevaluation_savoirs',title:'Autoévaluation — savoirs',category:'autoevaluation',scored:false},
+    {id:'autoevaluation_tic',title:'Autoévaluation — outils numériques',category:'autoevaluation',scored:false},
     {id:'transition_video_f1',title:'Transition vidéo F1',category:'transition',scored:false}
   ]
 };
@@ -47,8 +48,14 @@ const kaltest = {
     structure_3d_papier:{status:'COMPLETED',result:{score:0,scoreMax:0,percentage:0,details:{}}},
     autoevaluation_savoirs:{
       status:'COMPLETED',
-      answers:{ease:['Calculs'],difficulties:['Orthographe']},
-      supplemental:{auto:{commentaire:'Je dois encore vérifier mes réponses.'}},
+      answers:{autoeval1_choix:['progress']},
+      supplemental:{autoeval1_choix:{commentaire:'Je dois encore vérifier mes réponses.'}},
+      result:{score:0,scoreMax:0,percentage:0,details:{}}
+    },
+    autoevaluation_tic:{
+      status:'COMPLETED',
+      answers:{autoeval2_choix:['stressmessage']},
+      supplemental:{autoeval2_choix:{commentaire:'Je préfère prendre mon temps pour envoyer un message.'}},
       result:{score:0,scoreMax:0,percentage:0,details:{}}
     },
     transition_video_f1:{status:'COMPLETED',result:{score:0,scoreMax:0,percentage:0,details:{}}}
@@ -83,6 +90,7 @@ ipcMain.on('kaloneo-library:test-metadata-sync',event=>{event.returnValue={ok:tr
   {id:'tri_chevilles',title:'Tri de chevilles',category:'technique',scored:false},
   {id:'structure_3d_papier',title:'Structure 3D en papier',category:'activite_pratique',activityType:'practical',scored:false},
   {id:'autoevaluation_savoirs',title:'Autoévaluation — savoirs',category:'autoevaluation',scored:false},
+  {id:'autoevaluation_tic',title:'Autoévaluation — outils numériques',category:'autoevaluation',scored:false},
   {id:'transition_video_f1',title:'Transition vidéo F1',category:'transition',scored:false}
 ]}});
 
@@ -139,7 +147,11 @@ app.whenReady().then(async()=>{
     }
     if(before.visibleSections.some(x=>/techniques de l'information/i.test(x))) return fail('section TIC visible sans exercice TIC',before);
     if(before.autoRowPresent||before.autoSectionPresent) return fail('Autoévaluation visible dans le tableau institutionnel',before);
-    if(!/Calculs/.test(before.autoSummary)||!/Orthographe/.test(before.autoSummary)) return fail('Autoévaluation non disponible pour la synthèse',before);
+    if(!/Je pense avoir progressé dans mes compétences de base\./.test(before.autoSummary)) return fail('Libellé lisible de l’autoévaluation savoirs absent',before);
+    if(!/Messagerie : Je me suis senti\(e\) stressé\(e\) ou bloqué\(e\)/.test(before.autoSummary)) return fail('Libellé lisible de l’autoévaluation numérique absent',before);
+    if(!/Commentaire : « Je dois encore vérifier mes réponses\. »/.test(before.autoSummary)) return fail('Commentaire autoévaluation savoirs absent',before);
+    if(!/Commentaire : « Je préfère prendre mon temps pour envoyer un message\. »/.test(before.autoSummary)) return fail('Commentaire autoévaluation numérique absent',before);
+    if(before.autoSummary.includes('stressmessage')||before.autoSummary.includes(' : progress')) return fail('Code technique autoévaluation visible dans la synthèse',before);
     if(!/Parcours smoke R16 institutionnel/.test(before.parcours)) return fail('nom du parcours absent',before);
 
     await win.webContents.executeJavaScript(`document.getElementById('auto').click()`,true);
@@ -168,7 +180,8 @@ app.whenReady().then(async()=>{
         bricksErrors:document.querySelector('tr[data-r="briques-manipulation"] .detail')?.textContent||'',
         organisation:document.querySelector('tr[data-r="organisation"] .detail')?.textContent||'',
         planning:document.querySelector('tr[data-r="planning"] .detail')?.textContent||'',
-        mathEnonce:document.querySelector('tr[data-r="math-enonce"] .detail')?.textContent||''
+        mathEnonce:document.querySelector('tr[data-r="math-enonce"] .detail')?.textContent||'',
+        triErrors:document.querySelector('tr[data-r="tri-erreurs"] .detail')?.textContent||''
       },
       tri:{
         avg:document.getElementById('triAvg')?.textContent||'',
@@ -196,6 +209,7 @@ app.whenReady().then(async()=>{
     if(after.details.organisation!=='33 erreurs') return fail('Ranger le stock doit afficher exactement 33 erreurs',after);
     if(!/erreur/.test(after.details.planning)||/Planification/.test(after.details.planning)) return fail('détail Planning doit rester factuel sans nom de test',after);
     if(after.details.mathEnonce!=='80 % de réussite') return fail('pourcentage Maths mal affiché sous le commentaire',after);
+    if(after.details.triErrors!=='') return fail('la moyenne fractionnaire des erreurs du Tri ne doit pas être affichée dans le Bilan',after);
 
     for(const label of ['N°1','N°2','N°3','N°4']){
       if(!after.tri.times.includes(label)) return fail('temps individuels du Tri perdus',after);
