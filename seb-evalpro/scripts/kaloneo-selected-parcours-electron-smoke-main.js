@@ -77,7 +77,7 @@ app.whenReady().then(async()=>{
        JSON.stringify(value.active)!==JSON.stringify(expected)||value.phase!=='page-identification'||value.corrections!==true){
       return fail('le parcours choisi n’est pas utilisé par le candidat',{value,expected});
     }
-    if(!value.logo.present||value.logo.src!=='assets/kaloneo-logo-bar.svg'||value.logo.naturalWidth<=0||value.logo.naturalHeight<=0){
+    if(!value.logo.present||value.logo.src!=='assets/kaloneo-logo-app.jpg'||value.logo.naturalWidth<=0||value.logo.naturalHeight<=0){
       return fail('le vrai logo KALONÉO n’est pas affiché en haut à droite de la page de démarrage',{value});
     }
     console.log('KALONEO_SELECTED_PARCOURS_ELECTRON=OK');
