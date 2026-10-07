@@ -79,7 +79,7 @@ try {
     getPath(name) {
       if (name === 'documents') return documentsPath;
       if (name === 'userData') return userDataPath;
-      if (name === 'temp') return path.join(tmp, 'temp');
+      if (name === 'temp') return path.join(root, 'Temp');
       throw new Error('Chemin non simulé: ' + name);
     }
   };
