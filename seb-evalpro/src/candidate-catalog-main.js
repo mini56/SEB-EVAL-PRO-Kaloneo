@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const { shell } = require('electron');
 const { getEditionCapabilities } = require('./edition');
 const { encodeJson } = require('./candidate-data-crypto');
+const { decryptBilanDocxBuffer, isEncryptedBilanDocxBuffer } = require('./bilan-docx-main');
 const {
   readJson,
   ensureDir,
@@ -19,7 +20,7 @@ const {
   copyDirectoryAtomically
 } = require('./candidate-folder-utils');
 
-module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnlocked, getActiveCandidate, dataRoot = null }) {
+module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnlocked, getAdminDocumentPassword, getActiveCandidate, dataRoot = null }) {
   const editionCapabilities = getEditionCapabilities();
   const documentsPath = app.getPath('documents');
   const root = dataRoot || path.join(documentsPath, 'SEB EvalPro');
@@ -31,6 +32,33 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
   const BILAN_TYPE = 'SEB_EVALPRO_BILAN_ARCHIVE';
   let adminBilanWorkspace = null;
   let adminResultsWorkspace = null;
+
+  const wordTempRoot = path.join(app.getPath('temp'), 'SEB EvalPro', 'Word');
+  function cleanupWordTemp(maxAgeMs = 24 * 60 * 60 * 1000) {
+    try {
+      if (!fs.existsSync(wordTempRoot)) return;
+      const now=Date.now();
+      for (const entry of fs.readdirSync(wordTempRoot,{withFileTypes:true})) {
+        if (!entry.isFile()) continue;
+        const full=path.join(wordTempRoot,entry.name);
+        try {
+          const age=now-fs.statSync(full).mtimeMs;
+          if (age>=maxAgeMs) fs.rmSync(full,{force:true});
+        } catch (_) {}
+      }
+    } catch (_) {}
+  }
+  function scheduleWordTempCleanup(target, attempt = 0) {
+    const delays=[15000,30000,60000,120000,300000];
+    setTimeout(()=>{
+      try {
+        fs.rmSync(target,{force:true});
+        return;
+      } catch (_) {}
+      if(attempt+1<delays.length) scheduleWordTempCleanup(target,attempt+1);
+    },delays[Math.min(attempt,delays.length-1)]);
+  }
+  cleanupWordTemp();
 
   function writeJson(target, value) {
     ensureDir(path.dirname(target));
@@ -784,8 +812,31 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
     if (!/^Evaluation_.+\.docx?$/i.test(safe)) return { ok:false, error:'Type de fichier non autorisé.' };
     const full = path.join(record.candidateDir, 'bilan', 'exports', safe);
     if (!fs.existsSync(full)) return { ok:false, error:'Fichier résultat introuvable.' };
-    const error = await shell.openPath(full);
-    return error ? { ok:false, error } : { ok:true };
+
+    try {
+      if (/\.docx$/i.test(safe)) {
+        const encrypted=fs.readFileSync(full);
+        if (await isEncryptedBilanDocxBuffer(encrypted)) {
+          const password=String(typeof getAdminDocumentPassword==='function' ? getAdminDocumentPassword() : '');
+          if(!password) return {ok:false,error:'Mot de passe administrateur indisponible pour ouvrir ce document Word.'};
+          const plain=await decryptBilanDocxBuffer(encrypted,password);
+          ensureDir(wordTempRoot);
+          const temp=path.join(wordTempRoot,Date.now()+'-'+crypto.randomBytes(4).toString('hex')+'-'+safe);
+          fs.writeFileSync(temp,plain);
+          const error=await shell.openPath(temp);
+          if(error){
+            try{fs.rmSync(temp,{force:true})}catch(_){}
+            return {ok:false,error};
+          }
+          scheduleWordTempCleanup(temp);
+          return {ok:true,protected:true};
+        }
+      }
+      const error = await shell.openPath(full);
+      return error ? { ok:false, error } : { ok:true, protected:false };
+    } catch (error) {
+      return {ok:false,error:'Ouverture du document Word impossible : '+String(error&&error.message?error.message:error)};
+    }
   });
 
   ipcMain.handle('candidate-catalog:sync', () => {
