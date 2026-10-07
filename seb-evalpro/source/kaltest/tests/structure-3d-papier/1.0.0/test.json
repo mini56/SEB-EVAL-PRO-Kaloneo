@@ -1,0 +1,94 @@
+{
+  "kaltestFormat": 1,
+  "minSebEvalPro": "0.3.10",
+  "builderVersion": "2.0.0",
+  "id": "structure_3d_papier",
+  "version": "1.0.0",
+  "title": "Structure 3D en papier",
+  "category": "activite_pratique",
+  "activityType": "practical",
+  "description": "Activité pratique réalisée hors écran. La page candidat présente l’activité ; l’évaluation est renseignée manuellement par l’administrateur dans le Bilan.",
+  "kind": "complex",
+  "scored": false,
+  "sourceMigration": {
+    "baseline": "SEB EvalPro — Bilan historique",
+    "sourcePage": "admin-bilan.html",
+    "legacyBilanRows": [
+      "fabrication-plan",
+      "fabrication-tracage",
+      "fabrication-decoupe",
+      "fabrication-assemblage",
+      "fabrication-finition"
+    ]
+  },
+  "calculator": {
+    "compatible": false,
+    "defaultEnabled": false
+  },
+  "scenario": "Vous allez réaliser une structure 3D en papier à partir du plan et du matériel remis par l’administrateur.",
+  "instruction": "Prenez connaissance du plan et des consignes, puis réalisez la structure demandée. La liste du matériel, le plan et les éléments complémentaires pourront être ajoutés à cette page dans KALONÉO.",
+  "externalMaterial": {
+    "enabled": true,
+    "material": "Matériel et plan remis par l’administrateur. À compléter dans KALONÉO."
+  },
+  "presentation": {
+    "layout": "single",
+    "builderContent": [
+      {
+        "type": "text",
+        "zone": "left",
+        "text": "Activité pratique réalisée hors écran. Suivez les consignes et utilisez le matériel remis par l’administrateur."
+      },
+      {
+        "type": "text",
+        "zone": "left",
+        "text": "Cette page pourra être complétée dans KALONÉO avec la liste du matériel, le plan, des images, une vidéo ou d’autres indications."
+      }
+    ]
+  },
+  "navigation": {
+    "next": "host",
+    "abandon": "host-common"
+  },
+  "runtime": {
+    "start": true,
+    "save": true,
+    "restore": true,
+    "finish": true
+  },
+  "questions": [],
+  "outputs": [
+    {
+      "id": "status",
+      "type": "string"
+    }
+  ],
+  "bilanContributions": [
+    {
+      "lineId": "fabrication-plan",
+      "evaluation": "manual"
+    },
+    {
+      "lineId": "fabrication-tracage",
+      "evaluation": "manual"
+    },
+    {
+      "lineId": "fabrication-decoupe",
+      "evaluation": "manual"
+    },
+    {
+      "lineId": "fabrication-assemblage",
+      "evaluation": "manual"
+    },
+    {
+      "lineId": "fabrication-finition",
+      "evaluation": "manual"
+    }
+  ],
+  "features": [
+    "runtime.basic",
+    "layout.single",
+    "host.external-material",
+    "bilan.bindings"
+  ]
+}
