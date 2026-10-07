@@ -90,5 +90,9 @@
     "layout.single",
     "host.external-material",
     "bilan.bindings"
-  ]
+  ],
+  "allowEmptyCompletion": true,
+  "behavior": {
+    "practicalActivity": true
+  }
 }
