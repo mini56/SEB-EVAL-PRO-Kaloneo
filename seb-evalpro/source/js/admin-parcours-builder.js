@@ -48,6 +48,7 @@
       numerique:'Numérique',
       technique:'Technique',
       planification:'Planification',
+      activite_pratique:'Activités pratiques',
       transition:'Transition',
       systeme:'Système'
     };
@@ -310,7 +311,8 @@
       if(item.hasImage) contents.push('image');
       if(contents.length) details.push(contents.join(' + '));
     } else if (item.role === 'test') {
-      details.push(item.scored ? 'noté' : 'non noté');
+      if (item.category === 'activite_pratique' || item.activityType === 'practical') details.push('activité pratique');
+      else details.push(item.scored ? 'noté' : 'non noté');
       if (item.questionCount) details.push(item.questionCount + ' question' + (item.questionCount > 1 ? 's' : ''));
     } else if (item.role === 'introduction') {
       details.push('page d’introduction');
