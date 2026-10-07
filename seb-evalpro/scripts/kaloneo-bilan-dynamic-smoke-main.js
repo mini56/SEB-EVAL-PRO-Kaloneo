@@ -11,12 +11,13 @@ function fail(message, details) {
 
 const manifest = {
   schemaVersion:1,
-  parcoursId:'parcours-smoke-r15',
-  parcoursTitle:'Parcours smoke R15 institutionnel',
+  parcoursId:'parcours-smoke-r16',
+  parcoursTitle:'Parcours smoke R16 institutionnel',
   tests:[
     {id:'calculs_commandes_atelier',title:'Calculs commandes atelier',category:'mathematiques',scored:true},
     {id:'organisation_demenagement',title:'Organisation d’une activité',category:'organisation',scored:true},
     {id:'planning_cantine',title:'Planification — Le restaurant',category:'organisation',scored:true},
+    {id:'construction_briques',title:'Construction à base de briques',category:'technique',scored:false},
     {id:'gestes_postures',title:'Gestes et postures',category:'technique',scored:true},
     {id:'tri_chevilles',title:'Tri de chevilles',category:'technique',scored:false},
     {id:'structure_3d_papier',title:'Structure 3D en papier',category:'activite_pratique',scored:false},
@@ -30,6 +31,7 @@ const kaltest = {
     calculs_commandes_atelier:{status:'COMPLETED',result:{score:4,scoreMax:5,percentage:80,details:{}}},
     organisation_demenagement:{status:'COMPLETED',result:{score:7,scoreMax:8,percentage:87.5,details:{}}},
     planning_cantine:{status:'COMPLETED',result:{score:12,scoreMax:15,percentage:80,details:{}}},
+    construction_briques:{status:'COMPLETED',result:{score:0,scoreMax:0,percentage:0,details:{},bricks:{temps:10,erreurs:2}}},
     gestes_postures:{status:'COMPLETED',result:{score:3,scoreMax:3,percentage:100,details:{}}},
     tri_chevilles:{
       status:'COMPLETED',
@@ -54,7 +56,7 @@ const kaltest = {
 let smokeState={
   version:1,
   sessionStorage:{
-    candidat_data:JSON.stringify({nom:'TEST',prenom:'R15',date:'2026-10-07'}),
+    candidat_data:JSON.stringify({nom:'TEST',prenom:'R16',date:'2026-10-07'}),
     seb_kaloneo_results_manifest:JSON.stringify(manifest),
     seb_kaltest_pilot2_state_v1:JSON.stringify(kaltest)
   },
@@ -73,6 +75,7 @@ ipcMain.on('kaloneo-library:test-metadata-sync',event=>{event.returnValue={ok:tr
   {id:'calculs_commandes_atelier',title:'Calculs de commandes en atelier',category:'mathematiques',scored:true},
   {id:'organisation_demenagement',title:'Organisation d’une activité',category:'organisation',scored:true},
   {id:'planning_cantine',title:'Planification — Le restaurant',category:'planification',scored:true},
+  {id:'construction_briques',title:'Construction à base de briques',category:'technique',scored:false},
   {id:'gestes_postures',title:'Gestes et postures',category:'technique',scored:true},
   {id:'tri_chevilles',title:'Tri de chevilles',category:'technique',scored:false},
   {id:'structure_3d_papier',title:'Structure 3D en papier',category:'activite_pratique',activityType:'practical',scored:false},
@@ -108,6 +111,7 @@ app.whenReady().then(async()=>{
       visibleIds:window.SEB_KALONEO_BILAN?.visibleTestIds?.()||[],
       visibleRows:window.SEB_KALONEO_BILAN?.visibleInstitutionalRows?.()||[],
       generatedPerTest:document.querySelectorAll('tr[data-kaloneo-test-id]').length,
+      textareas:document.querySelectorAll('#bilan textarea.ctxt').length,
       visibleSections:[...document.querySelectorAll('#bilan tbody tr.section,#bilan tbody tr.section2')]
         .filter(x=>!x.hidden).map(x=>x.textContent.trim()),
       fabrication:[...document.querySelectorAll('tr[data-r^="fabrication-"]')].map(x=>({id:x.dataset.r,hidden:x.hidden,level:x.dataset.level||''})),
@@ -118,10 +122,11 @@ app.whenReady().then(async()=>{
     if(!before.enabled) return fail('mode Bilan KALONÉO non activé',before);
     if(before.visibleIds.includes('transition_video_f1')) return fail('transition présente dans la source Bilan',before);
     if(before.generatedPerTest!==0) return fail('le Bilan est encore construit avec une ligne par exercice',before);
+    if(before.textareas!==0) return fail('une zone texte supplémentaire est encore présente dans la colonne Commentaires',before);
     const mustRows=['fabrication-plan','fabrication-tracage','fabrication-decoupe','fabrication-assemblage','fabrication-finition',
-      'organisation','planning','tri-temps','tri-erreurs','math-enonce','kaloneo-gestes-postures','kaloneo-autoevaluation'];
+      'briques-identification','briques-manipulation','organisation','planning','tri-temps','tri-erreurs','math-enonce','kaloneo-gestes-postures','kaloneo-autoevaluation'];
     if(mustRows.some(id=>!before.visibleRows.includes(id))) return fail('lignes institutionnelles attendues absentes',before);
-    const forbiddenRows=['briques-identification','briques-manipulation','carre','texte','mail','expression','math-problemes'];
+    const forbiddenRows=['carre','texte','mail','expression','math-problemes'];
     if(forbiddenRows.some(id=>before.visibleRows.includes(id))) return fail('ligne institutionnelle hors parcours encore visible',before);
     if(before.fabrication.length!==5||before.fabrication.some(x=>x.hidden)) return fail('grille manuelle Structure 3D incomplète',before);
     if(!before.visibleSections.includes('Compétences techniques')||!before.visibleSections.includes('Savoirs fondamentaux')||!before.visibleSections.includes('Autoévaluation')) {
@@ -129,13 +134,15 @@ app.whenReady().then(async()=>{
     }
     if(before.visibleSections.some(x=>/techniques de l'information/i.test(x))) return fail('section TIC visible sans exercice TIC',before);
     if(!/Calculs/.test(before.autoDetail)||!/Orthographe/.test(before.autoDetail)) return fail('détails autoévaluation perdus',before);
-    if(!/Parcours smoke R15 institutionnel/.test(before.parcours)) return fail('nom du parcours absent',before);
+    if(!/Parcours smoke R16 institutionnel/.test(before.parcours)) return fail('nom du parcours absent',before);
 
     await win.webContents.executeJavaScript(`document.getElementById('auto').click()`,true);
     await new Promise(resolve=>setTimeout(resolve,250));
 
     const after=await win.webContents.executeJavaScript(`(()=>({
       levels:{
+        bricksIdentification:document.querySelector('tr[data-r="briques-identification"]')?.dataset.level||'',
+        bricksManipulation:document.querySelector('tr[data-r="briques-manipulation"]')?.dataset.level||'',
         organisation:document.querySelector('tr[data-r="organisation"]')?.dataset.level||'',
         planning:document.querySelector('tr[data-r="planning"]')?.dataset.level||'',
         triTemps:document.querySelector('tr[data-r="tri-temps"]')?.dataset.level||'',
@@ -145,11 +152,18 @@ app.whenReady().then(async()=>{
         autoevaluation:document.querySelector('tr[data-r="kaloneo-autoevaluation"]')?.dataset.level||'',
         fabrication:[...document.querySelectorAll('tr[data-r^="fabrication-"]')].map(x=>x.dataset.level||'')
       },
-      comments:{
-        organisation:document.querySelector('tr[data-r="organisation"] .ctxt')?.value||'',
-        planning:document.querySelector('tr[data-r="planning"] .ctxt')?.value||'',
-        triErrors:document.querySelector('tr[data-r="tri-erreurs"] .ctxt')?.value||'',
-        mathEnonce:document.querySelector('tr[data-r="math-enonce"] .ctxt')?.value||''
+      selected:{
+        organisation:document.querySelector('tr[data-r="organisation"] .csel')?.value||'',
+        planning:document.querySelector('tr[data-r="planning"] .csel')?.value||'',
+        triErrors:document.querySelector('tr[data-r="tri-erreurs"] .csel')?.value||'',
+        mathEnonce:document.querySelector('tr[data-r="math-enonce"] .csel')?.value||''
+      },
+      details:{
+        bricksTime:document.querySelector('tr[data-r="briques-identification"] .detail')?.textContent||'',
+        bricksErrors:document.querySelector('tr[data-r="briques-manipulation"] .detail')?.textContent||'',
+        organisation:document.querySelector('tr[data-r="organisation"] .detail')?.textContent||'',
+        planning:document.querySelector('tr[data-r="planning"] .detail')?.textContent||'',
+        mathEnonce:document.querySelector('tr[data-r="math-enonce"] .detail')?.textContent||''
       },
       tri:{
         avg:document.getElementById('triAvg')?.textContent||'',
@@ -166,10 +180,18 @@ app.whenReady().then(async()=>{
     if(after.levels.fabrication.some(Boolean)) return fail('Structure 3D remplie automatiquement alors qu’elle doit rester manuelle',after);
     if(after.levels.autoevaluation) return fail('Autoévaluation transformée en niveau automatique',after);
 
-    if(!/gestion de stock multicritère/i.test(after.comments.organisation)) return fail('commentaire institutionnel Organisation remplacé',after);
-    if(!/ordre d.exécution de tâches/i.test(after.comments.planning)) return fail('commentaire institutionnel Planification remplacé',after);
-    if(!/Fiabilité satisfaisante/i.test(after.comments.triErrors)) return fail('commentaire institutionnel Tri remplacé',after);
-    if(!/Comprend et exécute une consigne unique/i.test(after.comments.mathEnonce)) return fail('commentaire institutionnel Maths remplacé',after);
+    if(!/gestion de stock multicritère/i.test(after.selected.organisation)) return fail('commentaire institutionnel Organisation remplacé',after);
+    if(!/ordre d.exécution de tâches/i.test(after.selected.planning)) return fail('commentaire institutionnel Planification remplacé',after);
+    if(!/Fiabilité satisfaisante/i.test(after.selected.triErrors)) return fail('commentaire institutionnel Tri remplacé',after);
+    if(!/Comprend et exécute une consigne unique/i.test(after.selected.mathEnonce)) return fail('commentaire institutionnel Maths remplacé',after);
+
+    if(after.levels.bricksIdentification!=='') return fail('lecture du schéma Briques ne doit pas être nivelée automatiquement',after);
+    if(after.levels.bricksManipulation!=='I') return fail('niveau manipulation Briques incorrect',after);
+    if(after.details.bricksTime!=='Temps de construction : 00:10') return fail('temps de construction Briques mal affiché',after);
+    if(after.details.bricksErrors!=='2 erreurs') return fail('pluriel du nombre d’erreurs Briques incorrect',after);
+    if(!/erreur/.test(after.details.organisation)||/Organisation d’une activité|Ranger le stock/.test(after.details.organisation)) return fail('détail Organisation doit rester factuel sans nom de test',after);
+    if(!/erreur/.test(after.details.planning)||/Planification/.test(after.details.planning)) return fail('détail Planning doit rester factuel sans nom de test',after);
+    if(after.details.mathEnonce!=='80 % de réussite') return fail('pourcentage Maths mal affiché sous le commentaire',after);
 
     for(const label of ['N°1','N°2','N°3','N°4']){
       if(!after.tri.times.includes(label)) return fail('temps individuels du Tri perdus',after);
