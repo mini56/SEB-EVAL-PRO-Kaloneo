@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - test-builder-r17-institutional-comments
+      - test-builder-r17-bilan-docx
     paths:
       - 'seb-evalpro/**'
       - 'kaloneo/**'
@@ -202,4 +202,4 @@ jobs:
           Fichier : $env:SETUP_NAME
           SHA256 : $env:SETUP_SHA256
           "@
-          gh release create $tag $env:SETUP_PATH --target test-builder-r17-institutional-comments --title $title --notes $notes
+          gh release create $tag $env:SETUP_PATH --target test-builder-r17-bilan-docx --title $title --notes $notes
