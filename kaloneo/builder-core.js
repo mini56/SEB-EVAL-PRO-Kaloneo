@@ -512,8 +512,10 @@
       if(Array.isArray(m.outputs)) def.outputs=clone(m.outputs);
       if(Array.isArray(m.bilanContributions)) def.bilanContributions=clone(m.bilanContributions);
       const usesTextEditor=(model.blocks||[]).some(block=>block.type==='text-editor');
+      const usesHtmlJs=(model.blocks||[]).some(block=>block.type==='html-js');
       const featureSet=new Set(def.features||[]);
       if(usesTextEditor) featureSet.add('host.text-editor'); else featureSet.delete('host.text-editor');
+      if(usesHtmlJs) featureSet.add('content.html-js'); else featureSet.delete('content.html-js');
       def.features=[...featureSet];
 
       if(Array.isArray(def.presentation?.builderContent)){
@@ -530,7 +532,10 @@
             questionIndex+=qs.length;
           }
         }
-        if(rebuilt.length || Object.prototype.hasOwnProperty.call(def,'questions')) {
+        const presetKeepsQuestions=(model.blocks||[]).some(block=>block.type==='html-js'&&block.preset);
+        if(presetKeepsQuestions && rebuilt.length===0) {
+          def.questions=clone(def.questions||[]);
+        } else if(rebuilt.length || Object.prototype.hasOwnProperty.call(def,'questions')) {
           def.questions=rebuilt.map(q=>Object.assign({},existing.get(q.id)||{},q));
         } else if(Object.prototype.hasOwnProperty.call(def,'questions')) {
           delete def.questions;
