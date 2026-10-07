@@ -356,7 +356,17 @@
           ]
         }
       ]
-    }
+    },
+    "legacyFullPage": true,
+    "builderContent": [
+      {
+        "type": "html-js",
+        "zone": "left",
+        "preset": "stock-legacy-v1",
+        "html": "",
+        "script": ""
+      }
+    ]
   },
   "behavior": {
     "validateBeforeAdvance": true,
