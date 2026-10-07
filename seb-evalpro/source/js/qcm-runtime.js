@@ -304,6 +304,7 @@ function sebResultCategoryLabel(value) {
     'tic':'TIC / Bureautique',
     'raisonnement':'Raisonnement',
     'planification':'Planification',
+    'activite pratique':'Activités pratiques',
     'francais':'Français',
     'communication':'Communication',
     'technique':'Compétences techniques',
@@ -345,12 +346,22 @@ function sebReadCanonicalKaltestState() {
 }
 
 function sebDescribeCanonicalResult(test, testState) {
-  if (!testState || typeof testState !== 'object') return null;
-  const status = String(testState.status || 'PENDING').toUpperCase();
-  const result = testState.result && typeof testState.result === 'object' ? testState.result : null;
+  const practicalActivity = sebNormalizeResultText(test?.category || '') === 'activite pratique';
+  if ((!testState || typeof testState !== 'object') && !practicalActivity) return null;
+
+  const status = String(testState?.status || 'PENDING').toUpperCase();
+  const result = testState?.result && typeof testState.result === 'object' ? testState.result : null;
 
   const wrap = document.createElement('div');
   wrap.className = 'seb-canonical-result-summary';
+
+  if (practicalActivity) {
+    const p = document.createElement('p');
+    p.className = 'commentaire';
+    p.textContent = 'Activité pratique — grille d’évaluation à compléter dans le Bilan administrateur.';
+    wrap.appendChild(p);
+    return wrap;
+  }
 
   if (!result) {
     const p = document.createElement('p');
