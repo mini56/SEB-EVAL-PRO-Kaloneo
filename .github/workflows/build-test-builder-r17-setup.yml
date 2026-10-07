@@ -115,9 +115,9 @@ jobs:
           $xml = Get-Content (Join-Path $outDir 'word/document.xml') -Raw
           if (-not $xml.Contains('III. Réalise la tâche avec de nombreuses erreurs nécessitant un accompagnement.')) { throw 'Commentaire institutionnel absent du DOCX.' }
           if (-not $xml.Contains('33 erreurs')) { throw 'Indicateur 33 erreurs absent du DOCX.' }
-          if (-not $xml.Contains('Synthèse de l’évaluation')) { throw 'Synthèse absente du DOCX.' }
-          if (-not $xml.Contains('Autoévaluation du candidat')) { throw 'Autoévaluation absente de la synthèse DOCX.' }
-          if ($xml.Contains('AUTOEVALUATION_TABLE_FORBIDDEN')) { throw 'Autoévaluation présente dans le tableau DOCX.' }
+          if (-not $xml.Contains("Synthèse de l’évaluation")) { throw "Synthèse absente du DOCX." }
+          if (-not $xml.Contains("Autoévaluation du candidat")) { throw "Autoévaluation absente de la synthèse DOCX." }
+          if ($xml.Contains("AUTOEVALUATION_TABLE_FORBIDDEN")) { throw "Autoévaluation présente dans le tableau DOCX." }
           Remove-Item $zip -Force
           Remove-Item $outDir -Recurse -Force
 
