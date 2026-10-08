@@ -736,10 +736,23 @@
   }
 
   async function useLibraryImage(imageId) {
-    const target=blockByUid(state.imageLibraryTargetUid);
-    if(!target || target.type!=='image') return false;
     const result=await window.sebEvalPro?.kaloneoGetImage?.(imageId);
     if(!result || result.ok!==true || !result.image?.data) throw new Error(result?.error||'Image introuvable');
+
+    if(state.imageLibraryTargetUid==='__page_background__'){
+      const name=$('page-background-image-name');
+      name.dataset.imageData=result.image.data;
+      name.dataset.imageName=result.image.name||'image';
+      name.textContent=result.image.name||'Image';
+      $('page-background-type').value='image';
+      syncPageBackgroundOptions();
+      changed();
+      $('image-library-dialog')?.close();
+      return true;
+    }
+
+    const target=blockByUid(state.imageLibraryTargetUid);
+    if(!target || target.type!=='image') return false;
     target.mediaName=result.image.name||'image';
     target.mediaType=result.image.mime||'image/*';
     target.mediaData=result.image.data;
@@ -756,7 +769,7 @@
     if(!root)return;
     const search=normalizedSearch($('image-library-search')?.value||'');
     const items=(state.imageLibraryItems||[]).filter(item=>{
-      const haystack=normalizedSearch([item.name,item.category,item.sourceName].filter(Boolean).join(' '));
+      const haystack=normalizedSearch([item.name,item.category,item.theme,item.orientation,item.sourceName].filter(Boolean).join(' '));
       return !search||haystack.includes(search);
     });
     root.replaceChildren();
@@ -776,7 +789,8 @@
       const info=document.createElement('div');
       info.className='image-library-info';
       const title=document.createElement('strong');title.textContent=item.name||item.id;
-      const meta=document.createElement('span');meta.textContent=(item.category||'Images')+(item.systemProvided?' • système':' • personnelle');
+      const meta=document.createElement('span');
+      meta.textContent=[item.theme||item.category||'Images',item.orientation,item.systemProvided?'système':'personnelle'].filter(Boolean).join(' • ');
       info.append(title,meta);
       card.append(preview,info);
 
@@ -835,6 +849,21 @@
     await reloadImageLibrary();
     const status=$('image-library-status');
     if(status)status.textContent=added+' ajoutée'+(added>1?'s':'')+', '+duplicates+' déjà présente'+(duplicates>1?'s':'')+(failed?', '+failed+' refusée'+(failed>1?'s':''):'')+'.';
+  }
+
+  async function importImageZip() {
+    const result=await window.sebEvalPro?.kaloneoImportImageZip?.();
+    if(!result || result.canceled) return;
+    if(result.ok!==true) throw new Error(result.error||'Import ZIP impossible');
+    await reloadImageLibrary();
+    const status=$('image-library-status');
+    if(status){
+      const themes=(result.themes||[]).length;
+      status.textContent=result.added+' image'+(result.added>1?'s':'')+' ajoutée'+(result.added>1?'s':'')+
+        ', '+result.duplicates+' doublon'+(result.duplicates>1?'s':'')+
+        (result.failed?', '+result.failed+' refusée'+(result.failed>1?'s':''):'')+
+        ' — '+themes+' thème'+(themes>1?'s':'')+' détecté'+(themes>1?'s':'')+'.';
+    }
   }
 
   function renderMediaEditor(block,body) {
