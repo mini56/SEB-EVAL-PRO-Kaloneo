@@ -118,12 +118,51 @@
         <label class="inline-checkbox"><input id="last-block-remainder" type="checkbox" checked> Dernier bloc = reste de la place</label>
       </div>
 
+      <div class="page-style-panel">
+        <div class="section-title-row">
+          <div>
+            <h2>Style de la page</h2>
+            <p class="muted">L’arrière-plan est visible autour des blocs de l’exercice. Les blocs peuvent garder leur propre couleur claire.</p>
+          </div>
+        </div>
+        <div class="form-grid cols-3">
+          <label>Arrière-plan de la page
+            <select id="page-background-type">
+              <option value="none">Aucun</option>
+              <option value="color">Couleur claire</option>
+              <option value="image">Image</option>
+            </select>
+          </label>
+          <label id="page-background-color-field">Couleur
+            <select id="page-background-color">
+              <option value="#FFFFFF">Blanc</option>
+              <option value="#EEF6FD">Bleu très clair</option>
+              <option value="#EEF9F2">Vert très clair</option>
+              <option value="#FFF8DD">Jaune très clair</option>
+              <option value="#FFF0E2">Orange très clair</option>
+              <option value="#FDEFF4">Rose très clair</option>
+              <option value="#F3F5F7">Gris très clair</option>
+            </select>
+          </label>
+          <div id="page-background-image-field" class="page-background-image-field">
+            <strong>Image d’arrière-plan</strong>
+            <span id="page-background-image-name" class="muted">Aucune image</span>
+            <div class="page-background-actions">
+              <button id="choose-page-background-image" class="mini-btn" type="button">Choisir dans la bibliothèque</button>
+              <button id="clear-page-background-image" class="mini-btn danger" type="button">Retirer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="form-grid cols-2">
         <label>Scénario <span class="required">*</span>
           <textarea id="test-scenario" rows="4" placeholder="Situation proposée au candidat"></textarea>
+          <small class="muted">Pour passer à la ligne : touche Entrée ou écrivez \n.</small>
         </label>
         <label>Consignes <span class="required">*</span>
           <textarea id="test-instruction" rows="4" placeholder="Ce que le candidat doit réaliser"></textarea>
+          <small class="muted">Pour passer à la ligne : touche Entrée ou écrivez \n.</small>
         </label>
       </div>
 
@@ -310,7 +349,10 @@
       <label>Rechercher
         <input id="image-library-search" type="search" placeholder="Nom ou catégorie">
       </label>
-      <button id="import-images" class="seb-action-btn seb-btn-nav" type="button">Importer des images</button>
+      <div class="image-import-actions">
+        <button id="import-images" class="seb-action-btn seb-btn-nav" type="button">Importer des images</button>
+        <button id="import-image-zip" class="seb-action-btn seb-btn-functional" type="button">Importer un ZIP par thèmes</button>
+      </div>
     </div>
     <p id="image-library-status" class="muted"></p>
     <div id="image-library-list" class="image-library-grid" aria-label="Bibliothèque d’images KALONÉO"></div>
