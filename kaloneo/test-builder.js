@@ -1263,21 +1263,29 @@
   function blockPreview(block) {
     const wrap=document.createElement('div');
     wrap.className='preview-content-block';
-    if(block.type==='text') {wrap.textContent=block.text||'Bloc texte vide';return wrap;}
-    if(block.type==='html'||block.type==='html-js') {
+    let node=wrap;
+
+    if(block.type==='text') {
+      wrap.textContent=displayMultiline(block.text||'Bloc texte vide');
+    } else if(block.type==='html'||block.type==='html-js') {
       const frame=document.createElement('iframe');
       frame.className='preview-html-frame';frame.sandbox='allow-scripts';
       frame.srcdoc='<!doctype html><html><body style="font-family:Calibri,Arial,sans-serif;margin:10px">'+
         (block.html||'<em>Bloc HTML vide</em>')+
         (block.type==='html-js'&&block.js?'<script>'+block.js.replace(/<\/script/gi,'<\\/script')+'</script>':'')+
         '</body></html>';
-      wrap.appendChild(frame);return wrap;
-    }
-    if(block.type==='image'&&block.mediaData) {wrap.classList.add('preview-media-block');const img=document.createElement('img');img.className='preview-media';img.src=block.mediaData;img.alt=block.mediaAlt||block.mediaName||'Image';wrap.appendChild(img);return wrap;}
-    if(block.type==='audio'&&block.mediaData) {const a=document.createElement('audio');a.controls=true;a.src=block.mediaData;a.style.width='100%';wrap.appendChild(a);return wrap;}
-    if(block.type==='video'&&block.mediaData) {wrap.classList.add('preview-media-block');const v=document.createElement('video');v.controls=true;v.src=block.mediaData;v.className='preview-media';wrap.appendChild(v);return wrap;}
-    if(['image','audio','video'].includes(block.type)) {wrap.textContent=block.mediaPlaceholder||'Aucun média sélectionné';return wrap;}
-    if(block.type==='text-editor') {
+      wrap.appendChild(frame);
+    } else if(block.type==='image'&&block.mediaData) {
+      wrap.classList.add('preview-media-block');
+      const img=document.createElement('img');img.className='preview-media';img.src=block.mediaData;img.alt=block.mediaAlt||block.mediaName||'Image';wrap.appendChild(img);
+    } else if(block.type==='audio'&&block.mediaData) {
+      const a=document.createElement('audio');a.controls=true;a.src=block.mediaData;a.style.width='100%';wrap.appendChild(a);
+    } else if(block.type==='video'&&block.mediaData) {
+      wrap.classList.add('preview-media-block');
+      const v=document.createElement('video');v.controls=true;v.src=block.mediaData;v.className='preview-media';wrap.appendChild(v);
+    } else if(['image','audio','video'].includes(block.type)) {
+      wrap.textContent=block.mediaPlaceholder||'Aucun média sélectionné';
+    } else if(block.type==='text-editor') {
       wrap.classList.add('preview-text-editor');
       const toolbar=document.createElement('div');
       toolbar.className='preview-text-editor-toolbar';
@@ -1288,19 +1296,21 @@
       const badge=document.createElement('small');
       badge.textContent=(block.config?.scoringProfile==='seb-bureautique-v1')?'Correction SEB /8':'Éditeur libre';
       wrap.append(toolbar,page,badge);
-      return wrap;
-    }
-    if(block.type==='question') return createQuestionPreview(block);
-    if(block.type==='table-grid') return gridPreview(block);
-    if(block.type==='response-table') return responseTablePreview(block);
-    if(block.type==='inline-flow') return inlinePreview(block);
-    if(block.type==='multiple-tables') {
+    } else if(block.type==='question') {
+      node=createQuestionPreview(block);
+    } else if(block.type==='table-grid') {
+      node=gridPreview(block);
+    } else if(block.type==='response-table') {
+      node=responseTablePreview(block);
+    } else if(block.type==='inline-flow') {
+      node=inlinePreview(block);
+    } else if(block.type==='multiple-tables') {
       const h=document.createElement('h3');h.textContent=block.tableDefinition?.title||'Tableau';
       wrap.appendChild(h);
       const p=document.createElement('div');p.textContent=(block.tableDefinition?.headers||[]).join(' | ');wrap.appendChild(p);
-      return wrap;
     }
-    return wrap;
+    node.classList.add('preview-content-block');
+    return applyPreviewBlockStyle(node,block);
   }
 
   function refreshPreview() {
@@ -1317,10 +1327,28 @@
       previewIcon.alt='';
       previewIcon.hidden=true;
     }
-    $('preview-scenario').textContent=m.scenario||'Le scénario apparaîtra ici.';
-    $('preview-instruction').textContent=m.instruction||'Les consignes apparaîtront ici.';
+    $('preview-scenario').textContent=displayMultiline(m.scenario||'Le scénario apparaîtra ici.');
+    $('preview-instruction').textContent=displayMultiline(m.instruction||'Les consignes apparaîtront ici.');
     $('preview-calculator').hidden=!m.calculatorCompatible;
     $('preview-chrono').hidden=!m.chronoEnabled;
+
+    const page=$('candidate-preview');
+    if(page){
+      page.style.removeProperty('background');
+      page.style.removeProperty('background-color');
+      page.style.removeProperty('background-image');
+      page.style.removeProperty('background-size');
+      page.style.removeProperty('background-position');
+      page.style.removeProperty('background-repeat');
+      if(m.pageBackgroundType==='color'&&m.pageBackgroundColor){
+        page.style.backgroundColor=m.pageBackgroundColor;
+      }else if(m.pageBackgroundType==='image'&&m.pageBackgroundImage){
+        page.style.backgroundImage='url("'+String(m.pageBackgroundImage).replace(/"/g,'%22')+'")';
+        page.style.backgroundSize='cover';
+        page.style.backgroundPosition='center';
+        page.style.backgroundRepeat='no-repeat';
+      }
+    }
 
     const host=$('preview-exercise');
     host.className='preview-exercise layout-'+m.layout;
