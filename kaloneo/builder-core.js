@@ -431,7 +431,7 @@
     });
     return {
       layout:m.layout||'single',
-      legacyFullPage:Boolean(m.legacyFullPage || model.sourceDefinition?.presentation?.legacyFullPage === true),
+      legacyFullPage:(m.legacyFullPage || model.sourceDefinition?.presentation?.legacyFullPage === true) ? true : undefined,
       blockSizing:m.layout==='chars-rest'?{
         mode:'characters-and-remainder',
         blocks:[
