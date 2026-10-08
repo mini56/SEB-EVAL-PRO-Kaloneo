@@ -329,15 +329,19 @@
             .btn { font-size: 14px; width: 160px; }
         }
     </style>
+<link rel="stylesheet" href="css/kaloneo-remaining-pages.css">
+<link rel="stylesheet" href="css/kaloneo-context.css">
 <link rel="stylesheet" href="css/seb-in-app-alert.css" id="seb-evalpro-in-app-alert-css">
 </head>
-<body>
+<body data-kaloneo-page="carre">
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>🏙️ Puzzle Gratte-ciel</h1>
-            <p class="subtitle">C'est la journée de cohésion d'équipe. Régulièrement, l'équipe est invitée à se retrouver pour partager un moment convivial.</br>
-			À cette occasion, la cheffe d'équipe a préparé un petit défi ! Elle propose à chacun une grille à compléter.</p>
+        <!-- Scénario KALONÉO -->
+        <div class="header kaloneo-context-card kaloneo-context-scenario carre-scenario">
+            <img src="imageqcm/scenario.png" alt="Scénario">
+            <div class="kaloneo-context-body">
+                <strong class="kaloneo-context-label">Scénario :</strong>
+                <span class="kaloneo-context-text">C'est la journée de cohésion d'équipe. Régulièrement, l'équipe est invitée à se retrouver pour partager un moment convivial. À cette occasion, la cheffe d'équipe a préparé un petit défi ! Elle propose à chacun une grille à compléter.</span>
+            </div>
         </div>
         
         <!-- Main content -->
@@ -369,7 +373,7 @@
                     <strong>🎮 Comment jouer :</strong><br><br>
                     • Remplissez toutes les cases avec des chiffres de 1 à 4<br>
                     • Cliquez sur <strong>"Valider"</strong> pour vérifier votre réponse<br> 
-                    • Une fois terminé, cliquez sur <strong>"Page suivante"</strong>
+                    • Une fois terminé, cliquez sur <strong>"Suivant"</strong>
                 </div>
             </div>
             
@@ -480,7 +484,7 @@
                 <div class="footer">
                     <button class="btn btn-reset" id="carre-reset" type="button">🔄 Recommencer</button>
                     <button class="btn btn-validate" id="btnValidate" type="button">✔️ Valider</button>
-                    <button class="btn btn-next" id="btnNext" type="button">➡️ Page suivante</button>
+                    <button class="btn btn-next" id="btnNext" type="button">Suivant</button>
                 </div>
             </div>
         </div>
