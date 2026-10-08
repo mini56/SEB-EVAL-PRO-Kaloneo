@@ -161,18 +161,20 @@
             <button type="button" class="context-format-btn" data-target="test-scenario" data-format="b" title="Gras"><strong>G</strong></button>
             <button type="button" class="context-format-btn" data-target="test-scenario" data-format="i" title="Italique"><em>I</em></button>
             <button type="button" class="context-format-btn" data-target="test-scenario" data-format="u" title="Souligné"><u>U</u></button>
+            <button type="button" class="context-format-btn context-color-btn" data-target="test-scenario" data-format="color" title="Couleur du texte"><strong>A</strong>🎨</button>
           </span>
           <textarea id="test-scenario" rows="4" placeholder="Situation proposée au candidat"></textarea>
-          <small class="muted">Entrée ou \n = nouvelle ligne. Sélectionnez du texte puis utilisez G, I ou U.</small>
+          <small class="muted">Entrée ou \n = nouvelle ligne. Sélectionnez du texte puis utilisez G, I, U ou A🎨.</small>
         </label>
         <label class="context-rich-field">Consignes <span class="required">*</span>
           <span class="context-format-toolbar" aria-label="Mise en forme de la consigne">
             <button type="button" class="context-format-btn" data-target="test-instruction" data-format="b" title="Gras"><strong>G</strong></button>
             <button type="button" class="context-format-btn" data-target="test-instruction" data-format="i" title="Italique"><em>I</em></button>
             <button type="button" class="context-format-btn" data-target="test-instruction" data-format="u" title="Souligné"><u>U</u></button>
+            <button type="button" class="context-format-btn context-color-btn" data-target="test-instruction" data-format="color" title="Couleur du texte"><strong>A</strong>🎨</button>
           </span>
           <textarea id="test-instruction" rows="4" placeholder="Ce que le candidat doit réaliser"></textarea>
-          <small class="muted">Entrée ou \n = nouvelle ligne. Sélectionnez du texte puis utilisez G, I ou U.</small>
+          <small class="muted">Entrée ou \n = nouvelle ligne. Sélectionnez du texte puis utilisez G, I, U ou A🎨.</small>
         </label>
       </div>
 
@@ -346,6 +348,24 @@
   </template>
 
   <input id="import-images-file" type="file" accept="image/*" multiple hidden>
+
+  <dialog id="text-color-dialog" class="text-color-dialog">
+    <div class="dialog-head">
+      <div>
+        <h2>Couleur du texte</h2>
+        <p>Choisissez une couleur lisible pour le texte sélectionné.</p>
+      </div>
+      <button id="close-text-color-dialog" class="mini-btn" type="button">Fermer</button>
+    </div>
+    <div class="text-color-palette" aria-label="Palette de couleurs de texte">
+      <button type="button" data-text-color="#20262C" style="--swatch:#20262C">Noir</button>
+      <button type="button" data-text-color="#005A8D" style="--swatch:#005A8D">Bleu</button>
+      <button type="button" data-text-color="#1F6B3A" style="--swatch:#1F6B3A">Vert</button>
+      <button type="button" data-text-color="#9A4E00" style="--swatch:#9A4E00">Orange</button>
+      <button type="button" data-text-color="#B42318" style="--swatch:#B42318">Rouge</button>
+      <button type="button" data-text-color="#6B3FA0" style="--swatch:#6B3FA0">Violet</button>
+    </div>
+  </dialog>
 
   <dialog id="image-library-dialog" class="test-library-dialog image-library-dialog">
     <div class="dialog-head">
