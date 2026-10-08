@@ -97,6 +97,12 @@ app.whenReady().then(async()=>{
     return {ok:true};
   });
   ipcMain.handle('kaloneo-builder:get-preview',()=>previewDefinition?{ok:true,definition:previewDefinition}:{ok:false,error:'absent'});
+  ipcMain.handle('kaloneo-builder:consume-preview',()=>{
+    if(!previewDefinition)return {ok:false,error:'absent'};
+    const definition=JSON.parse(JSON.stringify(previewDefinition));
+    previewDefinition=null;
+    return {ok:true,definition};
+  });
   ipcMain.handle('kaloneo-builder:close-preview',async()=>{
     await win.loadFile(builder,{query:{resume:'preview'}});
     return true;
@@ -159,10 +165,22 @@ app.whenReady().then(async()=>{
     const setup=await win.webContents.executeJavaScript(`(async()=>{
       document.getElementById('test-title').value='Aperçu Electron Smoke';
       document.getElementById('test-title').dispatchEvent(new Event('input',{bubbles:true}));
-      document.getElementById('test-scenario').value='Scénario plein écran';
-      document.getElementById('test-scenario').dispatchEvent(new Event('input',{bubbles:true}));
-      document.getElementById('test-instruction').value='Consigne plein écran';
-      document.getElementById('test-instruction').dispatchEvent(new Event('input',{bubbles:true}));
+      const scenario=document.getElementById('test-scenario');
+      scenario.value='Scénario plein écran';
+      scenario.dispatchEvent(new Event('input',{bubbles:true}));
+      const sStart=scenario.value.indexOf('plein');
+      scenario.setSelectionRange(sStart,sStart+'plein'.length);
+      document.querySelector('.context-format-btn[data-target="test-scenario"][data-format="b"]').click();
+
+      const instruction=document.getElementById('test-instruction');
+      instruction.value='Consigne plein écran';
+      instruction.dispatchEvent(new Event('input',{bubbles:true}));
+      let iStart=instruction.value.indexOf('Consigne');
+      instruction.setSelectionRange(iStart,iStart+'Consigne'.length);
+      document.querySelector('.context-format-btn[data-target="test-instruction"][data-format="i"]').click();
+      iStart=instruction.value.indexOf('écran');
+      instruction.setSelectionRange(iStart,iStart+'écran'.length);
+      document.querySelector('.context-format-btn[data-target="test-instruction"][data-format="u"]').click();
       document.getElementById('calculator-compatible').checked=true;
       document.getElementById('calculator-compatible').dispatchEvent(new Event('change',{bubbles:true}));
       document.getElementById('calculator-brand').value='KALONÉO';
@@ -289,6 +307,9 @@ app.whenReady().then(async()=>{
       title:String(document.querySelector('.kb-heading h1')?.textContent||'').trim(),
       scenario:String(document.querySelectorAll('.kb-context p')[0]?.textContent||'').trim(),
       instruction:String(document.querySelectorAll('.kb-context p')[1]?.textContent||'').trim(),
+      scenarioBold:String(document.querySelectorAll('.kb-context p')[0]?.querySelector('strong')?.textContent||''),
+      instructionItalic:String(document.querySelectorAll('.kb-context p')[1]?.querySelector('em')?.textContent||''),
+      instructionUnderline:String(document.querySelectorAll('.kb-context p')[1]?.querySelector('u')?.textContent||''),
       close:String(document.querySelector('.close-preview')?.textContent||'').trim(),
       next:String(document.querySelector('.kb-nav-btn.next')?.textContent||'').trim(),
       calculator:String(document.querySelector('.kb-footer-center button')?.textContent||'').trim(),
@@ -318,6 +339,9 @@ app.whenReady().then(async()=>{
        shown.title!=='Aperçu Electron Smoke'||
        shown.scenario!=='Scénario plein écran'||
        shown.instruction!=='Consigne plein écran'||
+       shown.scenarioBold!=='plein'||
+       shown.instructionItalic!=='Consigne'||
+       shown.instructionUnderline!=='écran'||
        shown.close!=='Fermer l’aperçu'||
        shown.next!=='Suivant'||
        shown.calculator!=='Ouvrir la calculatrice'||
@@ -387,6 +411,16 @@ app.whenReady().then(async()=>{
       return fail('déplacement réel souris de la calculatrice incorrect', {calcBefore,calcOpen});
     }
 
+    await win.webContents.executeJavaScript(`(()=>{
+      localStorage.setItem('kaloneo_test_builder_v2',JSON.stringify({
+        idLocked:true,
+        sourceDefinition:null,
+        meta:{title:'Calculs de poids et volumes',id:'calculs_poids_volumes',version:'1.0.0',category:'mathematiques',layout:'single',scenario:'Ancien brouillon',instruction:'Ancienne consigne'},
+        blocks:[{uid:'stale',type:'text',zone:'left',text:'ancien'}]
+      }));
+      return true;
+    })()`,true);
+
     await win.webContents.executeJavaScript(`document.querySelector('.close-preview').click();true`);
     for(let i=0;i<30;i++){
       await wait(120);
@@ -401,16 +435,18 @@ app.whenReady().then(async()=>{
       scenario:document.getElementById('test-scenario')?.value||'',
       instruction:document.getElementById('test-instruction')?.value||'',
       calculatorBrand:document.getElementById('calculator-brand')?.value||'',
-      previewButton:String(document.getElementById('open-electron-preview')?.textContent||'').trim()
+      previewButton:String(document.getElementById('open-electron-preview')?.textContent||'').trim(),
+      draftStatus:String(document.getElementById('draft-status')?.textContent||'').trim()
     }))()`);
 
     if(!/test-builder\.html$/i.test(returned.path)||
        returned.title!=='Aperçu Electron Smoke'||
-       returned.scenario!=='Scénario plein écran'||
-       returned.instruction!=='Consigne plein écran'||
+       returned.scenario!=='Scénario [b]plein[/b] écran'||
+       returned.instruction!=='[i]Consigne[/i] plein [u]écran[/u]'||
        returned.calculatorBrand!=='KALONÉO'||
-       !/vraie page/i.test(returned.previewButton)) {
-      return fail('retour au Builder avec brouillon incorrect',returned);
+       !/vraie page/i.test(returned.previewButton)||
+       !/même test restauré/i.test(returned.draftStatus)) {
+      return fail('retour au Builder : le test exact de l’aperçu n’a pas été restauré',returned);
     }
 
     console.log('KALONEO_BUILDER_PREVIEW_ELECTRON=OK');
