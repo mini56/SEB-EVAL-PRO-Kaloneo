@@ -79,6 +79,16 @@ app.whenReady().then(async()=>{
     }
     if (stock.blockHeight < stock.contentHeight-4) throw new Error('Le bloc Stock ne prend pas toute la hauteur disponible.');
 
+    await win.webContents.executeJavaScript(`
+      document.querySelector('.kaltest-legacy-page-iframe').src='stock.html?kaltestEmbed=1&showCorrections=1'; true;
+    `, true);
+    await sleep(350);
+    const stockWithCorrections = await win.webContents.executeJavaScript(
+      "(document.querySelector('.kaltest-legacy-page-iframe')?.contentDocument?.getElementById('stockActionBtn')?.textContent||'').trim()",
+      true
+    );
+    if (!/Vérifier/.test(stockWithCorrections)) throw new Error('Avec affichage des corrections, la vraie page Stock doit proposer Vérifier.');
+
     win.destroy();
     win = await openSegment('carre');
     await sleep(450);
@@ -129,6 +139,16 @@ app.whenReady().then(async()=>{
       throw new Error('Le cadre générique KALTEST prend encore de la place sur Puzzle.');
     }
     if (puzzle.blockHeight < puzzle.contentHeight-4) throw new Error('Le bloc Puzzle ne prend pas toute la hauteur disponible.');
+
+    await win.webContents.executeJavaScript(`
+      document.querySelector('.kaltest-legacy-page-iframe').src='carre.html?kaltestEmbed=1&showCorrections=1'; true;
+    `, true);
+    await sleep(350);
+    const puzzleWithCorrections = await win.webContents.executeJavaScript(
+      "(document.querySelector('.kaltest-legacy-page-iframe')?.contentDocument?.getElementById('btnValidate')?.textContent||'').trim()",
+      true
+    );
+    if (!/Valider/.test(puzzleWithCorrections)) throw new Error('Avec affichage des corrections, la vraie page Puzzle doit proposer Valider.');
 
     console.log('KALONEO_LEGACY_IDENTITY_SMOKE: OK');
     console.log(JSON.stringify({stock,puzzle}));
