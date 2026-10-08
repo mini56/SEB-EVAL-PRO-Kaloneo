@@ -232,8 +232,9 @@ jobs:
           - Puzzle Gratte-ciel : KALTEST affiche directement la vraie page historique carre.html, avec fond urbain, règles, exemples, astuces, grille et boutons d’origine.
           - Chaque exercice reste un seul bloc HTML+JS qui occupe toute la zone restante.
           - Le pont KALTEST récupère les réponses de ces pages et conserve sauvegarde, score, Résultats et Bilan.
-          - Sans affichage des corrections choisi par l’Admin : Stock et Puzzle passent directement par Suivant sans montrer les réponses.
-          - Avec affichage des corrections : Stock propose Vérifier et Puzzle propose Valider avant Suivant.
+          - Stock conserve son fonctionnement historique : Vérifier puis Suivant.
+          - Puzzle conserve son fonctionnement historique : Recommencer / Valider puis Page suivante.
+          - Le mode sans correction masque uniquement les couleurs de correction ; il ne remplace plus prématurément Vérifier/Valider par Suivant.
           - Correction du placeholder du logo : utilisation directe du PNG KALONÉO validé, réellement décodable par Electron.
           - Contrôle Electron : l’image doit être réellement chargée avec des dimensions naturelles non nulles.
           - Les corrections R18/R19 sur le Tri, la Synthèse et le Word protégé sont conservées.
