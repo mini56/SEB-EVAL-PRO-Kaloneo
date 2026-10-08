@@ -1430,6 +1430,22 @@
     return applyPreviewBlockStyle(node,block);
   }
 
+  const MINI_PREVIEW_WIDTH=1366;
+  const MINI_PREVIEW_HEIGHT=768;
+
+  function fitMiniPreview() {
+    const viewport=$('candidate-preview-viewport');
+    const page=$('candidate-preview');
+    if(!viewport||!page)return;
+    const width=Math.max(1,viewport.clientWidth);
+    const height=Math.max(1,viewport.clientHeight);
+    const scale=Math.min(width/MINI_PREVIEW_WIDTH,height/MINI_PREVIEW_HEIGHT);
+    page.style.width=MINI_PREVIEW_WIDTH+'px';
+    page.style.height=MINI_PREVIEW_HEIGHT+'px';
+    page.style.transform='scale('+scale+')';
+    page.style.transformOrigin='top left';
+  }
+
   function refreshPreview() {
     const m=collectMeta();
     $('preview-title').textContent=m.title||'Nouveau test';
@@ -1446,8 +1462,6 @@
     }
     renderRichContext($('preview-scenario'),m.scenario||'Le scénario apparaîtra ici.');
     renderRichContext($('preview-instruction'),m.instruction||'Les consignes apparaîtront ici.');
-    $('preview-calculator').hidden=!m.calculatorCompatible;
-    $('preview-chrono').hidden=!m.chronoEnabled;
 
     const page=$('candidate-preview');
     if(page){
@@ -1490,6 +1504,7 @@
       host.append(left,right);
     }
     validate();
+    requestAnimationFrame(fitMiniPreview);
   }
 
   function validate() {
@@ -1723,16 +1738,23 @@
       return !search||haystack.includes(search);
     });
     filtered.forEach(item=>{
-      const button=document.createElement('button');
-      button.type='button';
-      button.className='test-library-item';
+      const row=document.createElement('article');
+      row.className='test-library-item';
       const text=document.createElement('div');
+      text.className='test-library-item-text';
       const title=document.createElement('strong');title.textContent=item.title;
-      const meta=document.createElement('span');meta.textContent=libraryCategoryLabel(item.category)+' • v'+item.version+(item.category==='activite_pratique'?' • activité pratique':(item.scored?' • noté':' • non noté'));
+      const meta=document.createElement('span');
+      meta.textContent=libraryCategoryLabel(item.category)+' • v'+item.version+(item.category==='activite_pratique'?' • activité pratique':(item.scored?' • noté':' • non noté'));
       text.append(title,meta);
-      const open=document.createElement('span');open.textContent='Ouvrir';
-      button.append(text,open);
-      button.addEventListener('click',async()=>{
+
+      const actions=document.createElement('div');
+      actions.className='test-library-item-actions';
+
+      const open=document.createElement('button');
+      open.type='button';
+      open.className='mini-btn';
+      open.textContent='Ouvrir';
+      open.addEventListener('click',async()=>{
         try{
           const result=await window.sebEvalPro?.kaloneoGetTest?.(item.id,item.version);
           if(!result||result.ok!==true)throw new Error(result?.error||'Lecture impossible');
@@ -1740,7 +1762,34 @@
           $('test-library-dialog')?.close();
         }catch(error){alert('Ouverture impossible : '+String(error?.message||error));}
       });
-      root.appendChild(button);
+
+      const remove=document.createElement('button');
+      remove.type='button';
+      remove.className='mini-btn danger';
+      remove.textContent='Supprimer';
+      remove.disabled=item.protectedVersion===true;
+      remove.title=item.protectedVersion===true?'Version fournie avec KALONÉO : suppression protégée.':'Supprimer cette version du test.';
+      remove.addEventListener('click',async()=>{
+        if(!confirm('Supprimer « '+item.title+' » — version '+item.version+' ?\n\nSeule cette version sera supprimée.'))return;
+        try{
+          const result=await window.sebEvalPro?.kaloneoDeleteTest?.(item.id,item.version);
+          if(!result||result.ok!==true){
+            if(result?.code==='IN_USE'&&Array.isArray(result.usages)){
+              alert('Suppression impossible : ce test est utilisé dans :\n'+result.usages.map(entry=>'• '+entry.name).join('\n')+'\n\nRetirez-le d’abord de ces parcours.');
+              return;
+            }
+            throw new Error(result?.error||'Suppression impossible');
+          }
+          const refreshed=await window.sebEvalPro?.kaloneoListTests?.();
+          const dialog=$('test-library-dialog');
+          dialog._kaloneoItems=Array.isArray(refreshed?.tests)?refreshed.tests:[];
+          renderLibraryTests(dialog._kaloneoItems);
+        }catch(error){alert('Suppression impossible : '+String(error?.message||error));}
+      });
+
+      actions.append(open,remove);
+      row.append(text,actions);
+      root.appendChild(row);
     });
     if(!filtered.length){
       const empty=document.createElement('p');empty.className='muted';empty.textContent='Aucun test trouvé.';root.appendChild(empty);
@@ -1912,14 +1961,6 @@
     });
     $('close-test-library').addEventListener('click',()=>$('test-library-dialog').close());
     $('test-library-search').addEventListener('input',()=>renderLibraryTests($('test-library-dialog')._kaloneoItems||[]));
-    $('import-json').addEventListener('click',()=>$('import-json-file').click());
-    $('import-json-file').addEventListener('change',async()=>{
-      const file=$('import-json-file').files&&$('import-json-file').files[0];
-      if(!file)return;
-      try {await importJsonFile(file);}
-      catch(error){alert('Import refusé : '+(error?.message||String(error)));}
-      finally {$('import-json-file').value='';}
-    });
 
     $('make-id').addEventListener('click',()=>{
       if(state.idLocked&&$('test-id').value)return;
@@ -2001,7 +2042,6 @@
     $('add-block').addEventListener('click',()=>{
       state.blocks.push(baseBlock('text'));changed();renderBlocks();
     });
-    $('refresh-preview').addEventListener('click',refreshPreview);
     $('open-electron-preview').addEventListener('click',async()=>{
       refreshPreview();
       saveDraft(false);
@@ -2021,8 +2061,15 @@
       }
     });
     $('save-draft').addEventListener('click',()=>{ saveToLibrary(); });
-    $('download-json').addEventListener('click',downloadJson);
     $('new-test').addEventListener('click',reset);
+
+    if(typeof ResizeObserver==='function'){
+      const observer=new ResizeObserver(()=>fitMiniPreview());
+      const viewport=$('candidate-preview-viewport');
+      if(viewport)observer.observe(viewport);
+    }else{
+      window.addEventListener('resize',fitMiniPreview);
+    }
 
     renderBlocks();
     refreshPreview();
