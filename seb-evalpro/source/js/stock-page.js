@@ -43,6 +43,21 @@
     } catch (_) {}
   }
 
+  function publishEmbeddedActions(mode) {
+    if (!EMBEDDED) return;
+    const actions = mode === 'next' || !SHOW_CORRECTIONS
+      ? [{ id:'advance', label:'➡️ Suivant' }]
+      : [{ id:'validate', label:'🔍 Vérifier' }];
+    postToKaltest('actions', { actions });
+  }
+
+  function hideEmbeddedActionButton(button) {
+    if (!EMBEDDED || !button) return;
+    button.style.setProperty('display', 'none', 'important');
+    button.setAttribute('aria-hidden', 'true');
+    button.tabIndex = -1;
+  }
+
   const pots = Object.freeze([
     { id:1, code:'Ow', percentage:37, color:'rouge' },
     { id:2, code:'To', percentage:87, color:'bleu' },
@@ -357,6 +372,8 @@
     button.replaceWith(replacement);
     replacement.textContent = '🔍 Vérifier';
     replacement.addEventListener('click', verifyPlacements, { once:true });
+    hideEmbeddedActionButton(replacement);
+    publishEmbeddedActions('verify');
   }
 
   function setNextMode() {
@@ -367,6 +384,8 @@
     const replacement = button.cloneNode(true);
     button.replaceWith(replacement);
     replacement.addEventListener('click', goNext);
+    hideEmbeddedActionButton(replacement);
+    publishEmbeddedActions('next');
   }
 
   function verifyPlacements() {
@@ -547,7 +566,15 @@
     if (!EMBEDDED) return;
     window.addEventListener('message', event => {
       const message = event.data;
-      if (!message || message.source !== 'seb-kaltest-host' || message.type !== 'restore' || message.testId !== 'ranger_stock') return;
+      if (!message || message.source !== 'seb-kaltest-host' || message.testId !== 'ranger_stock') return;
+
+      if (message.type === 'command') {
+        if (message.action === 'validate' && SHOW_CORRECTIONS) verifyPlacements();
+        else if (message.action === 'advance') goNext();
+        return;
+      }
+
+      if (message.type !== 'restore') return;
       if (Array.isArray(message.positions)) restorePositions(message.positions);
       const completed = String(message.status || '') === 'COMPLETED';
       if (completed && SHOW_CORRECTIONS) {
