@@ -77,6 +77,44 @@ function createKaloneoLibrary(options = {}) {
     }
   }
 
+  function isBundledMigratedTest(definition) {
+    const id = String(definition?.id || '');
+    return BASE_TEST_ORDER.includes(id) &&
+      definition?.sourceMigration &&
+      typeof definition.sourceMigration === 'object';
+  }
+
+  function syncBundledSeedTests(source, destination) {
+    if (!source || !fs.existsSync(source)) return;
+    copyMissingTree(source, destination);
+
+    for (const seedFile of walkTestFiles(source)) {
+      const seedDefinition = readJson(seedFile);
+      if (!isBundledMigratedTest(seedDefinition)) continue;
+
+      const relative = path.relative(source, seedFile);
+      const targetFile = path.join(destination, relative);
+      const currentDefinition = readJson(targetFile);
+      if (!currentDefinition) {
+        atomicWriteJson(targetFile, seedDefinition);
+        continue;
+      }
+
+      const sameIdentity =
+        String(currentDefinition.id || '') === String(seedDefinition.id || '') &&
+        String(currentDefinition.version || '') === String(seedDefinition.version || '');
+
+      // Les tests historiques fournis par SEB EvalPro/KALONÉO doivent suivre
+      // les corrections livrées par l'application. Un test créé par l'admin
+      // n'a pas sourceMigration et n'est donc jamais écrasé ici.
+      if (sameIdentity && isBundledMigratedTest(currentDefinition)) {
+        const currentJson = JSON.stringify(currentDefinition);
+        const seedJson = JSON.stringify(seedDefinition);
+        if (currentJson !== seedJson) atomicWriteJson(targetFile, seedDefinition);
+      }
+    }
+  }
+
   function walkNamedFiles(directory, filename, out = []) {
     if (!fs.existsSync(directory)) return out;
     for (const entry of fs.readdirSync(directory, { withFileTypes:true })) {
@@ -415,7 +453,7 @@ function createKaloneoLibrary(options = {}) {
     ensureDirectory(testsRoot);
     ensureDirectory(parcoursRoot);
     ensureDirectory(maskScreensRoot);
-    if (seedTestsRoot && fs.existsSync(seedTestsRoot)) copyMissingTree(seedTestsRoot, testsRoot);
+    if (seedTestsRoot && fs.existsSync(seedTestsRoot)) syncBundledSeedTests(seedTestsRoot, testsRoot);
     ensureDefaultMaskScreen();
     ensureBaseParcours();
     return true;
