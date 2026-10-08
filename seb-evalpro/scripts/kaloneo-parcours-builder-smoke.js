@@ -9,6 +9,13 @@ const { createKaloneoLibrary } = require('../src/kaloneo-library-main');
 const root = path.resolve(__dirname, '..');
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'seb-kaloneo-parcours-'));
 
+const builderHtml = fs.readFileSync(path.join(root, 'overrides', 'admin-parcours-builder.html'), 'utf8');
+const builderJs = fs.readFileSync(path.join(root, 'source', 'js', 'admin-parcours-builder.js'), 'utf8');
+assert.ok(builderHtml.includes('id="back-tests-parcours"') && builderHtml.includes('>Fermer</button>'), 'le Builder de parcours doit afficher Fermer');
+assert.ok(!builderHtml.includes('>← Tests / Parcours</button>'), 'ancien libellé ← Tests / Parcours encore présent');
+assert.ok(builderJs.includes('function closeBuilder()'), 'fonction Fermer du Builder de parcours absente');
+assert.ok(builderJs.includes('modifications non enregistrées'), 'protection des modifications non enregistrées absente');
+
 try {
   const library = createKaloneoLibrary({
     dataRoot: temp,
