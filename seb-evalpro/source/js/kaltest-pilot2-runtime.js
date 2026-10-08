@@ -371,6 +371,9 @@
   }
 
   function shouldPauseForValidation(test) {
+    if (test?.presentation?.legacyFullPage === true) {
+      return showCorrectionDuringParcours() && hasAutomaticCorrection(test);
+    }
     return test?.behavior?.validateBeforeAdvance === true ||
       (showCorrectionDuringParcours() && hasAutomaticCorrection(test));
   }
@@ -3046,7 +3049,9 @@
     const action = document.createElement('button');
     action.type = 'button';
     action.className = 'kaltest-legacy-stock-action';
-    action.textContent = testState.status === 'COMPLETED' ? '➡ Suivant' : '✓ Vérifier';
+    action.textContent = testState.status === 'COMPLETED'
+      ? '➡ Suivant'
+      : (showCorrectionDuringParcours() ? '✓ Vérifier' : '➡ Suivant');
     action.addEventListener('click', () => finishCurrentTest());
 
     instructions.append(intro, details, action);
@@ -3140,8 +3145,10 @@
         input.dataset.col = String(col);
         input.value = String(testState.answers?.[id] ?? '');
         const detail = testState.result?.details?.[id];
-        if (testState.status === 'COMPLETED' && detail?.correct != null) {
-          input.classList.add(detail.correct ? 'correct-answer' : 'wrong-answer');
+        if (testState.status === 'COMPLETED') {
+          if (showCorrectionDuringParcours() && detail?.correct != null) {
+            input.classList.add(detail.correct ? 'correct-answer' : 'wrong-answer');
+          }
           input.disabled = true;
         }
         input.addEventListener('input', () => {
