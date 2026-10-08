@@ -1,5 +1,7 @@
 (function(){
   'use strict';
+
+  if (new URLSearchParams(window.location.search || '').get('kaltestEmbed') === '1') return;
   const page = decodeURIComponent((location.pathname.split('/').pop() || '').toLowerCase());
   const KEY = 'seb_evalpro_page_draft_' + page;
   let restoring = false;
