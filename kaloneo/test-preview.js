@@ -228,7 +228,7 @@ function renderRichContext(target,value){
   if(!target)return;
   target.replaceChildren();
   const source=multilineText(value);
-  const token=/\[(\/)?(b|i|u)\]/gi;
+  const token=/\[(\/)?(b|i|u|c)(?:=(#[0-9a-f]{6}))?\]/gi;
   const stack=[{node:target,tag:null}];
   const appendText=text=>{
     const parts=String(text).split('\n');
@@ -244,7 +244,13 @@ function renderRichContext(target,value){
     const closing=Boolean(match[1]);
     const tag=String(match[2]||'').toLowerCase();
     if(!closing){
-      const element=document.createElement(tag==='b'?'strong':tag==='i'?'em':'u');
+      let element;
+      if(tag==='c'){
+        element=document.createElement('span');
+        if(/^#[0-9a-f]{6}$/i.test(String(match[3]||''))) element.style.color=match[3];
+      }else{
+        element=document.createElement(tag==='b'?'strong':tag==='i'?'em':'u');
+      }
       stack.at(-1).node.appendChild(element);
       stack.push({node:element,tag});
     }else{
@@ -274,7 +280,10 @@ function applyBlockStyle(node,block){
 
 function renderBlock(block){
   let node;
-  if(block.type==='text') node=el('section','kb-block kb-text',multilineText(block.text||'Bloc texte vide'));
+  if(block.type==='text'){
+    node=el('section','kb-block kb-text');
+    renderRichContext(node,block.text||'Bloc texte vide');
+  }
   else if(block.type==='html'||block.type==='html-js'){
     const wrap=el('section','kb-block');const frame=el('iframe','kb-frame');frame.sandbox='allow-scripts';
     const script=block.type==='html-js'&&block.js?'<script>'+String(block.js).replace(/<\/script/gi,'<\\/script')+'<\/script>':'';
