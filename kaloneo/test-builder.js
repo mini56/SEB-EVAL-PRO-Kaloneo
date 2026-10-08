@@ -1770,6 +1770,9 @@
     $('close-image-library').addEventListener('click',()=>$('image-library-dialog').close());
     $('image-library-search').addEventListener('input',renderImageLibrary);
     $('import-images').addEventListener('click',()=>$('import-images-file').click());
+    $('import-image-zip').addEventListener('click',()=>{
+      importImageZip().catch(error=>alert('Import ZIP impossible : '+String(error?.message||error)));
+    });
     $('import-images-file').addEventListener('change',async()=>{
       try{await importImages($('import-images-file').files);}
       catch(error){alert('Import d’images impossible : '+String(error?.message||error));}
@@ -1797,6 +1800,19 @@
       changed();
     });
 
+    $('choose-page-background-image').addEventListener('click',()=>{
+      openImageLibrary('__page_background__').catch(error=>alert('Bibliothèque d’images inaccessible : '+String(error?.message||error)));
+    });
+    $('clear-page-background-image').addEventListener('click',()=>{
+      const name=$('page-background-image-name');
+      name.dataset.imageData='';
+      name.dataset.imageName='';
+      name.textContent='Aucune image';
+      if($('page-background-type').value==='image')$('page-background-type').value='none';
+      syncPageBackgroundOptions();
+      changed();
+    });
+
     [
       'test-version','test-category','test-scored','test-layout',
       'test-scenario','test-instruction','calculator-compatible','calculator-brand','chrono-enabled',
@@ -1804,7 +1820,8 @@
       'chrono-focus-after-stop','chrono-show-time',
       'admin-intervention','admin-instructions','autoevaluation-enabled',
       'external-material','external-material-text',
-      'block1-width-chars','block2-width-chars','last-block-remainder'
+      'block1-width-chars','block2-width-chars','last-block-remainder',
+      'page-background-type','page-background-color'
     ].forEach(id=>{
       $(id).addEventListener('input',()=>{
         if(id==='test-layout') {
@@ -1813,6 +1830,7 @@
         } else {
           if(id==='test-category') syncPracticalCategory();
           if(['calculator-compatible','chrono-enabled','admin-intervention','external-material'].includes(id)) syncCapabilityOptions();
+          if(id==='page-background-type') syncPageBackgroundOptions();
           changed();
         }
       });
@@ -1823,6 +1841,7 @@
         } else {
           if(id==='test-category') syncPracticalCategory();
           if(['calculator-compatible','chrono-enabled','admin-intervention','external-material'].includes(id)) syncCapabilityOptions();
+          if(id==='page-background-type') syncPageBackgroundOptions();
           changed();
         }
       });
