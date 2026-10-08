@@ -249,7 +249,7 @@ app.whenReady().then(async()=>{
         smallBlockSize:br?{width:Math.round(br.width),height:Math.round(br.height)}:null,
         blockFont:smallBlock?.style.fontSize||'',
         blockBackground:smallBlock?.style.backgroundColor||'',
-        obsoleteButtonsAbsent:!document.getElementById('refresh-preview')&&!document.getElementById('preview-calculator')&&!document.querySelector('.preview-footer')&&!document.getElementById('download-json')&&!document.getElementById('import-json'),
+        obsoleteButtonsAbsent:!document.getElementById('refresh-preview')&&!document.getElementById('preview-calculator')&&!document.querySelector('.preview-footer')&&!document.getElementById('download-json')&&!document.getElementById('import-json')&&!document.getElementById('open-image-library'),
         topLabels:[...document.querySelectorAll('.builder-top-actions button')].map(node=>String(node.textContent||'').trim()),
         previewScale:Number(document.getElementById('candidate-preview')?.style.transform?.match(/scale\(([^)]+)\)/)?.[1]||1),
         viewportRect:(()=>{const r=document.getElementById('candidate-preview-viewport')?.getBoundingClientRect();return r?{width:r.width,height:r.height}:null})(),
@@ -261,7 +261,7 @@ app.whenReady().then(async()=>{
        !setup.imagePresent||!setup.smallImageFits||setup.blockFont!=='22px'||!/238, 249, 242/.test(setup.blockBackground)||
        !setup.obsoleteButtonsAbsent||setup.previewScale>=1||
        !setup.viewportRect||!setup.pageRect||setup.pageRect.width>setup.viewportRect.width+1||setup.pageRect.height>setup.viewportRect.height+1||
-       setup.topLabels.join('|')!=='← Tests / Parcours|Bibliothèque de tests|Bibliothèque d’images|Nouveau test|Enregistrer') return fail('ergonomie ou aperçu miniature Builder incorrect',setup);
+       setup.topLabels.join('|')!=='↶ Annuler|↷ Rétablir|Bibliothèque de tests|Nouveau test|Enregistrer|Fermer') return fail('ergonomie ou aperçu miniature Builder incorrect',setup);
 
     if(savedImageCalls<1) return fail('une image importée directement dans un bloc ne rejoint pas automatiquement la bibliothèque',{savedImageCalls});
 
