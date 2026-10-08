@@ -1085,6 +1085,16 @@ ipcMain.handle('kaloneo-library:save-test', (_event, payload) => {
   }
 });
 
+ipcMain.handle('kaloneo-library:delete-test', (_event, payload) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de supprimer un test pendant une évaluation active.' };
+  try {
+    return getKaloneoLibrary().deleteTest(payload && payload.id, payload && payload.version);
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
 ipcMain.handle('kaloneo-library:list-images', () => {
   if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
   if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier la bibliothèque d’images pendant une évaluation active.' };
