@@ -47,10 +47,10 @@ app.whenReady().then(async()=>{
         id:document.body.dataset.sebKaltestId,
         legacy:document.body.classList.contains('seb-kaltest-legacy-full'),
         src:frame?.getAttribute('src')||'',
-        page:Boolean(doc?.querySelector('.k-stock-page')),
-        title:(doc?.querySelector('.k-stock-title')?.textContent||'').trim(),
-        scenario:Boolean(doc?.querySelector('.k-stock-scenario')),
-        instructions:Boolean(doc?.querySelector('.k-stock-instructions')),
+        page:Boolean(doc?.querySelector('.container')),
+        scenario:Boolean(doc?.querySelector('img[src="imageqcm/scenario.png"]')),
+        instructions:Boolean(doc?.querySelector('.info-panel')),
+        background:doc?getComputedStyle(doc.body).backgroundImage:'',
         action:(doc?.getElementById('stockActionBtn')?.textContent||'').trim(),
         pots:doc?.querySelectorAll('.pot').length||0,
         shelves:doc?.querySelectorAll('.etagere').length||0,
@@ -64,14 +64,17 @@ app.whenReady().then(async()=>{
         blockHeight:Math.round(block?.getBoundingClientRect().height||0)
       };
     })()`, true);
-    if (stock.id!=='ranger_stock'||!stock.legacy||!stock.page||!/stock/i.test(stock.title)||!stock.scenario||!stock.instructions) {
-      throw new Error('Le vrai Stock historique n est pas chargé: '+JSON.stringify(stock));
+    if (stock.id!=='ranger_stock'||!stock.legacy||!stock.page||!stock.scenario||!stock.instructions) {
+      throw new Error('Le vrai Stock Build #20 n est pas chargé: '+JSON.stringify(stock));
+    }
+    if (!/linear-gradient/.test(stock.background||'')) {
+      throw new Error('Le fond historique violet/bleu de Stock a été perdu: '+JSON.stringify(stock));
     }
     if (stock.pots!==34||stock.shelves!==3||stock.cases!==35||stock.sourceZones!==2) {
       throw new Error('Plateau Stock historique incomplet: '+JSON.stringify(stock));
     }
-    if (/Vérifier/.test(stock.action) || !/Suivant/.test(stock.action)) {
-      throw new Error('Sans affichage des corrections, la vraie page Stock doit proposer Suivant et non Vérifier.');
+    if (!/Vérifier/.test(stock.action) || /Suivant/.test(stock.action)) {
+      throw new Error('La vraie page Stock Build #20 doit conserver Vérifier avant validation.');
     }
     if (stock.nestedNav) throw new Error('Navigation commune imbriquée dans la page historique Stock.');
     if (stock.headingDisplay!=='none'||stock.contextDisplay!=='none'||stock.footerDisplay!=='none') {
@@ -128,8 +131,8 @@ app.whenReady().then(async()=>{
     if (puzzle.cells!==16||puzzle.blueClues!==8||puzzle.orangeClues!==8||!puzzle.reset) {
       throw new Error('Grille historique du Puzzle incomplète: '+JSON.stringify(puzzle));
     }
-    if (!/Suivant/.test(puzzle.validateLabel) || /Valider/.test(puzzle.validateLabel)) {
-      throw new Error('Sans corrections, le bouton Puzzle doit être Suivant.');
+    if (!/Valider/.test(puzzle.validateLabel) || /Suivant/.test(puzzle.validateLabel)) {
+      throw new Error('La vraie page Puzzle Build #20 doit conserver Valider avant validation.');
     }
     if (!puzzle.background||puzzle.background==='none'||!/gratteciel/.test(puzzle.background)) {
       throw new Error('Fond urbain historique du Puzzle absent: '+JSON.stringify(puzzle));
