@@ -51,10 +51,14 @@ app.whenReady().then(async()=>{
         id:document.body.dataset.sebKaltestId,
         legacy:document.body.classList.contains('seb-kaltest-legacy-full'),
         src:frame?.getAttribute('src')||'',
-        page:Boolean(doc?.querySelector('.container')),
-        scenario:Boolean(doc?.querySelector('img[src="imageqcm/scenario.png"]')),
-        instructions:Boolean(doc?.querySelector('.info-panel')),
+        page:Boolean(doc?.querySelector('.k-stock-page')),
+        scenario:Boolean(doc?.querySelector('.k-stock-scenario.kaloneo-context-scenario')),
+        instructions:Boolean(doc?.querySelector('.k-stock-instructions.kaloneo-context-consigne')),
+        layout:doc?.body?.getAttribute('data-kaloneo-layout')||'',
         background:doc?getComputedStyle(doc.body).backgroundImage:'',
+        gameWidth:Math.round(doc?.querySelector('.k-stock-game')?.getBoundingClientRect().width||0),
+        leftWidth:Math.round(doc?.querySelector('.k-stock-left')?.getBoundingClientRect().width||0),
+        shelvesWidth:Math.round(doc?.querySelector('.k-stock-shelves')?.getBoundingClientRect().width||0),
         action:(doc?.getElementById('stockActionBtn')?.textContent||'').trim(),
         actionDisplay:doc?.getElementById('stockActionBtn')?getComputedStyle(doc.getElementById('stockActionBtn')).display:'',
         barActions:[...document.querySelectorAll('#kaloneo-nav-center .kaloneo-nav-action')]
@@ -72,11 +76,16 @@ app.whenReady().then(async()=>{
         blockHeight:Math.round(block?.getBoundingClientRect().height||0)
       };
     })()`, true);
-    if (stock.id!=='ranger_stock'||!stock.legacy||!stock.page||!stock.scenario||!stock.instructions) {
-      throw new Error('Le vrai Stock Build #20 n est pas chargé: '+JSON.stringify(stock));
+    if (stock.id!=='ranger_stock'||!stock.legacy||!stock.page||!stock.scenario||!stock.instructions||stock.layout!=='stock-full-context-35-65') {
+      throw new Error('Le Stock validé PILOTE 17 n est pas chargé: '+JSON.stringify(stock));
     }
-    if (!/linear-gradient/.test(stock.background||'')) {
-      throw new Error('Le fond historique violet/bleu de Stock a été perdu: '+JSON.stringify(stock));
+    const leftRatio=stock.gameWidth?stock.leftWidth/stock.gameWidth:0;
+    const rightRatio=stock.gameWidth?stock.shelvesWidth/stock.gameWidth:0;
+    if (leftRatio<0.31||leftRatio>0.39||rightRatio<0.60||rightRatio>0.69) {
+      throw new Error('Le layout Stock 35/65 validé est perdu: '+JSON.stringify(stock));
+    }
+    if (/linear-gradient/.test(stock.background||'') && /102, 126, 234/.test(stock.background||'')) {
+      throw new Error('Ancien fond violet Stock réintroduit: '+JSON.stringify(stock));
     }
     if (stock.pots!==34||stock.shelves!==3||stock.cases!==35||stock.sourceZones!==2) {
       throw new Error('Plateau Stock historique incomplet: '+JSON.stringify(stock));
@@ -102,8 +111,8 @@ app.whenReady().then(async()=>{
         legacy:document.body.classList.contains('seb-kaltest-legacy-full'),
         src:frame?.getAttribute('src')||'',
         page:Boolean(doc?.querySelector('.container')),
-        title:(doc?.querySelector('.header h1')?.textContent||'').trim(),
-        subtitle:(doc?.querySelector('.header .subtitle')?.textContent||'').trim(),
+        scenario:Boolean(doc?.querySelector('.carre-scenario.kaloneo-context-scenario')),
+        scenarioText:(doc?.querySelector('.carre-scenario .kaloneo-context-text')?.textContent||'').trim(),
         rules:(doc?.querySelector('.explanations')?.textContent||''),
         examples:doc?.querySelectorAll('.example').length||0,
         cells:doc?.querySelectorAll('.cell[data-row][data-col]').length||0,
@@ -126,8 +135,8 @@ app.whenReady().then(async()=>{
         blockHeight:Math.round(block?.getBoundingClientRect().height||0)
       };
     })()`, true);
-    if (puzzle.id!=='gratte_ciel'||!puzzle.legacy||!puzzle.page||!/Puzzle Gratte-ciel/.test(puzzle.title)) {
-      throw new Error('La vraie page Puzzle historique n est pas chargée: '+JSON.stringify(puzzle));
+    if (puzzle.id!=='gratte_ciel'||!puzzle.legacy||!puzzle.page||!puzzle.scenario||!/journée de cohésion/.test(puzzle.scenarioText)) {
+      throw new Error('Le Puzzle validé PILOTE 20 n est pas chargé: '+JSON.stringify(puzzle));
     }
     if (!/Règles du jeu/.test(puzzle.rules)||!/Astuces/.test(puzzle.rules)||!/Comment jouer/.test(puzzle.rules)||puzzle.examples!==3) {
       throw new Error('Consignes spécifiques historiques du Puzzle incomplètes.');
@@ -148,7 +157,7 @@ app.whenReady().then(async()=>{
     }
     if (puzzle.blockHeight < puzzle.contentHeight-4) throw new Error('Le bloc Puzzle ne prend pas toute la hauteur disponible.');
 
-    console.log('KALONEO_LEGACY_IDENTITY_SMOKE: OK');
+    console.log('KALONEO_VALIDATED_VISUAL_IDENTITY_SMOKE: OK');
     console.log(JSON.stringify({stock,puzzle}));
     win.destroy();
     app.exit(0);
