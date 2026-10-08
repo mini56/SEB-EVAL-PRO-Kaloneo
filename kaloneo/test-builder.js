@@ -8,7 +8,9 @@
   const state = {
     idLocked: false,
     sourceDefinition: null,
-    blocks: []
+    blocks: [],
+    imageLibraryTargetUid: null,
+    imageLibraryItems: []
   };
 
   const $ = id => document.getElementById(id);
@@ -695,6 +697,116 @@
     },{placeholder:'question_1; question_2'}));
   }
 
+  function normalizedSearch(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  }
+
+  function blockByUid(uidValue) {
+    return state.blocks.find(block => String(block.uid) === String(uidValue || '')) || null;
+  }
+
+  async function useLibraryImage(imageId) {
+    const target=blockByUid(state.imageLibraryTargetUid);
+    if(!target || target.type!=='image') return false;
+    const result=await window.sebEvalPro?.kaloneoGetImage?.(imageId);
+    if(!result || result.ok!==true || !result.image?.data) throw new Error(result?.error||'Image introuvable');
+    target.mediaName=result.image.name||'image';
+    target.mediaType=result.image.mime||'image/*';
+    target.mediaData=result.image.data;
+    target.mediaAlt=target.mediaAlt||result.image.name||'Image';
+    target.mediaPlaceholder='';
+    changed();
+    renderBlocks();
+    $('image-library-dialog')?.close();
+    return true;
+  }
+
+  function renderImageLibrary() {
+    const root=$('image-library-list');
+    if(!root)return;
+    const search=normalizedSearch($('image-library-search')?.value||'');
+    const items=(state.imageLibraryItems||[]).filter(item=>{
+      const haystack=normalizedSearch([item.name,item.category,item.sourceName].filter(Boolean).join(' '));
+      return !search||haystack.includes(search);
+    });
+    root.replaceChildren();
+    const status=$('image-library-status');
+    if(status) status.textContent=items.length+' image'+(items.length>1?'s':'')+' affichée'+(items.length>1?'s':'')+
+      (state.imageLibraryTargetUid?' — choisissez une image pour le bloc courant.':' — bibliothèque générale.');
+
+    items.slice(0,250).forEach(item=>{
+      const card=document.createElement('article');
+      card.className='image-library-card';
+      const preview=document.createElement('div');
+      preview.className='image-library-preview';
+      const img=document.createElement('img');
+      img.alt=item.name||'Image';
+      img.loading='lazy';
+      preview.appendChild(img);
+      const info=document.createElement('div');
+      info.className='image-library-info';
+      const title=document.createElement('strong');title.textContent=item.name||item.id;
+      const meta=document.createElement('span');meta.textContent=(item.category||'Images')+(item.systemProvided?' • système':' • personnelle');
+      info.append(title,meta);
+      card.append(preview,info);
+
+      if(state.imageLibraryTargetUid){
+        const use=document.createElement('button');
+        use.type='button';
+        use.className='mini-btn image-library-use';
+        use.textContent='Utiliser';
+        use.addEventListener('click',()=>useLibraryImage(item.id).catch(error=>alert('Image impossible à utiliser : '+String(error?.message||error))));
+        card.appendChild(use);
+      }
+
+      window.sebEvalPro?.kaloneoGetImage?.(item.id).then(result=>{
+        if(result?.ok&&result.image?.data)img.src=result.image.data;
+      }).catch(()=>{});
+      root.appendChild(card);
+    });
+    if(!items.length){
+      const empty=document.createElement('p');empty.className='muted';empty.textContent='Aucune image trouvée.';root.appendChild(empty);
+    }
+  }
+
+  async function reloadImageLibrary() {
+    const result=await window.sebEvalPro?.kaloneoListImages?.();
+    if(!result||result.ok!==true) throw new Error(result?.error||'Bibliothèque d’images inaccessible');
+    state.imageLibraryItems=Array.isArray(result.images)?result.images:[];
+    renderImageLibrary();
+  }
+
+  async function openImageLibrary(targetUid=null) {
+    state.imageLibraryTargetUid=targetUid||null;
+    await reloadImageLibrary();
+    $('image-library-dialog')?.showModal();
+    requestAnimationFrame(()=>$('image-library-search')?.focus());
+  }
+
+  async function importImages(files) {
+    const list=[...(files||[])];
+    if(!list.length)return;
+    let added=0,duplicates=0,failed=0;
+    for(const file of list){
+      if(!String(file.type||'').startsWith('image/')){failed++;continue;}
+      try{
+        const data=await readFileAsDataUrl(file);
+        const result=await window.sebEvalPro?.kaloneoSaveImage?.({
+          name:file.name,
+          mime:file.type,
+          data,
+          category:'Mes images KALONÉO'
+        });
+        if(result?.ok){
+          if(result.duplicate)duplicates++;else added++;
+        }else failed++;
+      }catch(_){failed++;}
+    }
+    await reloadImageLibrary();
+    const status=$('image-library-status');
+    if(status)status.textContent=added+' ajoutée'+(added>1?'s':'')+', '+duplicates+' déjà présente'+(duplicates>1?'s':'')+(failed?', '+failed+' refusée'+(failed>1?'s':''):'')+'.';
+  }
+
   function renderMediaEditor(block,body) {
     const kindLabel=block.type==='image'?'image':block.type==='audio'?'audio':'vidéo';
     const articleLabel=block.type==='image'?'l’image':block.type==='audio'?'l’audio':'la vidéo';
@@ -712,10 +824,29 @@
       block.mediaType=file.type||'';
       block.mediaData=await readFileAsDataUrl(file);
       block.mediaPlaceholder='';
+      if(block.type==='image'){
+        try{
+          await window.sebEvalPro?.kaloneoSaveImage?.({
+            name:file.name,
+            mime:file.type,
+            data:block.mediaData,
+            category:'Mes images KALONÉO'
+          });
+        }catch(_){}
+      }
       changed();renderBlocks();
     });
     label.appendChild(input);
     body.appendChild(label);
+
+    if(block.type==='image'){
+      const choose=document.createElement('button');
+      choose.type='button';
+      choose.className='mini-btn choose-library-image';
+      choose.textContent='Choisir dans la bibliothèque d’images';
+      choose.addEventListener('click',()=>openImageLibrary(block.uid).catch(error=>alert('Bibliothèque d’images inaccessible : '+String(error?.message||error))));
+      body.appendChild(choose);
+    }
     body.appendChild(inputField('Texte alternatif',block.mediaAlt||'',value=>{block.mediaAlt=value;changed();}));
 
     const name=document.createElement('div');
@@ -1498,6 +1629,15 @@
 
     $('back-tests').addEventListener('click',()=>{ window.location.href='../admin-tests-parcours.html'; });
     $('open-library-test').addEventListener('click',()=>{openLibraryDialog().catch(error=>alert('Bibliothèque inaccessible : '+String(error?.message||error)));});
+    $('open-image-library').addEventListener('click',()=>{openImageLibrary(null).catch(error=>alert('Bibliothèque d’images inaccessible : '+String(error?.message||error)));});
+    $('close-image-library').addEventListener('click',()=>$('image-library-dialog').close());
+    $('image-library-search').addEventListener('input',renderImageLibrary);
+    $('import-images').addEventListener('click',()=>$('import-images-file').click());
+    $('import-images-file').addEventListener('change',async()=>{
+      try{await importImages($('import-images-file').files);}
+      catch(error){alert('Import d’images impossible : '+String(error?.message||error));}
+      finally{$('import-images-file').value='';}
+    });
     $('close-test-library').addEventListener('click',()=>$('test-library-dialog').close());
     $('test-library-search').addEventListener('input',()=>renderLibraryTests($('test-library-dialog')._kaloneoItems||[]));
     $('import-json').addEventListener('click',()=>$('import-json-file').click());
