@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const BASE_TEST_ORDER = Object.freeze([
   'calculs_commandes_atelier',
@@ -33,12 +34,23 @@ const DEFAULT_MASK_VERSION = '1.0.0';
 function createKaloneoLibrary(options = {}) {
   const dataRoot = String(options.dataRoot || '').trim();
   const seedTestsRoot = String(options.seedTestsRoot || '').trim();
+  const seedImageRoots = Array.isArray(options.seedImageRoots)
+    ? options.seedImageRoots
+      .map(item => typeof item === 'string'
+        ? { root:String(item || '').trim(), category:'Images système KALONÉO' }
+        : {
+            root:String(item?.root || '').trim(),
+            category:String(item?.category || 'Images système KALONÉO').trim() || 'Images système KALONÉO'
+          })
+      .filter(item => item.root)
+    : [];
   const now = typeof options.now === 'function' ? options.now : () => new Date();
 
   if (!dataRoot) throw new Error('dataRoot KALONÉO requis.');
 
   const root = path.join(dataRoot, 'KALONEO');
   const testsRoot = path.join(root, 'Bibliotheque-tests');
+  const imagesRoot = path.join(root, 'Bibliotheque-images');
   const parcoursRoot = path.join(root, 'Parcours');
   const maskScreensRoot = path.join(root, 'Ecrans-masquage');
   const selectedParcoursFile = path.join(root, 'selected-parcours.json');
@@ -61,6 +73,177 @@ function createKaloneoLibrary(options = {}) {
     const temp = file + '.' + process.pid + '.tmp';
     fs.writeFileSync(temp, JSON.stringify(value, null, 2) + '\n', 'utf8');
     fs.renameSync(temp, file);
+  }
+
+  const IMAGE_EXTENSIONS = new Set(['.png','.jpg','.jpeg','.webp','.gif','.svg']);
+
+  function imageMimeFromName(filename) {
+    const ext = path.extname(String(filename || '')).toLowerCase();
+    if (ext === '.png') return 'image/png';
+    if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg';
+    if (ext === '.webp') return 'image/webp';
+    if (ext === '.gif') return 'image/gif';
+    if (ext === '.svg') return 'image/svg+xml';
+    return '';
+  }
+
+  function imageExtensionFromMime(mime, fallbackName = '') {
+    const normalized = String(mime || '').toLowerCase();
+    if (normalized === 'image/png') return '.png';
+    if (normalized === 'image/jpeg') return '.jpg';
+    if (normalized === 'image/webp') return '.webp';
+    if (normalized === 'image/gif') return '.gif';
+    if (normalized === 'image/svg+xml') return '.svg';
+    const ext = path.extname(String(fallbackName || '')).toLowerCase();
+    return IMAGE_EXTENSIONS.has(ext) ? ext : '.img';
+  }
+
+  function imageIdForBuffer(buffer) {
+    return 'img-' + crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 32);
+  }
+
+  function walkImageFiles(directory, out = []) {
+    if (!directory || !fs.existsSync(directory)) return out;
+    for (const entry of fs.readdirSync(directory, { withFileTypes:true })) {
+      const full = path.join(directory, entry.name);
+      if (entry.isDirectory()) walkImageFiles(full, out);
+      else if (entry.isFile() && IMAGE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) out.push(full);
+    }
+    return out;
+  }
+
+  function imageRecordPath(id) {
+    return path.join(imagesRoot, safeSegment(id, 'image'), 'image.json');
+  }
+
+  function scanImageRecords() {
+    const out = [];
+    for (const file of walkNamedFiles(imagesRoot, 'image.json')) {
+      const value = readJson(file);
+      if (!value || value.format !== 'kaloneo-image' || !value.id || !value.file) continue;
+      const binary = path.join(path.dirname(file), String(value.file));
+      if (!fs.existsSync(binary)) continue;
+      out.push({ value, file, binary });
+    }
+    return out;
+  }
+
+  function toImageMetadata(record) {
+    const value = record.value;
+    return {
+      id:String(value.id),
+      name:String(value.name || value.id),
+      mime:String(value.mime || ''),
+      size:Number(value.size || 0),
+      category:String(value.category || (value.systemProvided ? 'Images système KALONÉO' : 'Mes images KALONÉO')),
+      systemProvided:value.systemProvided === true,
+      createdAt:String(value.createdAt || ''),
+      sourceName:String(value.sourceName || '')
+    };
+  }
+
+  function findImageRecord(id) {
+    const wanted = String(id || '');
+    return scanImageRecords().find(record => String(record.value.id) === wanted) || null;
+  }
+
+  function storeImageBuffer(buffer, payload = {}) {
+    if (!Buffer.isBuffer(buffer) || !buffer.length) return { ok:false, error:'Image vide.' };
+    const name = path.basename(String(payload.name || 'image'));
+    const mime = String(payload.mime || imageMimeFromName(name));
+    if (!/^image\//i.test(mime)) return { ok:false, error:'Le fichier sélectionné n’est pas une image.' };
+
+    ensureDirectory(imagesRoot);
+    const id = imageIdForBuffer(buffer);
+    const existing = findImageRecord(id);
+    if (existing) return { ok:true, duplicate:true, image:toImageMetadata(existing) };
+
+    const ext = imageExtensionFromMime(mime, name);
+    const dir = ensureDirectory(path.join(imagesRoot, safeSegment(id, 'image')));
+    const binaryName = 'image' + ext;
+    const binaryFile = path.join(dir, binaryName);
+    fs.writeFileSync(binaryFile, buffer);
+
+    const stamp = now().toISOString();
+    const value = {
+      format:'kaloneo-image',
+      schemaVersion:1,
+      id,
+      name:name || ('image' + ext),
+      mime,
+      size:buffer.length,
+      category:String(payload.category || (payload.systemProvided ? 'Images système KALONÉO' : 'Mes images KALONÉO')),
+      systemProvided:payload.systemProvided === true,
+      sourceName:String(payload.sourceName || ''),
+      createdAt:stamp,
+      file:binaryName
+    };
+    atomicWriteJson(path.join(dir, 'image.json'), value);
+    return { ok:true, duplicate:false, image:toImageMetadata({ value, file:path.join(dir,'image.json'), binary:binaryFile }) };
+  }
+
+  function seedImageLibrary() {
+    ensureDirectory(imagesRoot);
+    for (const seed of seedImageRoots) {
+      if (!seed.root || !fs.existsSync(seed.root)) continue;
+      for (const file of walkImageFiles(seed.root)) {
+        try {
+          const buffer = fs.readFileSync(file);
+          storeImageBuffer(buffer, {
+            name:path.basename(file),
+            mime:imageMimeFromName(file),
+            category:seed.category,
+            systemProvided:true,
+            sourceName:path.relative(seed.root, file).replace(/\\/g, '/')
+          });
+        } catch (_) {}
+      }
+    }
+  }
+
+  function listImages() {
+    ensureSeed();
+    return scanImageRecords()
+      .map(toImageMetadata)
+      .sort((a,b) => {
+        if (a.systemProvided !== b.systemProvided) return a.systemProvided ? -1 : 1;
+        const category = a.category.localeCompare(b.category, 'fr');
+        if (category) return category;
+        return a.name.localeCompare(b.name, 'fr');
+      });
+  }
+
+  function getImage(id) {
+    ensureSeed();
+    const record = findImageRecord(id);
+    if (!record) return { ok:false, error:'Image KALONÉO introuvable.' };
+    const buffer = fs.readFileSync(record.binary);
+    const meta = toImageMetadata(record);
+    return {
+      ok:true,
+      image:{
+        ...meta,
+        data:'data:' + meta.mime + ';base64,' + buffer.toString('base64')
+      }
+    };
+  }
+
+  function saveImage(payload = {}) {
+    ensureSeed();
+    const name = String(payload.name || '').trim();
+    const data = String(payload.data || '');
+    const match = data.match(/^data:(image\/[^;,]+)(?:;charset=[^;,]+)?;base64,([A-Za-z0-9+/=\s]+)$/i);
+    if (!match) return { ok:false, error:'Image KALONÉO invalide ou non embarquée.' };
+    let buffer;
+    try { buffer = Buffer.from(match[2].replace(/\s+/g,''), 'base64'); }
+    catch (_) { return { ok:false, error:'Impossible de lire l’image.' }; }
+    return storeImageBuffer(buffer, {
+      name:name || 'image',
+      mime:String(payload.mime || match[1]),
+      category:String(payload.category || 'Mes images KALONÉO'),
+      systemProvided:false,
+      sourceName:''
+    });
   }
 
   function copyMissingTree(source, destination) {
@@ -456,9 +639,11 @@ function createKaloneoLibrary(options = {}) {
   function ensureSeed() {
     ensureDirectory(root);
     ensureDirectory(testsRoot);
+    ensureDirectory(imagesRoot);
     ensureDirectory(parcoursRoot);
     ensureDirectory(maskScreensRoot);
     if (seedTestsRoot && fs.existsSync(seedTestsRoot)) syncBundledSeedTests(seedTestsRoot, testsRoot);
+    seedImageLibrary();
     ensureDefaultMaskScreen();
     ensureBaseParcours();
     return true;
@@ -763,9 +948,12 @@ function createKaloneoLibrary(options = {}) {
   ensureSeed();
 
   return Object.freeze({
-    paths:Object.freeze({ root, testsRoot, parcoursRoot, maskScreensRoot }),
+    paths:Object.freeze({ root, testsRoot, imagesRoot, parcoursRoot, maskScreensRoot }),
     ensureSeed,
     listTests,
+    listImages,
+    getImage,
+    saveImage,
     getTest,
     saveTest,
     listMaskScreens,
