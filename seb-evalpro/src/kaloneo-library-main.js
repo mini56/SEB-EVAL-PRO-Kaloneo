@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const zlib = require('zlib');
 
 const BASE_TEST_ORDER = Object.freeze([
   'calculs_commandes_atelier',
@@ -138,7 +139,9 @@ function createKaloneoLibrary(options = {}) {
       category:String(value.category || (value.systemProvided ? 'Images système KALONÉO' : 'Mes images KALONÉO')),
       systemProvided:value.systemProvided === true,
       createdAt:String(value.createdAt || ''),
-      sourceName:String(value.sourceName || '')
+      sourceName:String(value.sourceName || ''),
+      theme:String(value.theme || ''),
+      orientation:String(value.orientation || '')
     };
   }
 
@@ -175,11 +178,133 @@ function createKaloneoLibrary(options = {}) {
       category:String(payload.category || (payload.systemProvided ? 'Images système KALONÉO' : 'Mes images KALONÉO')),
       systemProvided:payload.systemProvided === true,
       sourceName:String(payload.sourceName || ''),
+      theme:String(payload.theme || ''),
+      orientation:String(payload.orientation || ''),
       createdAt:stamp,
       file:binaryName
     };
     atomicWriteJson(path.join(dir, 'image.json'), value);
     return { ok:true, duplicate:false, image:toImageMetadata({ value, file:path.join(dir,'image.json'), binary:binaryFile }) };
+  }
+
+  function humanizeTheme(value) {
+    return String(value || '')
+      .replace(/^\d+[_ -]*/, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function readZipEntries(zipFile) {
+    const stat = fs.statSync(zipFile);
+    if (!stat.isFile()) throw new Error('Archive ZIP introuvable.');
+    if (stat.size > 500 * 1024 * 1024) throw new Error('Archive ZIP trop volumineuse (500 Mo maximum).');
+    const data = fs.readFileSync(zipFile);
+    const minOffset = Math.max(0, data.length - 65557);
+    let eocd = -1;
+    for (let i = data.length - 22; i >= minOffset; i -= 1) {
+      if (data.readUInt32LE(i) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('Archive ZIP invalide : répertoire central introuvable.');
+
+    const totalEntries = data.readUInt16LE(eocd + 10);
+    const centralOffset = data.readUInt32LE(eocd + 16);
+    let cursor = centralOffset;
+    const entries = [];
+
+    for (let index = 0; index < totalEntries; index += 1) {
+      if (cursor + 46 > data.length || data.readUInt32LE(cursor) !== 0x02014b50) {
+        throw new Error('Archive ZIP invalide : entrée centrale incorrecte.');
+      }
+      const flags = data.readUInt16LE(cursor + 8);
+      const method = data.readUInt16LE(cursor + 10);
+      const compressedSize = data.readUInt32LE(cursor + 20);
+      const uncompressedSize = data.readUInt32LE(cursor + 24);
+      const nameLength = data.readUInt16LE(cursor + 28);
+      const extraLength = data.readUInt16LE(cursor + 30);
+      const commentLength = data.readUInt16LE(cursor + 32);
+      const localOffset = data.readUInt32LE(cursor + 42);
+      const nameBuffer = data.subarray(cursor + 46, cursor + 46 + nameLength);
+      const name = nameBuffer.toString((flags & 0x0800) ? 'utf8' : 'utf8').replace(/\\/g, '/');
+      cursor += 46 + nameLength + extraLength + commentLength;
+
+      if (!name || name.endsWith('/')) continue;
+      const ext = path.extname(name).toLowerCase();
+      if (!IMAGE_EXTENSIONS.has(ext)) continue;
+      if (uncompressedSize > 30 * 1024 * 1024) continue;
+      if (localOffset + 30 > data.length || data.readUInt32LE(localOffset) !== 0x04034b50) continue;
+
+      const localNameLength = data.readUInt16LE(localOffset + 26);
+      const localExtraLength = data.readUInt16LE(localOffset + 28);
+      const payloadOffset = localOffset + 30 + localNameLength + localExtraLength;
+      if (payloadOffset + compressedSize > data.length) continue;
+
+      const compressed = data.subarray(payloadOffset, payloadOffset + compressedSize);
+      let buffer;
+      if (method === 0) buffer = Buffer.from(compressed);
+      else if (method === 8) buffer = zlib.inflateRawSync(compressed);
+      else continue;
+      if (!buffer.length || buffer.length > 30 * 1024 * 1024) continue;
+
+      entries.push({ name, buffer, mime:imageMimeFromName(name) });
+      if (entries.length >= 1000) break;
+    }
+    return entries;
+  }
+
+  function importImageZip(zipFile) {
+    ensureSeed();
+    const file = String(zipFile || '').trim();
+    if (!file || path.extname(file).toLowerCase() !== '.zip') {
+      return { ok:false, error:'Sélectionnez une archive .zip.' };
+    }
+    let entries;
+    try { entries = readZipEntries(file); }
+    catch (error) { return { ok:false, error:error?.message || String(error) }; }
+    if (!entries.length) return { ok:false, error:'Aucune image PNG/JPG/WEBP/GIF/SVG trouvée dans le ZIP.' };
+
+    let added = 0;
+    let duplicates = 0;
+    let failed = 0;
+    const themes = new Set();
+
+    for (const entry of entries) {
+      try {
+        const parts = entry.name.split('/').filter(Boolean);
+        const filename = parts.at(-1) || 'image';
+        const parent = parts.at(-2) || '';
+        const grandParent = parts.at(-3) || '';
+        const orientation = /^(paysage|portrait)$/i.test(parent) ? parent : '';
+        const themeRaw = orientation ? grandParent : (parent || path.basename(file, '.zip'));
+        const theme = humanizeTheme(themeRaw) || 'Images ZIP';
+        const result = storeImageBuffer(entry.buffer, {
+          name:filename,
+          mime:entry.mime,
+          category:theme,
+          theme,
+          orientation:orientation ? (orientation.charAt(0).toUpperCase() + orientation.slice(1).toLowerCase()) : '',
+          systemProvided:false,
+          sourceName:entry.name
+        });
+        if (result?.ok) {
+          if (result.duplicate) duplicates += 1;
+          else added += 1;
+          themes.add(theme);
+        } else failed += 1;
+      } catch (_) {
+        failed += 1;
+      }
+    }
+
+    return {
+      ok:true,
+      archive:path.basename(file),
+      added,
+      duplicates,
+      failed,
+      total:entries.length,
+      themes:[...themes].sort((a,b)=>a.localeCompare(b,'fr'))
+    };
   }
 
   function seedImageLibrary() {
@@ -993,6 +1118,7 @@ function createKaloneoLibrary(options = {}) {
     listImages,
     getImage,
     saveImage,
+    importImageZip,
     getTest,
     saveTest,
     listMaskScreens,
