@@ -355,11 +355,6 @@
     if (!button) return;
     const replacement = button.cloneNode(true);
     button.replaceWith(replacement);
-    if (EMBEDDED && !SHOW_CORRECTIONS) {
-      replacement.textContent = '➡️ Suivant';
-      replacement.addEventListener('click', goNext);
-      return;
-    }
     replacement.textContent = '🔍 Vérifier';
     replacement.addEventListener('click', verifyPlacements, { once:true });
   }
