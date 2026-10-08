@@ -15,7 +15,7 @@ function fail(message) {
 }
 
 const buildNumber = String(pkg.sebBuildNumber || '').trim();
-if (!/^\\d+$/.test(buildNumber)) fail('sebBuildNumber invalide dans package.json.');
+if (!/^\d+$/.test(buildNumber)) fail('sebBuildNumber invalide dans package.json.');
 if (!preload.includes("const APP_BUILD_NUMBER = String(appPackage.sebBuildNumber || '').trim() || 'DEV';")) {
   fail('preload.js ne lit pas le build central depuis package.json.');
 }
@@ -25,7 +25,7 @@ if (!preload.includes('const APP_BUILD_LABEL = `Build #${APP_BUILD_NUMBER}`;')) 
 if (!preload.includes('<div id="seb-evalpro-build" class="seb-evalpro-build">${APP_BUILD_LABEL}</div>')) {
   fail('la barre Admin n’injecte pas APP_BUILD_LABEL.');
 }
-const installerMatch = installer.match(/!define\\s+SEB_BUILD_NUMBER\\s+"(\\d+)"/);
+const installerMatch = installer.match(/!define\s+SEB_BUILD_NUMBER\s+"(\d+)"/);
 if (!installerMatch || installerMatch[1] !== buildNumber) {
   fail('le Setup et la barre Admin n’utilisent pas le même numéro de build.');
 }
