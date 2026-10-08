@@ -156,13 +156,23 @@
       </div>
 
       <div class="form-grid cols-2">
-        <label>Scénario <span class="required">*</span>
+        <label class="context-rich-field">Scénario <span class="required">*</span>
+          <span class="context-format-toolbar" aria-label="Mise en forme du scénario">
+            <button type="button" class="context-format-btn" data-target="test-scenario" data-format="b" title="Gras"><strong>G</strong></button>
+            <button type="button" class="context-format-btn" data-target="test-scenario" data-format="i" title="Italique"><em>I</em></button>
+            <button type="button" class="context-format-btn" data-target="test-scenario" data-format="u" title="Souligné"><u>U</u></button>
+          </span>
           <textarea id="test-scenario" rows="4" placeholder="Situation proposée au candidat"></textarea>
-          <small class="muted">Pour passer à la ligne : touche Entrée ou écrivez \n.</small>
+          <small class="muted">Entrée ou \n = nouvelle ligne. Sélectionnez du texte puis utilisez G, I ou U.</small>
         </label>
-        <label>Consignes <span class="required">*</span>
+        <label class="context-rich-field">Consignes <span class="required">*</span>
+          <span class="context-format-toolbar" aria-label="Mise en forme de la consigne">
+            <button type="button" class="context-format-btn" data-target="test-instruction" data-format="b" title="Gras"><strong>G</strong></button>
+            <button type="button" class="context-format-btn" data-target="test-instruction" data-format="i" title="Italique"><em>I</em></button>
+            <button type="button" class="context-format-btn" data-target="test-instruction" data-format="u" title="Souligné"><u>U</u></button>
+          </span>
           <textarea id="test-instruction" rows="4" placeholder="Ce que le candidat doit réaliser"></textarea>
-          <small class="muted">Pour passer à la ligne : touche Entrée ou écrivez \n.</small>
+          <small class="muted">Entrée ou \n = nouvelle ligne. Sélectionnez du texte puis utilisez G, I ou U.</small>
         </label>
       </div>
 
