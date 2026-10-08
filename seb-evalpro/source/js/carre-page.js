@@ -46,6 +46,26 @@
     } catch (_) {}
   }
 
+  function publishEmbeddedActions() {
+    if (!EMBEDDED) return;
+    if (isValidated) {
+      postToKaltest('actions', { actions:[{ id:'advance', label:'➡️ Page suivante' }] });
+      return;
+    }
+    const actions = [{ id:'reset', label:'🔄 Recommencer' }];
+    if (SHOW_CORRECTIONS) actions.push({ id:'validate', label:'✔️ Valider' });
+    else actions.push({ id:'advance', label:'➡️ Suivant' });
+    postToKaltest('actions', { actions });
+  }
+
+  function installEmbeddedButtonMask() {
+    if (!EMBEDDED || document.getElementById('seb-kaltest-interactive-button-mask')) return;
+    const style = document.createElement('style');
+    style.id = 'seb-kaltest-interactive-button-mask';
+    style.textContent = '#carre-reset,#btnValidate,#btnNext{display:none!important}';
+    (document.head || document.documentElement).appendChild(style);
+  }
+
   function questionId(row, col) {
     return 'gratte_r' + (row + 1) + 'c' + (col + 1);
   }
@@ -100,6 +120,7 @@
       validateButton.style.display = 'none';
     }
     document.getElementById('btnNext')?.classList.add('show');
+    publishEmbeddedActions();
   }
 
   function validatePuzzle() {
@@ -135,7 +156,10 @@
     errorCount = 0;
     document.getElementById('btnValidate')?.style.removeProperty('display');
     document.getElementById('btnNext')?.classList.remove('show');
-    if (EMBEDDED) postToKaltest('puzzle-reset');
+    if (EMBEDDED) {
+      postToKaltest('puzzle-reset');
+      publishEmbeddedActions();
+    }
   }
 
   function showSolution() {
@@ -229,22 +253,34 @@
       validateButton.textContent = '✔️ Valider';
     }
     nextButton?.classList.remove('show');
+    publishEmbeddedActions();
   }
 
   function installEmbeddedBridge() {
     if (!EMBEDDED) return;
     window.addEventListener('message', event => {
       const message = event.data;
-      if (!message || message.source !== 'seb-kaltest-host' || message.type !== 'restore' || message.testId !== 'gratte_ciel') return;
+      if (!message || message.source !== 'seb-kaltest-host' || message.testId !== 'gratte_ciel') return;
+
+      if (message.type === 'command') {
+        if (message.action === 'reset') resetPuzzle();
+        else if (message.action === 'validate' && SHOW_CORRECTIONS) validatePuzzle();
+        else if (message.action === 'advance') navigateNext();
+        return;
+      }
+
+      if (message.type !== 'restore') return;
       applyEmbeddedState(message);
     });
     postToKaltest('ready');
   }
 
   function prepareEmbeddedAppearance() {
-    // En mode KALTEST, ne jamais modifier le HTML/CSS historique du Build #20.
-    // Le pont d'intégration ne doit agir que sur navigation/état, pas sur le visuel.
+    // En mode KALTEST, le contenu visuel historique reste intact.
+    // Seuls les boutons de navigation sont masqués dans l'iframe, car ils sont
+    // reproduits dans la barre candidat extérieure par le pont interactif.
     if (!EMBEDDED) return;
+    installEmbeddedButtonMask();
   }
 
   function install() {
@@ -259,6 +295,7 @@
     document.getElementById('btnValidate')?.addEventListener('click', validatePuzzle);
     document.getElementById('btnNext')?.addEventListener('click', navigateNext);
     installEmbeddedBridge();
+    publishEmbeddedActions();
   }
 
   const api = Object.freeze({
