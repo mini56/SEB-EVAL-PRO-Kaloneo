@@ -768,7 +768,22 @@
     const root=$('image-library-list');
     if(!root)return;
     const search=normalizedSearch($('image-library-search')?.value||'');
+    const themeSelect=$('image-library-theme');
+    const selectedTheme=String(themeSelect?.value||'');
+    const themes=[...new Set((state.imageLibraryItems||[]).map(item=>String(item.theme||item.category||'')).filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b,'fr'));
+    if(themeSelect){
+      const previous=selectedTheme;
+      themeSelect.replaceChildren(new Option('Tous les thèmes',''));
+      themes.forEach(theme=>themeSelect.append(new Option(theme,theme)));
+      themeSelect.value=themes.includes(previous)?previous:'';
+    }
+    const themeFilter=String(themeSelect?.value||'');
+    const orientationFilter=String($('image-library-orientation')?.value||'');
     const items=(state.imageLibraryItems||[]).filter(item=>{
+      const itemTheme=String(item.theme||item.category||'');
+      if(themeFilter&&itemTheme!==themeFilter)return false;
+      if(orientationFilter&&String(item.orientation||'')!==orientationFilter)return false;
       const haystack=normalizedSearch([item.name,item.category,item.theme,item.orientation,item.sourceName].filter(Boolean).join(' '));
       return !search||haystack.includes(search);
     });
@@ -1769,6 +1784,8 @@
     $('open-image-library').addEventListener('click',()=>{openImageLibrary(null).catch(error=>alert('Bibliothèque d’images inaccessible : '+String(error?.message||error)));});
     $('close-image-library').addEventListener('click',()=>$('image-library-dialog').close());
     $('image-library-search').addEventListener('input',renderImageLibrary);
+    $('image-library-theme').addEventListener('change',renderImageLibrary);
+    $('image-library-orientation').addEventListener('change',renderImageLibrary);
     $('import-images').addEventListener('click',()=>$('import-images-file').click());
     $('import-image-zip').addEventListener('click',()=>{
       importImageZip().catch(error=>alert('Import ZIP impossible : '+String(error?.message||error)));
