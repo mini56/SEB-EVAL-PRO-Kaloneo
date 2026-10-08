@@ -1175,37 +1175,6 @@ ipcMain.handle('kaloneo-transfer:import-parcours', async () => {
   }
 });
 
-ipcMain.handle('kaloneo-transfer:export-image', async (_event, id) => {
-  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
-  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible d’exporter pendant une évaluation active.' };
-  try {
-    const result = getKaloneoLibrary().getImage(id);
-    if (!result.ok) return result;
-    const image = result.image || {};
-    const match = String(image.data || '').match(/^data:([^;,]+);base64,([A-Za-z0-9+/=\s]+)$/i);
-    if (!match) return { ok:false, error:'Données image invalides.' };
-    const extByMime = {
-      'image/png':'.png',
-      'image/jpeg':'.jpg',
-      'image/webp':'.webp',
-      'image/gif':'.gif',
-      'image/svg+xml':'.svg'
-    };
-    let filename = path.basename(String(image.name || 'image'));
-    if (!path.extname(filename)) filename += extByMime[String(image.mime || match[1]).toLowerCase()] || '.img';
-    const chosen = await dialog.showSaveDialog(mainWindow, {
-      title:'Exporter une image KALONÉO',
-      defaultPath:filename,
-      filters:[{ name:'Image KALONÉO', extensions:[path.extname(filename).replace(/^\./,'') || 'png'] }]
-    });
-    if (chosen.canceled || !chosen.filePath) return { ok:false, canceled:true };
-    fs.writeFileSync(chosen.filePath, Buffer.from(match[2].replace(/\s+/g,''), 'base64'));
-    return { ok:true, filePath:chosen.filePath };
-  } catch (error) {
-    return { ok:false, error:error && error.message ? error.message : String(error) };
-  }
-});
-
 ipcMain.handle('kaloneo-library:list-images', () => {
   if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
   if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier la bibliothèque d’images pendant une évaluation active.' };
