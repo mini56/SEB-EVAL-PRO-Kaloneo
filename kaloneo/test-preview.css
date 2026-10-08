@@ -118,3 +118,16 @@ body{font-family:Calibri,"Segoe UI",Arial,sans-serif;background:linear-gradient(
   height:auto;
   min-height:0;
 }
+
+
+/* R28 — taille de police configurable par bloc */
+[data-kaloneo-font-size] *,
+[data-kaloneo-font-size] input,
+[data-kaloneo-font-size] select,
+[data-kaloneo-font-size] textarea,
+[data-kaloneo-font-size] button,
+[data-kaloneo-font-size] table,
+[data-kaloneo-font-size] th,
+[data-kaloneo-font-size] td{
+  font-size:inherit!important;
+}
