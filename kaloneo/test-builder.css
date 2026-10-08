@@ -866,3 +866,77 @@ body{
 }
 .text-color-palette button:hover{background:#f3f8fb}
 @media(max-width:700px){.text-color-palette{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* R31 — ergonomie Builder */
+.builder-top-actions{
+  flex-wrap:nowrap;
+  align-items:center;
+}
+.builder-top-actions .seb-action-btn{
+  white-space:nowrap;
+}
+.candidate-preview-viewport{
+  position:relative;
+  width:100%;
+  aspect-ratio:1366 / 768;
+  max-height:calc(100vh - 235px);
+  overflow:hidden;
+  border:1px solid #C1C9D6;
+  border-radius:12px;
+  background:#eef2f5;
+}
+.candidate-preview{
+  position:absolute;
+  inset:0 auto auto 0;
+  width:1366px!important;
+  height:768px!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+  padding:18px 20px!important;
+  border:0!important;
+  border-radius:0!important;
+  gap:10px!important;
+  transform-origin:top left;
+}
+.preview-context-card>div{
+  min-width:0;
+  flex:1 1 auto;
+  display:grid;
+  grid-template-columns:max-content minmax(0,1fr);
+  align-items:start;
+  gap:0 4px;
+}
+.preview-context-card strong{
+  grid-column:1;
+  white-space:nowrap;
+}
+.preview-context-card p{
+  grid-column:2;
+  margin:0!important;
+}
+.preview-context-card p br+*{
+  margin-left:0;
+}
+.test-library-item{
+  cursor:default;
+}
+.test-library-item:hover{
+  background:#fbfdff;
+}
+.test-library-item-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.test-library-item-actions .mini-btn{
+  min-width:82px;
+}
+.test-library-item-actions .mini-btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+@media(max-width:1180px){
+  .builder-top-actions{flex-wrap:wrap}
+}
