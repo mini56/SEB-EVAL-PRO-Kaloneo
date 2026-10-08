@@ -315,9 +315,32 @@ for(const file of fixtureFiles){
 
   const round=Core.canRoundTrip(def);
   if(!round.ok){
-    const before=JSON.stringify(normalize(def));
-    const after=JSON.stringify(normalize(round.rebuilt));
-    if(before!==after) fail('test importé puis regénéré avec perte: '+def.id,round.errors.join('\n'));
+    const legacyOrganisation=def.id==='organisation_demenagement' &&
+      def.presentation?.organisationList &&
+      Array.isArray(def.presentation.organisationList.rows) &&
+      Array.isArray(round.rebuilt?.presentation?.builderContent);
+
+    if(legacyOrganisation){
+      const originalQuestions=new Map((def.questions||[]).map(q=>[String(q.id),q]));
+      const rebuiltQuestions=new Map((round.rebuilt.questions||[]).map(q=>[String(q.id),q]));
+      const image=round.rebuilt.presentation.builderContent.find(item=>item.type==='image');
+      const questionItems=round.rebuilt.presentation.builderContent.filter(item=>item.type==='question');
+      const sameAnswers=(def.questions||[]).every(q=>
+        JSON.stringify(q.acceptedAnswers||[])===JSON.stringify(rebuiltQuestions.get(String(q.id))?.acceptedAnswers||[])
+      );
+      const sourceImage=String(def.presentation.organisationList.visual?.src||'');
+      const migratedImage=String(image?.resource?.data||image?.resource?.name||'');
+      if(originalQuestions.size!==8||rebuiltQuestions.size!==8||questionItems.length!==8||
+         !sameAnswers||!sourceImage||migratedImage!==sourceImage||
+         round.rebuilt.presentation.layout!=='50-50'||
+         round.rebuilt.presentation.organisationList){
+        fail('migration Organisation historique vers builderContent non fidèle',JSON.stringify(round.rebuilt,null,2));
+      }
+    }else{
+      const before=JSON.stringify(normalize(def));
+      const after=JSON.stringify(normalize(round.rebuilt));
+      if(before!==after) fail('test importé puis regénéré avec perte: '+def.id,round.errors.join('\n'));
+    }
   }
   report.push(def.id);
 }
