@@ -153,25 +153,29 @@ if(!transferHtml.includes('KALONÉO — Import / Export')||
    !transferHtml.includes('Importer un test')||
    !transferHtml.includes('Exporter le parcours')||
    !transferHtml.includes('Importer un parcours')||
-   !transferHtml.includes('Exporter l’image')||
    !transferHtml.includes('Importer des images')||
    !transferHtml.includes('Importer un ZIP par thèmes')||
+   !transferHtml.includes('>Fermer</button>')||
+   transferHtml.includes('Exporter l’image')||
+   transferHtml.includes('class="note"')||
    !transferJs.includes('kaloneoExportTest')||
    !transferJs.includes('kaloneoImportParcours')||
-   !transferJs.includes('kaloneoExportImage')||
+   transferJs.includes('kaloneoExportImage')||
    !transferJs.includes('kaloneoSaveImage')||
    !transferJs.includes('kaloneoImportImageZip')){
-  fail('page Import / Export KALONÉO R32 incomplète');
+  fail('page Import / Export KALONÉO R33 incomplète');
 }
 if(!admin.includes('open-kaloneo-transfer')||!adminJs.includes("admin-kaloneo-transfer.html")){
   fail('Tests / Parcours n’ouvre pas la page Import / Export');
 }
-for(const token of ['kaloneo-transfer:export-test','kaloneo-transfer:import-test','kaloneo-transfer:export-parcours','kaloneo-transfer:import-parcours','kaloneo-transfer:export-image']){
-  if(!main.includes(token)) fail('IPC Import / Export R32 absent: '+token);
+for(const token of ['kaloneo-transfer:export-test','kaloneo-transfer:import-test','kaloneo-transfer:export-parcours','kaloneo-transfer:import-parcours']){
+  if(!main.includes(token)) fail('IPC Import / Export R33 absent: '+token);
 }
-for(const token of ['kaloneoExportTest','kaloneoImportTest','kaloneoExportParcours','kaloneoImportParcours','kaloneoExportImage']){
-  if(!preload.includes(token)) fail('Preload Import / Export R32 absent: '+token);
+if(main.includes('kaloneo-transfer:export-image')) fail('IPC export image R33 doit être supprimé');
+for(const token of ['kaloneoExportTest','kaloneoImportTest','kaloneoExportParcours','kaloneoImportParcours']){
+  if(!preload.includes(token)) fail('Preload Import / Export R33 absent: '+token);
 }
+if(preload.includes('kaloneoExportImage')) fail('Bridge export image R33 doit être supprimé');
 if(!main.includes("query:{ resume:'preview' }")) {
   fail('Retour aperçu R3 sans reprise explicite du brouillon');
 }
