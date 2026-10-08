@@ -1,123 +1,507 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <title>Gestion logistique — Ranger le stock de produits</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="css/seb-design-system.css">
-  <link rel="stylesheet" href="css/kaloneo-stock.css">
-  <link rel="stylesheet" href="css/seb-in-app-alert.css" id="seb-evalpro-in-app-alert-css">
-<link rel="stylesheet" href="css/kaloneo-context.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Rangement de Pots</title>
+    <style>
+	* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+          }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            height: calc(100vh - 20px);
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 5px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .game-area {
+            display: flex;
+            gap: 15px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .left-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .zone-pots {
+            background: #f0f0f0;
+            border: 2px dashed #999;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 120px;
+        }
+
+        .zone-tri {
+            background: #e8f5e9;
+            border: 2px dashed #4caf50;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 120px;
+        }
+
+        .zone-tri .pots-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 55px);
+            gap: 8px;
+            min-height: 60px;
+        }
+
+        .zone-tri .pot {
+            margin: 0;
+        }
+
+        .zone-tri .pot-placeholder {
+            width: 55px;
+            height: 70px;
+            background: transparent;
+        }
+
+        .zone-pots h2, .zone-tri h2 {
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 1em;
+        }
+
+        .pots-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 60px;
+            align-content: flex-start;
+        }
+
+        .pot {
+            width: 55px;
+            height: 70px;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            transition: transform 0.2s;
+            font-weight: bold;
+            color: black;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+
+        .pot-placeholder {
+            width: 55px;
+            height: 70px;
+            flex-shrink: 0;
+            visibility: hidden;
+        }
+
+        .pot:hover {
+            transform: scale(1.05);
+        }
+
+        .pot.dragging {
+            opacity: 0.5;
+        }
+
+        .pot.correct {
+            filter: drop-shadow(0 0 8px #4caf50);
+        }
+
+        .pot.incorrect {
+            filter: drop-shadow(0 0 8px #f44336);
+        }
+
+        .pot-code {
+            font-size: 15px;
+            margin-top: 8px;
+            margin-bottom: 1px;
+            background: rgba(255,255,255,0.3);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .pot-percent {
+            font-size: 12px;
+            margin-top: 3px;
+            background: rgba(255,255,255,0.3);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .etageres-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .row-etageres {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .etagere {
+            background: #8b4513;
+            border: 3px solid #654321;
+            border-radius: 8px;
+            padding: 8px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .etagere:nth-child(1) {
+            background: #4a90e2;
+            border-color: #d84315;
+        }
+
+        .etagere:nth-child(2) {
+            background: #4a90e2;
+            border-color: #1e5a9e;
+        }
+
+        .etagere-large {
+            background: #4a90e2;
+            border-color: #1e5a9e;
+            width: 100%;
+            flex: none;
+        }
+
+        .pancarte {
+            background: #ffd89b;
+            border: 2px solid #8b6914;
+            border-radius: 5px;
+            padding: 6px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #654321;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .etagere-content {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 5px;
+            flex: 1;
+        }
+
+        .niveau {
+            display: flex;
+            gap: 5px;
+            background: #d4a574;
+            padding: 5px;
+            border-radius: 4px;
+            position: relative;
+            flex: 1;
+        }
+
+        .niveau-label {
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.65em;
+            font-weight: bold;
+            color: #654321;
+            background: rgba(255,255,255,0.7);
+            padding: 2px 4px;
+            border-radius: 3px;
+            white-space: nowrap;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .cases-container {
+            display: flex;
+            gap: 5px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .case {
+            width: 60px;
+            height: 80px;
+            background: #f5deb3;
+            border: 2px solid #8b7355;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .case.drag-over {
+            background: #ffe4b5;
+            border-color: #ff6b6b;
+            border-width: 3px;
+        }
+
+        .case.occupied {
+            background: transparent;
+        }
+
+     .etagere-large {
+            width: 100%;
+            flex: none;
+        }
+		
+        .niveau-large {
+            display: flex;
+            gap: 5px;
+            background: #d4a574;
+            padding: 8px;
+            border-radius: 4px;
+            justify-content: center;
+        }
+
+        .info-panel {
+            background: #e3f2fd;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color:#000;
+        }
+
+        .info-panel p {
+            margin: 3px 0;
+            color: #000;
+        }
+		ul.puce {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+ul.puce li {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+ul.puce li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-50%);
+  background: url("ton-image.png") no-repeat center center;
+  background-size: contain;
+}			
+        .puce::before {
+    content: url("imageqcm/puce.png");
+    margin-right: 8px;
+    vertical-align: middle;
+        }
+.imageqcm/scenario.png {
+  vertical-align: middle;
+}			
+        .verify-btn {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border: none;
+            padding: 8px 8px;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 1px;
+			min-width: 220px;
+			margin-left: 400px;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            align-self: flex-start;
+        }
+
+        .verify-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .verify-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+<link rel="stylesheet" href="css/seb-in-app-alert.css" id="seb-evalpro-in-app-alert-css">
 </head>
-<body data-kaloneo-layout="stock-full-context-35-65" data-kaloneo-exercise="stock">
-  <main class="k-stock-page">
-    <h1 class="k-stock-title">Ranger le stock de produits</h1>
-
-    <section class="k-stock-context k-stock-scenario kaloneo-context-card kaloneo-context-scenario">
-      <img src="imageqcm/scenario.png" alt="Scénario">
-      <div class="kaloneo-context-body">
-        <strong class="kaloneo-context-label">Scénario :</strong>
-        <span class="kaloneo-context-text">Vous êtes chargé de mettre de l'ordre dans le stock des divers produits de l'entreprise. À vous de ranger, suivant les critères, les produits à leur bonne place.</span>
-      </div>
-    </section>
-
-    <section class="k-stock-context k-stock-instructions kaloneo-context-card kaloneo-context-consigne">
-      <img src="imageqcm/avatar_transparant.png" alt="Consigne">
-      <div class="kaloneo-context-body">
-        <strong class="kaloneo-context-label">Comment ça fonctionne ?</strong>
-        <span class="kaloneo-context-text">Glissez-déposez les pots dans les bonnes étagères selon les règles affichées. Vous disposez d'une zone de tri si vous en avez besoin.</span>
-        <div class="kaloneo-context-details">
-          <div class="k-stock-instruction-grid">
-            <p><strong class="kaloneo-context-label">Consigne :</strong> Sur chaque étagère, les flacons seront placés en ordre alphabétique puis, le cas échéant, selon le dosage en ordre décroissant.</p>
-            <p>Les flacons en double ou ne convenant pas aux casiers 1 et 2 seront placés dans le casier 3, selon les mêmes critères.</p>
-          </div>
+<body>
+    <div class="container">
+	<div>
+        <p><img class="imageqcm/scenario.png" src="imageqcm/scenario.png" alt="scenario.png" width="45" height="45" style="margin-right:8px;"><strong style="color:#1a73e8;">Scénario :</strong>
+		<span>  </span>
+		<strong>Vous êtes chargé de mettre de l'ordre dans le stock des divers produits de l'entreprise. À vous de ranger, suivant les critères,
+		les produits à leur bonne place.</strong></p>
+    </div>
+	
+        <div class="info-panel">
+		 
+		 <p style="margin-left:10px;">Rangez les flacons, un par emplacement, selon les consignes suivantes :</p>
+		 </br>
+		 <p><strong style="color:#1a73e8;">Consignes :</strong></p>
+		 
+         <p class="puce" style="margin-left:20px;">Sur chaque étagère, les flacons seront placés en ordre alphabétique puis, le cas échéant, selon le dosage en ordre décroissant.</p>
+	     <p class="puce" style="margin-left:20px;">Les flacons en double ou ne convenant pas aux casiers 1 et 2 seront placés dans le casier 3, selon les mêmes critères.</p>
+         <div style="display:flex; align-items:center; margin-bottom:10px;">
+          <img src="imageqcm/avatar_transparant.png" alt="avatar" width="45" height="45" style="margin-right:8px;">
+          <p><strong style="color:#1a73e8;">Comment ça fonctionne ?</strong> Glissez-déposez les pots dans les bonnes étagères selon les règles affichées. Vous disposez d'une zone de tri pour vous aider si vous en avez besoin.</p>
+		  <button class="verify-btn" id="stockActionBtn" type="button">🔍 Vérifier</button>
+            </div>  
         </div>
-      </div>
-    </section>
-
-    <section class="k-stock-game">
-      <div class="k-stock-left">
-        <div class="zone-pots">
-          <h2>🧴 Pots à ranger</h2>
-          <div class="pots-container" id="pots-source"></div>
-        </div>
-
-        <div class="zone-tri">
-          <h2>📋 Zone de tri</h2>
-          <div class="pots-container" id="zone-tri"></div>
-        </div>
-      </div>
-
-      <div class="k-stock-shelves">
-        <div class="row-etageres">
-          <div class="etagere">
-            <div class="pancarte">Casier 1️⃣ — Ranger ici les flacons de A à K, sauf E et G</div>
-            <div class="etagere-content">
-              <div class="niveau" data-etagere="1" data-niveau="3">
-                <div class="niveau-label">26% et moins</div>
-                <div class="cases-container">
-                  <div class="case" data-case="1"></div><div class="case" data-case="2"></div><div class="case" data-case="3"></div><div class="case" data-case="4"></div>
+        <div class="game-area">
+            <div class="left-section">
+                <!-- Zone des pots non rangés -->
+                <div class="zone-pots">
+                    <h2>🧴 Pots à ranger</h2>
+                    <div class="pots-container" id="pots-source"></div>
                 </div>
-              </div>
-              <div class="niveau" data-etagere="1" data-niveau="2">
-                <div class="niveau-label">27% à 59%</div>
-                <div class="cases-container">
-                  <div class="case" data-case="1"></div><div class="case" data-case="2"></div><div class="case" data-case="3"></div><div class="case" data-case="4"></div>
+
+                <!-- Zone de tri -->
+                <div class="zone-tri">
+                    <h2>📋 Zone de tri</h2>
+                    <div class="pots-container" id="zone-tri"></div>
                 </div>
-              </div>
-              <div class="niveau" data-etagere="1" data-niveau="1">
-                <div class="niveau-label">60% et plus</div>
-                <div class="cases-container">
-                  <div class="case" data-case="1"></div><div class="case" data-case="2"></div><div class="case" data-case="3"></div><div class="case" data-case="4"></div>
-                </div>
-              </div>
             </div>
-          </div>
 
-          <div class="etagere">
-            <div class="pancarte">Casier 2️⃣ — Ranger ici les flacons de L à U, sauf M, O, P</div>
-            <div class="etagere-content">
-              <div class="niveau" data-etagere="2" data-niveau="3">
-                <div class="niveau-label">29% et moins</div>
-                <div class="cases-container">
-                  <div class="case" data-case="1"></div><div class="case" data-case="2"></div><div class="case" data-case="3"></div><div class="case" data-case="4"></div>
+            <div class="etageres-container">
+                <div class="row-etageres">
+                    <!-- Étagère 1 -->
+                    <div class="etagere">
+                        <div class="pancarte">Casier 1️⃣  Ranger ici les flacons de A à K, sauf E et G</div>
+                        <div class="etagere-content">
+                            <div class="niveau" data-etagere="1" data-niveau="3">
+                                <div class="niveau-label">26% et moins</div>
+                                <div class="cases-container">
+                                    <div class="case" data-case="1"></div>
+                                    <div class="case" data-case="2"></div>
+                                    <div class="case" data-case="3"></div>
+                                    <div class="case" data-case="4"></div>
+                                </div>
+                            </div>
+                            <div class="niveau" data-etagere="1" data-niveau="2">
+                                <div class="niveau-label">27% à 59%</div>
+                                <div class="cases-container">
+                                    <div class="case" data-case="1"></div>
+                                    <div class="case" data-case="2"></div>
+                                    <div class="case" data-case="3"></div>
+                                    <div class="case" data-case="4"></div>
+                                </div>
+                            </div>
+                            <div class="niveau" data-etagere="1" data-niveau="1">
+                                <div class="niveau-label">60% et plus</div>
+                                <div class="cases-container">
+                                    <div class="case" data-case="1"></div>
+                                    <div class="case" data-case="2"></div>
+                                    <div class="case" data-case="3"></div>
+                                    <div class="case" data-case="4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Étagère 2 -->
+                    <div class="etagere">
+                        <div class="pancarte">Casier 2️⃣  Ranger ici les flacons de L à U, sauf M, O, P</div>
+                        <div class="etagere-content">
+                            <div class="niveau" data-etagere="2" data-niveau="3">
+                                <div class="niveau-label">29% et moins</div>
+                                <div class="cases-container">
+                                    <div class="case" data-case="1"></div>
+                                    <div class="case" data-case="2"></div>
+                                    <div class="case" data-case="3"></div>
+                                    <div class="case" data-case="4"></div>
+                                </div>
+                            </div>
+                            <div class="niveau" data-etagere="2" data-niveau="2">
+                                <div class="niveau-label">30% à 54%</div>
+                                <div class="cases-container">
+                                    <div class="case" data-case="1"></div>
+                                    <div class="case" data-case="2"></div>
+                                    <div class="case" data-case="3"></div>
+                                    <div class="case" data-case="4"></div>
+                                </div>
+                            </div>
+                            <div class="niveau" data-etagere="2" data-niveau="1">
+                                <div class="niveau-label">55% et plus</div>
+                                <div class="cases-container">
+                                    <div class="case" data-case="1"></div>
+                                    <div class="case" data-case="2"></div>
+                                    <div class="case" data-case="3"></div>
+                                    <div class="case" data-case="4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="niveau" data-etagere="2" data-niveau="2">
-                <div class="niveau-label">30% à 54%</div>
-                <div class="cases-container">
-                  <div class="case" data-case="1"></div><div class="case" data-case="2"></div><div class="case" data-case="3"></div><div class="case" data-case="4"></div>
+
+                <!-- Étagère Large -->
+                <div class="etagere etagere-large">
+                    <div class="pancarte">Casier 3️⃣  Ranger ici les flacons en double ou ne convenant pas aux étagères 1 et 2</div>
+                    <div class="niveau-large" data-etagere="3" data-niveau="1">
+                        <div class="case" data-case="1"></div>
+                        <div class="case" data-case="2"></div>
+                        <div class="case" data-case="3"></div>
+                        <div class="case" data-case="4"></div>
+                        <div class="case" data-case="5"></div>
+                        <div class="case" data-case="6"></div>
+                        <div class="case" data-case="7"></div>
+                        <div class="case" data-case="8"></div>
+                        <div class="case" data-case="9"></div>
+                        <div class="case" data-case="10"></div>
+                        <div class="case" data-case="11"></div>
+                    </div>
                 </div>
-              </div>
-              <div class="niveau" data-etagere="2" data-niveau="1">
-                <div class="niveau-label">55% et plus</div>
-                <div class="cases-container">
-                  <div class="case" data-case="1"></div><div class="case" data-case="2"></div><div class="case" data-case="3"></div><div class="case" data-case="4"></div>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
+    </div>
 
-        <div class="etagere etagere-large">
-          <div class="pancarte">Casier 3️⃣ — Ranger ici les flacons en double ou ne convenant pas aux étagères 1 et 2</div>
-          <div class="niveau-large" data-etagere="3" data-niveau="1">
-            <div class="case" data-case="1"></div><div class="case" data-case="2"></div><div class="case" data-case="3"></div><div class="case" data-case="4"></div><div class="case" data-case="5"></div><div class="case" data-case="6"></div><div class="case" data-case="7"></div><div class="case" data-case="8"></div><div class="case" data-case="9"></div><div class="case" data-case="10"></div><div class="case" data-case="11"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <script src="js/seb-parcours.js"></script>
+    <script src="js/stock-page.js"></script>
+<script src="js/seb-in-app-alert.js" id="seb-evalpro-in-app-alert-script"></script>
+<script src="js/seb-page-draft-resume.js" id="seb-evalpro-page-draft-resume"></script>
+<script src="js/seb-visual-branding.js" id="seb-evalpro-visual-branding"></script>
 
-    <footer class="k-stock-actions">
-      <button id="stockActionBtn" type="button" class="verify-btn">Vérifier</button>
-    </footer>
-  </main>
-
-  <script src="js/seb-parcours.js"></script>
-  <script src="js/stock-page.js"></script>
-  <script src="js/seb-in-app-alert.js" id="seb-evalpro-in-app-alert-script"></script>
-  <script src="js/seb-page-draft-resume.js" id="seb-evalpro-page-draft-resume"></script>
-  <script src="js/seb-visual-branding.js" id="seb-evalpro-visual-branding"></script>
-  <script id="seb-ui-runtime-loader" src="js/seb-ui-runtime.js"></script>
+<script id="seb-ui-runtime-loader" src="js/seb-ui-runtime.js"></script>
 </body>
 </html>
