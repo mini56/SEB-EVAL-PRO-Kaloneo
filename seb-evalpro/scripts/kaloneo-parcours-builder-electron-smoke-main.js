@@ -207,6 +207,7 @@ app.whenReady().then(async()=>{
       const privacy=document.getElementById('seb-evalpro-privacy-toggle');
       return {
         title:String(document.querySelector('.page-topbar h1')?.textContent||'').trim(),
+        closeLabel:String(document.getElementById('back-tests-parcours')?.textContent||'').trim(),
         libraryCount:document.querySelectorAll('.library-card').length,
         mask:String(document.querySelector('#mask-slot .special-card strong')?.textContent||'').trim(),
         intro:String(document.querySelector('#intro-slot .special-card strong')?.textContent||'').trim(),
@@ -220,7 +221,7 @@ app.whenReady().then(async()=>{
         privacyDisplay:privacy?getComputedStyle(privacy).display:'absent'
       };
     })()`);
-    if(initial.title!=='Création de parcours'||initial.libraryCount!==5||initial.mask!=='KALONÉO'||!/Introduction/.test(initial.intro)||initial.fin!=='Fin du parcours'||initial.savedCount!==1||
+    if(initial.title!=='Création de parcours'||initial.closeLabel!=='Fermer'||initial.libraryCount!==5||initial.mask!=='KALONÉO'||!/Introduction/.test(initial.intro)||initial.fin!=='Fin du parcours'||initial.savedCount!==1||
        initial.bodyOverflow!=='hidden'||initial.scrolls.some(v=>v!=='auto')||!initial.saveInTop||initial.saveShadow!=='none'||initial.finGap<12||
        !['none','absent'].includes(initial.privacyDisplay)) return fail('état R2 initial incorrect',initial);
 
@@ -320,6 +321,25 @@ app.whenReady().then(async()=>{
     await wait(180);
     const duplicate=await win.webContents.executeJavaScript(`({status:document.getElementById('builder-status').textContent.trim(),sequence:document.querySelectorAll('.sequence-card').length})`);
     if(!/existe déjà/i.test(duplicate.status))return fail('nom dupliqué incorrect',duplicate);
+
+    // Fermer protège les modifications non enregistrées et reste sur le Builder si l'Admin annule.
+    const closeProtection=await win.webContents.executeJavaScript(`(()=>{
+      window.__parcoursConfirmMessage='';
+      window.confirm=message=>{window.__parcoursConfirmMessage=String(message||'');return false;};
+      document.getElementById('parcours-name').value='Modification non enregistrée';
+      const before=location.href;
+      document.getElementById('back-tests-parcours').click();
+      return {
+        before,
+        after:location.href,
+        message:window.__parcoursConfirmMessage,
+        label:String(document.getElementById('back-tests-parcours')?.textContent||'').trim()
+      };
+    })()`);
+    await wait(80);
+    if(closeProtection.label!=='Fermer'||closeProtection.after!==closeProtection.before||!/modifications non enregistrées/i.test(closeProtection.message)) {
+      return fail('protection Fermer du Builder de parcours incorrecte',closeProtection);
+    }
 
     console.log('KALONEO_PARCOURS_ELECTRON=OK');
     console.log(JSON.stringify({initial,afterPointer,reordered,savedUi,reloaded,opened,updated,duplicate,lastSavedPayload}));
