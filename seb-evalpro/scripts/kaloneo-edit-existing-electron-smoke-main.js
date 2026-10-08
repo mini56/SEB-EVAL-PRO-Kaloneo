@@ -26,7 +26,7 @@ function buildOrganisationV2() {
   const model = Core.definitionToModel(v1);
   model.meta.version = '2.0.0';
   model.meta.layout = '60-40';
-  model.meta.scenario = '[b]Première ligne[/b]\\nDeuxième ligne';
+  model.meta.scenario = '[c=#005A8D][b]Première ligne[/b][/c]\\nDeuxième ligne';
   model.meta.instruction = '[i]Consigne ligne 1[/i]\n[u]Consigne ligne 2[/u]';
   model.meta.pageBackgroundType = 'color';
   model.meta.pageBackgroundColor = '#FFF8DD';
@@ -42,6 +42,14 @@ function buildOrganisationV2() {
   image.mediaData = 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
   image.mediaAlt = 'Illustration ajoutée dans la V2';
   questions.forEach(block => { block.zone = 'left'; });
+  model.blocks.unshift({
+    uid:'texte_couleur_runtime',
+    type:'text',
+    zone:'left',
+    text:'[c=#B42318]Texte couleur[/c]',
+    fontSize:'',
+    backgroundColor:''
+  });
   questions[0].fontSize = 22;
   questions[0].backgroundColor = '#EEF9F2';
 
@@ -127,6 +135,8 @@ app.whenReady().then(async () => {
           styledFont:styledBlock?.style.fontSize||'',
           styledBackground:styledBlock?.style.backgroundColor||'',
           scenarioBold:String(document.querySelector('#kaltest-scenario strong')?.textContent||''),
+          scenarioColor:String(document.querySelector('#kaltest-scenario span')?.style.color||''),
+          textBlockColor:String([...document.querySelectorAll('.kaltest-builder-content-item span')].find(node=>node.textContent==='Texte couleur')?.style.color||''),
           instructionItalic:String(document.querySelector('#kaltest-instruction em')?.textContent||''),
           instructionUnderline:String(document.querySelector('#kaltest-instruction u')?.textContent||''),
           scenarioBreaks:document.querySelectorAll('#kaltest-scenario br').length,
@@ -148,6 +158,8 @@ app.whenReady().then(async () => {
         result.styledFont !== '22px' ||
         !/238, 249, 242/.test(result.styledBackground) ||
         result.scenarioBold !== 'Première ligne' ||
+        !/0, 90, 141/.test(result.scenarioColor) ||
+        !/180, 35, 24/.test(result.textBlockColor) ||
         result.instructionItalic !== 'Consigne ligne 1' ||
         result.instructionUnderline !== 'Consigne ligne 2') {
       return fail('la V2 modifiée n’est pas rendue avec ses styles Builder', result);
