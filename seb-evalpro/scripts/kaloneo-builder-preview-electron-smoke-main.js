@@ -171,6 +171,10 @@ app.whenReady().then(async()=>{
       const sStart=scenario.value.indexOf('plein');
       scenario.setSelectionRange(sStart,sStart+'plein'.length);
       document.querySelector('.context-format-btn[data-target="test-scenario"][data-format="b"]').click();
+      const colorStart=scenario.value.indexOf('Scénario');
+      scenario.setSelectionRange(colorStart,colorStart+'Scénario'.length);
+      document.querySelector('.context-format-btn[data-target="test-scenario"][data-format="color"]').click();
+      document.querySelector('[data-text-color="#005A8D"]').click();
 
       const instruction=document.getElementById('test-instruction');
       instruction.value='Consigne plein écran';
@@ -187,6 +191,20 @@ app.whenReady().then(async()=>{
       document.getElementById('calculator-brand').dispatchEvent(new Event('input',{bubbles:true}));
       document.getElementById('chrono-enabled').checked=true;
       document.getElementById('chrono-enabled').dispatchEvent(new Event('change',{bubbles:true}));
+
+      const textArea=document.querySelector('.exercise-block .block-body textarea');
+      textArea.value='Bloc couleur simple';
+      textArea.dispatchEvent(new Event('input',{bubbles:true}));
+      const blockColorStart=textArea.value.indexOf('couleur');
+      textArea.setSelectionRange(blockColorStart,blockColorStart+'couleur'.length);
+      document.querySelector('.exercise-block .inline-text-format-toolbar .context-color-btn').click();
+      document.querySelector('[data-text-color="#1F6B3A"]').click();
+      await new Promise(resolve=>setTimeout(resolve,80));
+      const blockColorValue=textArea.value;
+      const blockColorRendered=document.querySelector('.preview-content-block span')?.style.color||'';
+      if(!/\[c=#1F6B3A\]couleur\[\/c\]/i.test(blockColorValue)||!/31, 107, 58/.test(blockColorRendered)) {
+        throw new Error('Couleur texte bloc non appliquée');
+      }
 
       const type=document.querySelector('.exercise-block .block-type');
       type.value='image';
@@ -308,6 +326,7 @@ app.whenReady().then(async()=>{
       scenario:String(document.querySelectorAll('.kb-context p')[0]?.textContent||'').trim(),
       instruction:String(document.querySelectorAll('.kb-context p')[1]?.textContent||'').trim(),
       scenarioBold:String(document.querySelectorAll('.kb-context p')[0]?.querySelector('strong')?.textContent||''),
+      scenarioColor:String(document.querySelectorAll('.kb-context p')[0]?.querySelector('span')?.style.color||''),
       instructionItalic:String(document.querySelectorAll('.kb-context p')[1]?.querySelector('em')?.textContent||''),
       instructionUnderline:String(document.querySelectorAll('.kb-context p')[1]?.querySelector('u')?.textContent||''),
       close:String(document.querySelector('.close-preview')?.textContent||'').trim(),
@@ -340,6 +359,7 @@ app.whenReady().then(async()=>{
        shown.scenario!=='Scénario plein écran'||
        shown.instruction!=='Consigne plein écran'||
        shown.scenarioBold!=='plein'||
+       !/0, 90, 141/.test(shown.scenarioColor)||
        shown.instructionItalic!=='Consigne'||
        shown.instructionUnderline!=='écran'||
        shown.close!=='Fermer l’aperçu'||
@@ -441,7 +461,7 @@ app.whenReady().then(async()=>{
 
     if(!/test-builder\.html$/i.test(returned.path)||
        returned.title!=='Aperçu Electron Smoke'||
-       returned.scenario!=='Scénario [b]plein[/b] écran'||
+       returned.scenario!=='[c=#005A8D]Scénario[/c] [b]plein[/b] écran'||
        returned.instruction!=='[i]Consigne[/i] plein [u]écran[/u]'||
        returned.calculatorBrand!=='KALONÉO'||
        !/vraie page/i.test(returned.previewButton)||
