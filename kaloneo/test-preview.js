@@ -224,6 +224,39 @@ function multilineText(value){
   return String(value||'').replace(/\\n/g,'\n');
 }
 
+function renderRichContext(target,value){
+  if(!target)return;
+  target.replaceChildren();
+  const source=multilineText(value);
+  const token=/\[(\/)?(b|i|u)\]/gi;
+  const stack=[{node:target,tag:null}];
+  const appendText=text=>{
+    const parts=String(text).split('\n');
+    parts.forEach((part,index)=>{
+      if(part)stack.at(-1).node.appendChild(document.createTextNode(part));
+      if(index<parts.length-1)stack.at(-1).node.appendChild(document.createElement('br'));
+    });
+  };
+  let cursor=0;
+  let match;
+  while((match=token.exec(source))){
+    appendText(source.slice(cursor,match.index));
+    const closing=Boolean(match[1]);
+    const tag=String(match[2]||'').toLowerCase();
+    if(!closing){
+      const element=document.createElement(tag==='b'?'strong':tag==='i'?'em':'u');
+      stack.at(-1).node.appendChild(element);
+      stack.push({node:element,tag});
+    }else{
+      for(let i=stack.length-1;i>0;i-=1){
+        if(stack[i].tag===tag){stack.length=i;break;}
+      }
+    }
+    cursor=token.lastIndex;
+  }
+  appendText(source.slice(cursor));
+}
+
 function applyBlockStyle(node,block){
   if(!node)return node;
   node.classList.add('kb-stylable-block');
@@ -381,8 +414,8 @@ function render(){
   page.append(heading);
 
   const contexts=el('div','kb-contexts');
-  const scenario=el('section','kb-context');const si=el('img');si.src='../imageqcm/scenario.png';si.alt='';const sb=el('div');sb.append(el('strong','','Scénario : '),el('p','',multilineText(m.scenario||'Le scénario apparaîtra ici.')));scenario.append(si,sb);
-  const instruction=el('section','kb-context');const ii=el('img');ii.src='../imageqcm/avatar_transparant.png';ii.alt='';const ib=el('div');ib.append(el('strong','','Consigne : '),el('p','',multilineText(m.instruction||'La consigne apparaîtra ici.')));instruction.append(ii,ib);
+  const scenario=el('section','kb-context');const si=el('img');si.src='../imageqcm/scenario.png';si.alt='';const sb=el('div');const sp=el('p');renderRichContext(sp,m.scenario||'Le scénario apparaîtra ici.');sb.append(el('strong','','Scénario : '),sp);scenario.append(si,sb);
+  const instruction=el('section','kb-context');const ii=el('img');ii.src='../imageqcm/avatar_transparant.png';ii.alt='';const ib=el('div');const ip=el('p');renderRichContext(ip,m.instruction||'La consigne apparaîtra ici.');ib.append(el('strong','','Consigne : '),ip);instruction.append(ii,ib);
   contexts.append(scenario,instruction);page.append(contexts);
 
   buildLayout(page);
