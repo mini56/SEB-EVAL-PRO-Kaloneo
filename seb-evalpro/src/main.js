@@ -1320,11 +1320,22 @@ ipcMain.handle('kaloneo-builder:get-preview', () => {
   }
 });
 
+ipcMain.handle('kaloneo-builder:consume-preview', () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (!kaloneoBuilderPreviewDefinition) return { ok:false, error:'Aucun aperçu KALONÉO à restaurer.' };
+  try {
+    const definition = JSON.parse(JSON.stringify(kaloneoBuilderPreviewDefinition));
+    kaloneoBuilderPreviewDefinition = null;
+    return { ok:true, definition };
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
 ipcMain.handle('kaloneo-builder:close-preview', () => {
   if (!mainWindow || mainWindow.isDestroyed() || !adminSessionUnlocked) return false;
   const target = path.join(__dirname, '..', 'app', 'web', 'kaloneo-builder', 'test-builder.html');
   if (!fs.existsSync(target)) return false;
-  kaloneoBuilderPreviewDefinition = null;
   mainWindow.loadFile(target, { query:{ resume:'preview' } });
   return true;
 });
