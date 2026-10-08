@@ -26,6 +26,10 @@ function buildOrganisationV2() {
   const model = Core.definitionToModel(v1);
   model.meta.version = '2.0.0';
   model.meta.layout = '60-40';
+  model.meta.scenario = 'Première ligne\\nDeuxième ligne';
+  model.meta.instruction = 'Consigne ligne 1\nConsigne ligne 2';
+  model.meta.pageBackgroundType = 'color';
+  model.meta.pageBackgroundColor = '#FFF8DD';
 
   const image = model.blocks.find(block => block.type === 'image');
   const questions = model.blocks.filter(block => block.type === 'question');
@@ -38,6 +42,8 @@ function buildOrganisationV2() {
   image.mediaData = 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
   image.mediaAlt = 'Illustration ajoutée dans la V2';
   questions.forEach(block => { block.zone = 'left'; });
+  questions[0].fontSize = 22;
+  questions[0].backgroundColor = '#EEF9F2';
 
   return Core.modelToDefinition(model);
 }
@@ -103,6 +109,8 @@ app.whenReady().then(async () => {
         const zones=[...document.querySelectorAll('.kaltest-builder-runtime-zone')];
         const image=document.querySelector('.kaltest-builder-runtime-zone:nth-child(2) img.seb-media-image');
         const leftQuestions=zones[0]?.querySelectorAll('.kaltest-builder-question input,.kaltest-builder-question select,.kaltest-builder-question textarea').length||0;
+        const styledBlock=document.querySelector('[data-kaloneo-font-size="22"]');
+        const page=document.getElementById('page-exercise');
         return {
           id:document.body.dataset.sebKaltestId||'',
           generic:!!generic,
@@ -112,7 +120,12 @@ app.whenReady().then(async () => {
           leftQuestions,
           rightImage:!!image,
           rightImageSrc:image?.getAttribute('src')||'',
-          title:String(document.querySelector('.kaltest-heading h1')?.textContent||'').trim()
+          title:String(document.querySelector('.kaltest-heading h1')?.textContent||'').trim(),
+          scenario:String(document.getElementById('kaltest-scenario')?.textContent||''),
+          instruction:String(document.getElementById('kaltest-instruction')?.textContent||''),
+          pageBackground:page?.style.backgroundColor||'',
+          styledFont:styledBlock?.style.fontSize||'',
+          styledBackground:styledBlock?.style.backgroundColor||''
         };
       })()`, true).catch(()=>null);
       if (result?.generic && result?.rightImage) break;
@@ -121,8 +134,13 @@ app.whenReady().then(async () => {
 
     if (!result?.generic || result.legacyOrganisation || result.zoneCount !== 2 ||
         result.leftQuestions !== 8 || !result.rightImage ||
-        !result.rightImageSrc.startsWith('data:image/svg+xml;base64,')) {
-      return fail('la V2 modifiée n’est pas rendue depuis builderContent', result);
+        !result.rightImageSrc.startsWith('data:image/svg+xml;base64,') ||
+        result.scenario !== 'Première ligne\nDeuxième ligne' ||
+        result.instruction !== 'Consigne ligne 1\nConsigne ligne 2' ||
+        !/255, 248, 221/.test(result.pageBackground) ||
+        result.styledFont !== '22px' ||
+        !/238, 249, 242/.test(result.styledBackground)) {
+      return fail('la V2 modifiée n’est pas rendue avec ses styles Builder', result);
     }
 
     console.log('KALONEO_EDIT_EXISTING_ELECTRON=OK');
