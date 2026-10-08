@@ -128,7 +128,9 @@ app.whenReady().then(async () => {
           styledBackground:styledBlock?.style.backgroundColor||'',
           scenarioBold:String(document.querySelector('#kaltest-scenario strong')?.textContent||''),
           instructionItalic:String(document.querySelector('#kaltest-instruction em')?.textContent||''),
-          instructionUnderline:String(document.querySelector('#kaltest-instruction u')?.textContent||'')
+          instructionUnderline:String(document.querySelector('#kaltest-instruction u')?.textContent||''),
+          scenarioBreaks:document.querySelectorAll('#kaltest-scenario br').length,
+          instructionBreaks:document.querySelectorAll('#kaltest-instruction br').length
         };
       })()`, true).catch(()=>null);
       if (result?.generic && result?.rightImage) break;
@@ -138,8 +140,10 @@ app.whenReady().then(async () => {
     if (!result?.generic || result.legacyOrganisation || result.zoneCount !== 2 ||
         result.leftQuestions !== 8 || !result.rightImage ||
         !result.rightImageSrc.startsWith('data:image/svg+xml;base64,') ||
-        result.scenario !== 'Première ligne\nDeuxième ligne' ||
-        result.instruction !== 'Consigne ligne 1\nConsigne ligne 2' ||
+        result.scenario !== 'Première ligneDeuxième ligne' ||
+        result.instruction !== 'Consigne ligne 1Consigne ligne 2' ||
+        result.scenarioBreaks !== 1 ||
+        result.instructionBreaks !== 1 ||
         !/255, 248, 221/.test(result.pageBackground) ||
         result.styledFont !== '22px' ||
         !/238, 249, 242/.test(result.styledBackground) ||
