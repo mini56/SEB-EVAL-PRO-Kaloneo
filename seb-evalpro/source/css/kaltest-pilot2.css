@@ -3026,3 +3026,23 @@ body.seb-kaltest-legacy-full #kaltest-content{
   background:transparent;
 }
 
+
+
+/* R28 — styles visuels configurables depuis le Test Builder */
+#kaltest-scenario,
+#kaltest-instruction{
+  white-space:pre-line;
+}
+#page-exercise.kaltest-custom-page-background{
+  background-clip:padding-box;
+}
+[data-kaloneo-font-size] *,
+[data-kaloneo-font-size] input,
+[data-kaloneo-font-size] select,
+[data-kaloneo-font-size] textarea,
+[data-kaloneo-font-size] button,
+[data-kaloneo-font-size] table,
+[data-kaloneo-font-size] th,
+[data-kaloneo-font-size] td{
+  font-size:inherit!important;
+}
