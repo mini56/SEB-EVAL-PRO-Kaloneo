@@ -195,7 +195,7 @@ jobs:
         run: npm run test:admin-foundation
 
       - name: Verify Admin bar and current Build number
-        run: npx electron --no-sandbox scripts/admin-bar-smoke-electron.js
+        run: node scripts/admin-build-label-guard.js
 
       - name: Verify existing parcours registry
         run: npm run test:parcours
