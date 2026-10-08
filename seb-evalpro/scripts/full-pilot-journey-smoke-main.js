@@ -442,7 +442,7 @@ app.whenReady().then(async()=>{
     const carre=await win.webContents.executeJavaScript(`
       ({
         current:window.sebKaltestPilot2.currentTest()?.id||'',
-        inputs:document.querySelectorAll('.kaltest-builder-grid input[data-question-id]').length,
+        inputs:document.querySelectorAll('.kaltest-legacy-gratte-cell[data-question-id], .kaltest-builder-grid input[data-question-id]').length,
         next:window.sebParcours?.nextUrl('carre')||''
       })
     `,true);
