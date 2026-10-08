@@ -27,7 +27,6 @@
     .status{min-height:24px;margin:12px 0 0;padding:7px 9px;border-radius:7px;background:#f6f8fa;color:#53636f}
     .status.ok{background:#eef9f2;color:#1f6b3a}
     .status.error{background:#fff0f0;color:#9b2424}
-    .note{margin-top:18px;padding:13px 15px;border:1px solid #d7e0e7;border-radius:9px;background:#f8fbfd;color:#52606d}
     @media(max-width:1050px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
@@ -38,7 +37,7 @@
         <h1>KALONÉO — Import / Export</h1>
         <p>Une page dédiée pour transférer les tests, les parcours et les images sans encombrer le Test Builder.</p>
       </div>
-      <button id="back-tests" type="button">← Tests / Parcours</button>
+      <button id="back-tests" type="button">Fermer</button>
     </header>
 
     <section class="grid">
@@ -69,12 +68,8 @@
       </article>
       <article class="card">
         <h2>Images</h2>
-        <p>Gérer les images de la bibliothèque KALONÉO : export individuel, import multiple ou archive ZIP organisée par thèmes.</p>
-        <label>Image à exporter
-          <select id="image-select"></select>
-        </label>
+        <p>Ajouter des images à la bibliothèque KALONÉO, individuellement ou par archive ZIP organisée par thèmes.</p>
         <div class="actions">
-          <button id="export-image" class="primary" type="button">Exporter l’image</button>
           <button id="import-images" type="button">Importer des images</button>
           <button id="import-image-zip" type="button">Importer un ZIP par thèmes</button>
         </div>
@@ -83,9 +78,6 @@
       </article>
     </section>
 
-    <div class="note">
-      Les opérations d’import/export sont séparées de la création : le Test Builder reste dédié à la conception, et cette page regroupe les transferts de tests, parcours et images.
-    </div>
   </main>
   <script src="js/admin-kaloneo-transfer.js"></script>
 </body>
