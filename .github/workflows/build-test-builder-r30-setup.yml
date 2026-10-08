@@ -1,5 +1,5 @@
 name: Build Windows KALONÉO PILOTE 22 R30
-# R23 adds a generic KALTEST full-page interactive host for historical/advanced exercises
+# R30 adds simple text colors to Scenario, Consigne and Builder text blocks.
 
 on:
   workflow_dispatch:
