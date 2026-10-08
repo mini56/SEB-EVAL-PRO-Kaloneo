@@ -1066,6 +1066,122 @@ function createKaloneoLibrary(options = {}) {
     }
   }
 
+  function buildParcoursPackage(id) {
+    ensureSeed();
+    const value = findParcours(id);
+    if (!value) return { ok:false, error:'Parcours introuvable.' };
+
+    const definitions = scanLatestDefinitions();
+    try {
+      const introduction = resolveDefinition(definitions, value.introduction, 'introduction');
+      const tests = (Array.isArray(value.tests) ? value.tests : []).map(ref => resolveDefinition(definitions, ref, 'test'));
+      const fin = resolveDefinition(definitions, value.fin, 'fin');
+      const maskResult = getMaskScreen(value.maskScreen || defaultMaskRef());
+      if (!maskResult.ok) throw new Error(maskResult.error || 'Écran de masquage introuvable.');
+
+      return {
+        ok:true,
+        package:{
+          format:'kaloneo-parcours-package',
+          schemaVersion:1,
+          exportedAt:now().toISOString(),
+          parcours:{
+            name:String(value.name || ''),
+            creator:String(value.creator || ''),
+            maskScreen:value.maskScreen || defaultMaskRef(),
+            introduction:value.introduction,
+            tests:Array.isArray(value.tests) ? JSON.parse(JSON.stringify(value.tests)) : [],
+            fin:value.fin
+          },
+          definitions:[
+            JSON.parse(JSON.stringify(introduction)),
+            ...tests.map(definition => JSON.parse(JSON.stringify(definition))),
+            JSON.parse(JSON.stringify(fin))
+          ],
+          maskScreen:JSON.parse(JSON.stringify(maskResult.maskScreen))
+        }
+      };
+    } catch (error) {
+      return { ok:false, error:error && error.message ? error.message : String(error) };
+    }
+  }
+
+  function importParcoursPackage(payload = {}) {
+    ensureSeed();
+    if (!payload || payload.format !== 'kaloneo-parcours-package' || Number(payload.schemaVersion) !== 1) {
+      return { ok:false, error:'Paquet de parcours KALONÉO invalide.' };
+    }
+    const parcours = payload.parcours || {};
+    const name = String(parcours.name || '').trim();
+    const creator = String(parcours.creator || '').trim();
+    if (!name || !creator) return { ok:false, error:'Le paquet de parcours ne contient pas son nom ou son créateur.' };
+
+    const existingName = readAllParcours().find(item => safeNameKey(item.name) === safeNameKey(name));
+    if (existingName) {
+      return { ok:false, code:'EXISTS_NAME', error:'Un parcours portant déjà le nom « ' + name + ' » existe.' };
+    }
+
+    const packageDefinitions = Array.isArray(payload.definitions) ? payload.definitions : [];
+    const byKey = new Map();
+    for (const definition of packageDefinitions) {
+      const validation = validateTestDefinition(definition);
+      if (validation) return { ok:false, error:'Définition incluse invalide : ' + validation };
+      byKey.set(String(definition.id) + '@' + String(definition.version), definition);
+    }
+
+    const refs = [
+      parcours.introduction,
+      ...(Array.isArray(parcours.tests) ? parcours.tests : []),
+      parcours.fin
+    ].filter(Boolean);
+
+    for (const ref of refs) {
+      const key = String(ref.id || '') + '@' + String(ref.version || '');
+      const existingFile = exactTestFile(ref.id, ref.version);
+      if (existingFile) {
+        const existingDefinition = readJson(existingFile);
+        const incomingDefinition = byKey.get(key);
+        if (incomingDefinition && existingDefinition) {
+          const clean = value => {
+            const copy = JSON.parse(JSON.stringify(value));
+            if (copy.kaloneoLibrary) delete copy.kaloneoLibrary;
+            return copy;
+          };
+          if (JSON.stringify(clean(existingDefinition)) !== JSON.stringify(clean(incomingDefinition))) {
+            return { ok:false, code:'TEST_CONFLICT', error:'Conflit sur le test ' + key + ' : une version différente existe déjà.' };
+          }
+        }
+      } else if (!byKey.has(key)) {
+        return { ok:false, error:'Le paquet ne contient pas le test requis ' + key + '.' };
+      }
+    }
+
+    const maskDefinition = payload.maskScreen;
+    const maskRef = parcours.maskScreen || defaultMaskRef();
+    const existingMask = findMaskScreen(maskRef.id, maskRef.version);
+    if (!existingMask && maskDefinition) {
+      const savedMask = saveMaskScreen(maskDefinition, { overwrite:false });
+      if (!savedMask.ok) return savedMask;
+    } else if (!existingMask && !maskDefinition) {
+      return { ok:false, error:'Écran de masquage requis absent du paquet.' };
+    }
+
+    for (const definition of packageDefinitions) {
+      if (exactTestFile(definition.id, definition.version)) continue;
+      const saved = saveTest(definition, { overwrite:false });
+      if (!saved.ok) return saved;
+    }
+
+    return saveParcours({
+      name,
+      creator,
+      maskScreen:maskRef,
+      introduction:parcours.introduction,
+      tests:Array.isArray(parcours.tests) ? parcours.tests : [],
+      fin:parcours.fin
+    });
+  }
+
   function listParcours() {
     ensureSeed();
     return readAllParcours()
@@ -1212,6 +1328,8 @@ function createKaloneoLibrary(options = {}) {
     getParcours,
     getParcoursDetails,
     saveParcours,
+    buildParcoursPackage,
+    importParcoursPackage,
     getSelectedParcours,
     selectParcours,
     resolveParcoursRuntime,
