@@ -3814,6 +3814,21 @@
         score:testState.result.score,
         scoreMax:testState.result.scoreMax
       });
+
+      // Une page interactive pleine page gère déjà localement son état visuel
+      // (couleurs de correction, verrouillage, passage de Vérifier/Valider à Suivant).
+      // Ne pas reconstruire l'iframe ici : cela provoquait un saut visible de la page
+      // et donnait l'impression d'un rechargement complet au moment de la correction.
+      if (test.presentation?.legacyFullPage === true && activeInteractiveFrame) {
+        persist();
+        status.textContent = test.behavior?.validationSuccessMessage ||
+          (showCorrectionDuringParcours(test)
+            ? ('Exercice validé : ' + testState.result.score + '/' + testState.result.scoreMax + '. Cliquez sur « Suivant » pour continuer.')
+            : 'Exercice validé. Cliquez sur « Suivant » pour continuer.');
+        refreshCandidateBar();
+        return;
+      }
+
       renderCurrentTest();
       status.textContent = test.behavior?.validationSuccessMessage ||
         (showCorrectionDuringParcours(test)
