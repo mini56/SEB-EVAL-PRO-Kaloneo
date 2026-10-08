@@ -5,13 +5,14 @@ const fs = require('fs');
 function fail(message, details) {
   console.error('KALONEO_BUILDER_PREVIEW_ELECTRON: FAIL — ' + message);
   if (details) console.error(JSON.stringify(details, null, 2));
-  app.exit(2);
+  process.exit(2);
 }
 
 let state = {version:1,sessionStorage:{},localStorage:{},lastPage:'kaltest-pilot2.html',lastEvaluationPage:'kaltest-pilot2.html'};
 let previewDefinition = null;
 let savedLibraryDefinition = null;
 let savedImageCalls = 0;
+let zipImportCalls = 0;
 const imageLibraryData = 'data:image/svg+xml;base64,' + Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="180" height="120"><rect width="180" height="120" fill="#1b6c8e"/></svg>').toString('base64');
 let win = null;
 
@@ -70,6 +71,10 @@ ipcMain.handle('kaloneo-library:get-image',(_e,id)=>id==='img-smoke-library'
 ipcMain.handle('kaloneo-library:save-image',(_e,payload)=>{
   savedImageCalls+=1;
   return {ok:true,duplicate:false,image:{id:'img-saved-'+savedImageCalls,name:payload?.name||'image',mime:payload?.mime||'image/*',size:1,category:'Mes images KALONÉO',systemProvided:false}};
+});
+ipcMain.handle('kaloneo-library:import-image-zip',()=>{
+  zipImportCalls+=1;
+  return {ok:true,archive:'KALONEO_200.zip',added:200,duplicates:0,failed:0,total:200,themes:Array.from({length:20},(_,i)=>'Thème '+(i+1))};
 });
 ipcMain.handle('kaloneo-library:list-mask-screens',()=>({ok:true,maskScreens:[{id:'kaloneo-default',version:'1.0.0',name:'KALONÉO',systemProvided:true,hasText:true,hasImage:false}]}));
 ipcMain.handle('kaloneo-library:get-mask-screen',()=>({ok:true,maskScreen:{id:'kaloneo-default',version:'1.0.0',name:'KALONÉO',content:{text:'KALONÉO',image:''}}}));
@@ -177,6 +182,15 @@ app.whenReady().then(async()=>{
       mediaInput.files=dt.files;
       mediaInput.dispatchEvent(new Event('change',{bubbles:true}));
       await new Promise(resolve=>setTimeout(resolve,180));
+      const styleSelects=[...document.querySelectorAll('.block-style-editor select')];
+      if(styleSelects[0]){
+        styleSelects[0].value='22';
+        styleSelects[0].dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      if(styleSelects[1]){
+        styleSelects[1].value='#EEF9F2';
+        styleSelects[1].dispatchEvent(new Event('change',{bubbles:true}));
+      }
       document.getElementById('refresh-preview').click();
       await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
       document.getElementById('save-draft').click();
@@ -194,12 +208,14 @@ app.whenReady().then(async()=>{
         imagePresent:!!smallImg,
         smallImageFits:!!(ir&&br&&ir.width<=br.width+1&&ir.height<=br.height+1),
         smallImageSize:ir?{width:Math.round(ir.width),height:Math.round(ir.height)}:null,
-        smallBlockSize:br?{width:Math.round(br.width),height:Math.round(br.height)}:null
+        smallBlockSize:br?{width:Math.round(br.width),height:Math.round(br.height)}:null,
+        blockFont:smallBlock?.style.fontSize||'',
+        blockBackground:smallBlock?.style.backgroundColor||''
       };
     })()`);
     if(!/vraie page/i.test(setup.button)||setup.title!=='Aperçu Electron Smoke'||setup.calculatorBrand!=='KALONÉO'||setup.calculatorOptionsHidden||
        !savedLibraryDefinition||savedLibraryDefinition.title!=='Aperçu Electron Smoke'||! /bibliothèque/i.test(setup.libraryStatus)||
-       !setup.imagePresent||!setup.smallImageFits) return fail('bouton, saisie ou image Builder incorrecte',setup);
+       !setup.imagePresent||!setup.smallImageFits||setup.blockFont!=='22px'||!/238, 249, 242/.test(setup.blockBackground)) return fail('bouton, saisie, image ou style Builder incorrect',setup);
 
     if(savedImageCalls<1) return fail('une image importée directement dans un bloc ne rejoint pas automatiquement la bibliothèque',{savedImageCalls});
 
@@ -227,6 +243,39 @@ app.whenReady().then(async()=>{
       return fail('sélection d’une image depuis la bibliothèque KALONÉO incorrecte',libraryPick);
     }
 
+    const pageBackground=await win.webContents.executeJavaScript(`(async()=>{
+      document.getElementById('choose-page-background-image').click();
+      await new Promise(resolve=>setTimeout(resolve,160));
+      const dialog=document.getElementById('image-library-dialog');
+      const use=dialog?.querySelector('.image-library-use');
+      if(!dialog?.open||!use)return {ok:false,reason:'sélecteur fond absent'};
+      use.click();
+      await new Promise(resolve=>setTimeout(resolve,180));
+      const page=document.getElementById('candidate-preview');
+      return {
+        ok:true,
+        type:document.getElementById('page-background-type')?.value||'',
+        name:String(document.getElementById('page-background-image-name')?.textContent||'').trim(),
+        background:page?.style.backgroundImage||''
+      };
+    })()`,true);
+    if(!pageBackground.ok||pageBackground.type!=='image'||pageBackground.name!=='bibliotheque-kaloneo.svg'||!pageBackground.background.includes('data:image/svg+xml')) {
+      return fail('arrière-plan de page depuis la bibliothèque incorrect',pageBackground);
+    }
+
+    const zipUi=await win.webContents.executeJavaScript(`(async()=>{
+      document.getElementById('open-image-library').click();
+      await new Promise(resolve=>setTimeout(resolve,150));
+      document.getElementById('import-image-zip').click();
+      await new Promise(resolve=>setTimeout(resolve,180));
+      const status=String(document.getElementById('image-library-status')?.textContent||'');
+      document.getElementById('close-image-library').click();
+      return {status};
+    })()`,true);
+    if(zipImportCalls!==1||!/200 images ajoutées/.test(zipUi.status)||!/20 thèmes détectés/.test(zipUi.status)) {
+      return fail('bouton import ZIP par thèmes incorrect',{zipImportCalls,zipUi});
+    }
+
     await win.webContents.executeJavaScript(`document.getElementById('open-electron-preview').click();true`);
     for(let i=0;i<30;i++){
       await wait(120);
@@ -246,6 +295,7 @@ app.whenReady().then(async()=>{
       chrono:String(document.querySelector('.kb-chrono-time')?.textContent||'').trim(),
       privacy:(()=>{const p=document.getElementById('seb-evalpro-privacy-toggle');return p?getComputedStyle(p).display:'absent';})(),
       calculatorButtonShadow:getComputedStyle(document.querySelector('.kb-footer-center button')).boxShadow,
+      pageBackground:document.querySelector('.kb-preview-page')?.style.backgroundImage||'',
       media:(()=>{
         const img=document.querySelector('.kb-media');
         const block=img?.closest('.kb-media-block');
@@ -257,7 +307,9 @@ app.whenReady().then(async()=>{
           fits:!!(ir&&br&&ir.width<=br.width+1&&ir.height<=br.height+1),
           image:ir?{width:Math.round(ir.width),height:Math.round(ir.height)}:null,
           block:br?{width:Math.round(br.width),height:Math.round(br.height)}:null,
-          workspaceScroll:workspace?workspace.scrollHeight>workspace.clientHeight+2:false
+          workspaceScroll:workspace?workspace.scrollHeight>workspace.clientHeight+2:false,
+          font:block?.style.fontSize||'',
+          background:block?.style.backgroundColor||''
         };
       })()
     }))()`);
@@ -271,7 +323,9 @@ app.whenReady().then(async()=>{
        shown.calculator!=='Ouvrir la calculatrice'||
        shown.chrono!=='00:00'||
        !['none','absent'].includes(shown.privacy)||
-       !shown.media.present||!shown.media.fits||shown.media.workspaceScroll) {
+       !shown.pageBackground.includes('data:image/svg+xml')||
+       !shown.media.present||!shown.media.fits||shown.media.workspaceScroll||
+       shown.media.font!=='22px'||!/238, 249, 242/.test(shown.media.background)) {
       return fail('rendu plein écran incorrect',shown);
     }
 
