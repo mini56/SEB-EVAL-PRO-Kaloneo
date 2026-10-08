@@ -1241,7 +1241,14 @@
       button.addEventListener('click',function(event){
         event.preventDefault();
         const action=currentActions[i];
-        const target=action&&action.source;
+        if(!action||action.disabled) return;
+        if(typeof action.invoke==='function'){
+          try{action.invoke()}catch(_){}
+          scheduleRefresh();
+          setTimeout(scheduleRefresh,40);
+          return;
+        }
+        const target=action.source;
         if(!target||target.disabled||target.getAttribute('aria-disabled')==='true') return;
         try{target.click()}catch(_){}
         scheduleRefresh();
@@ -1304,6 +1311,16 @@
     if(file==='kaltest-pilot2.html'){
       if(!document.getElementById('page-exercise')?.classList.contains('visible')){
         return ['#identity-next','#intro-next'].map(sel=>sourceAction(sel)).filter(Boolean);
+      }
+      const interactive=window.sebKaltestPilot2?.candidateBarActions?.();
+      if(Array.isArray(interactive)&&interactive.length){
+        return interactive.slice(0,3).map(action=>({
+          source:null,
+          label:clean(action?.label),
+          disabled:action?.disabled===true,
+          title:clean(action?.title),
+          invoke:()=>window.sebKaltestPilot2?.invokeCandidateBarAction?.(action?.id)
+        })).filter(action=>action.label);
       }
       const primary=sourceAction('#kaltest-next');
       const calc=sourceAction('#kaltest-calculator');
@@ -1392,8 +1409,8 @@
       const src=action.source;
       button.hidden=false;
       button.textContent=action.label;
-      button.disabled=!!src.disabled||src.getAttribute('aria-disabled')==='true';
-      button.title=src.title||'';
+      button.disabled=action.disabled===true||!!src?.disabled||src?.getAttribute?.('aria-disabled')==='true';
+      button.title=action.title||src?.title||'';
       styleActionButton(button,action);
     });
   }
