@@ -18,18 +18,15 @@
   }
 
   async function loadLists(){
-    const [testsResult,parcoursResult,imagesResult]=await Promise.all([
+    const [testsResult,parcoursResult]=await Promise.all([
       window.sebEvalPro?.kaloneoListTests?.(),
-      window.sebEvalPro?.kaloneoListParcours?.(),
-      window.sebEvalPro?.kaloneoListImages?.()
+      window.sebEvalPro?.kaloneoListParcours?.()
     ]);
 
     const testSelect=byId('test-select');
     const parcoursSelect=byId('parcours-select');
-    const imageSelect=byId('image-select');
     testSelect.replaceChildren();
     parcoursSelect.replaceChildren();
-    imageSelect.replaceChildren();
 
     const tests=Array.isArray(testsResult?.tests)?testsResult.tests.filter(item=>item.role==='test'):[];
     tests.forEach(item=>option(testSelect,item.id+'@@'+item.version,item.title+' — v'+item.version));
@@ -38,13 +35,6 @@
     const parcours=Array.isArray(parcoursResult?.parcours)?parcoursResult.parcours:[];
     parcours.forEach(item=>option(parcoursSelect,item.id,item.name+(item.systemProvided?' — fourni':'') ));
     if(!parcours.length)option(parcoursSelect,'','Aucun parcours disponible');
-
-    const images=Array.isArray(imagesResult?.images)?imagesResult.images:[];
-    images.forEach(item=>{
-      const details=[item.theme||item.category||'',item.orientation||''].filter(Boolean).join(' • ');
-      option(imageSelect,item.id,item.name+(details?' — '+details:''));
-    });
-    if(!images.length)option(imageSelect,'','Aucune image disponible');
   }
 
   async function exportTest(){
@@ -100,16 +90,6 @@
     });
   }
 
-  async function exportImage(){
-    const id=byId('image-select').value;
-    if(!id){setStatus('image-status','Choisissez une image à exporter.','error');return;}
-    setStatus('image-status','Export de l’image…');
-    const result=await window.sebEvalPro?.kaloneoExportImage?.(id);
-    if(result?.canceled){setStatus('image-status','Export annulé.');return;}
-    if(!result?.ok){setStatus('image-status','Export impossible : '+String(result?.error||'erreur inconnue'),'error');return;}
-    setStatus('image-status','Image exportée.','ok');
-  }
-
   async function importImages(files){
     const list=[...(files||[])];
     if(!list.length)return;
@@ -162,7 +142,6 @@
     byId('import-test').addEventListener('click',()=>importTest().catch(error=>setStatus('test-status','Import impossible : '+String(error?.message||error),'error')));
     byId('export-parcours').addEventListener('click',()=>exportParcours().catch(error=>setStatus('parcours-status','Export impossible : '+String(error?.message||error),'error')));
     byId('import-parcours').addEventListener('click',()=>importParcours().catch(error=>setStatus('parcours-status','Import impossible : '+String(error?.message||error),'error')));
-    byId('export-image').addEventListener('click',()=>exportImage().catch(error=>setStatus('image-status','Export impossible : '+String(error?.message||error),'error')));
     byId('import-images').addEventListener('click',()=>byId('image-files').click());
     byId('image-files').addEventListener('change',async()=>{
       try{await importImages(byId('image-files').files);}
