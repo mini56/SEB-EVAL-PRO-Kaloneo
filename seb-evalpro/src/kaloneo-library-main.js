@@ -201,6 +201,44 @@ function createKaloneoLibrary(options = {}) {
     }
   }
 
+  function seedImagesFromTests() {
+    if (!seedTestsRoot || !fs.existsSync(seedTestsRoot)) return;
+    const seen = new Set();
+    const visit = (value, hint = 'image-test') => {
+      if (typeof value === 'string') {
+        if (!/^data:image\//i.test(value) || seen.has(value)) return;
+        seen.add(value);
+        const match = value.match(/^data:(image\/[^;,]+)(?:;charset=[^;,]+)?;base64,([A-Za-z0-9+/=\s]+)$/i);
+        if (!match) return;
+        try {
+          const buffer = Buffer.from(match[2].replace(/\s+/g,''), 'base64');
+          storeImageBuffer(buffer, {
+            name:hint,
+            mime:match[1],
+            category:'Images embarquées dans les tests',
+            systemProvided:true,
+            sourceName:'test.json'
+          });
+        } catch (_) {}
+        return;
+      }
+      if (Array.isArray(value)) {
+        value.forEach((item,index) => visit(item, hint + '-' + (index + 1)));
+        return;
+      }
+      if (value && typeof value === 'object') {
+        for (const [key,item] of Object.entries(value)) {
+          const nextHint = /name|filename/i.test(key) && typeof item === 'string' ? item : hint;
+          visit(item, nextHint);
+        }
+      }
+    };
+    for (const file of walkTestFiles(seedTestsRoot)) {
+      const definition = readJson(file);
+      if (definition) visit(definition, safeSegment(definition.id || path.basename(path.dirname(file)), 'image-test'));
+    }
+  }
+
   function listImages() {
     ensureSeed();
     return scanImageRecords()
@@ -644,6 +682,7 @@ function createKaloneoLibrary(options = {}) {
     ensureDirectory(maskScreensRoot);
     if (seedTestsRoot && fs.existsSync(seedTestsRoot)) syncBundledSeedTests(seedTestsRoot, testsRoot);
     seedImageLibrary();
+    seedImagesFromTests();
     ensureDefaultMaskScreen();
     ensureBaseParcours();
     return true;
