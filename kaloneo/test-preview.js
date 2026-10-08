@@ -220,22 +220,42 @@ function renderMedia(block){
   return wrap;
 }
 
+function multilineText(value){
+  return String(value||'').replace(/\\n/g,'\n');
+}
+
+function applyBlockStyle(node,block){
+  if(!node)return node;
+  const size=Number(block?.fontSize);
+  if(Number.isFinite(size)&&size>=10&&size<=40){
+    node.style.fontSize=size+'px';
+    node.dataset.kaloneoFontSize=String(size);
+  }
+  const background=String(block?.backgroundColor||'').trim();
+  if(background){
+    node.style.backgroundColor=background;
+  }
+  return node;
+}
+
 function renderBlock(block){
-  if(block.type==='text'){const w=el('section','kb-block kb-text',block.text||'Bloc texte vide');return w;}
-  if(block.type==='html'||block.type==='html-js'){
+  let node;
+  if(block.type==='text') node=el('section','kb-block kb-text',multilineText(block.text||'Bloc texte vide'));
+  else if(block.type==='html'||block.type==='html-js'){
     const wrap=el('section','kb-block');const frame=el('iframe','kb-frame');frame.sandbox='allow-scripts';
     const script=block.type==='html-js'&&block.js?'<script>'+String(block.js).replace(/<\/script/gi,'<\\/script')+'<\/script>':'';
     frame.srcdoc='<!doctype html><html><body style="font-family:Calibri,Arial,sans-serif;margin:10px">'+(block.html||'<em>Bloc HTML vide</em>')+script+'</body></html>';
-    wrap.append(frame);return wrap;
+    wrap.append(frame);node=wrap;
   }
-  if(['image','audio','video'].includes(block.type)) return renderMedia(block);
-  if(block.type==='question') return renderQuestion(block);
-  if(block.type==='response-table') return renderResponseTable(block);
-  if(block.type==='table-grid') return renderGrid(block);
-  if(block.type==='inline-flow') return renderInline(block);
-  if(block.type==='multiple-tables') return renderMultipleTable(block);
-  if(block.type==='text-editor') return renderTextEditor(block);
-  return el('section','kb-block kb-empty','Bloc '+String(block.type||'inconnu'));
+  else if(['image','audio','video'].includes(block.type)) node=renderMedia(block);
+  else if(block.type==='question') node=renderQuestion(block);
+  else if(block.type==='response-table') node=renderResponseTable(block);
+  else if(block.type==='table-grid') node=renderGrid(block);
+  else if(block.type==='inline-flow') node=renderInline(block);
+  else if(block.type==='multiple-tables') node=renderMultipleTable(block);
+  else if(block.type==='text-editor') node=renderTextEditor(block);
+  else node=el('section','kb-block kb-empty','Bloc '+String(block.type||'inconnu'));
+  return applyBlockStyle(node,block);
 }
 
 function buildLayout(page){
@@ -343,6 +363,15 @@ function render(){
   const def=state.definition||{};
   const m=state.model.meta||{};
   const page=el('div','kb-preview-page');
+  const pageStyle=def.presentation?.pageStyle||{};
+  if(pageStyle.backgroundImage){
+    page.style.backgroundImage='url("'+String(pageStyle.backgroundImage).replace(/"/g,'%22')+'")';
+    page.style.backgroundSize=pageStyle.backgroundFit==='contain'?'contain':'cover';
+    page.style.backgroundPosition='center';
+    page.style.backgroundRepeat='no-repeat';
+  }else if(pageStyle.backgroundColor){
+    page.style.background=String(pageStyle.backgroundColor);
+  }
   const heading=el('header','kb-heading');
   const main=el('div','kb-heading-main');
   if(def.icon?.data){const icon=el('img','kb-heading-icon');icon.src=def.icon.data;icon.alt=def.icon.label||'';main.append(icon);}
@@ -350,8 +379,8 @@ function render(){
   page.append(heading);
 
   const contexts=el('div','kb-contexts');
-  const scenario=el('section','kb-context');const si=el('img');si.src='../imageqcm/scenario.png';si.alt='';const sb=el('div');sb.append(el('strong','','Scénario : '),el('p','',m.scenario||'Le scénario apparaîtra ici.'));scenario.append(si,sb);
-  const instruction=el('section','kb-context');const ii=el('img');ii.src='../imageqcm/avatar_transparant.png';ii.alt='';const ib=el('div');ib.append(el('strong','','Consigne : '),el('p','',m.instruction||'La consigne apparaîtra ici.'));instruction.append(ii,ib);
+  const scenario=el('section','kb-context');const si=el('img');si.src='../imageqcm/scenario.png';si.alt='';const sb=el('div');sb.append(el('strong','','Scénario : '),el('p','',multilineText(m.scenario||'Le scénario apparaîtra ici.')));scenario.append(si,sb);
+  const instruction=el('section','kb-context');const ii=el('img');ii.src='../imageqcm/avatar_transparant.png';ii.alt='';const ib=el('div');ib.append(el('strong','','Consigne : '),el('p','',multilineText(m.instruction||'La consigne apparaîtra ici.')));instruction.append(ii,ib);
   contexts.append(scenario,instruction);page.append(contexts);
 
   buildLayout(page);
