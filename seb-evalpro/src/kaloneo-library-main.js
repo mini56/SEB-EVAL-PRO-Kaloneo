@@ -81,7 +81,8 @@ function createKaloneoLibrary(options = {}) {
     const id = String(definition?.id || '');
     return BASE_TEST_ORDER.includes(id) &&
       definition?.sourceMigration &&
-      typeof definition.sourceMigration === 'object';
+      typeof definition.sourceMigration === 'object' &&
+      definition?.kaloneoLibrary?.adminModified !== true;
   }
 
   function syncBundledSeedTests(source, destination) {
@@ -231,6 +232,10 @@ function createKaloneoLibrary(options = {}) {
     value.id = String(value.id).trim();
     value.version = String(value.version).trim();
     value.title = String(value.title).trim();
+    value.kaloneoLibrary = Object.assign({}, value.kaloneoLibrary || {}, {
+      adminModified:true,
+      modifiedAt:now().toISOString()
+    });
 
     const existing = exactTestFile(value.id, value.version);
     if (existing && options.overwrite !== true) {
