@@ -11,6 +11,8 @@ function fail(message, details) {
 let state = {version:1,sessionStorage:{},localStorage:{},lastPage:'kaltest-pilot2.html',lastEvaluationPage:'kaltest-pilot2.html'};
 let previewDefinition = null;
 let savedLibraryDefinition = null;
+let savedImageCalls = 0;
+const imageLibraryData = 'data:image/svg+xml;base64,' + Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="180" height="120"><rect width="180" height="120" fill="#1b6c8e"/></svg>').toString('base64');
 let win = null;
 
 ipcMain.on('app:edition-sync', event => {
@@ -58,6 +60,16 @@ ipcMain.handle('kaloneo-library:list-tests',()=>({ok:true,tests:[]}));
 ipcMain.handle('kaloneo-library:save-test',(_e,payload)=>{
   savedLibraryDefinition=JSON.parse(JSON.stringify(payload?.definition||null));
   return {ok:true,replaced:false,test:{id:savedLibraryDefinition?.id,version:savedLibraryDefinition?.version,title:savedLibraryDefinition?.title}};
+});
+ipcMain.handle('kaloneo-library:list-images',()=>({ok:true,images:[
+  {id:'img-smoke-library',name:'bibliotheque-kaloneo.svg',mime:'image/svg+xml',size:123,category:'Mes images KALONÉO',systemProvided:false,sourceName:''}
+]}));
+ipcMain.handle('kaloneo-library:get-image',(_e,id)=>id==='img-smoke-library'
+  ? {ok:true,image:{id,name:'bibliotheque-kaloneo.svg',mime:'image/svg+xml',size:123,category:'Mes images KALONÉO',systemProvided:false,data:imageLibraryData}}
+  : {ok:false,error:'absent'});
+ipcMain.handle('kaloneo-library:save-image',(_e,payload)=>{
+  savedImageCalls+=1;
+  return {ok:true,duplicate:false,image:{id:'img-saved-'+savedImageCalls,name:payload?.name||'image',mime:payload?.mime||'image/*',size:1,category:'Mes images KALONÉO',systemProvided:false}};
 });
 ipcMain.handle('kaloneo-library:list-mask-screens',()=>({ok:true,maskScreens:[{id:'kaloneo-default',version:'1.0.0',name:'KALONÉO',systemProvided:true,hasText:true,hasImage:false}]}));
 ipcMain.handle('kaloneo-library:get-mask-screen',()=>({ok:true,maskScreen:{id:'kaloneo-default',version:'1.0.0',name:'KALONÉO',content:{text:'KALONÉO',image:''}}}));
@@ -188,6 +200,32 @@ app.whenReady().then(async()=>{
     if(!/vraie page/i.test(setup.button)||setup.title!=='Aperçu Electron Smoke'||setup.calculatorBrand!=='KALONÉO'||setup.calculatorOptionsHidden||
        !savedLibraryDefinition||savedLibraryDefinition.title!=='Aperçu Electron Smoke'||! /bibliothèque/i.test(setup.libraryStatus)||
        !setup.imagePresent||!setup.smallImageFits) return fail('bouton, saisie ou image Builder incorrecte',setup);
+
+    if(savedImageCalls<1) return fail('une image importée directement dans un bloc ne rejoint pas automatiquement la bibliothèque',{savedImageCalls});
+
+    const libraryPick=await win.webContents.executeJavaScript(`(async()=>{
+      const choose=document.querySelector('.choose-library-image');
+      if(!choose)return {ok:false,reason:'bouton absent'};
+      choose.click();
+      await new Promise(resolve=>setTimeout(resolve,160));
+      const dialog=document.getElementById('image-library-dialog');
+      const card=document.querySelector('.image-library-card');
+      const img=card?.querySelector('img');
+      const use=card?.querySelector('.image-library-use');
+      if(!dialog?.open||!card||!use)return {ok:false,reason:'dialogue ou carte absent'};
+      use.click();
+      await new Promise(resolve=>setTimeout(resolve,180));
+      const preview=document.querySelector('.preview-media');
+      return {
+        ok:true,
+        dialogClosed:!dialog.open,
+        cardImageLoaded:Boolean(img?.src),
+        previewSrc:preview?.getAttribute('src')||''
+      };
+    })()`,true);
+    if(!libraryPick.ok||!libraryPick.dialogClosed||!libraryPick.cardImageLoaded||libraryPick.previewSrc!==imageLibraryData) {
+      return fail('sélection d’une image depuis la bibliothèque KALONÉO incorrecte',libraryPick);
+    }
 
     await win.webContents.executeJavaScript(`document.getElementById('open-electron-preview').click();true`);
     for(let i=0;i<30;i++){
