@@ -270,12 +270,17 @@ app.whenReady().then(async()=>{
     await sleep(350);
 
     const stock=await win.webContents.executeJavaScript(`
-      ({
-        current:window.sebKaltestPilot2.currentTest()?.id||'',
-        pots:document.querySelectorAll('.kaltest-stock-pot').length,
-        cases:document.querySelectorAll('.kaltest-stock-case').length,
-        next:window.sebParcours?.nextUrl('stock')||''
-      })
+      (()=>{
+        const frame=document.querySelector('.kaltest-legacy-page-iframe');
+        const doc=frame?.contentDocument;
+        return {
+          current:window.sebKaltestPilot2.currentTest()?.id||'',
+          page:frame?.getAttribute('src')||'',
+          pots:doc?.querySelectorAll('.pot').length||0,
+          cases:doc?.querySelectorAll('.case').length||0,
+          next:window.sebParcours?.nextUrl('stock')||''
+        };
+      })()
     `,true);
     if(stock.current!=='ranger_stock' || stock.pots!==34 || stock.cases!==35 ||
        stock.next!=='kaltest-pilot2.html?fullParcours=1&segment=planning'){
@@ -442,7 +447,7 @@ app.whenReady().then(async()=>{
     const carre=await win.webContents.executeJavaScript(`
       ({
         current:window.sebKaltestPilot2.currentTest()?.id||'',
-        inputs:document.querySelectorAll('.kaltest-legacy-gratte-cell[data-question-id], .kaltest-builder-grid input[data-question-id]').length,
+        inputs:document.querySelector('.kaltest-legacy-page-iframe')?.contentDocument?.querySelectorAll('.cell[data-row][data-col]').length||0,
         next:window.sebParcours?.nextUrl('carre')||''
       })
     `,true);
