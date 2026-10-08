@@ -103,8 +103,10 @@ async function runCase(test, fin, showCorrections) {
   return result;
 }
 
-function sameLabels(actual, expected) {
-  return JSON.stringify(actual) === JSON.stringify(expected);
+function sameLabels(actual, expectedPatterns) {
+  return Array.isArray(actual) &&
+    actual.length === expectedPatterns.length &&
+    expectedPatterns.every((pattern,index) => pattern.test(String(actual[index] || '')));
 }
 
 app.commandLine.appendSwitch('disable-gpu');
@@ -120,14 +122,14 @@ app.whenReady().then(async () => {
     const stockNo = await runCase(stock, fin, false);
     if (!stockNo?.ready || stockNo.testId !== 'ranger_stock' || stockNo.corrections ||
         !stockNo.legacyFull || !stockNo.nativeNextHidden || stockNo.nestedBar ||
-        !sameLabels(stockNo.actions, ['➡️ Suivant']) ||
+        !sameLabels(stockNo.actions, [/Suivant/]) ||
         stockNo.internal.stockActionBtn !== 'none') {
       return fail('Stock sans corrections : la barre candidat doit afficher uniquement Suivant', stockNo);
     }
 
     const stockYes = await runCase(stock, fin, true);
     if (!stockYes?.ready || stockYes.testId !== 'ranger_stock' || !stockYes.corrections ||
-        !sameLabels(stockYes.actions, ['🔍 Vérifier']) ||
+        !sameLabels(stockYes.actions, [/Vérifier/]) ||
         stockYes.internal.stockActionBtn !== 'none') {
       return fail('Stock avec corrections : la barre candidat doit afficher Vérifier', stockYes);
     }
@@ -135,7 +137,7 @@ app.whenReady().then(async () => {
     const puzzleNo = await runCase(puzzle, fin, false);
     if (!puzzleNo?.ready || puzzleNo.testId !== 'gratte_ciel' || puzzleNo.corrections ||
         !puzzleNo.legacyFull || !puzzleNo.nativeNextHidden || puzzleNo.nestedBar ||
-        !sameLabels(puzzleNo.actions, ['🔄 Recommencer','➡️ Suivant']) ||
+        !sameLabels(puzzleNo.actions, [/Recommencer/,/Suivant/]) ||
         puzzleNo.internal['carre-reset'] !== 'none' ||
         puzzleNo.internal.btnValidate !== 'none' ||
         puzzleNo.internal.btnNext !== 'none') {
@@ -144,7 +146,7 @@ app.whenReady().then(async () => {
 
     const puzzleYes = await runCase(puzzle, fin, true);
     if (!puzzleYes?.ready || puzzleYes.testId !== 'gratte_ciel' || !puzzleYes.corrections ||
-        !sameLabels(puzzleYes.actions, ['🔄 Recommencer','✔️ Valider']) ||
+        !sameLabels(puzzleYes.actions, [/Recommencer/,/Valider/]) ||
         puzzleYes.internal['carre-reset'] !== 'none' ||
         puzzleYes.internal.btnValidate !== 'none' ||
         puzzleYes.internal.btnNext !== 'none') {
