@@ -52,6 +52,10 @@ app.whenReady().then(async()=>{
         instructions:Boolean(doc?.querySelector('.info-panel')),
         background:doc?getComputedStyle(doc.body).backgroundImage:'',
         action:(doc?.getElementById('stockActionBtn')?.textContent||'').trim(),
+        actionDisplay:doc?.getElementById('stockActionBtn')?getComputedStyle(doc.getElementById('stockActionBtn')).display:'',
+        barActions:[...document.querySelectorAll('#kaloneo-nav-center .kaloneo-nav-action')]
+          .filter(button=>!button.hidden&&getComputedStyle(button).display!=='none')
+          .map(button=>String(button.textContent||'').trim()),
         pots:doc?.querySelectorAll('.pot').length||0,
         shelves:doc?.querySelectorAll('.etagere').length||0,
         cases:doc?.querySelectorAll('.case').length||0,
@@ -73,24 +77,14 @@ app.whenReady().then(async()=>{
     if (stock.pots!==34||stock.shelves!==3||stock.cases!==35||stock.sourceZones!==2) {
       throw new Error('Plateau Stock historique incomplet: '+JSON.stringify(stock));
     }
-    if (!/Vérifier/.test(stock.action) || /Suivant/.test(stock.action)) {
-      throw new Error('La vraie page Stock Build #20 doit conserver Vérifier avant validation.');
+    if (stock.actionDisplay!=='none' || JSON.stringify(stock.barActions)!==JSON.stringify(['➡️ Suivant'])) {
+      throw new Error('Stock sans corrections : le bouton interne doit être masqué et Suivant doit être dans la barre candidat: '+JSON.stringify(stock));
     }
     if (stock.nestedNav) throw new Error('Navigation commune imbriquée dans la page historique Stock.');
     if (stock.headingDisplay!=='none'||stock.contextDisplay!=='none'||stock.footerDisplay!=='none') {
       throw new Error('Le cadre générique KALTEST prend encore de la place sur Stock.');
     }
     if (stock.blockHeight < stock.contentHeight-4) throw new Error('Le bloc Stock ne prend pas toute la hauteur disponible.');
-
-    await win.webContents.executeJavaScript(`
-      document.querySelector('.kaltest-legacy-page-iframe').src='stock.html?kaltestEmbed=1&showCorrections=1'; true;
-    `, true);
-    await sleep(350);
-    const stockWithCorrections = await win.webContents.executeJavaScript(
-      "(document.querySelector('.kaltest-legacy-page-iframe')?.contentDocument?.getElementById('stockActionBtn')?.textContent||'').trim()",
-      true
-    );
-    if (!/Vérifier/.test(stockWithCorrections)) throw new Error('Avec affichage des corrections, la vraie page Stock doit proposer Vérifier.');
 
     win.destroy();
     win = await openSegment('carre');
@@ -113,6 +107,12 @@ app.whenReady().then(async()=>{
         orangeClues:doc?.querySelectorAll('.clue-left,.clue-right').length||0,
         reset:Boolean(doc?.querySelector('.btn-reset')),
         validateLabel:(doc?.getElementById('btnValidate')?.textContent||'').trim(),
+        resetDisplay:doc?.getElementById('carre-reset')?getComputedStyle(doc.getElementById('carre-reset')).display:'',
+        validateDisplay:doc?.getElementById('btnValidate')?getComputedStyle(doc.getElementById('btnValidate')).display:'',
+        nextDisplay:doc?.getElementById('btnNext')?getComputedStyle(doc.getElementById('btnNext')).display:'',
+        barActions:[...document.querySelectorAll('#kaloneo-nav-center .kaloneo-nav-action')]
+          .filter(button=>!button.hidden&&getComputedStyle(button).display!=='none')
+          .map(button=>String(button.textContent||'').trim()),
         background:doc?getComputedStyle(doc.body).backgroundImage:'',
         nestedNav:Boolean(doc?.getElementById('kaloneo-common-navigation')),
         headingDisplay:getComputedStyle(document.querySelector('.kaltest-heading')).display,
@@ -131,8 +131,9 @@ app.whenReady().then(async()=>{
     if (puzzle.cells!==16||puzzle.blueClues!==8||puzzle.orangeClues!==8||!puzzle.reset) {
       throw new Error('Grille historique du Puzzle incomplète: '+JSON.stringify(puzzle));
     }
-    if (!/Valider/.test(puzzle.validateLabel) || /Suivant/.test(puzzle.validateLabel)) {
-      throw new Error('La vraie page Puzzle Build #20 doit conserver Valider avant validation.');
+    if (puzzle.resetDisplay!=='none'||puzzle.validateDisplay!=='none'||puzzle.nextDisplay!=='none' ||
+        JSON.stringify(puzzle.barActions)!==JSON.stringify(['🔄 Recommencer','➡️ Suivant'])) {
+      throw new Error('Puzzle sans corrections : boutons internes masqués et Recommencer/Suivant attendus dans la barre candidat: '+JSON.stringify(puzzle));
     }
     if (!puzzle.background||puzzle.background==='none'||!/gratteciel/.test(puzzle.background)) {
       throw new Error('Fond urbain historique du Puzzle absent: '+JSON.stringify(puzzle));
@@ -142,16 +143,6 @@ app.whenReady().then(async()=>{
       throw new Error('Le cadre générique KALTEST prend encore de la place sur Puzzle.');
     }
     if (puzzle.blockHeight < puzzle.contentHeight-4) throw new Error('Le bloc Puzzle ne prend pas toute la hauteur disponible.');
-
-    await win.webContents.executeJavaScript(`
-      document.querySelector('.kaltest-legacy-page-iframe').src='carre.html?kaltestEmbed=1&showCorrections=1'; true;
-    `, true);
-    await sleep(350);
-    const puzzleWithCorrections = await win.webContents.executeJavaScript(
-      "(document.querySelector('.kaltest-legacy-page-iframe')?.contentDocument?.getElementById('btnValidate')?.textContent||'').trim()",
-      true
-    );
-    if (!/Valider/.test(puzzleWithCorrections)) throw new Error('Avec affichage des corrections, la vraie page Puzzle doit proposer Valider.');
 
     console.log('KALONEO_LEGACY_IDENTITY_SMOKE: OK');
     console.log(JSON.stringify({stock,puzzle}));
