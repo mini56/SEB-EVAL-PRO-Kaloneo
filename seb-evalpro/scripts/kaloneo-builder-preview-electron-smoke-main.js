@@ -202,8 +202,9 @@ app.whenReady().then(async()=>{
       await new Promise(resolve=>setTimeout(resolve,80));
       const blockColorValue=textArea.value;
       const blockColorRendered=document.querySelector('.preview-content-block span')?.style.color||'';
-      const blockMarkupOk=/\[c=#1F6B3A\]couleur\[\/c\]/i.test(blockColorValue);
-      const blockRenderOk=/31,\s*107,\s*58/.test(blockColorRendered)||/#1f6b3a/i.test(blockColorRendered);
+      const blockMarkupOk=blockColorValue.toLowerCase().includes('[c=#1f6b3a]couleur[/c]');
+      const normalizedBlockColor=blockColorRendered.toLowerCase().split(' ').join('');
+      const blockRenderOk=normalizedBlockColor.includes('rgb(31,107,58)')||normalizedBlockColor.includes('#1f6b3a');
       if(!blockMarkupOk||!blockRenderOk) {
         throw new Error('Couleur texte bloc non appliquée :: '+JSON.stringify({blockColorValue,blockColorRendered,blockMarkupOk,blockRenderOk}));
       }
