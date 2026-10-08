@@ -3046,3 +3046,9 @@ body.seb-kaltest-legacy-full #kaltest-content{
 [data-kaloneo-font-size] td{
   font-size:inherit!important;
 }
+
+#page-exercise.kaltest-custom-page-background .kaltest-builder-stylable-block{
+  background-color:rgba(255,255,255,.94);
+  padding:8px 10px;
+  border-radius:9px;
+}
