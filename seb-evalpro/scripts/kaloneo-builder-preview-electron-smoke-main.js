@@ -230,7 +230,6 @@ app.whenReady().then(async()=>{
         styleSelects[1].value='#EEF9F2';
         styleSelects[1].dispatchEvent(new Event('change',{bubbles:true}));
       }
-      document.getElementById('refresh-preview').click();
       await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
       document.getElementById('save-draft').click();
       await new Promise(resolve=>setTimeout(resolve,180));
@@ -249,12 +248,20 @@ app.whenReady().then(async()=>{
         smallImageSize:ir?{width:Math.round(ir.width),height:Math.round(ir.height)}:null,
         smallBlockSize:br?{width:Math.round(br.width),height:Math.round(br.height)}:null,
         blockFont:smallBlock?.style.fontSize||'',
-        blockBackground:smallBlock?.style.backgroundColor||''
+        blockBackground:smallBlock?.style.backgroundColor||'',
+        obsoleteButtonsAbsent:!document.getElementById('refresh-preview')&&!document.getElementById('preview-calculator')&&!document.querySelector('.preview-footer')&&!document.getElementById('download-json')&&!document.getElementById('import-json'),
+        topLabels:[...document.querySelectorAll('.builder-top-actions button')].map(node=>String(node.textContent||'').trim()),
+        previewScale:Number(document.getElementById('candidate-preview')?.style.transform?.match(/scale\(([^)]+)\)/)?.[1]||1),
+        viewportRect:(()=>{const r=document.getElementById('candidate-preview-viewport')?.getBoundingClientRect();return r?{width:r.width,height:r.height}:null})(),
+        pageRect:(()=>{const r=document.getElementById('candidate-preview')?.getBoundingClientRect();return r?{width:r.width,height:r.height}:null})()
       };
     })()`);
     if(!/vraie page/i.test(setup.button)||setup.title!=='Aperçu Electron Smoke'||setup.calculatorBrand!=='KALONÉO'||setup.calculatorOptionsHidden||
        !savedLibraryDefinition||savedLibraryDefinition.title!=='Aperçu Electron Smoke'||! /bibliothèque/i.test(setup.libraryStatus)||
-       !setup.imagePresent||!setup.smallImageFits||setup.blockFont!=='22px'||!/238, 249, 242/.test(setup.blockBackground)) return fail('bouton, saisie, image ou style Builder incorrect',setup);
+       !setup.imagePresent||!setup.smallImageFits||setup.blockFont!=='22px'||!/238, 249, 242/.test(setup.blockBackground)||
+       !setup.obsoleteButtonsAbsent||setup.previewScale>=1||
+       !setup.viewportRect||!setup.pageRect||setup.pageRect.width>setup.viewportRect.width+1||setup.pageRect.height>setup.viewportRect.height+1||
+       setup.topLabels.join('|')!=='← Tests / Parcours|Bibliothèque de tests|Bibliothèque d’images|Nouveau test|Enregistrer') return fail('ergonomie ou aperçu miniature Builder incorrect',setup);
 
     if(savedImageCalls<1) return fail('une image importée directement dans un bloc ne rejoint pas automatiquement la bibliothèque',{savedImageCalls});
 
