@@ -17,9 +17,12 @@ const page = read('app/web/js/carre-page.js');
 const parcours = read('app/web/js/seb-parcours.js');
 const qcm = read('app/web/qcmv1.0.html') + '\n' + read('app/web/js/qcm-runtime.js') + '\n' + read('app/web/js/qcm-runtime-ui.js') + '\n' + read('app/web/js/qcm-runtime-tail.js');
 
+// Le rendu de référence est désormais la vraie page historique Build #20.
+// Ce garde doit empêcher qu'un habillage KALONÉO moderne la remplace à nouveau.
 const protectedText = [
-  'kaloneo-context-scenario carre-scenario',
-  '<strong class="kaloneo-context-label">Scénario :</strong>',
+  '<title>Puzzle Gratte-ciel 4×4</title>',
+  "background: url('imageqcm/gratteciel.png') center/cover no-repeat;",
+  '<h1>🏙️ Puzzle Gratte-ciel</h1>',
   "C'est la journée de cohésion d'équipe. Régulièrement, l'équipe est invitée à se retrouver pour partager un moment convivial.",
   "À cette occasion, la cheffe d'équipe a préparé un petit défi ! Elle propose à chacun une grille à compléter.",
   '📋 Règles du jeu',
@@ -27,14 +30,18 @@ const protectedText = [
   'Chaque chiffre doit apparaître <strong>une seule fois</strong> par ligne et par colonne',
   'Pour la rangée <strong>[2, 4, 3, 1]</strong>',
   'Cliquez sur <strong>"Valider"</strong> pour vérifier votre réponse',
-  'Une fois terminé, cliquez sur <strong>"Suivant"</strong>'
+  'Une fois terminé, cliquez sur <strong>"Page suivante"</strong>',
+  '<button class="btn btn-reset" id="carre-reset" type="button">🔄 Recommencer</button>',
+  '<button class="btn btn-validate" id="btnValidate" type="button">✔️ Valider</button>',
+  '<button class="btn btn-next" id="btnNext" type="button">➡️ Page suivante</button>'
 ];
 for (const token of protectedText) {
-  if (!html.includes(token)) fail('contenu validé modifié: ' + token);
+  if (!html.includes(token)) fail('contenu/visuel historique modifié: ' + token);
 }
 
-if (!html.includes('<link rel="stylesheet" href="css/kaloneo-context.css">')) fail('composant contexte KALONÉO absent du Carré');
-if (!html.includes('<button class="btn btn-next" id="btnNext" type="button">Suivant</button>')) fail('bouton Suivant local du Carré absent');
+if (html.includes('css/kaloneo-context.css') || html.includes('kaloneo-context-scenario')) {
+  fail('habillage contexte moderne réintroduit dans le Puzzle historique');
+}
 
 if (!html.includes('<script src="js/seb-parcours.js"></script>') ||
     !html.includes('<script src="js/carre-page.js"></script>')) {
@@ -53,9 +60,12 @@ for (const token of [
   'Object.freeze([4, 3, 1, 2])',
   'Object.freeze([2, 4, 3, 1])',
   'Object.freeze([3, 1, 2, 4])',
-  'Object.freeze([1, 2, 4, 3])'
+  'Object.freeze([1, 2, 4, 3])',
+  "testId:'gratte_ciel'",
+  "postToKaltest('puzzle-answer'",
+  "postToKaltest('action'"
 ]) {
-  if (!page.includes(token)) fail('contrat Carré absent: ' + token);
+  if (!page.includes(token)) fail('contrat Carré/KALTEST absent: ' + token);
 }
 if (/qcmv1\.0\.html/i.test(page)) fail('couplage direct Carré -> QCM réintroduit');
 
@@ -79,4 +89,4 @@ for (const token of [
   if (!qcm.includes(token)) fail('page Résultats/Bilan ne récupère plus Carré: ' + token);
 }
 
-console.log('SEB EvalPro garde carré: contenu, solution, score /16, verrouillage, Résultats et navigation centrale — OK.');
+console.log('SEB EvalPro garde carré: visuel Build #20, moteur /16, pont KALTEST et Résultats — OK.');
