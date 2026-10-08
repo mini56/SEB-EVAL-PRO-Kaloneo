@@ -9,7 +9,7 @@ on:
     paths:
       - 'seb-evalpro/**'
       - 'kaloneo/**'
-      - '.github/workflows/build-test-builder-r22-setup.yml'
+      - '.github/workflows/build-test-builder-r23-setup.yml'
 
 permissions:
   contents: write
@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Verify R22 institutional Bilan and native DOCX
+      - name: Verify R23 institutional Bilan and native DOCX
         shell: pwsh
         run: |
           node --check src/preload.js
