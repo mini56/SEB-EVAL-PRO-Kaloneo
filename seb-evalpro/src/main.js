@@ -1115,6 +1115,22 @@ ipcMain.handle('kaloneo-library:save-image', (_event, payload) => {
   }
 });
 
+ipcMain.handle('kaloneo-library:import-image-zip', async () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier la bibliothèque d’images pendant une évaluation active.' };
+  try {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title:'Importer un ZIP d’images KALONÉO',
+      properties:['openFile'],
+      filters:[{ name:'Archives ZIP', extensions:['zip'] }]
+    });
+    if (result.canceled || !result.filePaths?.[0]) return { ok:false, canceled:true };
+    return getKaloneoLibrary().importImageZip(result.filePaths[0]);
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
 ipcMain.handle('kaloneo-library:list-mask-screens', () => {
   if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
   if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les écrans de masquage pendant une évaluation active.' };
