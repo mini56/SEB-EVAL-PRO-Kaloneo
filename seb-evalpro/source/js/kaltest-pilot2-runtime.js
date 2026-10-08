@@ -3003,227 +3003,143 @@
     return wrap;
   }
 
-  function legacyContextCard(kind, label, text, image) {
-    const section = document.createElement('section');
-    section.className = 'kaltest-legacy-context kaltest-legacy-' + kind;
-    const img = document.createElement('img');
-    img.src = image;
-    img.alt = label;
-    const body = document.createElement('div');
-    body.className = 'kaltest-legacy-context-body';
-    const strong = document.createElement('strong');
-    strong.textContent = label + ' :';
-    const span = document.createElement('span');
-    span.textContent = text || '';
-    body.append(strong, span);
-    section.append(img, body);
-    return section;
+  function stockPositionsFromKaltest(test, testState) {
+    if (Array.isArray(testState?.legacyPositions) && testState.legacyPositions.length) {
+      return testState.legacyPositions.map(item => ({ ...item }));
+    }
+    const definition = test.presentation?.stockBoard || {};
+    const positions = [];
+    for (const pot of definition.pots || []) {
+      const id = String(pot.id);
+      if (pot.example) {
+        const parts = String(definition.examplePlacement || '').split(':');
+        positions.push(parts[0] === 'case'
+          ? { id, type:'case', etagere:parts[1] || '', niveau:parts[2] || '', caseNum:parts[3] || '' }
+          : { id, type:'source', index:positions.length });
+        continue;
+      }
+      const answer = String(testState?.answers?.[pot.questionId] ?? 'source');
+      if (answer.startsWith('case:')) {
+        const parts = answer.split(':');
+        positions.push({ id, type:'case', etagere:parts[1] || '', niveau:parts[2] || '', caseNum:parts[3] || '' });
+      } else if (answer === 'tri') {
+        positions.push({ id, type:'tri', index:positions.length });
+      } else {
+        positions.push({ id, type:'source', index:positions.length });
+      }
+    }
+    return positions;
+  }
+
+  function syncStockPositionsFromLegacy(test, positions) {
+    if (!Array.isArray(positions)) return;
+    const testState = testStateFor(test);
+    testState.legacyPositions = positions.map(item => ({ ...item }));
+    const definition = test.presentation?.stockBoard || {};
+    const byId = new Map((definition.pots || []).map(pot => [String(pot.id), pot]));
+    for (const item of positions) {
+      const pot = byId.get(String(item?.id || ''));
+      if (!pot || pot.example || !pot.questionId) continue;
+      let value = 'source';
+      if (item.type === 'case') {
+        value = 'case:' + String(item.etagere || '') + ':' + String(item.niveau || '') + ':' + String(item.caseNum || '');
+      } else if (item.type === 'tri') {
+        value = 'tri';
+      }
+      testState.answers[pot.questionId] = value;
+    }
+    persist();
+  }
+
+  function legacyPageFrame(test, pageName) {
+    const wrap = document.createElement('div');
+    wrap.className = 'kaltest-legacy-page-frame';
+    const frame = document.createElement('iframe');
+    frame.className = 'kaltest-legacy-page-iframe';
+    frame.title = test.title || 'Exercice';
+    const params = new URLSearchParams({
+      kaltestEmbed:'1',
+      showCorrections:showCorrectionDuringParcours() ? '1' : '0'
+    });
+    frame.src = pageName + '?' + params.toString();
+
+    const sendState = () => {
+      const testState = testStateFor(test);
+      const payload = {
+        source:'seb-kaltest-host',
+        type:'restore',
+        testId:test.id,
+        status:testState.status,
+        showCorrections:showCorrectionDuringParcours()
+      };
+      if (test.id === 'ranger_stock') {
+        payload.positions = stockPositionsFromKaltest(test, testState);
+      } else if (test.id === 'gratte_ciel') {
+        payload.answers = Object.assign({}, testState.answers || {});
+      }
+      try { frame.contentWindow?.postMessage(payload, '*'); } catch (_) {}
+    };
+
+    const onMessage = event => {
+      if (event.source !== frame.contentWindow) return;
+      const message = event.data;
+      if (!message || message.source !== 'seb-kaltest-legacy' || message.testId !== test.id) return;
+
+      if (message.type === 'ready') {
+        sendState();
+        return;
+      }
+
+      if (test.id === 'ranger_stock' && message.type === 'stock-state') {
+        syncStockPositionsFromLegacy(test, message.positions);
+        return;
+      }
+
+      if (test.id === 'gratte_ciel' && message.type === 'puzzle-answer') {
+        const questionId = String(message.questionId || '');
+        if (questionById(test, questionId)) saveAnswer(test, questionId, String(message.value || ''));
+        return;
+      }
+
+      if (test.id === 'gratte_ciel' && message.type === 'puzzle-reset') {
+        const testState = testStateFor(test);
+        for (const question of test.questions || []) delete testState.answers[question.id];
+        testState.result = null;
+        testState.status = 'PENDING';
+        persist();
+        sendState();
+        return;
+      }
+
+      if (message.type === 'action') {
+        if (test.id === 'ranger_stock' && Array.isArray(message.positions)) {
+          syncStockPositionsFromLegacy(test, message.positions);
+        }
+        if (test.id === 'gratte_ciel' && message.answers && typeof message.answers === 'object') {
+          const testState = testStateFor(test);
+          for (const question of test.questions || []) {
+            if (Object.prototype.hasOwnProperty.call(message.answers, question.id)) {
+              testState.answers[question.id] = String(message.answers[question.id] || '');
+            }
+          }
+          persist();
+        }
+        finishCurrentTest();
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    frame.addEventListener('load', sendState);
+    wrap.appendChild(frame);
+    return wrap;
   }
 
   function renderLegacyStockBlock(test) {
-    const testState = testStateFor(test);
-    const page = document.createElement('div');
-    page.className = 'kaltest-legacy-stock-page';
-
-    const scenario = legacyContextCard(
-      'stock-scenario',
-      'Scénario',
-      test.scenario || '',
-      'imageqcm/scenario.png'
-    );
-
-    const instructions = document.createElement('section');
-    instructions.className = 'kaltest-legacy-stock-instructions';
-    const intro = document.createElement('div');
-    intro.className = 'kaltest-legacy-stock-intro';
-    intro.textContent = 'Rangez les flacons, un par emplacement, selon les consignes suivantes :';
-
-    const details = document.createElement('div');
-    details.className = 'kaltest-legacy-stock-details';
-    details.innerHTML =
-      '<strong>Consignes :</strong>' +
-      '<div>△ Sur chaque étagère, les flacons seront placés en ordre alphabétique puis, le cas échéant, selon le dosage en ordre décroissant.</div>' +
-      '<div>△ Les flacons en double ou ne convenant pas aux casiers 1 et 2 seront placés dans le casier 3, selon les mêmes critères.</div>' +
-      '<div class="kaltest-legacy-stock-how"><span>🧙</span><b>Comment ça fonctionne ?</b> Glissez-déposez les pots dans les bonnes étagères selon les règles affichées. Vous disposez d\'une zone de tri pour vous aider si vous en avez besoin.</div>';
-
-    const action = document.createElement('button');
-    action.type = 'button';
-    action.className = 'kaltest-legacy-stock-action';
-    action.textContent = testState.status === 'COMPLETED'
-      ? '➡ Suivant'
-      : (showCorrectionDuringParcours() ? '✓ Vérifier' : '➡ Suivant');
-    action.addEventListener('click', () => finishCurrentTest());
-
-    instructions.append(intro, details, action);
-
-    const board = document.createElement('div');
-    board.className = 'kaltest-legacy-stock-board';
-    renderStock(test, board, { force:true });
-
-    page.append(scenario, instructions, board);
-    return page;
+    return legacyPageFrame(test, 'stock.html');
   }
 
   function renderLegacyGratteCielBlock(test) {
-    const testState = testStateFor(test);
-    const page = document.createElement('div');
-    page.className = 'kaltest-legacy-gratte-page';
-
-    const scenario = document.createElement('section');
-    scenario.className = 'kaltest-legacy-gratte-header';
-    const title = document.createElement('h2');
-    title.textContent = '🧩 Puzzle Gratte-ciel';
-    const subtitle = document.createElement('p');
-    subtitle.textContent = test.scenario || '';
-    scenario.append(title, subtitle);
-
-    const main = document.createElement('div');
-    main.className = 'kaltest-legacy-gratte-main';
-
-    const rules = document.createElement('section');
-    rules.className = 'kaltest-legacy-gratte-card kaltest-legacy-gratte-rules';
-    rules.innerHTML =
-      '<h3>📋 Règles du jeu</h3>' +
-      '<ul>' +
-      '<li>• Placez les chiffres <strong>1, 2, 3, 4</strong> dans chaque case</li>' +
-      '<li>• Chaque chiffre doit apparaître <strong>une seule fois</strong> par ligne et par colonne</li>' +
-      '<li>• Les nombres sur les bords indiquent combien de "bâtons" sont <strong>visibles</strong> depuis ce point</li>' +
-      '</ul>' +
-      '<div class="kaltest-legacy-gratte-example"><strong>💡 Exemple :</strong> Pour la rangée <strong>[2, 4, 3, 1]</strong> :<br>' +
-      '👈 Depuis la <strong>gauche</strong>, on voit <strong>2 bâtons</strong> (le 2 et le 4, car le 4 cache le 3 et le 1)<br>' +
-      '👉 Depuis la <strong>droite</strong>, on voit <strong>3 bâtons</strong> (le 1, le 3 et le 4)</div>' +
-      '<div class="kaltest-legacy-gratte-example kaltest-legacy-gratte-yellow"><strong>🎯 Astuces :</strong><br><br>' +
-      '• Si l\'indice est <strong>1</strong>, le plus grand bâton (4) doit être en première position !<br>' +
-      '• Si l\'indice est <strong>4</strong>, les bâtons sont forcément dans l\'ordre croissant : 1, 2, 3, 4<br>' +
-      '• Commencez par les indices les plus contraignants (1 et 4)</div>' +
-      '<div class="kaltest-legacy-gratte-example kaltest-legacy-gratte-green"><strong>🎮 Comment jouer :</strong><br><br>' +
-      '• Remplissez toutes les cases avec des chiffres de 1 à 4<br>' +
-      '• Cliquez sur <strong>"Valider"</strong> pour vérifier votre réponse<br>' +
-      '• Une fois terminé, cliquez sur <strong>"Suivant"</strong></div>';
-
-    const puzzleSection = document.createElement('section');
-    puzzleSection.className = 'kaltest-legacy-gratte-puzzle-section';
-    const puzzleCard = document.createElement('div');
-    puzzleCard.className = 'kaltest-legacy-gratte-puzzle-card';
-    const grid = document.createElement('div');
-    grid.className = 'kaltest-legacy-gratte-grid';
-
-    const top = [1,2,3,2];
-    const bottom = [3,2,1,2];
-    const left = [1,2,2,3];
-    const right = [3,3,1,2];
-
-    const topRow = document.createElement('div');
-    topRow.className = 'kaltest-legacy-gratte-row';
-    topRow.appendChild(Object.assign(document.createElement('div'), {className:'kaltest-legacy-gratte-spacer'}));
-    top.forEach(value => {
-      const clue = document.createElement('div');
-      clue.className = 'kaltest-legacy-gratte-clue clue-blue';
-      clue.textContent = String(value);
-      topRow.appendChild(clue);
-    });
-    topRow.appendChild(Object.assign(document.createElement('div'), {className:'kaltest-legacy-gratte-spacer'}));
-    grid.appendChild(topRow);
-
-    for (let row = 0; row < 4; row += 1) {
-      const line = document.createElement('div');
-      line.className = 'kaltest-legacy-gratte-row';
-      const lc = document.createElement('div');
-      lc.className = 'kaltest-legacy-gratte-clue clue-orange';
-      lc.textContent = String(left[row]);
-      line.appendChild(lc);
-
-      for (let col = 0; col < 4; col += 1) {
-        const id = 'gratte_r' + (row + 1) + 'c' + (col + 1);
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.maxLength = 1;
-        input.inputMode = 'numeric';
-        input.className = 'kaltest-legacy-gratte-cell';
-        input.dataset.questionId = id;
-        input.dataset.row = String(row);
-        input.dataset.col = String(col);
-        input.value = String(testState.answers?.[id] ?? '');
-        const detail = testState.result?.details?.[id];
-        if (testState.status === 'COMPLETED') {
-          if (showCorrectionDuringParcours() && detail?.correct != null) {
-            input.classList.add(detail.correct ? 'correct-answer' : 'wrong-answer');
-          }
-          input.disabled = true;
-        }
-        input.addEventListener('input', () => {
-          if (!/^[1-4]?$/.test(input.value)) input.value = '';
-          saveAnswer(test, id, input.value);
-        });
-        input.addEventListener('keydown', event => {
-          let r = row, cc = col;
-          if (event.key === 'ArrowUp' && row > 0) r -= 1;
-          else if (event.key === 'ArrowDown' && row < 3) r += 1;
-          else if (event.key === 'ArrowLeft' && col > 0) cc -= 1;
-          else if (event.key === 'ArrowRight' && col < 3) cc += 1;
-          else return;
-          event.preventDefault();
-          puzzleCard.querySelector('[data-row="' + r + '"][data-col="' + cc + '"]')?.focus();
-        });
-        line.appendChild(input);
-      }
-
-      const rc = document.createElement('div');
-      rc.className = 'kaltest-legacy-gratte-clue clue-orange';
-      rc.textContent = String(right[row]);
-      line.appendChild(rc);
-      grid.appendChild(line);
-    }
-
-    const bottomRow = document.createElement('div');
-    bottomRow.className = 'kaltest-legacy-gratte-row';
-    bottomRow.appendChild(Object.assign(document.createElement('div'), {className:'kaltest-legacy-gratte-spacer'}));
-    bottom.forEach(value => {
-      const clue = document.createElement('div');
-      clue.className = 'kaltest-legacy-gratte-clue clue-blue';
-      clue.textContent = String(value);
-      bottomRow.appendChild(clue);
-    });
-    bottomRow.appendChild(Object.assign(document.createElement('div'), {className:'kaltest-legacy-gratte-spacer'}));
-    grid.appendChild(bottomRow);
-
-    puzzleCard.appendChild(grid);
-
-    const footer = document.createElement('div');
-    footer.className = 'kaltest-legacy-gratte-footer';
-    const reset = document.createElement('button');
-    reset.type = 'button';
-    reset.className = 'kaltest-legacy-gratte-btn reset';
-    reset.textContent = '↻ Recommencer';
-    reset.hidden = testState.status === 'COMPLETED';
-    reset.addEventListener('click', () => {
-      if (testState.status === 'COMPLETED') return;
-      for (const question of test.questions || []) delete testState.answers[question.id];
-      testState.result = null;
-      testState.status = 'PENDING';
-      persist();
-      renderCurrentTest();
-    });
-
-    const validate = document.createElement('button');
-    validate.type = 'button';
-    validate.className = 'kaltest-legacy-gratte-btn validate';
-    validate.textContent = 'Valider';
-    validate.hidden = testState.status === 'COMPLETED';
-    validate.addEventListener('click', () => finishCurrentTest());
-
-    const next = document.createElement('button');
-    next.type = 'button';
-    next.className = 'kaltest-legacy-gratte-btn next';
-    next.textContent = 'Suivant';
-    next.hidden = testState.status !== 'COMPLETED';
-    next.addEventListener('click', () => finishCurrentTest());
-
-    footer.append(reset, validate, next);
-    puzzleSection.append(puzzleCard, footer);
-    main.append(rules, puzzleSection);
-    page.append(scenario, main);
-    return page;
+    return legacyPageFrame(test, 'carre.html');
   }
 
   function renderLegacyPreset(test, item) {
