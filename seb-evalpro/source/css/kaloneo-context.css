@@ -72,9 +72,9 @@
 .instruction-line>div{
   min-width:0;
   flex:1 1 auto;
-  display:flex!important;
-  align-items:baseline!important;
-  flex-wrap:wrap!important;
+  display:grid!important;
+  grid-template-columns:max-content minmax(0,1fr)!important;
+  align-items:start!important;
   gap:0 4px!important;
 }
 
@@ -98,8 +98,8 @@
 .kaloneo-scenario p,
 .k-stock-context p,
 .scenario-line p{
-  display:inline!important;
-  flex:1 1 0;
+  display:block!important;
+  grid-column:2!important;
   min-width:0;
   margin:0!important;
   color:#27313A!important;
@@ -176,4 +176,14 @@
   .scenario-line p{
     font-size:14.5px!important;
   }
+}
+
+.kaloneo-context-label,
+.kaltest-context strong,
+.kaloneo-scenario strong,
+.k-stock-context strong,
+.scenario-line .label,
+.instruction-line .label,
+.k-qcm-context .kaloneo-context-label{
+  grid-column:1!important;
 }
