@@ -1007,6 +1007,7 @@
 
   function applyPreviewBlockStyle(node,block) {
     if(!node)return node;
+    node.classList.add('preview-stylable-block');
     const size=Number(block?.fontSize);
     if(Number.isFinite(size)&&size>=10&&size<=40){
       node.style.fontSize=size+'px';
@@ -1349,6 +1350,7 @@
 
     const page=$('candidate-preview');
     if(page){
+      page.classList.toggle('preview-custom-page-background',m.pageBackgroundType==='color'||m.pageBackgroundType==='image');
       page.style.removeProperty('background');
       page.style.removeProperty('background-color');
       page.style.removeProperty('background-image');
