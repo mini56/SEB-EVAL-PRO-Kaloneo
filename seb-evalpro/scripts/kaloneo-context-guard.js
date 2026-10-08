@@ -23,11 +23,11 @@ for (const token of [
   'font-weight:700'
 ]) if (!css.includes(token)) fail('règle commune absente: ' + token);
 
-// Stock est volontairement une page historique pleine page dans KALTEST.
-// Son visuel Build #20 est protégé séparément : on ne lui impose plus
-// le composant de contexte moderne qui avait provoqué la régression visuelle.
+// Les pages validées KALONÉO doivent conserver le composant de contexte partagé.
 const pages = [
   'kaltest-pilot2.html',
+  'stock.html',
+  'carre.html',
   'brique.html',
   'dictee.html',
   'tri_de_cheville.html',
@@ -50,17 +50,29 @@ for (const page of ['kaltest-pilot2.html','brique.html','dictee.html','qcmv1.0.h
 
 const stock = read('app/web/stock.html');
 for (const token of [
-  '<title>Jeu de Rangement de Pots</title>',
-  'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);',
+  'data-kaloneo-layout="stock-full-context-35-65"',
+  'css/kaloneo-stock.css',
+  'kaloneo-context-scenario',
+  'kaloneo-context-consigne',
+  'class="k-stock-game"',
   'id="pots-source"',
   'id="zone-tri"',
-  'id="stockActionBtn"',
-  '🔍 Vérifier'
+  'id="stockActionBtn"'
 ]) {
-  if (!stock.includes(token)) fail('visuel historique Stock modifié: ' + token);
+  if (!stock.includes(token)) fail('visuel Stock validé PILOTE 17 modifié: ' + token);
 }
-if (stock.includes('css/kaloneo-context.css') || stock.includes('kaloneo-context-scenario')) {
-  fail('habillage contexte moderne réintroduit dans Stock historique');
+if (stock.includes('linear-gradient(135deg, #667eea 0%, #764ba2 100%)')) {
+  fail('ancien fond violet Stock réintroduit');
+}
+
+const carre = read('app/web/carre.html');
+for (const token of [
+  'data-kaloneo-page="carre"',
+  'css/kaloneo-remaining-pages.css',
+  'kaloneo-context-scenario',
+  'class="header kaloneo-context-card kaloneo-context-scenario carre-scenario"'
+]) {
+  if (!carre.includes(token)) fail('visuel Puzzle validé PILOTE 20 modifié: ' + token);
 }
 
 const forbidden = [
@@ -72,4 +84,4 @@ for (const page of pages.filter(name => name !== 'qcmv1.0.html')) {
   for (const re of forbidden) if (re.test(html)) fail('ancien style local Scénario/Consigne réintroduit dans ' + page);
 }
 
-console.log('SEB EvalPro garde contexte KALONÉO: composant partagé conservé, Stock historique explicitement protégé — OK.');
+console.log('SEB EvalPro garde contexte KALONÉO: Stock PILOTE 17 et Puzzle PILOTE 20 protégés — OK.');
