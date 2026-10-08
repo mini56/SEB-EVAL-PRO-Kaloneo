@@ -8,6 +8,20 @@
   const LEGACY_DRAFT_KEY = 'seb_evalpro_page_draft_stock.html';
   const TOTAL_EVALUATED = 33;
   const EXAMPLE_ID = '8';
+  const EMBEDDED = new URLSearchParams(window.location.search || '').get('kaltestEmbed') === '1';
+  const SHOW_CORRECTIONS = new URLSearchParams(window.location.search || '').get('showCorrections') === '1';
+
+  function postToKaltest(type, detail = {}) {
+    if (!EMBEDDED || window.parent === window) return;
+    try {
+      window.parent.postMessage({
+        source:'seb-kaltest-legacy',
+        testId:'ranger_stock',
+        type,
+        ...detail
+      }, '*');
+    } catch (_) {}
+  }
 
   const pots = Object.freeze([
     { id:1, code:'Ow', percentage:37, color:'rouge' },
@@ -184,6 +198,7 @@
     };
     sessionStorage.setItem(STATE_KEY, JSON.stringify(state));
     persistCandidate();
+    if (EMBEDDED) postToKaltest('stock-state', { positions:state.positions });
     return state;
   }
 
@@ -318,9 +333,15 @@
   function setVerifyMode() {
     const button = document.getElementById('stockActionBtn');
     if (!button) return;
-    button.textContent = '🔍 Vérifier';
-    button.onclick = null;
-    button.addEventListener('click', verifyPlacements, { once:true });
+    const replacement = button.cloneNode(true);
+    button.replaceWith(replacement);
+    if (EMBEDDED && !SHOW_CORRECTIONS) {
+      replacement.textContent = '➡️ Suivant';
+      replacement.addEventListener('click', goNext);
+      return;
+    }
+    replacement.textContent = '🔍 Vérifier';
+    replacement.addEventListener('click', verifyPlacements, { once:true });
   }
 
   function setNextMode() {
@@ -334,20 +355,27 @@
   }
 
   function verifyPlacements() {
-    const score = computeScore(true);
+    const score = computeScore(!EMBEDDED || SHOW_CORRECTIONS);
     sessionStorage.setItem(CORRECT_KEY, String(score.correct));
     sessionStorage.setItem(ERROR_KEY, String(score.errors));
     sessionStorage.setItem(TOTAL_KEY, String(TOTAL_EVALUATED));
     persistState(true);
-    window.alert(
-      '✅ Flacons correctement placés : ' + score.correct + ' / ' + TOTAL_EVALUATED +
-      '\n❌ Erreurs : ' + score.errors
-    );
+    if (!EMBEDDED || SHOW_CORRECTIONS) {
+      window.alert(
+        '✅ Flacons correctement placés : ' + score.correct + ' / ' + TOTAL_EVALUATED +
+        '\n❌ Erreurs : ' + score.errors
+      );
+    }
     setNextMode();
+    if (EMBEDDED) postToKaltest('action', { action:'validate', positions:capturePositions() });
     return score;
   }
 
   function goNext() {
+    if (EMBEDDED) {
+      postToKaltest('action', { action:'advance', positions:capturePositions() });
+      return;
+    }
     if (!window.sebParcours?.goNext) throw new Error('Registre de parcours indisponible.');
     window.sebParcours.goNext('stock');
   }
@@ -500,14 +528,41 @@
     return true;
   }
 
+  function installEmbeddedBridge() {
+    if (!EMBEDDED) return;
+    window.addEventListener('message', event => {
+      const message = event.data;
+      if (!message || message.source !== 'seb-kaltest-host' || message.type !== 'restore' || message.testId !== 'ranger_stock') return;
+      if (Array.isArray(message.positions)) restorePositions(message.positions);
+      const completed = String(message.status || '') === 'COMPLETED';
+      if (completed && SHOW_CORRECTIONS) {
+        computeScore(true);
+        setNextMode();
+      } else if (completed) {
+        setNextMode();
+      } else {
+        document.querySelectorAll('.pot').forEach(pot => pot.classList.remove('correct','incorrect'));
+        setVerifyMode();
+      }
+    });
+    postToKaltest('ready');
+  }
+
   function install() {
     createPots();
-    const restored = restoreState();
     installDragAndDrop();
 
+    if (EMBEDDED) {
+      defaultExample();
+      updateCaseOccupancy();
+      setVerifyMode();
+      installEmbeddedBridge();
+      return;
+    }
+
+    const restored = restoreState();
     if (restored.validated || hasStoredResult()) restoreValidatedUi();
     else setVerifyMode();
-
     if (!restored.restored) persistState(false);
   }
 
