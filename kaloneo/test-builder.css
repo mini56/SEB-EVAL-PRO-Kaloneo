@@ -812,3 +812,27 @@ body{
   padding:9px 10px;
   border-radius:8px;
 }
+
+
+/* R29 — mise en forme légère Scénario / Consigne */
+.context-rich-field{position:relative}
+.context-format-toolbar{
+  display:flex;
+  gap:5px;
+  margin:6px 0 5px;
+}
+.context-format-btn{
+  width:34px;
+  height:30px;
+  padding:2px;
+  border:1px solid #9eb5c4;
+  border-radius:6px;
+  background:#fff;
+  color:#004E70;
+  font-size:16px;
+  cursor:pointer;
+}
+.context-format-btn:hover{background:#eef6fd}
+.preview-context-card p strong,
+.preview-context-card p em,
+.preview-context-card p u{font-size:inherit}
