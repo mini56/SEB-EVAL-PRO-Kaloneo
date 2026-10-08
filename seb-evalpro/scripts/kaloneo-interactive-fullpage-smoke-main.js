@@ -12,7 +12,7 @@ let currentState = null;
 function fail(message, detail) {
   console.error('KALONEO_INTERACTIVE_FULLPAGE: FAIL — ' + message);
   if (detail) console.error(JSON.stringify(detail, null, 2));
-  app.exit(2);
+  process.exit(2);
 }
 
 ipcMain.on('smoke:interactive-fullpage-sync', event => {
@@ -68,7 +68,11 @@ async function runCase(test, fin, showCorrections) {
     }
   });
 
-  await win.loadFile(path.join(webRoot, 'kaltest-pilot2.html'));
+  try {
+    await win.loadFile(path.join(webRoot, 'kaltest-pilot2.html'));
+  } catch (error) {
+    if (!/ERR_FAILED/.test(String(error?.message || error))) throw error;
+  }
 
   let result = null;
   for (let i=0;i<80;i+=1) {
