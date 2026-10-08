@@ -212,7 +212,12 @@ function getKaloneoLibrary() {
   if (!kaloneoLibrary) {
     kaloneoLibrary = createKaloneoLibrary({
       dataRoot: sebInternalRoot(),
-      seedTestsRoot: path.join(__dirname, '..', 'app', 'web', 'kaltest', 'tests')
+      seedTestsRoot: path.join(__dirname, '..', 'app', 'web', 'kaltest', 'tests'),
+      seedImageRoots:[
+        { root:path.join(__dirname, '..', 'app', 'web', 'imageqcm'), category:'Images exercices SEB EvalPro' },
+        { root:path.join(__dirname, '..', 'app', 'web', 'flacon'), category:'Images Stock' },
+        { root:path.join(__dirname, '..', 'app', 'web', 'assets'), category:'Images KALONÉO' }
+      ]
     });
   }
   return kaloneoLibrary;
@@ -1075,6 +1080,36 @@ ipcMain.handle('kaloneo-library:save-test', (_event, payload) => {
   if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les tests pendant une évaluation active.' };
   try {
     return getKaloneoLibrary().saveTest(payload && payload.definition, { overwrite:payload && payload.overwrite === true });
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:list-images', () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier la bibliothèque d’images pendant une évaluation active.' };
+  try {
+    return { ok:true, images:getKaloneoLibrary().listImages() };
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:get-image', (_event, id) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de consulter la bibliothèque d’images pendant une évaluation active.' };
+  try {
+    return getKaloneoLibrary().getImage(id);
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-library:save-image', (_event, payload) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier la bibliothèque d’images pendant une évaluation active.' };
+  try {
+    return getKaloneoLibrary().saveImage(payload || {});
   } catch (error) {
     return { ok:false, error:error && error.message ? error.message : String(error) };
   }
