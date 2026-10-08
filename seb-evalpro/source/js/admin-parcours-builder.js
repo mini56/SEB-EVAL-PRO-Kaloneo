@@ -15,6 +15,7 @@
     draggingIndex: null,
     pointerDrag: null
   };
+  let cleanSnapshot = '';
 
   const $ = id => document.getElementById(id);
 
@@ -28,6 +29,33 @@
 
   function keyOf(item) {
     return item ? String(item.id) + '@' + String(item.version) : '';
+  }
+
+  function currentParcoursSnapshot() {
+    return JSON.stringify({
+      editingId:String(state.editingId || ''),
+      name:String($('parcours-name')?.value || ''),
+      creator:String($('parcours-creator')?.value || ''),
+      maskScreen:refOf(state.maskScreen),
+      introduction:refOf(state.introduction),
+      tests:state.tests.map(refOf),
+      fin:refOf(state.fin)
+    });
+  }
+
+  function markParcoursClean() {
+    cleanSnapshot = currentParcoursSnapshot();
+  }
+
+  function hasUnsavedChanges() {
+    return Boolean(cleanSnapshot) && currentParcoursSnapshot() !== cleanSnapshot;
+  }
+
+  function closeBuilder() {
+    if (hasUnsavedChanges() && !confirm(
+      'Le parcours contient des modifications non enregistrées.\n\nFermer entraînera la perte de ces modifications. Continuer ?'
+    )) return;
+    window.location.href = 'admin-tests-parcours.html';
   }
 
   function setStatus(message, type = '') {
@@ -609,6 +637,7 @@
     document.querySelector('.page-topbar h1').textContent='Création de parcours';
     setStatus('Nouveau parcours.');
     render();
+    markParcoursClean();
     requestAnimationFrame(()=>$('parcours-name').focus());
   }
 
@@ -637,6 +666,7 @@
           : 'Parcours « '+value.name+' » ouvert.',
         state.editingSystemProvided?'':'ok'
       );
+      markParcoursClean();
     } catch(error) {
       setStatus(error?.message||String(error),'error');
     }
@@ -672,6 +702,7 @@
         await loadParcours(editId);
       } else {
         setStatus('Bibliothèque chargée : ' + state.library.filter(item => item.role === 'test').length + ' tests et ' + state.maskScreens.length + ' écran(s) de masquage.');
+        markParcoursClean();
       }
     } catch (error) {
       setStatus(error && error.message ? error.message : String(error), 'error');
@@ -711,6 +742,7 @@
       await refreshSaved();
       renderSaved();
       setStatus(result.updated ? 'Parcours « ' + name + ' » mis à jour.' : 'Parcours « ' + name + ' » enregistré.', 'ok');
+      markParcoursClean();
     } catch (error) {
       setStatus(error && error.message ? error.message : String(error), 'error');
     } finally {
@@ -719,7 +751,7 @@
   }
 
   function ready() {
-    $('back-tests-parcours').addEventListener('click', () => { window.location.href = 'admin-tests-parcours.html'; });
+    $('back-tests-parcours').addEventListener('click', closeBuilder);
     $('new-parcours').addEventListener('click', resetParcours);
     $('cancel-parcours').addEventListener('click', () => { window.location.href = 'admin-tests-parcours.html'; });
     $('save-parcours').addEventListener('click', saveParcours);
