@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  if (new URLSearchParams(window.location.search || '').get('kaltestEmbed') === '1') return;
+
   const ABANDON_KEY = 'seb_evalpro_abandons';
   const EXERCISE_FILES = new Set([
     'brique.html',
