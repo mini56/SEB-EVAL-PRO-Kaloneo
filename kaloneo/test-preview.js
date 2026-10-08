@@ -226,6 +226,7 @@ function multilineText(value){
 
 function applyBlockStyle(node,block){
   if(!node)return node;
+  node.classList.add('kb-stylable-block');
   const size=Number(block?.fontSize);
   if(Number.isFinite(size)&&size>=10&&size<=40){
     node.style.fontSize=size+'px';
@@ -364,6 +365,7 @@ function render(){
   const m=state.model.meta||{};
   const page=el('div','kb-preview-page');
   const pageStyle=def.presentation?.pageStyle||{};
+  if(pageStyle.backgroundImage||pageStyle.backgroundColor)page.classList.add('kb-custom-page-background');
   if(pageStyle.backgroundImage){
     page.style.backgroundImage='url("'+String(pageStyle.backgroundImage).replace(/"/g,'%22')+'")';
     page.style.backgroundSize=pageStyle.backgroundFit==='contain'?'contain':'cover';
