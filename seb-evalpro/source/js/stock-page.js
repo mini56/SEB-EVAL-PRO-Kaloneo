@@ -11,6 +11,26 @@
   const EMBEDDED = new URLSearchParams(window.location.search || '').get('kaltestEmbed') === '1';
   const SHOW_CORRECTIONS = new URLSearchParams(window.location.search || '').get('showCorrections') === '1';
 
+  function cleanupEmbeddedShell() {
+    if (!EMBEDDED) return;
+    document.getElementById('kaloneo-common-navigation')?.remove();
+    document.getElementById('kaloneo-stable-bottom-bar-style')?.remove();
+    document.getElementById('seb-evalpro-abandon-fixed')?.remove();
+    document.getElementById('seb-evalpro-privacy-toggle')?.remove();
+    document.body.classList.remove('seb-kaloneo-nav-active');
+    document.documentElement.classList.remove('seb-kaloneo-nav-active');
+  }
+
+  function keepEmbeddedShellClean() {
+    if (!EMBEDDED) return;
+    cleanupEmbeddedShell();
+    const observer = new MutationObserver(() => cleanupEmbeddedShell());
+    observer.observe(document.documentElement, { childList:true, subtree:true });
+    setTimeout(cleanupEmbeddedShell, 0);
+    setTimeout(cleanupEmbeddedShell, 100);
+    setTimeout(cleanupEmbeddedShell, 400);
+  }
+
   function postToKaltest(type, detail = {}) {
     if (!EMBEDDED || window.parent === window) return;
     try {
@@ -549,6 +569,7 @@
   }
 
   function install() {
+    keepEmbeddedShellClean();
     createPots();
     installDragAndDrop();
 
