@@ -38,9 +38,10 @@
   }
 
   function baseBlock(type='text') {
-    if (type === 'table-grid') return Core.createGridBlock(3, 3);
+    const styled=block=>Object.assign({fontSize:'',backgroundColor:''},block);
+    if (type === 'table-grid') return styled(Core.createGridBlock(3, 3));
     if (type === 'response-table') {
-      return {
+      return styled({
         uid:uid('responses'),
         type,
         zone:'left',
@@ -52,21 +53,21 @@
             {id:'unit',align:'left'}
           ]
         }
-      };
+      });
     }
     if (type === 'inline-flow') {
-      return {uid:uid('inline'),type,zone:'left',wordBank:[],flow:[],flowText:''};
+      return styled({uid:uid('inline'),type,zone:'left',wordBank:[],flow:[],flowText:''});
     }
     if (type === 'multiple-tables') {
-      return {
+      return styled({
         uid:uid('table'),
         type,
         zone:'left',
         tableDefinition:{id:uid('tabledef'),title:'',headers:['Colonne 1','Colonne 2'],questionIds:[]}
-      };
+      });
     }
     if (type === 'text-editor') {
-      return {
+      return styled({
         uid:uid('editor'),
         type,
         zone:'right',
@@ -75,9 +76,9 @@
           imageSimulation:true,
           scoringProfile:'none'
         }
-      };
+      });
     }
-    return {
+    return styled({
       uid:uid(),
       type,
       zone:'left',
@@ -90,7 +91,7 @@
       mediaAlt:'',
       mediaPlaceholder:'',
       question:baseQuestion()
-    };
+    });
   }
 
   function defaultMeta() {
@@ -122,7 +123,11 @@
       externalMaterialText:'',
       block1WidthChars:'',
       block2WidthChars:'',
-      lastBlockRemainder:true
+      lastBlockRemainder:true,
+      pageBackgroundType:'none',
+      pageBackgroundColor:'#EEF6FD',
+      pageBackgroundImage:'',
+      pageBackgroundName:''
     };
   }
 
@@ -156,7 +161,11 @@
       externalMaterialText:$('external-material-text').value.trim(),
       block1WidthChars:$('block1-width-chars').value,
       block2WidthChars:$('block2-width-chars').value,
-      lastBlockRemainder:$('last-block-remainder').checked
+      lastBlockRemainder:$('last-block-remainder').checked,
+      pageBackgroundType:$('page-background-type').value,
+      pageBackgroundColor:$('page-background-color').value,
+      pageBackgroundImage:String($('page-background-image-name')?.dataset?.imageData||''),
+      pageBackgroundName:String($('page-background-image-name')?.dataset?.imageName||'')
     };
   }
 
@@ -190,6 +199,15 @@
     $('block2-width-chars').value=m.block2WidthChars || '';
     $('last-block-remainder').checked=m.lastBlockRemainder !== false;
     $('custom-sizing-row').hidden=m.layout !== 'chars-rest';
+    $('page-background-type').value=['none','color','image'].includes(m.pageBackgroundType)?m.pageBackgroundType:'none';
+    $('page-background-color').value=m.pageBackgroundColor||'#EEF6FD';
+    const bgName=$('page-background-image-name');
+    if(bgName){
+      bgName.dataset.imageData=m.pageBackgroundImage||'';
+      bgName.dataset.imageName=m.pageBackgroundName||'';
+      bgName.textContent=m.pageBackgroundName||'Aucune image';
+    }
+    syncPageBackgroundOptions();
     syncPracticalCategory();
     syncCapabilityOptions();
   }
@@ -198,6 +216,18 @@
     const practical=$('test-category').value==='activite_pratique';
     if(practical) $('test-scored').value='false';
     $('test-scored').disabled=practical;
+  }
+
+  function displayMultiline(value) {
+    return String(value || '').replace(/\\n/g,'\n');
+  }
+
+  function syncPageBackgroundOptions() {
+    const type=$('page-background-type')?.value||'none';
+    const colorField=$('page-background-color-field');
+    const imageField=$('page-background-image-field');
+    if(colorField) colorField.hidden=type!=='color';
+    if(imageField) imageField.hidden=type!=='image';
   }
 
   function syncCapabilityOptions() {
