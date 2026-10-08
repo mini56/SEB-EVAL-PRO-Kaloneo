@@ -211,6 +211,58 @@
   let activeTriChrono = null;
   let activeBriqueChrono = null;
   let transitionAdvanceTimer = null;
+  let activeInteractiveFrame = null;
+  let interactivePageActions = [];
+
+  function refreshCandidateBar() {
+    try { window.KaloneoNavigation?.refresh?.(); } catch (_) {}
+  }
+
+  function clearInteractivePageActions(clearFrame = true) {
+    interactivePageActions = [];
+    if (clearFrame) activeInteractiveFrame = null;
+    refreshCandidateBar();
+  }
+
+  function setInteractivePageActions(frame, actions) {
+    if (frame !== activeInteractiveFrame) return;
+    const source = Array.isArray(actions) ? actions : [];
+    interactivePageActions = source
+      .map((action, index) => ({
+        id:String(action?.id || ('action-' + index)),
+        label:String(action?.label || '').trim(),
+        disabled:action?.disabled === true,
+        title:String(action?.title || '').trim()
+      }))
+      .filter(action => action.label)
+      .filter(action => {
+        if (SHOW_CORRECTIONS_DURING_PARCOURS) return true;
+        return !['verify','check','validate','correction'].includes(action.id.toLowerCase());
+      })
+      .slice(0,3);
+    refreshCandidateBar();
+  }
+
+  function candidateBarActions() {
+    return interactivePageActions.map(action => ({ ...action }));
+  }
+
+  function invokeCandidateBarAction(actionId) {
+    const action = interactivePageActions.find(item => item.id === String(actionId || ''));
+    const frame = activeInteractiveFrame;
+    if (!action || action.disabled || !frame?.contentWindow) return false;
+    try {
+      frame.contentWindow.postMessage({
+        source:'seb-kaltest-host',
+        type:'command',
+        testId:currentTest()?.id || '',
+        action:action.id
+      }, '*');
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   function persist() {
     sessionStorage.setItem(STATE_KEY, JSON.stringify(state));
@@ -3056,6 +3108,8 @@
     wrap.className = 'kaltest-legacy-page-frame';
     const frame = document.createElement('iframe');
     frame.className = 'kaltest-legacy-page-iframe';
+    activeInteractiveFrame = frame;
+    clearInteractivePageActions(false);
     frame.title = test.title || 'Exercice';
     const params = new URLSearchParams({
       kaltestEmbed:'1',
@@ -3087,6 +3141,11 @@
 
       if (message.type === 'ready') {
         sendState();
+        return;
+      }
+
+      if (message.type === 'actions') {
+        setInteractivePageActions(frame, message.actions);
         return;
       }
 
@@ -3603,7 +3662,8 @@
     }
     clearTimeout(transitionAdvanceTimer);
     transitionAdvanceTimer = null;
-    if (next) next.hidden = false;
+    clearInteractivePageActions();
+    if (next) next.hidden = test.presentation?.legacyFullPage === true;
     host.innerHTML = '';
 
     if (renderTransitionVideo(test, host)) {
@@ -3920,6 +3980,8 @@
     get activeTests() { return ACTIVE_TESTS.map(test => test.id); },
     get segment() { return SEGMENT_KEY; },
     get showCorrectionsDuringParcours() { return SHOW_CORRECTIONS_DURING_PARCOURS; },
+    candidateBarActions,
+    invokeCandidateBarAction,
     currentTest,
     evaluateTest,
     parseDurationFr,
