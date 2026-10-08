@@ -183,6 +183,34 @@
       })
     };
   }
+
+  function organisationToBlocks(def){
+    const organisation=def.presentation?.organisationList;
+    if(!organisation||!Array.isArray(organisation.rows)) return [];
+    const blocks=[];
+    const visual=organisation.visual||{};
+    if(visual.type==='image'&&visual.src){
+      blocks.push({
+        uid:'organisation_visual',
+        type:'image',
+        zone:'left',
+        mediaName:String(visual.src||''),
+        mediaType:'image/*',
+        mediaData:String(visual.src||''),
+        mediaAlt:String(visual.alt||''),
+        mediaPlaceholder:'Illustration'
+      });
+    }
+    const byId=new Map((def.questions||[]).map(q=>[String(q.id),q]));
+    for(const row of organisation.rows){
+      const q=byId.get(String(row?.questionId||''));
+      if(!q) continue;
+      const block=questionToBlock(q,'right');
+      if(row?.text) block.question.prompt=String(row.text);
+      blocks.push(block);
+    }
+    return blocks;
+  }
   function visualBlock(def){
     const k=def.presentation?.kaloneoLayout;
     if(!k) return null;
@@ -247,6 +275,8 @@
 
     if(Array.isArray(def.presentation?.builderContent)){
       blocks.push(...builderContentToBlocks(def));
+    } else if(def.presentation?.organisationList&&Array.isArray(def.presentation.organisationList.rows)){
+      blocks.push(...organisationToBlocks(def));
     } else if(Array.isArray(def.presentation?.inlineFlow)){
       blocks.push(inlineToBlock(def));
     } else if(def.presentation?.choiceTable){
@@ -443,6 +473,28 @@
     };
   }
 
+  function rebuildBuilderQuestions(def,model){
+    const existing=new Map((def.questions||[]).map(q=>[q.id,q]));
+    const rebuilt=[];
+    let questionIndex=0;
+    for(const block of model.blocks||[]){
+      if(block.type==='question') rebuilt.push(blockQuestion(block,questionIndex++));
+      if(block.type==='table-grid'){
+        const qs=gridQuestions(block,questionIndex);
+        rebuilt.push(...qs);
+        questionIndex+=qs.length;
+      }
+    }
+    const presetKeepsQuestions=(model.blocks||[]).some(block=>block.type==='html-js'&&block.preset);
+    if(presetKeepsQuestions&&rebuilt.length===0){
+      def.questions=clone(def.questions||[]);
+    }else if(rebuilt.length||Object.prototype.hasOwnProperty.call(def,'questions')){
+      def.questions=rebuilt.map(q=>Object.assign({},existing.get(q.id)||{},q));
+    }else if(Object.prototype.hasOwnProperty.call(def,'questions')){
+      delete def.questions;
+    }
+  }
+
   function modelToDefinition(model){
     const m=model.meta||{};
     if(model.sourceDefinition){
@@ -518,29 +570,14 @@
       if(usesHtmlJs) featureSet.add('content.html-js'); else featureSet.delete('content.html-js');
       def.features=[...featureSet];
 
-      if(Array.isArray(def.presentation?.builderContent)){
+      const existingBuilderContent=Array.isArray(def.presentation?.builderContent);
+      const legacyOrganisation=Boolean(def.presentation?.organisationList&&Array.isArray(def.presentation.organisationList.rows));
+      if(existingBuilderContent||legacyOrganisation){
         const generated=genericPresentation(model);
         def.presentation=Object.assign({},def.presentation||{},generated);
-        const existing=new Map((def.questions||[]).map(q=>[q.id,q]));
-        const rebuilt=[];
-        let questionIndex=0;
-        for(const block of model.blocks||[]){
-          if(block.type==='question') rebuilt.push(blockQuestion(block,questionIndex++));
-          if(block.type==='table-grid'){
-            const qs=gridQuestions(block,questionIndex);
-            rebuilt.push(...qs);
-            questionIndex+=qs.length;
-          }
-        }
-        const presetKeepsQuestions=(model.blocks||[]).some(block=>block.type==='html-js'&&block.preset);
-        if(presetKeepsQuestions && rebuilt.length===0) {
-          def.questions=clone(def.questions||[]);
-        } else if(rebuilt.length || Object.prototype.hasOwnProperty.call(def,'questions')) {
-          def.questions=rebuilt.map(q=>Object.assign({},existing.get(q.id)||{},q));
-        } else if(Object.prototype.hasOwnProperty.call(def,'questions')) {
-          delete def.questions;
-        }
-      } else {
+        if(legacyOrganisation) delete def.presentation.organisationList;
+        rebuildBuilderQuestions(def,model);
+      }else{
         updateImportedQuestions(def,model);
       }
       return def;
