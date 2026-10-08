@@ -162,6 +162,24 @@ app.whenReady().then(async()=>{
       return fail('Nouveau test non saisissable immédiatement',newTest);
     }
 
+    const history=await win.webContents.executeJavaScript(`(async()=>{
+      await new Promise(resolve=>setTimeout(resolve,450));
+      const undo=document.getElementById('undo-change');
+      const redo=document.getElementById('redo-change');
+      const before={undoDisabled:undo.disabled,redoDisabled:redo.disabled,value:document.getElementById('test-title').value};
+      undo.click();
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      const afterUndo={value:document.getElementById('test-title').value,undoDisabled:undo.disabled,redoDisabled:redo.disabled};
+      redo.click();
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      const afterRedo={value:document.getElementById('test-title').value,undoDisabled:undo.disabled,redoDisabled:redo.disabled};
+      return {before,afterUndo,afterRedo};
+    })()`);
+    if(history.before.undoDisabled||!history.before.redoDisabled||history.before.value!=='Saisie immédiate'||
+       history.afterUndo.value!==''||!history.afterUndo.undoDisabled||history.afterUndo.redoDisabled||
+       history.afterRedo.value!=='Saisie immédiate'||history.afterRedo.undoDisabled||!history.afterRedo.redoDisabled){
+      return fail('Annuler / Rétablir du Builder incorrect',history);
+    }
     const setup=await win.webContents.executeJavaScript(`(async()=>{
       document.getElementById('test-title').value='Aperçu Electron Smoke';
       document.getElementById('test-title').dispatchEvent(new Event('input',{bubbles:true}));
