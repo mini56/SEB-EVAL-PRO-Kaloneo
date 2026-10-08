@@ -3213,6 +3213,7 @@
 
   function applyBuilderItemStyle(node, item) {
     if (!node) return node;
+    node.classList.add('kaltest-builder-stylable-block');
     const style = item?.style || {};
     const fontSize = Number(style.fontSize);
     if (Number.isFinite(fontSize) && fontSize >= 10 && fontSize <= 40) {
