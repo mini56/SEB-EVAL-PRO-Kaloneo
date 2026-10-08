@@ -14,11 +14,12 @@
       <p>Créer → Prévisualiser → Contrôler → Générer KALTEST</p>
     </div>
     <div class="builder-top-actions">
-      <button id="back-tests" class="seb-action-btn seb-btn-functional" type="button">← Tests / Parcours</button>
+      <button id="undo-change" class="seb-action-btn seb-btn-functional builder-history-btn" type="button" disabled title="Annuler la dernière modification (Ctrl+Z)">↶ Annuler</button>
+      <button id="redo-change" class="seb-action-btn seb-btn-functional builder-history-btn" type="button" disabled title="Rétablir la modification annulée (Ctrl+Y)">↷ Rétablir</button>
       <button id="open-library-test" class="seb-action-btn seb-btn-functional" type="button">Bibliothèque de tests</button>
-      <button id="open-image-library" class="seb-action-btn seb-btn-functional" type="button">Bibliothèque d’images</button>
       <button id="new-test" class="seb-action-btn seb-btn-danger" type="button">Nouveau test</button>
       <button id="save-draft" class="seb-action-btn seb-btn-nav" type="button">Enregistrer</button>
+      <button id="back-tests" class="seb-action-btn seb-btn-functional" type="button">Fermer</button>
     </div>
   </header>
 
@@ -333,8 +334,6 @@
     </article>
   </template>
 
-  <input id="import-images-file" type="file" accept="image/*" multiple hidden>
-
   <dialog id="text-color-dialog" class="text-color-dialog">
     <div class="dialog-head">
       <div>
@@ -356,8 +355,8 @@
   <dialog id="image-library-dialog" class="test-library-dialog image-library-dialog">
     <div class="dialog-head">
       <div>
-        <h2>Bibliothèque d’images KALONÉO</h2>
-        <p>Réutilisez les images du programme ou importez plusieurs images KALONÉO en une seule fois.</p>
+        <h2>Choisir une image KALONÉO</h2>
+        <p>Sélectionnez une image déjà présente dans la bibliothèque. Les imports se gèrent depuis la page Import / Export.</p>
       </div>
       <button id="close-image-library" class="mini-btn" type="button">Fermer</button>
     </div>
@@ -377,10 +376,6 @@
           <option value="Portrait">Portrait</option>
         </select>
       </label>
-      <div class="image-import-actions">
-        <button id="import-images" class="seb-action-btn seb-btn-nav" type="button">Importer des images</button>
-        <button id="import-image-zip" class="seb-action-btn seb-btn-functional" type="button">Importer un ZIP par thèmes</button>
-      </div>
     </div>
     <p id="image-library-status" class="muted"></p>
     <div id="image-library-list" class="image-library-grid" aria-label="Bibliothèque d’images KALONÉO"></div>
