@@ -2109,6 +2109,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   kaloneoImportTest: () => ipcRenderer.invoke('kaloneo-transfer:import-test'),
   kaloneoExportParcours: (id) => ipcRenderer.invoke('kaloneo-transfer:export-parcours', id),
   kaloneoImportParcours: () => ipcRenderer.invoke('kaloneo-transfer:import-parcours'),
+  kaloneoExportImage: (id) => ipcRenderer.invoke('kaloneo-transfer:export-image', id),
   kaloneoListImages: () => ipcRenderer.invoke('kaloneo-library:list-images'),
   kaloneoGetImage: (id) => ipcRenderer.invoke('kaloneo-library:get-image', id),
   kaloneoSaveImage: (payload) => ipcRenderer.invoke('kaloneo-library:save-image', payload || {}),
