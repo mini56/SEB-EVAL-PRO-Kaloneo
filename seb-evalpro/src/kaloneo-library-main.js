@@ -46,6 +46,7 @@ function createKaloneoLibrary(options = {}) {
       .filter(item => item.root)
     : [];
   const now = typeof options.now === 'function' ? options.now : () => new Date();
+  let imageSeedsEnsured = false;
 
   if (!dataRoot) throw new Error('dataRoot KALONÉO requis.');
 
@@ -806,8 +807,11 @@ function createKaloneoLibrary(options = {}) {
     ensureDirectory(parcoursRoot);
     ensureDirectory(maskScreensRoot);
     if (seedTestsRoot && fs.existsSync(seedTestsRoot)) syncBundledSeedTests(seedTestsRoot, testsRoot);
-    seedImageLibrary();
-    seedImagesFromTests();
+    if (!imageSeedsEnsured) {
+      seedImageLibrary();
+      seedImagesFromTests();
+      imageSeedsEnsured = true;
+    }
     ensureDefaultMaskScreen();
     ensureBaseParcours();
     return true;
