@@ -2125,6 +2125,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   kaloneoSaveParcours: (payload) => ipcRenderer.invoke('kaloneo-library:save-parcours', payload),
   kaloneoOpenPreview: (definition) => ipcRenderer.invoke('kaloneo-builder:open-preview', definition),
   kaloneoGetPreviewDefinition: () => ipcRenderer.invoke('kaloneo-builder:get-preview'),
+  kaloneoConsumePreviewDefinition: () => ipcRenderer.invoke('kaloneo-builder:consume-preview'),
   kaloneoClosePreview: () => ipcRenderer.invoke('kaloneo-builder:close-preview'),
   closeAdminBilan: () => closeAdminBilanPage(),
   exportBilanDocx: (payload) => ipcRenderer.invoke('admin:export-bilan-docx', payload),
