@@ -226,7 +226,7 @@
     if (validateButton) {
       validateButton.disabled = false;
       validateButton.style.removeProperty('display');
-      validateButton.textContent = SHOW_CORRECTIONS ? '✔️ Valider' : '➡️ Suivant';
+      validateButton.textContent = '✔️ Valider';
     }
     nextButton?.classList.remove('show');
   }
@@ -242,21 +242,9 @@
   }
 
   function prepareEmbeddedAppearance() {
+    // En mode KALTEST, ne jamais modifier le HTML/CSS historique du Build #20.
+    // Le pont d'intégration ne doit agir que sur navigation/état, pas sur le visuel.
     if (!EMBEDDED) return;
-    document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-      const href = String(link.getAttribute('href') || '');
-      if (href.endsWith('kaloneo-remaining-pages.css') || href.endsWith('kaloneo-context.css')) {
-        link.disabled = true;
-      }
-    });
-    document.body.removeAttribute('data-kaloneo-page');
-    const header = document.querySelector('.header');
-    if (header) {
-      header.className = 'header';
-      header.innerHTML =
-        '<h1>🧩 Puzzle Gratte-ciel</h1>' +
-        '<div class="subtitle">C\'est la journée de cohésion d\'équipe. Régulièrement, l\'équipe est invitée à se retrouver pour partager un moment convivial. À cette occasion, la cheffe d\'équipe a préparé un petit défi ! Elle propose à chacun une grille à compléter.</div>';
-    }
   }
 
   function install() {
@@ -268,13 +256,7 @@
 
     installCellBehaviour();
     document.querySelector('.btn-reset')?.addEventListener('click', resetPuzzle);
-    if (EMBEDDED && !SHOW_CORRECTIONS) {
-      const validateButton = document.getElementById('btnValidate');
-      if (validateButton) validateButton.textContent = '➡️ Suivant';
-      validateButton?.addEventListener('click', navigateNext);
-    } else {
-      document.getElementById('btnValidate')?.addEventListener('click', validatePuzzle);
-    }
+    document.getElementById('btnValidate')?.addEventListener('click', validatePuzzle);
     document.getElementById('btnNext')?.addEventListener('click', navigateNext);
     installEmbeddedBridge();
   }
