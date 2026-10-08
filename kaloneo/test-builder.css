@@ -940,3 +940,20 @@ body{
 @media(max-width:1180px){
   .builder-top-actions{flex-wrap:wrap}
 }
+
+
+/* R32 — barre de travail et historique */
+.builder-history-btn:disabled{
+  opacity:.42;
+  cursor:default;
+  background:#f3f5f7;
+  border-color:#aeb9c2;
+  color:#73818b;
+}
+.status-pill.dirty{
+  background:#fff0e2;
+  color:#8a4a00;
+}
+#back-tests{
+  margin-left:2px;
+}
