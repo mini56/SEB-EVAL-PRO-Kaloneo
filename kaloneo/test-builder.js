@@ -15,6 +15,16 @@
   let textColorTarget = null;
   let textColorChanged = null;
 
+  const HISTORY_LIMIT = 30;
+  const SAVED_FINGERPRINT_KEY = 'kaloneo_test_builder_saved_fingerprint';
+  let historyEntries = [];
+  let historyIndex = -1;
+  let historyTimer = null;
+  let applyingHistory = false;
+  let builderDirty = false;
+  let savedFingerprint = String(localStorage.getItem(SAVED_FINGERPRINT_KEY) || '');
+  let statusToken = 0;
+
   const $ = id => document.getElementById(id);
 
   function uid(prefix='b') {
@@ -389,12 +399,147 @@
     };
   }
 
+  function historyFingerprint(json) {
+    let hash=2166136261;
+    for(let i=0;i<json.length;i+=1){
+      hash^=json.charCodeAt(i);
+      hash=Math.imul(hash,16777619);
+    }
+    return (hash>>>0).toString(16).padStart(8,'0')+':'+json.length;
+  }
+
+  function captureHistoryEntry() {
+    const json=JSON.stringify(currentModel());
+    return {json,fingerprint:historyFingerprint(json)};
+  }
+
+  function syncHistoryButtons() {
+    const undo=$('undo-change');
+    const redo=$('redo-change');
+    if(undo)undo.disabled=historyIndex<=0;
+    if(redo)redo.disabled=historyIndex<0||historyIndex>=historyEntries.length-1;
+  }
+
+  function updateDirtyIndicator() {
+    const status=$('draft-status');
+    if(!status)return;
+    status.classList.toggle('dirty',builderDirty);
+    status.textContent=builderDirty?'Modifications non enregistrées':'Enregistré';
+  }
+
+  function transientStatus(text,delay=1600) {
+    const status=$('draft-status');
+    if(!status)return;
+    const token=++statusToken;
+    status.textContent=text;
+    setTimeout(()=>{
+      if(token===statusToken)updateDirtyIndicator();
+    },delay);
+  }
+
+  function setDirtyFromFingerprint(fingerprint) {
+    builderDirty=Boolean(savedFingerprint)&&fingerprint!==savedFingerprint;
+    if(!savedFingerprint)builderDirty=true;
+    updateDirtyIndicator();
+  }
+
+  function commitHistorySnapshot() {
+    if(applyingHistory)return;
+    if(historyTimer){
+      clearTimeout(historyTimer);
+      historyTimer=null;
+    }
+    const entry=captureHistoryEntry();
+    const current=historyEntries[historyIndex];
+    if(current?.fingerprint===entry.fingerprint&&current?.json===entry.json){
+      setDirtyFromFingerprint(entry.fingerprint);
+      syncHistoryButtons();
+      return;
+    }
+    if(historyIndex<historyEntries.length-1)historyEntries=historyEntries.slice(0,historyIndex+1);
+    historyEntries.push(entry);
+    if(historyEntries.length>HISTORY_LIMIT)historyEntries.shift();
+    historyIndex=historyEntries.length-1;
+    setDirtyFromFingerprint(entry.fingerprint);
+    syncHistoryButtons();
+  }
+
+  function scheduleHistorySnapshot() {
+    if(applyingHistory)return;
+    if(historyTimer)clearTimeout(historyTimer);
+    historyTimer=setTimeout(commitHistorySnapshot,350);
+  }
+
+  function resetHistory(options={}) {
+    if(historyTimer){
+      clearTimeout(historyTimer);
+      historyTimer=null;
+    }
+    const entry=captureHistoryEntry();
+    historyEntries=[entry];
+    historyIndex=0;
+    if(options.markSaved===true){
+      savedFingerprint=entry.fingerprint;
+      localStorage.setItem(SAVED_FINGERPRINT_KEY,savedFingerprint);
+      builderDirty=false;
+    }else{
+      setDirtyFromFingerprint(entry.fingerprint);
+    }
+    syncHistoryButtons();
+    updateDirtyIndicator();
+  }
+
+  function markCurrentSaved() {
+    commitHistorySnapshot();
+    const entry=historyEntries[historyIndex]||captureHistoryEntry();
+    savedFingerprint=entry.fingerprint;
+    localStorage.setItem(SAVED_FINGERPRINT_KEY,savedFingerprint);
+    builderDirty=false;
+    updateDirtyIndicator();
+  }
+
+  function applyHistoryEntry(entry) {
+    if(!entry)return;
+    applyingHistory=true;
+    try{
+      const model=JSON.parse(entry.json);
+      state.idLocked=Boolean(model.idLocked);
+      state.sourceDefinition=model.sourceDefinition||null;
+      state.blocks=Array.isArray(model.blocks)?model.blocks:[];
+      applyMeta(model.meta||defaultMeta());
+      renderIconPicker();
+      renderBlocks();
+      refreshPreview();
+      saveDraft(false);
+      setDirtyFromFingerprint(entry.fingerprint);
+    }finally{
+      applyingHistory=false;
+      syncHistoryButtons();
+    }
+  }
+
+  function undoChange() {
+    commitHistorySnapshot();
+    if(historyIndex<=0)return;
+    historyIndex-=1;
+    applyHistoryEntry(historyEntries[historyIndex]);
+  }
+
+  function redoChange() {
+    commitHistorySnapshot();
+    if(historyIndex>=historyEntries.length-1)return;
+    historyIndex+=1;
+    applyHistoryEntry(historyEntries[historyIndex]);
+  }
+
+  function confirmDiscardChanges(action) {
+    if(!builderDirty)return true;
+    return confirm('Le test contient des modifications non enregistrées.\n\n'+action+' entraînera la perte de ces modifications. Continuer ?');
+  }
+
   function saveDraft(showStatus=true) {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(currentModel()));
-    if (showStatus) {
-      $('draft-status').textContent='Sauvegardé';
-      setTimeout(()=>$('draft-status').textContent='Brouillon local',1200);
-    }
+    if(showStatus)transientStatus('Brouillon local sauvegardé',1200);
   }
 
   function restoreDraft() {
@@ -1689,7 +1834,7 @@
     changed();renderBlocks();
   }
 
-  function loadDefinition(definition, statusLabel='Test KALTEST ouvert depuis la bibliothèque') {
+  function loadDefinition(definition, statusLabel='Test KALTEST ouvert depuis la bibliothèque', options={}) {
     const analysis=Core.analyzeDefinition(definition);
     if(!analysis.ok) throw new Error(analysis.errors.join('\\n'));
 
@@ -1704,8 +1849,8 @@
     saveDraft(false);
     renderBlocks();
     refreshPreview();
-    $('draft-status').textContent=statusLabel;
-    setTimeout(()=>$('draft-status').textContent='Brouillon local',1800);
+    resetHistory({markSaved:options.markSaved!==false});
+    transientStatus(statusLabel,1800);
   }
 
   async function importJsonFile(file) {
@@ -1758,6 +1903,7 @@
         try{
           const result=await window.sebEvalPro?.kaloneoGetTest?.(item.id,item.version);
           if(!result||result.ok!==true)throw new Error(result?.error||'Lecture impossible');
+          if(!confirmDiscardChanges('Ouvrir un autre test'))return;
           loadDefinition(result.definition);
           $('test-library-dialog')?.close();
         }catch(error){alert('Ouverture impossible : '+String(error?.message||error));}
@@ -1859,8 +2005,8 @@
     }
 
     saveDraft(false);
-    $('draft-status').textContent='Enregistré dans la bibliothèque';
-    setTimeout(()=>$('draft-status').textContent='Brouillon local',1800);
+    markCurrentSaved();
+    transientStatus('Enregistré dans la bibliothèque',1800);
     if(options.exportJson===true) exportDefinition(data);
     return true;
   }
@@ -1872,6 +2018,11 @@
   function changed() {
     saveDraft(false);
     refreshPreview();
+    if(!applyingHistory){
+      builderDirty=true;
+      updateDirtyIndicator();
+      scheduleHistorySnapshot();
+    }
   }
 
   function focusTitleField() {
@@ -1891,9 +2042,9 @@
   }
 
   function startNewTest(options={}) {
-    const ask = options.ask !== false;
-    if (ask && !confirm('Effacer le brouillon actuel et créer un nouveau test ?')) return false;
-    if (options.clearDraft !== false) localStorage.removeItem(DRAFT_KEY);
+    const ask=options.ask!==false;
+    if(ask&&!confirmDiscardChanges('Créer un nouveau test'))return false;
+    if(options.clearDraft!==false)localStorage.removeItem(DRAFT_KEY);
     state.idLocked=false;
     state.sourceDefinition=null;
     state.blocks=[baseBlock('text')];
@@ -1901,12 +2052,18 @@
     renderIconPicker();
     renderBlocks();
     refreshPreview();
+    resetHistory({markSaved:true});
     focusTitleField();
     return true;
   }
 
   function reset() {
-    startNewTest({ ask:true, clearDraft:true });
+    startNewTest({ask:true,clearDraft:true});
+  }
+
+  function closeBuilder() {
+    if(!confirmDiscardChanges('Fermer le Test Builder'))return;
+    window.location.href='../admin-tests-parcours.html';
   }
 
   async function install() {
@@ -1918,7 +2075,7 @@
       try {
         const preview = await window.sebEvalPro.kaloneoConsumePreviewDefinition();
         if(preview?.ok && preview.definition) {
-          loadDefinition(preview.definition,'Retour de l’aperçu Electron — même test restauré');
+          loadDefinition(preview.definition,'Retour de l’aperçu Electron — même test restauré',{markSaved:false});
           restored = true;
         }
       } catch (_) {}
@@ -1943,22 +2100,14 @@
       changed();
     });
 
-    $('back-tests').addEventListener('click',()=>{ window.location.href='../admin-tests-parcours.html'; });
+    $('back-tests').addEventListener('click',closeBuilder);
+    $('undo-change').addEventListener('click',undoChange);
+    $('redo-change').addEventListener('click',redoChange);
     $('open-library-test').addEventListener('click',()=>{openLibraryDialog().catch(error=>alert('Bibliothèque inaccessible : '+String(error?.message||error)));});
-    $('open-image-library').addEventListener('click',()=>{openImageLibrary(null).catch(error=>alert('Bibliothèque d’images inaccessible : '+String(error?.message||error)));});
     $('close-image-library').addEventListener('click',()=>$('image-library-dialog').close());
     $('image-library-search').addEventListener('input',renderImageLibrary);
     $('image-library-theme').addEventListener('change',renderImageLibrary);
     $('image-library-orientation').addEventListener('change',renderImageLibrary);
-    $('import-images').addEventListener('click',()=>$('import-images-file').click());
-    $('import-image-zip').addEventListener('click',()=>{
-      importImageZip().catch(error=>alert('Import ZIP impossible : '+String(error?.message||error)));
-    });
-    $('import-images-file').addEventListener('change',async()=>{
-      try{await importImages($('import-images-file').files);}
-      catch(error){alert('Import d’images impossible : '+String(error?.message||error));}
-      finally{$('import-images-file').value='';}
-    });
     $('close-test-library').addEventListener('click',()=>$('test-library-dialog').close());
     $('test-library-search').addEventListener('input',()=>renderLibraryTests($('test-library-dialog')._kaloneoItems||[]));
 
@@ -2062,6 +2211,17 @@
     });
     $('save-draft').addEventListener('click',()=>{ saveToLibrary(); });
     $('new-test').addEventListener('click',reset);
+    document.addEventListener('keydown',event=>{
+      if(!(event.ctrlKey||event.metaKey)||event.altKey)return;
+      const key=String(event.key||'').toLowerCase();
+      if(key==='z'&&!event.shiftKey){
+        event.preventDefault();
+        undoChange();
+      }else if(key==='y'||(key==='z'&&event.shiftKey)){
+        event.preventDefault();
+        redoChange();
+      }
+    });
 
     if(typeof ResizeObserver==='function'){
       const observer=new ResizeObserver(()=>fitMiniPreview());
@@ -2073,7 +2233,9 @@
 
     renderBlocks();
     refreshPreview();
-    if (!resumeFromPreview) focusTitleField();
+    if(!restored)resetHistory({markSaved:true});
+    else if(historyEntries.length===0)resetHistory({markSaved:false});
+    if(!resumeFromPreview)focusTitleField();
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{install().catch(error=>alert('Initialisation du Builder impossible : '+String(error?.message||error)));},{once:true});
