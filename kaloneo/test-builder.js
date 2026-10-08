@@ -222,6 +222,55 @@
     return String(value || '').replace(/\\n/g,'\n');
   }
 
+  function renderRichContext(target,value) {
+    if(!target)return;
+    target.replaceChildren();
+    const source=displayMultiline(value);
+    const token=/\[(\/)?(b|i|u)\]/gi;
+    const stack=[{node:target,tag:null}];
+    let cursor=0;
+    const appendText=text=>{
+      const parts=String(text).split('\n');
+      parts.forEach((part,index)=>{
+        if(part)stack.at(-1).node.appendChild(document.createTextNode(part));
+        if(index<parts.length-1)stack.at(-1).node.appendChild(document.createElement('br'));
+      });
+    };
+    let match;
+    while((match=token.exec(source))){
+      appendText(source.slice(cursor,match.index));
+      const closing=Boolean(match[1]);
+      const tag=String(match[2]||'').toLowerCase();
+      if(!closing){
+        const element=document.createElement(tag==='b'?'strong':tag==='i'?'em':'u');
+        stack.at(-1).node.appendChild(element);
+        stack.push({node:element,tag});
+      }else{
+        for(let i=stack.length-1;i>0;i-=1){
+          if(stack[i].tag===tag){stack.length=i;break;}
+        }
+      }
+      cursor=token.lastIndex;
+    }
+    appendText(source.slice(cursor));
+  }
+
+  function applyContextFormat(targetId,format) {
+    const input=$(targetId);
+    if(!input)return;
+    const start=Number.isFinite(input.selectionStart)?input.selectionStart:input.value.length;
+    const end=Number.isFinite(input.selectionEnd)?input.selectionEnd:start;
+    const open='['+format+']';
+    const close='[/'+format+']';
+    const selected=input.value.slice(start,end);
+    input.value=input.value.slice(0,start)+open+selected+close+input.value.slice(end);
+    const nextStart=start+open.length;
+    const nextEnd=nextStart+selected.length;
+    input.focus();
+    input.setSelectionRange(nextStart,nextEnd);
+    changed();
+  }
+
   function syncPageBackgroundOptions() {
     const type=$('page-background-type')?.value||'none';
     const colorField=$('page-background-color-field');
@@ -1343,8 +1392,8 @@
       previewIcon.alt='';
       previewIcon.hidden=true;
     }
-    $('preview-scenario').textContent=displayMultiline(m.scenario||'Le scénario apparaîtra ici.');
-    $('preview-instruction').textContent=displayMultiline(m.instruction||'Les consignes apparaîtront ici.');
+    renderRichContext($('preview-scenario'),m.scenario||'Le scénario apparaîtra ici.');
+    renderRichContext($('preview-instruction'),m.instruction||'Les consignes apparaîtront ici.');
     $('preview-calculator').hidden=!m.calculatorCompatible;
     $('preview-chrono').hidden=!m.chronoEnabled;
 
@@ -1759,10 +1808,22 @@
     startNewTest({ ask:true, clearDraft:true });
   }
 
-  function install() {
+  async function install() {
     const params = new URLSearchParams(window.location.search || '');
     const resumeFromPreview = params.get('resume') === 'preview';
-    const restored = resumeFromPreview ? restoreDraft() : false;
+    let restored = false;
+
+    if(resumeFromPreview && typeof window.sebEvalPro?.kaloneoConsumePreviewDefinition === 'function') {
+      try {
+        const preview = await window.sebEvalPro.kaloneoConsumePreviewDefinition();
+        if(preview?.ok && preview.definition) {
+          loadDefinition(preview.definition,'Retour de l’aperçu Electron — même test restauré');
+          restored = true;
+        }
+      } catch (_) {}
+    }
+
+    if(!restored && resumeFromPreview) restored = restoreDraft();
     if(!restored || state.blocks.length===0) {
       state.idLocked=false;
       state.sourceDefinition=null;
@@ -1817,6 +1878,12 @@
     $('test-title').addEventListener('input',()=>{
       if(!state.idLocked)$('test-id').value=normalizeIdFromTitle();
       changed();
+    });
+
+    document.querySelectorAll('.context-format-btn').forEach(button=>{
+      button.addEventListener('click',()=>{
+        applyContextFormat(button.dataset.target,button.dataset.format);
+      });
     });
 
     $('choose-page-background-image').addEventListener('click',()=>{
@@ -1898,6 +1965,6 @@
     if (!resumeFromPreview) focusTitleField();
   }
 
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install,{once:true});
-  else install();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{install().catch(error=>alert('Initialisation du Builder impossible : '+String(error?.message||error)));},{once:true});
+  else install().catch(error=>alert('Initialisation du Builder impossible : '+String(error?.message||error)));
 })();
