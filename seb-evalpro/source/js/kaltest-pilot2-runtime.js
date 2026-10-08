@@ -3215,7 +3215,7 @@
     if (!target) return;
     target.replaceChildren();
     const source = multilineText(value);
-    const token = /\[(\/)?(b|i|u)\]/gi;
+    const token = /\[(\/)?(b|i|u|c)(?:=(#[0-9a-f]{6}))?\]/gi;
     const stack = [{ node:target, tag:null }];
     const appendText = text => {
       const parts = String(text).split('\n');
@@ -3231,7 +3231,13 @@
       const closing = Boolean(match[1]);
       const tag = String(match[2] || '').toLowerCase();
       if (!closing) {
-        const element = document.createElement(tag === 'b' ? 'strong' : tag === 'i' ? 'em' : 'u');
+        let element;
+        if (tag === 'c') {
+          element = document.createElement('span');
+          if (/^#[0-9a-f]{6}$/i.test(String(match[3] || ''))) element.style.color = match[3];
+        } else {
+          element = document.createElement(tag === 'b' ? 'strong' : tag === 'i' ? 'em' : 'u');
+        }
         stack.at(-1).node.appendChild(element);
         stack.push({ node:element, tag });
       } else {
@@ -3293,7 +3299,7 @@
     applyBuilderItemStyle(wrap, item);
 
     if (item.type === 'text') {
-      wrap.textContent = item.text || '';
+      renderRichContext(wrap, item.text || '');
       return wrap;
     }
     if (item.type === 'html' || item.type === 'html-js') {
