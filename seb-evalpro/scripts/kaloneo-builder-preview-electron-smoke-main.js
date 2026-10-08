@@ -327,17 +327,15 @@ app.whenReady().then(async()=>{
       return fail('arrière-plan de page depuis la bibliothèque incorrect',pageBackground);
     }
 
-    const zipUi=await win.webContents.executeJavaScript(`(async()=>{
-      document.getElementById('open-image-library').click();
-      await new Promise(resolve=>setTimeout(resolve,150));
-      document.getElementById('import-image-zip').click();
-      await new Promise(resolve=>setTimeout(resolve,180));
-      const status=String(document.getElementById('image-library-status')?.textContent||'');
-      document.getElementById('close-image-library').click();
-      return {status};
-    })()`,true);
-    if(zipImportCalls!==1||!/200 images ajoutées/.test(zipUi.status)||!/20 thèmes détectés/.test(zipUi.status)) {
-      return fail('bouton import ZIP par thèmes incorrect',{zipImportCalls,zipUi});
+    const imageChooserErgonomics=await win.webContents.executeJavaScript(`(()=>({
+      globalImageButtonAbsent:!document.getElementById('open-image-library'),
+      importImageButtonAbsent:!document.getElementById('import-images'),
+      importZipButtonAbsent:!document.getElementById('import-image-zip'),
+      chooserStillAvailable:!!document.querySelector('.choose-library-image')
+    }))()`,true);
+    if(!imageChooserErgonomics.globalImageButtonAbsent||!imageChooserErgonomics.importImageButtonAbsent||
+       !imageChooserErgonomics.importZipButtonAbsent||!imageChooserErgonomics.chooserStillAvailable) {
+      return fail('gestion globale des images encore présente dans le Builder',imageChooserErgonomics);
     }
 
     await win.webContents.executeJavaScript(`document.getElementById('open-electron-preview').click();true`);
