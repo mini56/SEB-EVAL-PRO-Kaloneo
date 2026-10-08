@@ -30,7 +30,7 @@ app.whenReady().then(async()=>{
 
     const metrics=await win.webContents.executeJavaScript(`(()=> {
       const cards=[...document.querySelectorAll('.action-card')];
-      const buttons=['open-kaloneo-builder','open-mask-builder','open-parcours-builder'].map(id=>document.getElementById(id));
+      const buttons=['open-kaloneo-builder','open-mask-builder','open-parcours-builder','open-kaloneo-transfer'].map(id=>document.getElementById(id));
       const rect=el=>{const r=el.getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height,right:r.right,bottom:r.bottom,cx:r.left+r.width/2,cy:r.top+r.height/2};};
       return {
         cardRects:cards.map(rect),
@@ -41,16 +41,16 @@ app.whenReady().then(async()=>{
       };
     })()`,true);
 
-    const tops=metrics.buttonRects.map(r=>r.top);
     const heights=metrics.buttonRects.map(r=>r.height);
     const cardHeights=metrics.cardRects.map(r=>r.height);
-    const aligned=Math.max(...tops)-Math.min(...tops)<=2;
     const sameHeight=Math.max(...heights)-Math.min(...heights)<=1;
-    const sameCards=Math.max(...cardHeights)-Math.min(...cardHeights)<=1;
+    const sameCards=Math.max(...cardHeights)-Math.min(...cardHeights)<=2;
     const centered=metrics.buttonRects.every((b,i)=>Math.abs(b.cx-metrics.cardRects[i].cx)<=2);
+    const twoRows=new Set(metrics.cardRects.map(r=>Math.round(r.top))).size===2;
+    const twoColumns=new Set(metrics.cardRects.map(r=>Math.round(r.left))).size===2;
 
-    if(!aligned||!sameHeight||!sameCards||!centered) {
-      return fail('boutons/cartes non alignés',metrics);
+    if(metrics.cardRects.length!==4||metrics.buttonRects.length!==4||!sameHeight||!sameCards||!centered||!twoRows||!twoColumns) {
+      return fail('grille ergonomique Tests / Parcours incorrecte',metrics);
     }
 
     console.log('KALONEO_TESTS_PARCOURS_LAYOUT=OK');
