@@ -6,6 +6,7 @@
     const builder = document.getElementById('open-kaloneo-builder');
     const parcoursBuilder = document.getElementById('open-parcours-builder');
     const maskBuilder = document.getElementById('open-mask-builder');
+    const transfer = document.getElementById('open-kaloneo-transfer');
     if (!button) return;
 
     if (builder) {
@@ -23,6 +24,12 @@
     if (maskBuilder) {
       maskBuilder.addEventListener('click', () => {
         window.location.href = 'admin-mask-builder.html';
+      });
+    }
+
+    if (transfer) {
+      transfer.addEventListener('click', () => {
+        window.location.href = 'admin-kaloneo-transfer.html';
       });
     }
 
