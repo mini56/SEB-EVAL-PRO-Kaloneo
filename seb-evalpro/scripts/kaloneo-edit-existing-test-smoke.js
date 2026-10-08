@@ -1,0 +1,108 @@
+'use strict';
+
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const Core = require('../../kaloneo/builder-core');
+const { createKaloneoLibrary } = require('../src/kaloneo-library-main');
+
+const root = path.resolve(__dirname, '..');
+const seedTestsRoot = path.join(root, 'source', 'kaltest', 'tests');
+const organisationFile = path.join(seedTestsRoot, 'organisation-demenagement', '1.0.0', 'test.json');
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kaloneo-edit-existing-'));
+
+function fail(message, detail) {
+  console.error('KALONEO_EDIT_EXISTING_TEST: FAIL — ' + message);
+  if (detail) console.error(JSON.stringify(detail, null, 2));
+  process.exit(2);
+}
+
+function makeV2(definition) {
+  const model = Core.definitionToModel(definition);
+  if (model.meta.layout !== '50-50') fail('la V1 Organisation ne remonte pas son ratio 50/50', model.meta);
+
+  const image = model.blocks.find(block => block.type === 'image');
+  const questions = model.blocks.filter(block => block.type === 'question');
+  if (!image || questions.length !== 8) {
+    fail('la V1 Organisation doit être reconstruite en 1 image + 8 questions dans le Builder', {
+      blocks:model.blocks.map(block => ({type:block.type,zone:block.zone,uid:block.uid}))
+    });
+  }
+  if (image.zone !== 'left' || questions.some(block => block.zone !== 'right')) {
+    fail('la composition V1 historique doit être fidèle avant modification', {
+      imageZone:image.zone,
+      questionZones:questions.map(block => block.zone)
+    });
+  }
+
+  model.meta.version = '2.0.0';
+  model.meta.layout = '60-40';
+
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="400" height="300" fill="#f4b44b"/><circle cx="200" cy="150" r="80" fill="#1b6c8e"/></svg>';
+  image.zone = 'right';
+  image.mediaName = 'organisation-v2.svg';
+  image.mediaType = 'image/svg+xml';
+  image.mediaData = 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
+  image.mediaAlt = 'Illustration ajoutée dans la V2';
+  questions.forEach(block => { block.zone = 'left'; });
+
+  const v2 = Core.modelToDefinition(model);
+  return { model, v2 };
+}
+
+try {
+  const v1 = JSON.parse(fs.readFileSync(organisationFile, 'utf8'));
+  const { v2 } = makeV2(v1);
+
+  if (v2.version !== '2.0.0') fail('la nouvelle version n’est pas conservée', v2.version);
+  if (v2.presentation?.layout !== '60-40') fail('le layout V2 60/40 n’est pas enregistré', v2.presentation);
+  if (!Array.isArray(v2.presentation?.builderContent)) fail('builderContent absent de la V2', v2.presentation);
+  if (v2.presentation?.organisationList) fail('l’ancien renderer organisationList reste dans la V2', v2.presentation);
+
+  const imageItem = v2.presentation.builderContent.find(item => item.type === 'image');
+  const questionItems = v2.presentation.builderContent.filter(item => item.type === 'question');
+  if (!imageItem || imageItem.zone !== 'right' || !String(imageItem.resource?.data || '').startsWith('data:image/svg+xml;base64,')) {
+    fail('l’image V2 droite n’est pas réellement embarquée dans le test.json', imageItem);
+  }
+  if (questionItems.length !== 8 || questionItems.some(item => item.zone !== 'left')) {
+    fail('les 8 questions ne sont pas enregistrées à gauche dans la V2', questionItems);
+  }
+  if ((v2.questions || []).length !== 8 || v2.questions.some(q => !Array.isArray(q.acceptedAnswers) || !q.acceptedAnswers.length)) {
+    fail('les réponses/corrections historiques ont été perdues pendant la modification', v2.questions);
+  }
+
+  let library = createKaloneoLibrary({ dataRoot:tempRoot, seedTestsRoot });
+  const savedV2 = library.saveTest(v2);
+  if (!savedV2?.ok) fail('enregistrement V2 impossible', savedV2);
+
+  const editedV1 = JSON.parse(JSON.stringify(v1));
+  editedV1.scenario = 'SCENARIO ADMIN A CONSERVER';
+  const overwriteV1 = library.saveTest(editedV1, { overwrite:true });
+  if (!overwriteV1?.ok) fail('écrasement volontaire de la V1 impossible', overwriteV1);
+
+  library = createKaloneoLibrary({ dataRoot:tempRoot, seedTestsRoot });
+  const persistedV2 = library.getTest('organisation_demenagement', '2.0.0')?.definition;
+  const persistedV1 = library.getTest('organisation_demenagement', '1.0.0')?.definition;
+
+  if (!persistedV2?.kaloneoLibrary?.adminModified ||
+      persistedV2.presentation?.builderContent?.find(item => item.type === 'image')?.zone !== 'right') {
+    fail('la V2 admin ne survit pas à la resynchronisation de bibliothèque', persistedV2);
+  }
+  if (persistedV1?.scenario !== 'SCENARIO ADMIN A CONSERVER' || !persistedV1?.kaloneoLibrary?.adminModified) {
+    fail('une V1 volontairement modifiée par l’admin est réécrasée par le seed système', persistedV1);
+  }
+
+  console.log('KALONEO_EDIT_EXISTING_TEST=OK');
+  console.log(JSON.stringify({
+    v1:{version:v1.version,layout:v1.presentation?.layout?.ratio},
+    v2:{
+      version:persistedV2.version,
+      layout:persistedV2.presentation?.layout,
+      imageZone:persistedV2.presentation?.builderContent?.find(item=>item.type==='image')?.zone,
+      questions:persistedV2.presentation?.builderContent?.filter(item=>item.type==='question').length,
+      adminModified:persistedV2.kaloneoLibrary?.adminModified
+    }
+  }));
+} finally {
+  try { fs.rmSync(tempRoot, { recursive:true, force:true }); } catch (_) {}
+}
