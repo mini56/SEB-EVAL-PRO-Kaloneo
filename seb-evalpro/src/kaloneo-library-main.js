@@ -537,7 +537,9 @@ function createKaloneoLibrary(options = {}) {
       description:String(definition.description || ''),
       questionCount:questions,
       icon:definition.icon || null,
-      tools:[...new Set(tools)]
+      tools:[...new Set(tools)],
+      protectedVersion:seedContainsTest(definition.id, definition.version),
+      adminModified:definition?.kaloneoLibrary?.adminModified === true
     };
   }
 
@@ -559,6 +561,36 @@ function createKaloneoLibrary(options = {}) {
       if (definition && String(definition.id) === wantedId && String(definition.version) === wantedVersion) return file;
     }
     return '';
+  }
+
+  function seedContainsTest(id, version) {
+    if (!seedTestsRoot || !fs.existsSync(seedTestsRoot)) return false;
+    const wantedId = String(id || '');
+    const wantedVersion = String(version || '');
+    return walkTestFiles(seedTestsRoot).some(file => {
+      const definition = readJson(file);
+      return definition &&
+        String(definition.id || '') === wantedId &&
+        String(definition.version || '') === wantedVersion;
+    });
+  }
+
+  function parcoursUsingTest(id, version) {
+    const wantedId = String(id || '');
+    const wantedVersion = String(version || '');
+    return readAllParcours()
+      .filter(item => {
+        const refs = [
+          item.introduction,
+          ...(Array.isArray(item.tests) ? item.tests : []),
+          item.fin
+        ].filter(Boolean);
+        return refs.some(ref =>
+          String(ref.id || '') === wantedId &&
+          String(ref.version || '') === wantedVersion
+        );
+      })
+      .map(item => ({ id:String(item.id || ''), name:String(item.name || item.id || '') }));
   }
 
   function getTest(id, version) {
@@ -598,6 +630,53 @@ function createKaloneoLibrary(options = {}) {
     atomicWriteJson(target, value);
     const record = { definition:value, file:target };
     return { ok:true, replaced:Boolean(existing), test:toTestMetadata(record) };
+  }
+
+  function deleteTest(id, version) {
+    ensureSeed();
+    const wantedId = String(id || '').trim();
+    const wantedVersion = String(version || '').trim();
+    if (!wantedId || !wantedVersion) return { ok:false, error:'Test à supprimer invalide.' };
+
+    const file = exactTestFile(wantedId, wantedVersion);
+    if (!file) return { ok:false, error:'Cette version du test n’existe plus dans la bibliothèque.' };
+
+    const definition = readJson(file);
+    if (!definition) return { ok:false, error:'Test KALTEST illisible.' };
+    if (roleOf(definition) !== 'test') {
+      return { ok:false, code:'PROTECTED', error:'Les pages d’introduction et de fin ne se suppriment pas depuis la bibliothèque de tests.' };
+    }
+    if (seedContainsTest(wantedId, wantedVersion)) {
+      return {
+        ok:false,
+        code:'PROTECTED',
+        error:'Cette version est fournie avec KALONÉO et reste protégée. Créez une nouvelle version si vous souhaitez la personnaliser.'
+      };
+    }
+
+    const usages = parcoursUsingTest(wantedId, wantedVersion);
+    if (usages.length) {
+      return {
+        ok:false,
+        code:'IN_USE',
+        usages,
+        error:'Ce test est utilisé dans ' + usages.length + ' parcours enregistré' + (usages.length > 1 ? 's' : '') + '.'
+      };
+    }
+
+    try {
+      fs.unlinkSync(file);
+      let directory = path.dirname(file);
+      const stop = path.resolve(testsRoot);
+      while (path.resolve(directory).startsWith(stop) && path.resolve(directory) !== stop) {
+        if (fs.readdirSync(directory).length) break;
+        fs.rmdirSync(directory);
+        directory = path.dirname(directory);
+      }
+      return { ok:true, deleted:{ id:wantedId, version:wantedVersion, title:String(definition.title || wantedId) } };
+    } catch (error) {
+      return { ok:false, error:error && error.message ? error.message : String(error) };
+    }
   }
 
   function defaultMaskScreen() {
@@ -1125,6 +1204,7 @@ function createKaloneoLibrary(options = {}) {
     importImageZip,
     getTest,
     saveTest,
+    deleteTest,
     listMaskScreens,
     getMaskScreen,
     saveMaskScreen,
