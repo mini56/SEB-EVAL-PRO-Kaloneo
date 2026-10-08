@@ -107,6 +107,82 @@ async function runCase(test, fin, showCorrections) {
   return result;
 }
 
+
+async function runValidationStabilityCase(test, fin, actionPattern) {
+  currentRuntime = {
+    id:'interactive-fullpage-stability-smoke',
+    title:'Interactive full-page stability smoke',
+    creator:'Smoke R25',
+    launchOptions:{showCorrectionsDuringParcours:true},
+    maskScreen:{id:'kaloneo-default',version:'1.0.0'},
+    introduction:null,
+    tests:[test],
+    fin
+  };
+  currentState = pendingState(test, fin);
+
+  const win = new BrowserWindow({
+    show:false,
+    width:1366,
+    height:768,
+    webPreferences:{
+      preload:path.join(__dirname, 'kaloneo-interactive-fullpage-smoke-preload.js'),
+      contextIsolation:true,
+      nodeIntegration:false,
+      sandbox:false,
+      devTools:false
+    }
+  });
+
+  try {
+    await win.loadFile(path.join(webRoot, 'kaltest-pilot2.html'));
+  } catch (error) {
+    if (!/ERR_FAILED/.test(String(error?.message || error))) throw error;
+  }
+
+  let armed = false;
+  for (let i=0;i<100;i+=1) {
+    armed = await win.webContents.executeJavaScript(`(()=>{
+      const frame=document.querySelector('.kaltest-legacy-page-iframe');
+      const buttons=[...document.querySelectorAll('#kaloneo-nav-center .kaloneo-nav-action')]
+        .filter(button=>!button.hidden&&getComputedStyle(button).display!=='none');
+      const action=buttons.find(button=>new RegExp(${JSON.stringify(actionPattern)},'i').test(String(button.textContent||'')));
+      if(!frame||!frame.contentDocument||!action) return false;
+      window.__sebSmokeInteractiveFrame=frame;
+      frame.dataset.sebSmokeStableFrame='1';
+      try{ frame.contentWindow.alert=()=>{}; }catch(_){}
+      action.click();
+      return true;
+    })()`, true).catch(()=>false);
+    if (armed) break;
+    await wait(50);
+  }
+
+  if (!armed) {
+    win.destroy();
+    return { armed:false };
+  }
+
+  await wait(450);
+  const result = await win.webContents.executeJavaScript(`(()=>{
+    const frame=document.querySelector('.kaltest-legacy-page-iframe');
+    const doc=frame?.contentDocument;
+    const actions=[...document.querySelectorAll('#kaloneo-nav-center .kaloneo-nav-action')]
+      .filter(button=>!button.hidden&&getComputedStyle(button).display!=='none')
+      .map(button=>String(button.textContent||'').trim());
+    return {
+      armed:true,
+      sameFrame:frame===window.__sebSmokeInteractiveFrame,
+      marker:frame?.dataset?.sebSmokeStableFrame||'',
+      colored:doc?.querySelectorAll('.correct,.incorrect,.correct-answer,.wrong-answer').length||0,
+      actions
+    };
+  })()`, true);
+
+  win.destroy();
+  return result;
+}
+
 function sameLabels(actual, expectedPatterns) {
   return Array.isArray(actual) &&
     actual.length === expectedPatterns.length &&
@@ -157,8 +233,20 @@ app.whenReady().then(async () => {
       return fail('Puzzle avec corrections : Recommencer + Valider attendus dans la barre candidat', puzzleYes);
     }
 
+    const stockStable = await runValidationStabilityCase(stock, fin, 'Vérifier');
+    if (!stockStable?.armed || !stockStable.sameFrame || stockStable.marker !== '1' ||
+        stockStable.colored < 1 || !stockStable.actions.some(label => /Suivant/.test(label))) {
+      return fail('Stock : la validation ne doit pas reconstruire la page ; seules les couleurs et la barre doivent changer', stockStable);
+    }
+
+    const puzzleStable = await runValidationStabilityCase(puzzle, fin, 'Valider');
+    if (!puzzleStable?.armed || !puzzleStable.sameFrame || puzzleStable.marker !== '1' ||
+        puzzleStable.colored < 1 || !puzzleStable.actions.some(label => /Page suivante|Suivant/.test(label))) {
+      return fail('Puzzle : la validation ne doit pas reconstruire la page ; seules les couleurs et la barre doivent changer', puzzleStable);
+    }
+
     console.log('KALONEO_INTERACTIVE_FULLPAGE=OK');
-    console.log(JSON.stringify({stockNo,stockYes,puzzleNo,puzzleYes}));
+    console.log(JSON.stringify({stockNo,stockYes,puzzleNo,puzzleYes,stockStable,puzzleStable}));
     clearTimeout(timeout);
     app.exit(0);
   } catch (error) {
