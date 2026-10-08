@@ -12,6 +12,8 @@
     imageLibraryTargetUid: null,
     imageLibraryItems: []
   };
+  let textColorTarget = null;
+  let textColorChanged = null;
 
   const $ = id => document.getElementById(id);
 
@@ -226,7 +228,7 @@
     if(!target)return;
     target.replaceChildren();
     const source=displayMultiline(value);
-    const token=/\[(\/)?(b|i|u)\]/gi;
+    const token=/\[(\/)?(b|i|u|c)(?:=(#[0-9a-f]{6}))?\]/gi;
     const stack=[{node:target,tag:null}];
     let cursor=0;
     const appendText=text=>{
@@ -242,7 +244,13 @@
       const closing=Boolean(match[1]);
       const tag=String(match[2]||'').toLowerCase();
       if(!closing){
-        const element=document.createElement(tag==='b'?'strong':tag==='i'?'em':'u');
+        let element;
+        if(tag==='c'){
+          element=document.createElement('span');
+          if(/^#[0-9a-f]{6}$/i.test(String(match[3]||''))) element.style.color=match[3];
+        }else{
+          element=document.createElement(tag==='b'?'strong':tag==='i'?'em':'u');
+        }
         stack.at(-1).node.appendChild(element);
         stack.push({node:element,tag});
       }else{
@@ -255,12 +263,11 @@
     appendText(source.slice(cursor));
   }
 
-  function applyContextFormat(targetId,format) {
-    const input=$(targetId);
+  function applyMarkupToTextarea(input,format,onChanged,color='') {
     if(!input)return;
     const start=Number.isFinite(input.selectionStart)?input.selectionStart:input.value.length;
     const end=Number.isFinite(input.selectionEnd)?input.selectionEnd:start;
-    const open='['+format+']';
+    const open=format==='c'?'[c='+color+']':'['+format+']';
     const close='[/'+format+']';
     const selected=input.value.slice(start,end);
     input.value=input.value.slice(0,start)+open+selected+close+input.value.slice(end);
@@ -268,7 +275,51 @@
     const nextEnd=nextStart+selected.length;
     input.focus();
     input.setSelectionRange(nextStart,nextEnd);
+    if(typeof onChanged==='function') onChanged(input.value);
     changed();
+  }
+
+  function openTextColorPalette(input,onChanged) {
+    textColorTarget=input||null;
+    textColorChanged=typeof onChanged==='function'?onChanged:null;
+    $('text-color-dialog')?.showModal();
+  }
+
+  function createTextFormatToolbar(input,onChanged) {
+    const toolbar=document.createElement('span');
+    toolbar.className='context-format-toolbar inline-text-format-toolbar';
+    const buttons=[
+      ['b','G','Gras'],
+      ['i','I','Italique'],
+      ['u','U','Souligné'],
+      ['color','A🎨','Couleur du texte']
+    ];
+    buttons.forEach(([format,label,title])=>{
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='context-format-btn'+(format==='color'?' context-color-btn':'');
+      button.title=title;
+      if(format==='b') button.innerHTML='<strong>G</strong>';
+      else if(format==='i') button.innerHTML='<em>I</em>';
+      else if(format==='u') button.innerHTML='<u>U</u>';
+      else button.textContent=label;
+      button.addEventListener('click',()=>{
+        if(format==='color') openTextColorPalette(input,onChanged);
+        else applyMarkupToTextarea(input,format,onChanged);
+      });
+      toolbar.appendChild(button);
+    });
+    return toolbar;
+  }
+
+  function applyContextFormat(targetId,format) {
+    const input=$(targetId);
+    if(!input)return;
+    if(format==='color') {
+      openTextColorPalette(input,null);
+      return;
+    }
+    applyMarkupToTextarea(input,format,null);
   }
 
   function syncPageBackgroundOptions() {
@@ -1082,6 +1133,7 @@
       });
       body.appendChild(field);
       const textarea=field.querySelector('textarea');
+      body.appendChild(createTextFormatToolbar(textarea,value=>{block.text=value;}));
       const insert=document.createElement('button');
       insert.type='button';
       insert.className='mini-btn insert-question-at-cursor';
@@ -1331,7 +1383,7 @@
     let node=wrap;
 
     if(block.type==='text') {
-      wrap.textContent=displayMultiline(block.text||'Bloc texte vide');
+      renderRichContext(wrap,block.text||'Bloc texte vide');
     } else if(block.type==='html'||block.type==='html-js') {
       const frame=document.createElement('iframe');
       frame.className='preview-html-frame';frame.sandbox='allow-scripts';
@@ -1880,9 +1932,21 @@
       changed();
     });
 
-    document.querySelectorAll('.context-format-btn').forEach(button=>{
+    document.querySelectorAll('.context-rich-field .context-format-btn').forEach(button=>{
       button.addEventListener('click',()=>{
         applyContextFormat(button.dataset.target,button.dataset.format);
+      });
+    });
+    $('close-text-color-dialog').addEventListener('click',()=>$('text-color-dialog').close());
+    document.querySelectorAll('[data-text-color]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const color=String(button.dataset.textColor||'');
+        if(textColorTarget&&/^#[0-9a-f]{6}$/i.test(color)) {
+          applyMarkupToTextarea(textColorTarget,'c',textColorChanged,color);
+        }
+        $('text-color-dialog').close();
+        textColorTarget=null;
+        textColorChanged=null;
       });
     });
 
