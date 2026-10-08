@@ -92,13 +92,20 @@ const preload=read(path.join(sebRoot,'src','preload.js'));
 const kaloneoLibrary=read(path.join(sebRoot,'src','kaloneo-library-main.js'));
 const maskBuilderHtml=read(path.join(sebRoot,'overrides','admin-mask-builder.html'));
 const maskBuilderJs=read(path.join(sebRoot,'source','js','admin-mask-builder.js'));
+const transferHtml=read(path.join(sebRoot,'overrides','admin-kaloneo-transfer.html'));
+const transferJs=read(path.join(sebRoot,'source','js','admin-kaloneo-transfer.js'));
 
 
 for(const token of [
-  'builder-core.js','Importer test.json','table-grid','Gratte-ciel 6 × 6','value="text-editor"',
+  'builder-core.js','table-grid','Gratte-ciel 6 × 6','value="text-editor"',
   'value="chars-rest"','id="block1-width-chars"','id="last-block-remainder"',
-  'Démarrer le compteur','Arrêter le compteur','id="calculator-brand"'
+  'id="calculator-brand"','Bibliothèque de tests','Bibliothèque d’images',
+  'Nouveau test','Enregistrer','candidate-preview-viewport','Voir la vraie page dans Electron'
 ]) if(!builderHtml.includes(token)) fail('Builder UI incomplet: '+token);
+
+for(const obsolete of ['id="import-json"','id="download-json"','id="refresh-preview"','id="preview-calculator"','class="preview-footer"']){
+  if(builderHtml.includes(obsolete)) fail('Builder R31 encore encombré par une commande obsolète: '+obsolete);
+}
 
 for(const token of [
   "Core.createGridBlock(6,6)","acceptedAnswers=answers","response-table","inline-flow","multiple-tables","text-editor",
@@ -138,6 +145,24 @@ for(const token of ["kaloneoSaveTest","kaloneoListMaskScreens","kaloneoSaveMaskS
   if(!preload.includes(token)) fail('Preload R4 absent: '+token);
 }
 if(!maskBuilderHtml.includes('Écrans de masquage')||!maskBuilderJs.includes('kaloneoSaveMaskScreen')) fail('éditeur Écrans de masquage absent');
+if(!transferHtml.includes('KALONÉO — Import / Export')||
+   !transferHtml.includes('Exporter le test')||
+   !transferHtml.includes('Importer un test')||
+   !transferHtml.includes('Exporter le parcours')||
+   !transferHtml.includes('Importer un parcours')||
+   !transferJs.includes('kaloneoExportTest')||
+   !transferJs.includes('kaloneoImportParcours')){
+  fail('page Import / Export KALONÉO R31 incomplète');
+}
+if(!admin.includes('open-kaloneo-transfer')||!adminJs.includes("admin-kaloneo-transfer.html")){
+  fail('Tests / Parcours n’ouvre pas la page Import / Export');
+}
+for(const token of ['kaloneo-transfer:export-test','kaloneo-transfer:import-test','kaloneo-transfer:export-parcours','kaloneo-transfer:import-parcours']){
+  if(!main.includes(token)) fail('IPC Import / Export R31 absent: '+token);
+}
+for(const token of ['kaloneoExportTest','kaloneoImportTest','kaloneoExportParcours','kaloneoImportParcours']){
+  if(!preload.includes(token)) fail('Preload Import / Export R31 absent: '+token);
+}
 if(!main.includes("query:{ resume:'preview' }")) {
   fail('Retour aperçu R3 sans reprise explicite du brouillon');
 }
