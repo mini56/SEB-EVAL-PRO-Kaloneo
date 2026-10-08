@@ -60,7 +60,7 @@ app.whenReady().then(async()=>{
     if (stock.pots!==34||stock.shelves!==3||stock.sourceZones!==2) {
       throw new Error('Plateau Stock incomplet: '+JSON.stringify(stock));
     }
-    if (!/Vérifier/.test(stock.action)) throw new Error('Bouton Vérifier Stock absent.');
+    if (/Vérifier/.test(stock.action) || !/Suivant/.test(stock.action)) throw new Error('Sans affichage des corrections, Stock doit proposer Suivant et non Vérifier.');
     if (stock.headingDisplay!=='none'||stock.contextDisplay!=='none'||stock.footerDisplay!=='none') {
       throw new Error('Le cadre générique KALTEST prend encore de la place sur Stock.');
     }
