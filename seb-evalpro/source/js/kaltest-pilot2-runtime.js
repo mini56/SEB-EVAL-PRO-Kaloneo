@@ -3207,11 +3207,53 @@
     return null;
   }
 
+  function multilineText(value) {
+    return String(value || '').replace(/\\n/g, '\n');
+  }
+
+  function applyBuilderItemStyle(node, item) {
+    if (!node) return node;
+    const style = item?.style || {};
+    const fontSize = Number(style.fontSize);
+    if (Number.isFinite(fontSize) && fontSize >= 10 && fontSize <= 40) {
+      node.style.fontSize = fontSize + 'px';
+      node.dataset.kaloneoFontSize = String(fontSize);
+    }
+    const backgroundColor = String(style.backgroundColor || '').trim();
+    if (backgroundColor) {
+      node.style.backgroundColor = backgroundColor;
+      node.style.padding = node.style.padding || '8px 10px';
+      node.style.borderRadius = node.style.borderRadius || '9px';
+    }
+    return node;
+  }
+
+  function applyTestPageStyle(test) {
+    const page = document.getElementById('page-exercise');
+    if (!page) return;
+    for (const property of ['background','backgroundColor','backgroundImage','backgroundSize','backgroundPosition','backgroundRepeat']) {
+      page.style[property] = '';
+    }
+    page.classList.remove('kaltest-custom-page-background');
+    const style = test?.presentation?.pageStyle || {};
+    if (style.backgroundImage) {
+      page.style.backgroundImage = 'url("' + String(style.backgroundImage).replace(/"/g, '%22') + '")';
+      page.style.backgroundSize = style.backgroundFit === 'contain' ? 'contain' : 'cover';
+      page.style.backgroundPosition = 'center';
+      page.style.backgroundRepeat = 'no-repeat';
+      page.classList.add('kaltest-custom-page-background');
+    } else if (style.backgroundColor) {
+      page.style.backgroundColor = String(style.backgroundColor);
+      page.classList.add('kaltest-custom-page-background');
+    }
+  }
+
   function renderBuilderContentItem(test, item) {
     const legacy = renderLegacyPreset(test, item);
     if (legacy) return legacy;
     const wrap = document.createElement('div');
     wrap.className = 'kaltest-builder-content-item';
+    applyBuilderItemStyle(wrap, item);
 
     if (item.type === 'text') {
       wrap.textContent = item.text || '';
@@ -3228,8 +3270,8 @@
       wrap.appendChild(frame);
       return wrap;
     }
-    if (['image','audio','video'].includes(item.type)) return renderBuilderMedia(item);
-    if (item.type === 'text-editor') return renderTextEditorTool(test, item);
+    if (['image','audio','video'].includes(item.type)) return applyBuilderItemStyle(renderBuilderMedia(item), item);
+    if (item.type === 'text-editor') return applyBuilderItemStyle(renderTextEditorTool(test, item), item);
     if (item.type === 'question') {
       const question = questionById(test, item.questionId);
       if (question) {
@@ -3242,9 +3284,9 @@
       }
       return wrap;
     }
-    if (item.type === 'response-table') return renderBuilderResponseTable(test, item);
-    if (item.type === 'inline-flow') return renderBuilderInlineFlow(test, item);
-    if (item.type === 'table-grid') return renderBuilderGrid(test, item);
+    if (item.type === 'response-table') return applyBuilderItemStyle(renderBuilderResponseTable(test, item), item);
+    if (item.type === 'inline-flow') return applyBuilderItemStyle(renderBuilderInlineFlow(test, item), item);
+    if (item.type === 'table-grid') return applyBuilderItemStyle(renderBuilderGrid(test, item), item);
     if (item.type === 'table-definition') {
       const definition = item.definition || {};
       const title = document.createElement('h3');
@@ -3619,11 +3661,12 @@
     document.body.dataset.sebKaltestLabel = test.title;
     window.sebNwtexteContext = null;
 
+    applyTestPageStyle(test);
     document.getElementById('kaltest-title').textContent = test.title || 'Exercice';
     document.getElementById('kaltest-progress').textContent =
       'Exercice ' + (state.testIndex + 1) + ' / ' + ACTIVE_TESTS.length;
-    document.getElementById('kaltest-scenario').textContent = test.scenario || '';
-    document.getElementById('kaltest-instruction').textContent = test.instruction || '';
+    document.getElementById('kaltest-scenario').textContent = multilineText(test.scenario || '');
+    document.getElementById('kaltest-instruction').textContent = multilineText(test.instruction || '');
 
     const calculator = document.getElementById('kaltest-calculator');
     const calculatorEnabled = test.calculator?.compatible === true && test.calculator?.defaultEnabled !== false;
