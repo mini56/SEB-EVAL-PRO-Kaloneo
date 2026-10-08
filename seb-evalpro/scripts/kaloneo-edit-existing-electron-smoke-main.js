@@ -26,8 +26,8 @@ function buildOrganisationV2() {
   const model = Core.definitionToModel(v1);
   model.meta.version = '2.0.0';
   model.meta.layout = '60-40';
-  model.meta.scenario = 'Première ligne\\nDeuxième ligne';
-  model.meta.instruction = 'Consigne ligne 1\nConsigne ligne 2';
+  model.meta.scenario = '[b]Première ligne[/b]\\nDeuxième ligne';
+  model.meta.instruction = '[i]Consigne ligne 1[/i]\n[u]Consigne ligne 2[/u]';
   model.meta.pageBackgroundType = 'color';
   model.meta.pageBackgroundColor = '#FFF8DD';
 
@@ -125,7 +125,10 @@ app.whenReady().then(async () => {
           instruction:String(document.getElementById('kaltest-instruction')?.textContent||''),
           pageBackground:page?.style.backgroundColor||'',
           styledFont:styledBlock?.style.fontSize||'',
-          styledBackground:styledBlock?.style.backgroundColor||''
+          styledBackground:styledBlock?.style.backgroundColor||'',
+          scenarioBold:String(document.querySelector('#kaltest-scenario strong')?.textContent||''),
+          instructionItalic:String(document.querySelector('#kaltest-instruction em')?.textContent||''),
+          instructionUnderline:String(document.querySelector('#kaltest-instruction u')?.textContent||'')
         };
       })()`, true).catch(()=>null);
       if (result?.generic && result?.rightImage) break;
@@ -139,7 +142,10 @@ app.whenReady().then(async () => {
         result.instruction !== 'Consigne ligne 1\nConsigne ligne 2' ||
         !/255, 248, 221/.test(result.pageBackground) ||
         result.styledFont !== '22px' ||
-        !/238, 249, 242/.test(result.styledBackground)) {
+        !/238, 249, 242/.test(result.styledBackground) ||
+        result.scenarioBold !== 'Première ligne' ||
+        result.instructionItalic !== 'Consigne ligne 1' ||
+        result.instructionUnderline !== 'Consigne ligne 2') {
       return fail('la V2 modifiée n’est pas rendue avec ses styles Builder', result);
     }
 
