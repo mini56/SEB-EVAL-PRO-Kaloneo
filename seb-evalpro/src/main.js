@@ -1095,6 +1095,86 @@ ipcMain.handle('kaloneo-library:delete-test', (_event, payload) => {
   }
 });
 
+ipcMain.handle('kaloneo-transfer:export-test', async (_event, payload) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible d’exporter pendant une évaluation active.' };
+  try {
+    const result = getKaloneoLibrary().getTest(payload && payload.id, payload && payload.version);
+    if (!result.ok) return result;
+    const definition = result.definition;
+    const chosen = await dialog.showSaveDialog(mainWindow, {
+      title:'Exporter un test KALONÉO',
+      defaultPath:String(definition.id || 'test') + '-' + String(definition.version || '1.0.0') + '-test.json',
+      filters:[{ name:'Test KALONÉO JSON', extensions:['json'] }]
+    });
+    if (chosen.canceled || !chosen.filePath) return { ok:false, canceled:true };
+    fs.writeFileSync(chosen.filePath, JSON.stringify(definition, null, 2) + '\n', 'utf8');
+    return { ok:true, filePath:chosen.filePath };
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-transfer:import-test', async () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible d’importer pendant une évaluation active.' };
+  try {
+    const chosen = await dialog.showOpenDialog(mainWindow, {
+      title:'Importer un test KALONÉO',
+      properties:['openFile'],
+      filters:[{ name:'Test KALONÉO JSON', extensions:['json'] }]
+    });
+    if (chosen.canceled || !chosen.filePaths?.[0]) return { ok:false, canceled:true };
+    const definition = JSON.parse(fs.readFileSync(chosen.filePaths[0], 'utf8'));
+    const result = getKaloneoLibrary().saveTest(definition, { overwrite:false });
+    if (result && result.code === 'EXISTS') {
+      return { ...result, definition };
+    }
+    return result;
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-transfer:export-parcours', async (_event, id) => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible d’exporter pendant une évaluation active.' };
+  try {
+    const result = getKaloneoLibrary().buildParcoursPackage(id);
+    if (!result.ok) return result;
+    const name = String(result.package?.parcours?.name || 'parcours')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'') || 'parcours';
+    const chosen = await dialog.showSaveDialog(mainWindow, {
+      title:'Exporter un parcours KALONÉO',
+      defaultPath:name + '-kaloneo-parcours.json',
+      filters:[{ name:'Parcours KALONÉO JSON', extensions:['json'] }]
+    });
+    if (chosen.canceled || !chosen.filePath) return { ok:false, canceled:true };
+    fs.writeFileSync(chosen.filePath, JSON.stringify(result.package, null, 2) + '\n', 'utf8');
+    return { ok:true, filePath:chosen.filePath };
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('kaloneo-transfer:import-parcours', async () => {
+  if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
+  if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible d’importer pendant une évaluation active.' };
+  try {
+    const chosen = await dialog.showOpenDialog(mainWindow, {
+      title:'Importer un parcours KALONÉO',
+      properties:['openFile'],
+      filters:[{ name:'Parcours KALONÉO JSON', extensions:['json'] }]
+    });
+    if (chosen.canceled || !chosen.filePaths?.[0]) return { ok:false, canceled:true };
+    const payload = JSON.parse(fs.readFileSync(chosen.filePaths[0], 'utf8'));
+    return getKaloneoLibrary().importParcoursPackage(payload);
+  } catch (error) {
+    return { ok:false, error:error && error.message ? error.message : String(error) };
+  }
+});
+
 ipcMain.handle('kaloneo-library:list-images', () => {
   if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
   if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier la bibliothèque d’images pendant une évaluation active.' };
