@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const appPackage = require('../package.json');
+const EXPECTED_BUILD_LABEL = 'Build #' + String(appPackage.sebBuildNumber || '').trim();
 
 function fail(message, details) {
   console.error('SEB EvalPro Admin smoke: ' + message);
@@ -105,6 +107,7 @@ app.whenReady().then(async () => {
       const oldBilan=document.getElementById('seb-evalpro-old-bilan');
       const oldReplay=document.getElementById('seb-evalpro-replay');
       const oldResults=document.getElementById('seb-evalpro-results');
+      const build=document.getElementById('seb-evalpro-build');
       document.dispatchEvent(new MouseEvent('mousemove',{bubbles:true,clientY:0,clientX:20}));
       await new Promise(r=>setTimeout(r,120));
       return {
@@ -120,16 +123,17 @@ app.whenReady().then(async () => {
         oldResultsVisible:!!oldResults && !oldResults.hidden && getComputedStyle(oldResults).display!=='none',
         visible:!!bar && bar.classList.contains('seb-evalpro-visible'),
         transform:bar ? getComputedStyle(bar).transform : '',
-        adminText:admin ? String(admin.textContent||'').trim() : ''
+        adminText:admin ? String(admin.textContent||'').trim() : '',
+        buildText:build ? String(build.textContent||'').trim() : ''
       };
     })()`);
 
-    if (!result.bar || !result.hotzone || !result.adminButton || !result.openCandidate || !result.openCandidateVisible || !result.closeSessionVisible || result.bilanVisible || result.oldReplayVisible || result.oldResultsVisible || !result.visible || result.adminText !== 'Verrouiller') {
-      fail('barre Admin incorrecte : Ouvrir un candidat/Fermer la session active requis, Bilan global et Replay global interdits', result);
+    if (!result.bar || !result.hotzone || !result.adminButton || !result.openCandidate || !result.openCandidateVisible || !result.closeSessionVisible || result.bilanVisible || result.oldReplayVisible || result.oldResultsVisible || !result.visible || result.adminText !== 'Verrouiller' || result.buildText !== EXPECTED_BUILD_LABEL) {
+      fail('barre Admin incorrecte : commandes requises et numéro de build courant attendus (' + EXPECTED_BUILD_LABEL + ')', result);
       return;
     }
 
-    console.log('SEB EvalPro Admin smoke: OK - Ouvrir un candidat et Fermer la session active visibles; Bilan global et Replay global masqués.');
+    console.log('SEB EvalPro Admin smoke: OK - commandes Admin correctes et ' + EXPECTED_BUILD_LABEL + ' affiché.');
     console.log(JSON.stringify(result));
 
     // Vérification réelle du correctif IA #25 : un seul bouton visible,
