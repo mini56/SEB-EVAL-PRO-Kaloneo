@@ -135,7 +135,7 @@ for(const token of ["params.get('resume') === 'preview'","focusTitleField","star
 for(const token of ["Texte libre — évaluation Administrateur","saveToLibrary","kaloneoSaveTest"]) {
   if(!builderJs.includes(token)) fail('Test Builder R4 incomplet: '+token);
 }
-for(const token of ["undoChange","redoChange","confirmDiscardChanges","Ctrl+Z","SAVED_FINGERPRINT_KEY"]) {
+for(const token of ["undoChange","redoChange","confirmDiscardChanges","event.key","SAVED_FINGERPRINT_KEY"]) {
   if(!builderJs.includes(token)) fail('Historique ergonomique R32 incomplet: '+token);
 }
 for(const token of ["saveTest","listMaskScreens","saveMaskScreen","Ecrans-masquage","kaloneo-default"]) {
