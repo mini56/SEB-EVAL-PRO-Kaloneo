@@ -3684,6 +3684,9 @@
       // Ranger le stock migré dans le moteur KALTEST commun.
     } else if (renderPlanning(test, host)) {
       // Planning cantine migré dans le moteur KALTEST commun.
+    } else if (Array.isArray(test.presentation?.builderContent) && renderBuilderContent(test, host)) {
+      // Une version explicitement enregistrée par le Builder est prioritaire
+      // sur les anciens renderers historiques (fractions/organisation/postures).
     } else if (renderFractions(test, host)) {
       // Migration KALTEST de l'ancienne page 4.
     } else if (renderOrganisation(test, host)) {
