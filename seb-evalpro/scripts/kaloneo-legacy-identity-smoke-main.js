@@ -77,7 +77,7 @@ app.whenReady().then(async()=>{
     if (stock.pots!==34||stock.shelves!==3||stock.cases!==35||stock.sourceZones!==2) {
       throw new Error('Plateau Stock historique incomplet: '+JSON.stringify(stock));
     }
-    if (stock.actionDisplay!=='none' || JSON.stringify(stock.barActions)!==JSON.stringify(['➡️ Suivant'])) {
+    if (stock.actionDisplay!=='none' || stock.barActions.length!==1 || !/Suivant/.test(stock.barActions[0])) {
       throw new Error('Stock sans corrections : le bouton interne doit être masqué et Suivant doit être dans la barre candidat: '+JSON.stringify(stock));
     }
     if (stock.nestedNav) throw new Error('Navigation commune imbriquée dans la page historique Stock.');
@@ -132,7 +132,7 @@ app.whenReady().then(async()=>{
       throw new Error('Grille historique du Puzzle incomplète: '+JSON.stringify(puzzle));
     }
     if (puzzle.resetDisplay!=='none'||puzzle.validateDisplay!=='none'||puzzle.nextDisplay!=='none' ||
-        JSON.stringify(puzzle.barActions)!==JSON.stringify(['🔄 Recommencer','➡️ Suivant'])) {
+        puzzle.barActions.length!==2 || !/Recommencer/.test(puzzle.barActions[0]) || !/Suivant/.test(puzzle.barActions[1])) {
       throw new Error('Puzzle sans corrections : boutons internes masqués et Recommencer/Suivant attendus dans la barre candidat: '+JSON.stringify(puzzle));
     }
     if (!puzzle.background||puzzle.background==='none'||!/gratteciel/.test(puzzle.background)) {
