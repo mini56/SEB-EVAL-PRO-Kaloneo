@@ -7,7 +7,7 @@ const page = path.join(root, 'app', 'web', 'kaltest-pilot2.html');
 function fail(message, detail) {
   console.error('KALONEO_LEGACY_IDENTITY_SMOKE: FAIL — ' + message);
   if (detail) console.error(JSON.stringify(detail, null, 2));
-  app.exit(2);
+  process.exit(2);
 }
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -19,7 +19,11 @@ async function openSegment(segment) {
     height:768,
     webPreferences:{contextIsolation:true,nodeIntegration:false,sandbox:true,devTools:false}
   });
-  await win.loadFile(page, { query:{ segment } });
+  try {
+    await win.loadFile(page, { query:{ segment } });
+  } catch (error) {
+    if (!/ERR_FAILED/.test(String(error?.message || error))) throw error;
+  }
   for (let i=0;i<100;i+=1) {
     const ready = await win.webContents.executeJavaScript(
       "Boolean(window.sebKaltestPilot2 && document.querySelector('#page-exercise.visible') && document.body.dataset.sebKaltestId)",
