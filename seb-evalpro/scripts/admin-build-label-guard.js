@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const pkg = require(path.join(root, 'package.json'));
 const preload = fs.readFileSync(path.join(root, 'src', 'preload.js'), 'utf8');
 const installer = fs.readFileSync(path.join(root, 'build', 'installer.nsh'), 'utf8');
-const r45Builder = fs.readFileSync(path.join(root, 'build', 'kaloneo-test-builder-r45-builder.yml'), 'utf8');
+const r46Builder = fs.readFileSync(path.join(root, 'build', 'kaloneo-test-builder-r46-builder.yml'), 'utf8');
 
 function fail(message) {
   console.error('SEB EvalPro garde barre Admin / build: ' + message);
@@ -29,8 +29,8 @@ const installerMatch = installer.match(/!define\s+SEB_BUILD_NUMBER\s+"(\d+)"/);
 if (!installerMatch || installerMatch[1] !== buildNumber) {
   fail('le Setup et la barre Admin n’utilisent pas le même numéro de build.');
 }
-if (!r45Builder.includes('version: 0.0.' + buildNumber)) {
-  fail('la version du builder R45 ne correspond pas au Build #' + buildNumber + '.');
+if (!r46Builder.includes('version: 0.0.' + buildNumber)) {
+  fail('la version du builder R46 ne correspond pas au Build #' + buildNumber + '.');
 }
 
 console.log('SEB_ADMIN_BUILD_LABEL=OK Build #' + buildNumber);
