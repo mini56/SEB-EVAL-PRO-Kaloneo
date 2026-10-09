@@ -167,6 +167,22 @@ try {
   assert.strictEqual(importedAgain.added, 0);
   assert.strictEqual(importedAgain.skipped, 2, 'Un candidat déjà présent ne doit jamais être écrasé.');
 
+  // Une évaluation placée dans la Corbeille ne doit pas être recréée silencieusement
+  // par un nouvel import du même fichier .seb.
+  fs.mkdirSync(admin.paths.candidateTrashRoot, { recursive:true });
+  const trashedTarget = path.join(admin.paths.candidateTrashRoot, importedCandidate1.folderName);
+  fs.renameSync(importedCandidate1.candidateDir, trashedTarget);
+  const importWhileTrashed = admin.importAll(usbRoot, password);
+  assert.strictEqual(importWhileTrashed.added, 0, 'Une évaluation en Corbeille ne doit pas être réimportée comme nouvelle.');
+  assert.strictEqual(importWhileTrashed.skipped, 1, 'Le candidat encore actif doit rester ignoré comme déjà présent.');
+  assert.strictEqual(importWhileTrashed.trashSkipped, 1, 'L’évaluation déjà en Corbeille doit être signalée séparément.');
+  assert.strictEqual(
+    admin.listCandidateRecords(admin.paths.candidatesRoot, false).some((record) => String(record.candidateId) === 'candidate-1'),
+    false,
+    'L’import ne doit pas ressusciter candidate-1 hors de la Corbeille.'
+  );
+
+  console.log('USB_IMPORT_TRASH_PROTECTION: OK');
   console.log('USB_EXPORT_EXISTING_CANDIDATE_UPDATE: OK');
   console.log('USB_IMPORT_BILAN_HISTORY_PRESERVED: OK');
   console.log('USB_IMPORT_WORD_EXPORT_PRESERVED: OK');
