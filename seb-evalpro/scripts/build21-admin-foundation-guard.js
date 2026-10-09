@@ -158,13 +158,13 @@ assert(catalog.includes('↓ Importer candidat'), 'flèche descendante Importer 
 assert(catalog.includes('↑ Exporter candidat'), 'flèche montante Exporter candidat absente.');
 assert(catalog.indexOf('id="seb-cc-export-launch"') < catalog.indexOf('id="seb-cc-export-cancel"'), 'Lancer l export doit précéder Annuler la sélection.');
 assert(catalog.includes('<button type="button" id="seb-cc-close">Fermer</button>') && catalog.includes('id="seb-cc-trash"'), 'Fermer / Corbeille absents du footer.');
-assert(fs.existsSync(path.join(root, 'source', 'assets', 'candidate-trash-empty.png')), 'icône Corbeille vide absente.');
-assert(fs.existsSync(path.join(root, 'source', 'assets', 'candidate-trash-full.png')), 'icône Corbeille pleine absente.');
+assert(fs.existsSync(path.join(ROOT, 'source', 'assets', 'candidate-trash-empty.png')), 'icône Corbeille vide absente.');
+assert(fs.existsSync(path.join(ROOT, 'source', 'assets', 'candidate-trash-full.png')), 'icône Corbeille pleine absente.');
 assert(catalog.includes("ipcRenderer.invoke('candidate-catalog:trash-restore'"), 'bouton Restaurer non raccordé.');
 assert(catalog.includes("Vider définitivement la corbeille"), 'confirmation forte de vidage définitif absente.');
 
 const uiRuntime = read('source/js/seb-ui-runtime.js');
-assert(uiRuntime.includes("closest('[data-seb-no-normalize=\"1\"]')") || uiRuntime.includes("closest('[data-seb-no-normalize=\"1\"]')"), 'runtime UI ne respecte pas les boutons à icône explicite.');
+assert(uiRuntime.includes("closest('[data-seb-no-normalize=\"1\"]')"), 'runtime UI ne respecte pas les boutons à icône explicite.');
 
 const main = read('src/main.js');
 assert(main.includes('function loadAdminCandidateBrowser'), 'route principale du catalogue candidat absente.');
