@@ -8,14 +8,14 @@ const repoRoot = path.resolve(sebRoot, '..');
 const output = path.join(sebRoot, 'source', 'js', 'kaltest-pilot2-data.js');
 
 const testPaths = [
-  'tests/fixtures/kaltests/calculs-commandes-atelier/1.0.0/test.json',
-  'tests/fixtures/kaltests/calculs-poids-volumes/1.0.0/test.json',
-  'tests/fixtures/kaltests/horaires-reception-controle/1.0.0/test.json',
-  'tests/fixtures/kaltests/texte-a-trous-stage-logistique/1.0.0/test.json',
+  'seb-evalpro/source/kaltest/tests/calculs-commandes-atelier/1.0.0/test.json',
+  'seb-evalpro/source/kaltest/tests/calculs-poids-volumes/1.0.0/test.json',
+  'seb-evalpro/source/kaltest/tests/horaires-reception-controle/1.0.0/test.json',
+  'seb-evalpro/source/kaltest/tests/texte-a-trous-stage-logistique/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/fractions-preparation-lots/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/organisation-demenagement/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/gestes-postures/1.0.0/test.json',
-  'tests/fixtures/kaltests/conversions-atelier-expedition/1.0.0/test.json',
+  'seb-evalpro/source/kaltest/tests/conversions-atelier-expedition/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/autoevaluation-savoirs/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/transition-video-f1/1.0.0/test.json',
   'seb-evalpro/source/kaltest/tests/construction-briques/1.0.0/test.json',
