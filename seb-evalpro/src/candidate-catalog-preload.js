@@ -5,6 +5,8 @@ const editionCapabilities = ipcRenderer.sendSync('app:edition-sync') || { editio
 
 let installed = false;
 let beforeAdminNavigate = null;
+let importCandidatesAction = null;
+let exportCandidatesAction = null;
 
 function isCandidateAdminHost() {
   try { return /\/admin-candidats\.html$/i.test(decodeURIComponent(window.location.pathname)); }
@@ -57,7 +59,11 @@ function addStyle() {
     .seb-delete-actions button:hover{background:#fff!important;color:#0070c0!important;border-color:#0070c0!important}
     .seb-delete-actions .danger{background:#fff!important;color:#c00000!important;border-color:#c00000!important}
     .seb-delete-actions .danger:hover{background:#fff!important;color:#c00000!important;border-color:#c00000!important}
-    .seb-cc-foot{display:flex;justify-content:flex-end;gap:10px;padding:12px 16px;border-top:1px solid #ddd;background:#fff}
+    .seb-cc-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid #ddd;background:#fff}
+    .seb-cc-foot-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .seb-cc-foot button:disabled,.seb-cc-actions button:disabled{opacity:.48;cursor:default;box-shadow:none}
+    .seb-cc-row.export-selected{border-color:#16834f;background:#f1fbf6;box-shadow:inset 0 0 0 1px #16834f}
+    .seb-cc-actions .selected{border-color:#16834f!important;color:#16834f!important;background:#f1fbf6!important}
     .seb-cc-empty{padding:35px;text-align:center;color:#555}
     .seb-cc-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 18px;padding:14px 16px;background:#f7f9fc;border-bottom:1px solid #ddd;font-size:14px}
     .seb-cc-section{padding:14px 16px}.seb-cc-section h3{margin:0 0 10px;color:#005b9f}
@@ -341,12 +347,35 @@ function openCatalog(initialCandidateId = '') {
         <div class="seb-cc-head"><div class="seb-cc-title">Liste des candidats</div><div class="seb-cc-badge">DOSSIERS CANDIDATS</div></div>
         <div class="seb-cc-search-wrap"><input id="seb-cc-search" class="seb-cc-search" type="search" autocomplete="off" placeholder="Rechercher un nom, prénom, ville, groupe ou date…"></div>
         <div class="seb-cc-body"><div id="seb-cc-list">Chargement…</div></div>
-        <div class="seb-cc-foot"><button type="button" id="seb-cc-close">Fermer</button></div>
+        <div class="seb-cc-foot">
+          <div class="seb-cc-foot-left">
+            <button type="button" id="seb-cc-import">Importer candidat</button>
+            <button type="button" id="seb-cc-export-mode">Exporter candidat</button>
+            <button type="button" id="seb-cc-export-cancel" hidden>Annuler la sélection</button>
+            <button type="button" id="seb-cc-export-launch" class="primary" hidden disabled>Lancer l’export (0)</button>
+          </div>
+          <button type="button" id="seb-cc-close">Fermer</button>
+        </div>
       </div>`;
     document.body.appendChild(overlay);
     const list = overlay.querySelector('#seb-cc-list');
     const search = overlay.querySelector('#seb-cc-search');
+    const importButton = overlay.querySelector('#seb-cc-import');
+    const exportModeButton = overlay.querySelector('#seb-cc-export-mode');
+    const exportCancelButton = overlay.querySelector('#seb-cc-export-cancel');
+    const exportLaunchButton = overlay.querySelector('#seb-cc-export-launch');
     let items = [];
+    let exportMode = false;
+    const selectedExportIds = new Set();
+
+    const updateExportFooter = () => {
+      importButton.hidden = exportMode || !editionCapabilities.canImport;
+      exportModeButton.hidden = exportMode || !editionCapabilities.canExport;
+      exportCancelButton.hidden = !exportMode;
+      exportLaunchButton.hidden = !exportMode;
+      exportLaunchButton.disabled = selectedExportIds.size === 0;
+      exportLaunchButton.textContent = 'Lancer l’export (' + selectedExportIds.size + ')';
+    };
 
     const render = () => {
       const q = norm(search.value);
@@ -365,32 +394,53 @@ function openCatalog(initialCandidateId = '') {
           <div class="seb-cc-bilan">${bilanLabel(item)}</div>
           <div class="seb-cc-actions"></div>`;
         const actions = row.querySelector('.seb-cc-actions');
-        const open = document.createElement('button');
-        open.type='button'; open.className='primary'; open.textContent='Ouvrir';
-        open.addEventListener('click', () => openCandidateDetail(item.candidateId, reload));
-        actions.append(open);
+        if (exportMode) {
+          const selectable = ['TERMINE','SESSION_FERMEE'].includes(String(item.status || ''));
+          const selected = selectedExportIds.has(String(item.candidateId || ''));
+          row.classList.toggle('export-selected', selected);
+          const choose = document.createElement('button');
+          choose.type = 'button';
+          choose.className = selected ? 'selected' : 'primary';
+          choose.disabled = !selectable;
+          choose.textContent = selectable ? (selected ? '✓ Sélectionné' : 'Exporter') : 'Parcours en cours';
+          choose.title = selectable ? 'Ajouter ou retirer ce candidat de l’export' : 'Ce candidat doit terminer son parcours avant de pouvoir être exporté.';
+          choose.addEventListener('click', () => {
+            const id = String(item.candidateId || '');
+            if (!id || !selectable) return;
+            if (selectedExportIds.has(id)) selectedExportIds.delete(id);
+            else selectedExportIds.add(id);
+            updateExportFooter();
+            render();
+          });
+          actions.append(choose);
+        } else {
+          const open = document.createElement('button');
+          open.type='button'; open.className='primary'; open.textContent='Ouvrir';
+          open.addEventListener('click', () => openCandidateDetail(item.candidateId, reload));
+          actions.append(open);
 
-        const remove = document.createElement('button');
-        remove.type='button';
-        remove.className='danger';
-        remove.textContent='Supprimer';
-        remove.addEventListener('click', async () => {
-          if (!(await confirmCandidateDelete(item))) return;
-          remove.disabled = true;
-          open.disabled = true;
-          const result = await ipcRenderer.invoke('candidate-catalog:delete', item.candidateId).catch((error) => ({
-            ok:false,
-            error:String(error && error.message ? error.message : error)
-          }));
-          if (!result || result.ok !== true) {
-            remove.disabled = false;
-            open.disabled = false;
-            window.alert((result && result.error) || 'Suppression impossible.');
-            return;
-          }
-          await reload();
-        });
-        actions.append(remove);
+          const remove = document.createElement('button');
+          remove.type='button';
+          remove.className='danger';
+          remove.textContent='Supprimer';
+          remove.addEventListener('click', async () => {
+            if (!(await confirmCandidateDelete(item))) return;
+            remove.disabled = true;
+            open.disabled = true;
+            const result = await ipcRenderer.invoke('candidate-catalog:delete', item.candidateId).catch((error) => ({
+              ok:false,
+              error:String(error && error.message ? error.message : error)
+            }));
+            if (!result || result.ok !== true) {
+              remove.disabled = false;
+              open.disabled = false;
+              window.alert((result && result.error) || 'Suppression impossible.');
+              return;
+            }
+            await reload();
+          });
+          actions.append(remove);
+        }
         list.appendChild(row);
       });
     };
@@ -400,7 +450,55 @@ function openCatalog(initialCandidateId = '') {
       render();
     };
     await reload();
+    updateExportFooter();
     search.addEventListener('input', render);
+
+    importButton.addEventListener('click', async () => {
+      if (typeof importCandidatesAction !== 'function') return;
+      importButton.disabled = true;
+      exportModeButton.disabled = true;
+      try {
+        const completed = await importCandidatesAction();
+        if (completed) await reload();
+      } finally {
+        importButton.disabled = false;
+        exportModeButton.disabled = false;
+      }
+    });
+
+    exportModeButton.addEventListener('click', () => {
+      exportMode = true;
+      selectedExportIds.clear();
+      updateExportFooter();
+      render();
+    });
+
+    exportCancelButton.addEventListener('click', () => {
+      exportMode = false;
+      selectedExportIds.clear();
+      updateExportFooter();
+      render();
+    });
+
+    exportLaunchButton.addEventListener('click', async () => {
+      if (!selectedExportIds.size || typeof exportCandidatesAction !== 'function') return;
+      const ids = [...selectedExportIds];
+      exportLaunchButton.disabled = true;
+      exportCancelButton.disabled = true;
+      try {
+        const completed = await exportCandidatesAction(ids);
+        if (completed) {
+          exportMode = false;
+          selectedExportIds.clear();
+          updateExportFooter();
+          await reload();
+        }
+      } finally {
+        exportCancelButton.disabled = false;
+        updateExportFooter();
+      }
+    });
+
     const closeButton = overlay.querySelector('#seb-cc-close');
     const close = () => { overlay.remove(); resolve(); };
     closeButton.hidden = false;
@@ -469,6 +567,8 @@ function install(options = {}) {
   if (installed) return;
   installed = true;
   beforeAdminNavigate = typeof options.beforeNavigate === 'function' ? options.beforeNavigate : null;
+  importCandidatesAction = typeof options.onImportCandidates === 'function' ? options.onImportCandidates : null;
+  exportCandidatesAction = typeof options.onExportCandidates === 'function' ? options.onExportCandidates : null;
   addStyle();
   installGenericSearchObserver();
   if (!ensureButton()) setTimeout(ensureButton, 150);
