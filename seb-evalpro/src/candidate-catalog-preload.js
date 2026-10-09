@@ -830,7 +830,7 @@ function openCatalog(initialCandidateId = '') {
       const total = Number(count || 0);
       const full = total > 0;
       trashButton.dataset.state = full ? 'full' : 'empty';
-      trashButton.innerHTML = '<img src="' + (full ? 'assets/candidate-trash-full-simple.svg' : 'assets/candidate-trash-empty.png') + '" alt="">';
+      trashButton.innerHTML = '<img src="' + (full ? 'assets/candidate-trash-full-simple.svg' : 'assets/candidate-trash-empty-simple.svg') + '" alt="">';
       trashButton.title = full ? ('Corbeille — ' + total + ' élément' + (total > 1 ? 's' : '')) : 'Corbeille — vide';
       trashButton.setAttribute('aria-label', full ? ('Corbeille pleine, ' + total + ' élément' + (total > 1 ? 's' : '')) : 'Corbeille vide');
     };
