@@ -443,23 +443,14 @@ function createKaloneoLibrary(options = {}) {
       const relative = path.relative(source, seedFile);
       const targetFile = path.join(destination, relative);
       const currentDefinition = readJson(targetFile);
-      if (!currentDefinition) {
-        atomicWriteJson(targetFile, seedDefinition);
-        continue;
-      }
 
-      const sameIdentity =
-        String(currentDefinition.id || '') === String(seedDefinition.id || '') &&
-        String(currentDefinition.version || '') === String(seedDefinition.version || '');
-
-      // Les tests historiques fournis par SEB EvalPro/KALONÉO doivent suivre
-      // les corrections livrées par l'application. Un test créé par l'admin
-      // n'a pas sourceMigration et n'est donc jamais écrasé ici.
-      if (sameIdentity && isBundledMigratedTest(currentDefinition)) {
-        const currentJson = JSON.stringify(currentDefinition);
-        const seedJson = JSON.stringify(seedDefinition);
-        if (currentJson !== seedJson) atomicWriteJson(targetFile, seedDefinition);
-      }
+      // Une version fournie avec KALONÉO est la référence système immuable.
+      // Si une ancienne version de l'application a permis de modifier cette
+      // V1 localement, on la restaure depuis le seed embarqué. Les V2/V3 admin
+      // utilisent d'autres numéros de version et ne sont donc jamais touchées.
+      const currentJson = currentDefinition ? JSON.stringify(currentDefinition) : '';
+      const seedJson = JSON.stringify(seedDefinition);
+      if (currentJson !== seedJson) atomicWriteJson(targetFile, seedDefinition);
     }
   }
 
@@ -624,6 +615,17 @@ function createKaloneoLibrary(options = {}) {
       adminModified:true,
       modifiedAt:now().toISOString()
     });
+
+    // Les versions fournies par KALONÉO (V1 système) sont en lecture seule.
+    // Une personnalisation doit être enregistrée sous une nouvelle version
+    // (V2, V3, ...), jamais écraser le seed système.
+    if (seedContainsTest(value.id, value.version)) {
+      return {
+        ok:false,
+        code:'PROTECTED_VERSION',
+        error:'Cette version est fournie avec KALONÉO et ne peut pas être modifiée. Enregistrez vos changements sous une nouvelle version (V2 ou supérieure).'
+      };
+    }
 
     const existing = exactTestFile(value.id, value.version);
     if (existing && options.overwrite !== true) {
