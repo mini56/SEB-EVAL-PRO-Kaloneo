@@ -1854,7 +1854,7 @@
     if(save){
       save.textContent=protectedSource?'Créer une nouvelle version':'Enregistrer';
       save.title=protectedSource
-        ? 'Conserver la V1 intacte et enregistrer les modifications sous la prochaine version disponible.'
+        ? 'V1 KALONÉO protégée : conserver la V1 intacte et enregistrer les modifications sous la prochaine version disponible.'
         : 'Enregistrer le test dans la bibliothèque.';
     }
   }
