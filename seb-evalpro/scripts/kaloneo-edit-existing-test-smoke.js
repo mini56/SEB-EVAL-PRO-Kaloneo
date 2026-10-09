@@ -75,10 +75,19 @@ try {
   const savedV2 = library.saveTest(v2);
   if (!savedV2?.ok) fail('enregistrement V2 impossible', savedV2);
 
-  const editedV1 = JSON.parse(JSON.stringify(v1));
-  editedV1.scenario = 'SCENARIO ADMIN A CONSERVER';
-  const overwriteV1 = library.saveTest(editedV1, { overwrite:true });
-  if (!overwriteV1?.ok) fail('écrasement volontaire de la V1 impossible', overwriteV1);
+  const overwriteV1 = library.saveTest(v1, { overwrite:true });
+  if (overwriteV1?.ok || overwriteV1?.code !== 'PROTECTED_VERSION') {
+    fail('la V1 système doit refuser tout écrasement, même avec overwrite=true', overwriteV1);
+  }
+
+  // Simule une ancienne version de l'application qui avait déjà corrompu
+  // localement la V1 en y enregistrant une modification admin/V2.
+  const localV1File = path.join(library.paths.testsRoot, 'organisation-demenagement', '1.0.0', 'test.json');
+  const corruptedV1 = JSON.parse(JSON.stringify(v2));
+  corruptedV1.version = '1.0.0';
+  corruptedV1.scenario = 'ANCIENNE V1 LOCALE MODIFIEE PAR ERREUR';
+  corruptedV1.kaloneoLibrary = { adminModified:true, modifiedAt:'2026-10-09T00:00:00.000Z' };
+  fs.writeFileSync(localV1File, JSON.stringify(corruptedV1, null, 2));
 
   library = createKaloneoLibrary({ dataRoot:tempRoot, seedTestsRoot });
   const persistedV2 = library.getTest('organisation_demenagement', '2.0.0')?.definition;
@@ -112,8 +121,12 @@ try {
       persistedV2.presentation?.builderContent?.find(item => item.type === 'image')?.zone !== 'right') {
     fail('la V2 admin ne survit pas à la resynchronisation de bibliothèque', persistedV2);
   }
-  if (persistedV1?.scenario !== 'SCENARIO ADMIN A CONSERVER' || !persistedV1?.kaloneoLibrary?.adminModified) {
-    fail('une V1 volontairement modifiée par l’admin est réécrasée par le seed système', persistedV1);
+  if (persistedV1?.scenario !== v1.scenario ||
+      persistedV1?.version !== '1.0.0' ||
+      persistedV1?.kaloneoLibrary?.adminModified === true ||
+      persistedV1?.presentation?.builderContent ||
+      persistedV1?.presentation?.organisationList?.visual?.src !== 'imageqcm/demenagement.png') {
+    fail('la vraie V1 système Organisation n’est pas restaurée depuis le seed', persistedV1);
   }
 
   const deleteV1 = library.deleteTest('organisation_demenagement', '1.0.0');
@@ -135,6 +148,8 @@ try {
   console.log('KALONEO_VERSIONED_LIBRARY_V1_V2=OK');
   console.log('KALONEO_BASE_PARCOURS_PINNED_V1=OK');
   console.log('KALONEO_V1_PROTECTED_V2_DELETABLE=OK');
+  console.log('KALONEO_SYSTEM_V1_SELF_RESTORED=OK');
+  console.log('KALONEO_SYSTEM_V1_IMMUTABLE=OK');
   console.log(JSON.stringify({
     v1:{version:v1.version,layout:v1.presentation?.layout?.ratio},
     v2:{
