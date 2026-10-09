@@ -111,7 +111,12 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
       const candidatePath = path.join(record.candidateDir, 'donnees', 'candidat.json');
       const statePath = path.join(record.candidateDir, 'donnees', 'evaluation-state.json');
       const manifest = readJson(manifestPath) || record.manifest || {};
-      const candidate = readJson(candidatePath) || record.candidate || manifest.candidat || {};
+      const candidateFile = readJson(candidatePath);
+      const candidate = {
+        ...((manifest && manifest.candidat) || {}),
+        ...((record && record.candidate) || {}),
+        ...((candidateFile && typeof candidateFile === 'object') ? candidateFile : {})
+      };
       const enriched = {
         ...enrichCandidatePersonIdentity(candidate, record.candidateId),
         personId:person.personId,
@@ -375,7 +380,13 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
 
   function completeLegacySkeleton(dir, record) {
     ensureCandidateShape(dir);
-    const c = (record && record.candidate) || {};
+    // candidateFromManifest() ne conserve historiquement que les champs
+    // d'identité de base. Garder aussi le candidat complet du manifeste afin
+    // de ne jamais perdre parcours, naissance, identifiant ou futures données.
+    const c = {
+      ...((record && record.manifest && record.manifest.candidat) || {}),
+      ...((record && record.candidate) || {})
+    };
     const defaults = [
       [path.join(dir, 'donnees', 'candidat.json'), c],
       [path.join(dir, 'donnees', 'evaluation-state.json'), {
