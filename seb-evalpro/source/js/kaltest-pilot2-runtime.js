@@ -2831,6 +2831,119 @@
     return true;
   }
 
+  function fractionCloudOverlap(points, itemSize, margin) {
+    for (let i = 0; i < points.length; i += 1) {
+      for (let j = i + 1; j < points.length; j += 1) {
+        if (
+          Math.abs(points[i].x - points[j].x) < itemSize + margin &&
+          Math.abs(points[i].y - points[j].y) < itemSize + margin
+        ) return true;
+      }
+    }
+    return false;
+  }
+
+  function randomFractionCloudPoints(count, width, height, itemSize, margin) {
+    const maxX = Math.max(0, width - itemSize);
+    const maxY = Math.max(0, height - itemSize);
+    const points = [];
+    const maxAttempts = Math.max(800, count * 350);
+    let attempts = 0;
+
+    while (points.length < count && attempts < maxAttempts) {
+      attempts += 1;
+      const candidate = {
+        x:Math.random() * maxX,
+        y:Math.random() * maxY
+      };
+      const collides = points.some(point =>
+        Math.abs(point.x - candidate.x) < itemSize + margin &&
+        Math.abs(point.y - candidate.y) < itemSize + margin
+      );
+      if (!collides) points.push(candidate);
+    }
+
+    if (points.length === count) return points;
+
+    // Garde de secours : grille légèrement décalée, utilisée uniquement si
+    // l'espace devient trop petit pour le placement aléatoire par rejet.
+    const columns = Math.max(1, Math.floor((width + margin) / (itemSize + margin)));
+    const rows = Math.max(1, Math.ceil(count / columns));
+    const stepX = columns > 1 ? maxX / (columns - 1) : 0;
+    const stepY = rows > 1 ? maxY / (rows - 1) : 0;
+    const fallback = [];
+    for (let index = 0; index < count; index += 1) {
+      const column = index % columns;
+      const row = Math.floor(index / columns);
+      const jitterX = Math.min(Math.max(0, stepX * 0.16), Math.max(0, stepX - itemSize - margin));
+      const jitterY = Math.min(Math.max(0, stepY * 0.16), Math.max(0, stepY - itemSize - margin));
+      fallback.push({
+        x:Math.max(0, Math.min(maxX, column * stepX + ((row % 2) ? jitterX : 0))),
+        y:Math.max(0, Math.min(maxY, row * stepY + ((column % 2) ? jitterY : 0)))
+      });
+    }
+    return fallback;
+  }
+
+  function layoutFractionCloud(test, question, items) {
+    if (!items || !question) return false;
+    const buttons = Array.from(items.querySelectorAll('.kaltest-fraction-item'));
+    if (!buttons.length) return false;
+
+    const width = Math.max(1, items.clientWidth || items.getBoundingClientRect().width || 1);
+    const height = Math.max(1, items.clientHeight || items.getBoundingClientRect().height || 1);
+    const itemSize = Math.max(1, buttons[0].getBoundingClientRect().width || buttons[0].offsetWidth || 54);
+    const margin = 7;
+    const maxX = Math.max(0, width - itemSize);
+    const maxY = Math.max(0, height - itemSize);
+    const testState = testStateFor(test);
+    if (!testState.fractionCloudPositions || typeof testState.fractionCloudPositions !== 'object') {
+      testState.fractionCloudPositions = {};
+    }
+
+    const saved = testState.fractionCloudPositions[question.id];
+    let points = null;
+    if (Array.isArray(saved) && saved.length === buttons.length) {
+      const restored = saved.map(position => ({
+        x:Math.max(0, Math.min(maxX, Number(position?.x || 0) * maxX)),
+        y:Math.max(0, Math.min(maxY, Number(position?.y || 0) * maxY))
+      }));
+      if (!fractionCloudOverlap(restored, itemSize, margin)) points = restored;
+    }
+
+    let generated = false;
+    if (!points) {
+      points = randomFractionCloudPoints(buttons.length, width, height, itemSize, margin);
+      testState.fractionCloudPositions[question.id] = points.map(point => ({
+        x:maxX > 0 ? point.x / maxX : 0,
+        y:maxY > 0 ? point.y / maxY : 0
+      }));
+      generated = true;
+    }
+
+    buttons.forEach((button, index) => {
+      const point = points[index] || { x:0, y:0 };
+      button.style.left = point.x + 'px';
+      button.style.top = point.y + 'px';
+    });
+    items.dataset.cloudReady = '1';
+
+    if (generated) persist();
+    return true;
+  }
+
+  function installFractionCloud(test, question, items) {
+    const relayout = () => layoutFractionCloud(test, question, items);
+    requestAnimationFrame(relayout);
+    if (typeof ResizeObserver === 'function' && !items.__sebFractionCloudObserver) {
+      const observer = new ResizeObserver(() => {
+        requestAnimationFrame(relayout);
+      });
+      observer.observe(items);
+      items.__sebFractionCloudObserver = observer;
+    }
+  }
+
   function renderFractions(test, host) {
     const definition = test.presentation?.fractionSelection;
     if (!definition || !Array.isArray(definition.groups)) return false;
@@ -2842,6 +2955,7 @@
     const work = document.createElement('section');
     work.className = 'kaltest-fractions-work';
     const testState = testStateFor(test);
+    const cloudLayouts = [];
 
     for (const group of definition.groups) {
       const question = questionById(test, group.questionId);
@@ -2864,6 +2978,10 @@
 
       const items = document.createElement('div');
       items.className = 'kaltest-fraction-items' + (group.cloud ? ' cloud' : '');
+      if (group.cloud) {
+        row.classList.add('cloud-row');
+        items.dataset.cloud = 'true';
+      }
       const selected = new Set(Array.isArray(testState.answers?.[question.id]) ? testState.answers[question.id].map(String) : []);
       const count = Math.max(1, Number(group.totalItems) || 1);
       for (let index = 1; index <= count; index += 1) {
@@ -2888,10 +3006,12 @@
       }
       row.append(title, items);
       work.appendChild(row);
+      if (group.cloud) cloudLayouts.push({ question, items });
     }
 
     layout.appendChild(work);
     host.appendChild(layout);
+    cloudLayouts.forEach(entry => installFractionCloud(test, entry.question, entry.items));
     return true;
   }
 
