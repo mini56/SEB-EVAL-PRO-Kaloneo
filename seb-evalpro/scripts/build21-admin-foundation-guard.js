@@ -105,6 +105,11 @@ assert(quitSection && quitSection.includes('app.quit'), 'Quitter ne ferme plus l
 
 const catalogMain = read('src/candidate-catalog-main.js');
 assert(catalogMain.includes("ipcMain.handle('candidate-catalog:list'"), 'catalogue candidat : liste IPC absente.');
+assert(catalogMain.includes("ipcMain.handle('candidate-catalog:list-persons'"), 'catalogue candidat : regroupement par personne absent.');
+assert(catalogMain.includes("ipcMain.handle('candidate-catalog:person-detail'"), 'catalogue candidat : fiche personne absente.');
+assert(catalogMain.includes("ipcMain.handle('candidate-catalog:delete-person'"), 'catalogue candidat : suppression globale personne absente.');
+assert(catalogMain.includes("function listPersonGroups()"), 'catalogue candidat : agrégation des évaluations par personId absente.');
+assert(catalogMain.includes("identifierCollision"), 'catalogue candidat : collision de N° identifiant non signalée.');
 assert(catalogMain.includes("ipcMain.handle('candidate-catalog:detail'"), 'catalogue candidat : détail IPC absent.');
 assert(catalogMain.includes("ipcMain.handle('candidate-catalog:delete'"), 'catalogue candidat : suppression protégée absente.');
 assert(catalogMain.includes("candidateId: record.candidateId"), 'catalogue candidat : identité technique candidateId absente.');
@@ -122,12 +127,30 @@ assert(catalog.includes('id="seb-cc-export-mode"') && catalog.includes('Exporter
 assert(catalog.includes("selectedExportIds") && catalog.includes("Lancer l’export ("), 'sélection multiple avant export absente de la Liste des candidats.');
 assert(catalog.includes("Parcours en cours"), 'protection visuelle des parcours non terminés absente de la sélection export.');
 assert(catalog.includes("onImportCandidates") && catalog.includes("onExportCandidates"), 'raccordement Import / Export de la Liste des candidats absent.');
+assert(catalog.includes("ipcRenderer.invoke('candidate-catalog:list-persons')"), 'UI Liste des candidats non raccordée au regroupement par personne.');
+assert(catalog.includes("N° identifiant"), 'N° identifiant absent de la Liste des candidats.');
+assert(catalog.includes("Supprimer l’évaluation"), 'suppression d’une seule évaluation absente.');
+assert(catalog.includes("Supprimer le candidat"), 'suppression globale du candidat absente.');
+assert(catalog.includes("Tout sélectionner"), 'sélection de toutes les évaluations d’une personne absente du mode Export.');
 
 const main = read('src/main.js');
 assert(main.includes('function loadAdminCandidateBrowser'), 'route principale du catalogue candidat absente.');
 assert(main.includes("ipcMain.handle('admin:open-candidate-browser'"), 'IPC Ouvrir un candidat absent.');
 assert(main.includes("ipcMain.handle('admin:return-candidate-browser'"), 'IPC retour candidat absent.');
 assert(main.includes("selectedCandidateIds") && main.includes("exportSelected"), 'IPC export candidats ne relaie pas la sélection de la Liste des candidats.');
+const personIdentity = read('src/candidate-person-identity.js');
+assert(personIdentity.includes('function candidatePersonIdentity('), 'modèle personId interne absent.');
+assert(personIdentity.includes("c.personIdentifier || c.identifiant || c.identifier || c.ss7"), 'migration de l’ancien identifiant vers personIdentifier absente.');
+const candidateStore = read('src/candidate-store-main.js');
+assert(candidateStore.includes("personId:person.personId"), 'personId non persisté lors de la création d’une évaluation.');
+assert(candidateStore.includes("evaluationId:candidateId"), 'evaluationId distinct du personId non persisté.');
+const identityPage = read('source/kaltest-pilot2.html');
+assert(identityPage.includes('for="personIdentifier">N° identifiant'), 'page d’accueil candidat : N° identifiant absent.');
+assert(!identityPage.includes('sécurité sociale'), 'page d’accueil candidat : ancienne référence sécurité sociale encore visible.');
+const identityRuntime = read('source/js/kaltest-pilot2-runtime.js');
+assert(identityRuntime.includes("/^[A-Z0-9]{7}$/"), 'validation du N° identifiant alphanumérique 7 caractères absente.');
+assert(!identityRuntime.includes('7 premiers chiffres du n° de sécurité sociale'), 'ancien message NIR encore présent dans le runtime candidat.');
+
 const transferMain = read('src/candidate-transfer-main.js');
 assert(transferMain.includes('function exportSelected('), 'moteur export sélectionné absent.');
 assert(transferMain.includes("parcours non terminé"), 'moteur export sélectionné ne protège pas les parcours en cours.');
