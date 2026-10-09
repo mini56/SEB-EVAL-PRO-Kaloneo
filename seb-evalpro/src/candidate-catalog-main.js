@@ -1002,6 +1002,8 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
           ...(record.candidate || {})
         };
         removeLegacyCandidateCopies(candidate, record, [...currentRecords, record]);
+        const active = typeof getActiveCandidate === 'function' ? getActiveCandidate() : null;
+        if (!active) removeCandidateRuntimeState(candidate);
         fs.rmSync(record.candidateDir, { recursive:true, force:true });
         purged += 1;
       }
