@@ -943,7 +943,7 @@ ipcMain.handle('admin:export-candidates', async (event, password, destinationOpt
     }
     const runExport = (destination) => selectedCandidateIds
       ? getCandidateTransfer().exportSelected(destination, password, selectedCandidateIds)
-      : runExport(destination);
+      : getCandidateTransfer().exportAll(destination, password);
 
     if (mode === 'create') {
       const rawFolderName = String(destinationOptions && destinationOptions.folderName || '').trim();
