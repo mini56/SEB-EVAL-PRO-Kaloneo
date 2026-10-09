@@ -3803,19 +3803,19 @@
       nom: document.getElementById('nom').value.trim(),
       prenom: document.getElementById('prenom').value.trim(),
       naissance: document.getElementById('naissance').value,
-      ss7: document.getElementById('ss7').value.trim(),
+      personIdentifier: document.getElementById('personIdentifier').value.trim().toUpperCase(),
       lieu: document.getElementById('lieu').value.trim(),
       groupe: document.getElementById('groupe').value.trim(),
       dateEvaluation: document.getElementById('dateEvaluation').value,
       parcours: DATA.parcours?.title || 'Parcours KALTEST'
     };
 
-    const required = ['nom','prenom','naissance','ss7','lieu','groupe','dateEvaluation'];
+    const required = ['nom','prenom','naissance','personIdentifier','lieu','groupe','dateEvaluation'];
     if (required.some(key => !values[key])) {
       return { ok:false, message:'Veuillez remplir tous les champs avant de commencer.' };
     }
-    if (!/^\d{7}$/.test(values.ss7)) {
-      return { ok:false, message:'Les 7 premiers chiffres du n° de sécurité sociale doivent contenir exactement 7 chiffres.' };
+    if (!/^[A-Z0-9]{7}$/.test(values.personIdentifier)) {
+      return { ok:false, message:'Le N° identifiant doit contenir exactement 7 caractères : lettres ou chiffres.' };
     }
     return { ok:true, values };
   }
@@ -4016,8 +4016,8 @@
   function install() {
     renderIdentity();
 
-    document.getElementById('ss7').addEventListener('input', event => {
-      event.target.value = event.target.value.replace(/\D/g, '').slice(0,7);
+    document.getElementById('personIdentifier').addEventListener('input', event => {
+      event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0,7);
     });
 
     document.getElementById('identity-next').addEventListener('click', () => {
@@ -4036,11 +4036,11 @@
         dateTest: validation.values.dateEvaluation
       };
       state.identity = candidateData;
-      state.personId = state.personId || crypto.randomUUID();
-      state.evaluationId = state.evaluationId || crypto.randomUUID();
+      // personId et evaluationId sont attribués par le stockage principal Electron.
+      // Le navigateur ne doit pas créer d'identité technique concurrente.
       sessionStorage.setItem('candidat_data', JSON.stringify(candidateData));
       replay('IDENTITY_VALIDATED', {
-        fields:['nom','prenom','naissance','ss7','lieu','groupe','dateEvaluation','parcours']
+        fields:['nom','prenom','naissance','personIdentifier','lieu','groupe','dateEvaluation','parcours']
       });
       showPhase('intro');
     });
