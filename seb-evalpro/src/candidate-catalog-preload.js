@@ -60,10 +60,12 @@ function addStyle() {
     .seb-delete-actions .danger{background:#fff!important;color:#c00000!important;border-color:#c00000!important}
     .seb-delete-actions .danger:hover{background:#fff!important;color:#c00000!important;border-color:#c00000!important}
     .seb-cc-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid #ddd;background:#fff}
-    .seb-cc-foot-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .seb-cc-foot-left,.seb-cc-foot-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .seb-cc-foot button:disabled,.seb-cc-actions button:disabled{opacity:.48;cursor:default;box-shadow:none}
-    #seb-cc-trash[data-state="empty"]{color:#667085!important;border-color:#98a2b3!important}
-    #seb-cc-trash[data-state="full"]{color:#a65c00!important;border-color:#d48a00!important;background:#fffaf0!important}
+    #seb-cc-trash{width:42px;height:42px;min-width:42px;padding:4px!important;display:inline-flex;align-items:center;justify-content:center}
+    #seb-cc-trash img{width:32px;height:32px;display:block;object-fit:contain;pointer-events:none}
+    #seb-cc-trash[data-state="empty"]{border-color:#98a2b3!important}
+    #seb-cc-trash[data-state="full"]{border-color:#d48a00!important;background:#fffaf0!important}
     .seb-trash-deleted-at{font-size:12px;color:#777}
     .seb-cc-row.export-selected{border-color:#16834f;background:#f1fbf6;box-shadow:inset 0 0 0 1px #16834f}
     .seb-cc-actions .selected{border-color:#16834f!important;color:#16834f!important;background:#f1fbf6!important}
@@ -653,13 +655,15 @@ function openCatalog(initialCandidateId = '') {
         <div class="seb-cc-body"><div id="seb-cc-list">Chargement…</div></div>
         <div class="seb-cc-foot">
           <div class="seb-cc-foot-left">
-            <button type="button" id="seb-cc-import">Importer candidat</button>
-            <button type="button" id="seb-cc-export-mode">Exporter candidat</button>
-            <button type="button" id="seb-cc-trash" data-state="empty">🗑 Corbeille vide</button>
-            <button type="button" id="seb-cc-export-cancel" hidden>Annuler la sélection</button>
+            <button type="button" id="seb-cc-import" data-seb-no-normalize="1">↓ Importer candidat</button>
+            <button type="button" id="seb-cc-export-mode" data-seb-no-normalize="1">↑ Exporter candidat</button>
             <button type="button" id="seb-cc-export-launch" class="primary" hidden disabled>Lancer l’export (0)</button>
+            <button type="button" id="seb-cc-export-cancel" hidden>Annuler la sélection</button>
           </div>
-          <button type="button" id="seb-cc-close">Fermer</button>
+          <div class="seb-cc-foot-right">
+            <button type="button" id="seb-cc-close">Fermer</button>
+            <button type="button" id="seb-cc-trash" data-state="empty" data-seb-no-normalize="1" title="Corbeille" aria-label="Corbeille vide"><img src="assets/candidate-trash-empty.png" alt=""></button>
+          </div>
         </div>
       </div>`;
     document.body.appendChild(overlay);
@@ -677,9 +681,9 @@ function openCatalog(initialCandidateId = '') {
     const updateExportFooter = () => {
       importButton.hidden = exportMode || !editionCapabilities.canImport;
       exportModeButton.hidden = exportMode || !editionCapabilities.canExport;
-      trashButton.hidden = exportMode;
-      exportCancelButton.hidden = !exportMode;
+      trashButton.hidden = false;
       exportLaunchButton.hidden = !exportMode;
+      exportCancelButton.hidden = !exportMode;
       exportLaunchButton.disabled = selectedExportIds.size === 0;
       exportLaunchButton.textContent = 'Lancer l’export (' + selectedExportIds.size + ')';
     };
@@ -800,8 +804,9 @@ function openCatalog(initialCandidateId = '') {
             const choose = document.createElement('button');
             choose.type = 'button';
             choose.disabled = !selectable;
-            choose.className = selected ? 'selected' : '';
-            choose.textContent = selectable ? (selected ? '✓ Sélectionné' : 'Exporter') : 'Parcours en cours';
+            choose.className = selected ? 'selected seb-cc-export-choice' : 'seb-cc-export-choice';
+            choose.dataset.sebNoNormalize = '1';
+            choose.textContent = selectable ? (selected ? '✓ Sélectionné' : '↑ Exporter') : 'Parcours en cours';
             choose.addEventListener('click', () => {
               const id = String(evaluation.candidateId || '');
               if (!id || !selectable) return;
@@ -822,9 +827,11 @@ function openCatalog(initialCandidateId = '') {
 
     const updateTrashState = (count) => {
       const total = Number(count || 0);
-      trashButton.dataset.state = total > 0 ? 'full' : 'empty';
-      trashButton.textContent = total > 0 ? ('🗑 Corbeille pleine (' + total + ')') : '🗑 Corbeille vide';
-      trashButton.title = total > 0 ? 'Ouvrir la corbeille et restaurer des éléments supprimés.' : 'La corbeille est vide.';
+      const full = total > 0;
+      trashButton.dataset.state = full ? 'full' : 'empty';
+      trashButton.innerHTML = '<img src="' + (full ? 'assets/candidate-trash-full.png' : 'assets/candidate-trash-empty.png') + '" alt="">';
+      trashButton.title = full ? ('Corbeille — ' + total + ' élément' + (total > 1 ? 's' : '')) : 'Corbeille — vide';
+      trashButton.setAttribute('aria-label', full ? ('Corbeille pleine, ' + total + ' élément' + (total > 1 ? 's' : '')) : 'Corbeille vide');
     };
     const refreshTrashState = async () => {
       const result = await ipcRenderer.invoke('candidate-catalog:trash-list').catch(() => ({ ok:false, entries:[] }));
