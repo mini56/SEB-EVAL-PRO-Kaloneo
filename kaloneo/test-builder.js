@@ -2031,11 +2031,12 @@
     }
     state.idLocked=true;
     $('test-id').value=$('test-id').value||normalizeIdFromTitle();
-    const data=Core.modelToDefinition(currentModel());
+    let data=Core.modelToDefinition(currentModel());
     const bridge=window.sebEvalPro;
     if(!bridge || typeof bridge.kaloneoSaveTest!=='function') {
       if(options.exportJson===true) {
         exportDefinition(data);
+        if(protectedClone)$('test-version').value=originalVersion;
         saveDraft(false);
         $('draft-status').textContent='test.json généré — hors SEB EvalPro';
         setTimeout(()=>$('draft-status').textContent='Brouillon local',1800);
@@ -2049,7 +2050,19 @@
     let result;
     try {
       result=await bridge.kaloneoSaveTest(data,false);
-      if(result && result.ok===false && result.code==='EXISTS') {
+      if(protectedClone){
+        // Une V1 protégée ne doit jamais écraser une V2/V3 existante.
+        // Même si la liste des versions était momentanément indisponible,
+        // on cherche automatiquement le prochain numéro libre.
+        let attempts=0;
+        while(result && result.ok===false && result.code==='EXISTS' && attempts<20){
+          attempts+=1;
+          const currentMajor=Math.max(1,Number(String($('test-version').value||'1').split('.')[0])||1);
+          $('test-version').value=String(currentMajor+1)+'.0.0';
+          data=Core.modelToDefinition(currentModel());
+          result=await bridge.kaloneoSaveTest(data,false);
+        }
+      } else if(result && result.ok===false && result.code==='EXISTS') {
         const replace=confirm('Le test « '+data.title+' » existe déjà en version '+data.version+'. Remplacer cette version dans la bibliothèque ?');
         if(!replace) return false;
         result=await bridge.kaloneoSaveTest(data,true);
