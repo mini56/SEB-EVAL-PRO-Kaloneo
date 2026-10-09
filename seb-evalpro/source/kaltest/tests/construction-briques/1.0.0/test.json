@@ -43,7 +43,7 @@
   "presentation": {
     "layout": "50-50",
     "bricksStation": {
-      "image": "imageqcm/brique.jpg",
+      "image": "imageqcm/kaloneo-lego-f1-orange.webp",
       "imageAlt": "Modèle de construction à base de briques",
       "errorMin": 0,
       "errorMax": 10,
