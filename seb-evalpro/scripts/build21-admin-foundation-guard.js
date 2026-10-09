@@ -152,9 +152,19 @@ assert(catalog.includes("Supprimer l’évaluation"), 'suppression d’une seule
 assert(catalog.includes("Supprimer le candidat"), 'suppression globale du candidat absente.');
 assert(catalog.includes("Tout sélectionner"), 'sélection de toutes les évaluations d’une personne absente du mode Export.');
 assert(catalog.includes('id="seb-cc-trash"') && catalog.includes('Corbeille vide'), 'bouton Corbeille vide absent de la Liste des candidats.');
-assert(catalog.includes('Corbeille pleine ('), 'état Corbeille pleine absent.');
+assert(catalog.includes('candidate-trash-full.png') && catalog.includes('candidate-trash-empty.png'), 'icônes Corbeille pleine/vide absentes.');
+assert(catalog.includes('data-seb-no-normalize="1"'), 'protection des icônes spécifiques du footer candidat absente.');
+assert(catalog.includes('↓ Importer candidat'), 'flèche descendante Importer candidat absente.');
+assert(catalog.includes('↑ Exporter candidat'), 'flèche montante Exporter candidat absente.');
+assert(catalog.indexOf('id="seb-cc-export-launch"') < catalog.indexOf('id="seb-cc-export-cancel"'), 'Lancer l export doit précéder Annuler la sélection.');
+assert(catalog.includes('<button type="button" id="seb-cc-close">Fermer</button>') && catalog.includes('id="seb-cc-trash"'), 'Fermer / Corbeille absents du footer.');
+assert(fs.existsSync(path.join(root, 'source', 'assets', 'candidate-trash-empty.png')), 'icône Corbeille vide absente.');
+assert(fs.existsSync(path.join(root, 'source', 'assets', 'candidate-trash-full.png')), 'icône Corbeille pleine absente.');
 assert(catalog.includes("ipcRenderer.invoke('candidate-catalog:trash-restore'"), 'bouton Restaurer non raccordé.');
 assert(catalog.includes("Vider définitivement la corbeille"), 'confirmation forte de vidage définitif absente.');
+
+const uiRuntime = read('source/js/seb-ui-runtime.js');
+assert(uiRuntime.includes("closest('[data-seb-no-normalize=\"1\"]')") || uiRuntime.includes("closest('[data-seb-no-normalize=\"1\"]')"), 'runtime UI ne respecte pas les boutons à icône explicite.');
 
 const main = read('src/main.js');
 assert(main.includes('function loadAdminCandidateBrowser'), 'route principale du catalogue candidat absente.');
