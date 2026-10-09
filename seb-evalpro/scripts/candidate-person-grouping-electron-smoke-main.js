@@ -70,7 +70,10 @@ ipcMain.handle('candidate-catalog:detail',(_e,candidateId)=>{
   return evaluation?{ok:true,candidate:evaluation,bilans:[],replays:[],exports:[]}:{ok:false,error:'Évaluation introuvable'};
 });
 ipcMain.handle('candidate-catalog:delete',()=>({ok:true}));
-ipcMain.handle('candidate-catalog:delete-person',()=>({ok:true,removedEvaluations:2}));
+ipcMain.handle('candidate-catalog:delete-person',()=>({ok:true,movedEvaluations:2,movedToTrash:true}));
+ipcMain.handle('candidate-catalog:trash-list',()=>({ok:true,entries:[]}));
+ipcMain.handle('candidate-catalog:trash-restore',()=>({ok:false,error:'Corbeille vide'}));
+ipcMain.handle('candidate-catalog:trash-empty',()=>({ok:true,purged:0}));
 ipcMain.handle('candidate-catalog:sync',()=>({ok:true}));
 ipcMain.handle('ai:cancel-current',()=>({ok:true}));
 ipcMain.handle('ai:status',()=>({available:false,offline:true,integrated:true}));
