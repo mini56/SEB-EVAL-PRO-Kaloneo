@@ -582,7 +582,7 @@ function createCandidateTransfer(options = {}) {
     return true;
   }
 
-  function exportAll(selectedUsbPath, password) {
+  function exportCandidates(selectedUsbPath, password, candidateIds = null) {
     const destinationRoot = path.resolve(String(selectedUsbPath || ''));
     if (!destinationRoot) throw new Error('Clé USB non sélectionnée.');
     transferPassword(password);
@@ -595,9 +595,34 @@ function createCandidateTransfer(options = {}) {
     const allRecords = localScan.records;
     const invalidFolders = localScan.invalidFolders.slice();
     const activeId = activeCandidateId();
-    const sourceRecords = allRecords
-      .filter((record) => String(record.candidateId || '') !== activeId)
-      .filter((record) => isCompletedStatus(record.manifest && record.manifest.status));
+    const requestedIds = Array.isArray(candidateIds)
+      ? [...new Set(candidateIds.map((id) => String(id || '').trim()).filter(Boolean))]
+      : null;
+
+    if (requestedIds && !requestedIds.length) {
+      throw new Error('Sélectionnez au moins un candidat à exporter.');
+    }
+
+    let sourceRecords;
+    if (requestedIds) {
+      const recordsById = new Map(allRecords.map((record) => [String(record.candidateId || ''), record]));
+      const missing = requestedIds.filter((id) => !recordsById.has(id));
+      if (missing.length) {
+        throw new Error('Un candidat sélectionné est introuvable ou son dossier local est illisible. Aucun export n’a été lancé.');
+      }
+      sourceRecords = requestedIds.map((id) => recordsById.get(id));
+      const blocked = sourceRecords.filter((record) =>
+        String(record.candidateId || '') === activeId ||
+        !isCompletedStatus(record.manifest && record.manifest.status)
+      );
+      if (blocked.length) {
+        throw new Error('Un candidat sélectionné a un parcours non terminé. Terminez le parcours avant de l’exporter.');
+      }
+    } else {
+      sourceRecords = allRecords
+        .filter((record) => String(record.candidateId || '') !== activeId)
+        .filter((record) => isCompletedStatus(record.manifest && record.manifest.status));
+    }
     let added = 0, updated = 0, skipped = 0, verifiedFiles = 0;
     const copied = [];
     const existingCandidates = existingTransferCandidates(destinationRoot, password);
@@ -660,6 +685,15 @@ function createCandidateTransfer(options = {}) {
       invalidFolders,
       format:'SEB-EVALPRO-USB-1'
     };
+  }
+
+
+  function exportAll(selectedUsbPath, password) {
+    return exportCandidates(selectedUsbPath, password, null);
+  }
+
+  function exportSelected(selectedUsbPath, password, candidateIds) {
+    return exportCandidates(selectedUsbPath, password, candidateIds);
   }
 
   function unpackCandidatePayload(payload, targetDir) {
