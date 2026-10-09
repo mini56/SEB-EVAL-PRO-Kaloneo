@@ -34,7 +34,7 @@ function addStyle() {
   style.id = 'seb-candidate-catalog-style';
   style.textContent = `
     #seb-evalpro-open-candidate{background:#fff!important;color:#0070c0!important;border:2px solid #0070c0!important;font-weight:700}
-    #seb-candidate-catalog,#seb-candidate-detail{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
+    #seb-candidate-catalog,#seb-candidate-person-detail,#seb-candidate-detail{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
     .seb-cc-card{width:min(1180px,96vw);max-height:90vh;background:#fff;border-radius:10px;box-shadow:0 16px 50px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
     .seb-cc-head{background:#0070c0;color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px}
     .seb-cc-title{font-size:20px;font-weight:700;flex:1}.seb-cc-badge{font-size:12px;font-weight:700;background:#fff;color:#0070c0;border-radius:14px;padding:4px 9px}
@@ -190,10 +190,10 @@ async function openCandidateDetail(candidateId, onChanged) {
   overlay.id = 'seb-candidate-detail';
   overlay.innerHTML = `
     <div class="seb-cc-card">
-      <div class="seb-cc-head"><div class="seb-cc-title">${escapeHtml(item.nom)} ${escapeHtml(item.prenom)}</div><div class="seb-cc-badge">DOSSIER CANDIDAT</div></div>
+      <div class="seb-cc-head"><div class="seb-cc-title">${escapeHtml(item.nom)} ${escapeHtml(item.prenom)}</div><div class="seb-cc-badge">ÉVALUATION</div></div>
       <div class="seb-cc-meta">
-        <div><b>Ville :</b> ${escapeHtml(item.lieu)}</div><div><b>Groupe :</b> ${escapeHtml(item.groupe)}</div><div><b>Date :</b> ${escapeHtml(item.date)}</div>
-        <div><b>Bilans :</b> ${item.bilanCount}</div><div><b>Révisions :</b> ${item.revisionCount}</div><div><b>Parcours :</b> ${escapeHtml(item.parcours || '—')}</div>
+        <div><b>N° identifiant :</b> ${escapeHtml(item.personIdentifier || '—')}</div><div><b>Ville :</b> ${escapeHtml(item.lieu)}</div><div><b>Groupe :</b> ${escapeHtml(item.groupe)}</div>
+        <div><b>Date :</b> ${escapeHtml(item.date)}</div><div><b>Bilans :</b> ${item.bilanCount}</div><div><b>Parcours :</b> ${escapeHtml(item.parcours || '—')}</div>
       </div>
       <div class="seb-cc-body">
         <div class="seb-cc-section"><h3>Bilan et révisions</h3><div id="seb-cc-detail-bilans"></div></div>
@@ -472,7 +472,6 @@ async function openPersonDetail(personId, onChanged) {
     open.type = 'button';
     open.textContent = 'Ouvrir';
     open.addEventListener('click', async () => {
-      overlay.remove();
       await openCandidateDetail(evaluation.candidateId, async () => {
         if (typeof onChanged === 'function') await onChanged();
       });
