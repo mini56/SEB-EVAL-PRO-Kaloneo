@@ -121,13 +121,22 @@ app.whenReady().then(async()=>{
       rightOrder:[...document.querySelectorAll('.seb-cc-foot-right button')].map(b=>b.id),
       heights:[...document.querySelectorAll('.seb-cc-foot button')].filter(b=>!b.hidden).map(b=>Math.round(b.getBoundingClientRect().height)),
       trashWidth:Math.round(document.getElementById('seb-cc-trash')?.getBoundingClientRect().width||0),
-      trashIconWidth:Math.round(document.querySelector('#seb-cc-trash img')?.getBoundingClientRect().width||0)
+      trashHeight:Math.round(document.getElementById('seb-cc-trash')?.getBoundingClientRect().height||0),
+      trashIconWidth:Math.round(document.querySelector('#seb-cc-trash img')?.getBoundingClientRect().width||0),
+      trashBg:getComputedStyle(document.getElementById('seb-cc-trash')).backgroundColor,
+      cardRight:Math.round(document.querySelector('#seb-candidate-catalog .seb-cc-card')?.getBoundingClientRect().right||0),
+      trashLeft:Math.round(document.getElementById('seb-cc-trash')?.getBoundingClientRect().left||0),
+      cardBottom:Math.round(document.querySelector('#seb-candidate-catalog .seb-cc-card')?.getBoundingClientRect().bottom||0),
+      trashBottom:Math.round(document.getElementById('seb-cc-trash')?.getBoundingClientRect().bottom||0),
+      trashInsideFooter:Boolean(document.querySelector('.seb-cc-foot #seb-cc-trash'))
     }))()`);
-    if(emptyState.state!=='empty'||emptyState.text!==''||!/candidate-trash-empty-simple\.svg$/.test(emptyState.icon)||
+    if(emptyState.state!=='empty'||emptyState.text!==''||!/candidate-trash-empty\.png$/.test(emptyState.icon)||
        emptyState.rows!==1||emptyState.importLabel!=='↓ Importer candidat'||emptyState.exportLabel!=='↑ Exporter candidat'||
-       JSON.stringify(emptyState.rightOrder)!==JSON.stringify(['seb-cc-close','seb-cc-trash'])||
-       emptyState.heights.some(h=>h!==38)||emptyState.trashWidth!==38||emptyState.trashIconWidth!==26){
-      return fail('état Corbeille vide / footer candidat incorrect',emptyState);
+       JSON.stringify(emptyState.rightOrder)!==JSON.stringify(['seb-cc-close'])||
+       emptyState.heights.some(h=>h!==38)||emptyState.trashWidth!==72||emptyState.trashHeight!==72||
+       emptyState.trashIconWidth!==60||emptyState.trashBg!=='rgb(255, 255, 255)'||emptyState.trashInsideFooter||
+       emptyState.trashLeft<=emptyState.cardRight||Math.abs(emptyState.trashBottom-emptyState.cardBottom)>2){
+      return fail('Corbeille externe vide / footer candidat incorrect',emptyState);
     }
 
     await win.webContents.executeJavaScript("document.querySelector('.seb-cc-person-wrap .seb-cc-actions .danger').click();true");
@@ -144,7 +153,7 @@ app.whenReady().then(async()=>{
       aria:String(document.getElementById('seb-cc-trash')?.getAttribute('aria-label')||''),
       rows:document.querySelectorAll('.seb-cc-person-wrap>.seb-cc-row').length
     }))()`);
-    if(fullState.state!=='full'||fullState.text!==''||!/candidate-trash-full-simple\.svg$/.test(fullState.icon)||
+    if(fullState.state!=='full'||fullState.text!==''||!/candidate-trash-full\.png$/.test(fullState.icon)||
        !/1 élément/.test(fullState.aria)||fullState.rows!==0) return fail('état Corbeille pleine incorrect',fullState);
 
     // En mode export : Lancer l’export précède Annuler la sélection, la Corbeille reste à droite après Fermer.
@@ -153,11 +162,13 @@ app.whenReady().then(async()=>{
     const exportFooter=await win.webContents.executeJavaScript(`(()=>({
       leftVisible:[...document.querySelectorAll('.seb-cc-foot-left button')].filter(b=>!b.hidden).map(b=>b.id),
       rightVisible:[...document.querySelectorAll('.seb-cc-foot-right button')].filter(b=>!b.hidden).map(b=>b.id),
-      heights:[...document.querySelectorAll('.seb-cc-foot button')].filter(b=>!b.hidden).map(b=>Math.round(b.getBoundingClientRect().height))
+      heights:[...document.querySelectorAll('.seb-cc-foot button')].filter(b=>!b.hidden).map(b=>Math.round(b.getBoundingClientRect().height)),
+      trashVisible:!document.getElementById('seb-cc-trash')?.hidden,
+      trashWidth:Math.round(document.getElementById('seb-cc-trash')?.getBoundingClientRect().width||0)
     }))()`);
     if(JSON.stringify(exportFooter.leftVisible)!==JSON.stringify(['seb-cc-export-launch','seb-cc-export-cancel'])||
-       JSON.stringify(exportFooter.rightVisible)!==JSON.stringify(['seb-cc-close','seb-cc-trash'])||
-       exportFooter.heights.some(h=>h!==38)){
+       JSON.stringify(exportFooter.rightVisible)!==JSON.stringify(['seb-cc-close'])||
+       exportFooter.heights.some(h=>h!==38)||!exportFooter.trashVisible||exportFooter.trashWidth!==72){
       return fail('ordre des boutons pendant la sélection export incorrect',exportFooter);
     }
     await win.webContents.executeJavaScript("document.getElementById('seb-cc-export-cancel').click();true");
