@@ -123,6 +123,8 @@ app.whenReady().then(async()=>{
       trashWidth:Math.round(document.getElementById('seb-cc-trash')?.getBoundingClientRect().width||0),
       trashHeight:Math.round(document.getElementById('seb-cc-trash')?.getBoundingClientRect().height||0),
       trashIconWidth:Math.round(document.querySelector('#seb-cc-trash img')?.getBoundingClientRect().width||0),
+      trashNaturalWidth:Number(document.querySelector('#seb-cc-trash img')?.naturalWidth||0),
+      trashNaturalHeight:Number(document.querySelector('#seb-cc-trash img')?.naturalHeight||0),
       trashBg:getComputedStyle(document.getElementById('seb-cc-trash')).backgroundColor,
       cardRight:Math.round(document.querySelector('#seb-candidate-catalog .seb-cc-card')?.getBoundingClientRect().right||0),
       trashLeft:Math.round(document.getElementById('seb-cc-trash')?.getBoundingClientRect().left||0),
@@ -134,7 +136,8 @@ app.whenReady().then(async()=>{
        emptyState.rows!==1||emptyState.importLabel!=='↓ Importer candidat'||emptyState.exportLabel!=='↑ Exporter candidat'||
        JSON.stringify(emptyState.rightOrder)!==JSON.stringify(['seb-cc-close'])||
        emptyState.heights.some(h=>h!==38)||emptyState.trashWidth!==72||emptyState.trashHeight!==72||
-       emptyState.trashIconWidth!==60||emptyState.trashBg!=='rgb(255, 255, 255)'||emptyState.trashInsideFooter||
+       emptyState.trashIconWidth!==60||emptyState.trashNaturalWidth!==96||emptyState.trashNaturalHeight!==96||
+       emptyState.trashBg!=='rgb(255, 255, 255)'||emptyState.trashInsideFooter||
        emptyState.trashLeft<=emptyState.cardRight||Math.abs(emptyState.trashBottom-emptyState.cardBottom)>2){
       return fail('Corbeille externe vide / footer candidat incorrect',emptyState);
     }
