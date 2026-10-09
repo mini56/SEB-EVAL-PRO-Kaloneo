@@ -77,6 +77,24 @@ try {
   fs.mkdirSync(corruptDir, { recursive:true });
   fs.writeFileSync(path.join(corruptDir, 'manifest.json'), 'ILLISIBLE', 'utf8');
 
+  const selectedUsbRoot = path.join(root, 'USB-SELECTED');
+  fs.mkdirSync(selectedUsbRoot, { recursive:true });
+  const selectedExport = pc1.exportSelected(selectedUsbRoot, password, ['candidate-2']);
+  assert.strictEqual(selectedExport.total, 1, 'L’export sélectionné doit contenir uniquement le candidat choisi.');
+  assert.strictEqual(selectedExport.added, 1);
+  const selectedFiles = fs.readdirSync(selectedUsbRoot).filter((name) => name.toLowerCase().endsWith('.seb'));
+  assert.strictEqual(selectedFiles.length, 1, 'Un seul fichier .seb doit être produit pour une sélection d’un candidat.');
+  assert.throws(
+    () => pc1.exportSelected(selectedUsbRoot, password, ['candidate-active']),
+    /parcours non terminé/i,
+    'Un parcours en cours ne doit jamais être exportable depuis la sélection.'
+  );
+  assert.throws(
+    () => pc1.exportSelected(selectedUsbRoot, password, ['candidate-inconnu']),
+    /introuvable|illisible/i,
+    'Une sélection incohérente doit être refusée sans export partiel.'
+  );
+
   fs.mkdirSync(usbRoot, { recursive:true });
   const firstExport = pc1.exportAll(usbRoot, password);
   assert.strictEqual(firstExport.total, 2, 'Seules les sessions fermées doivent être exportées.');
