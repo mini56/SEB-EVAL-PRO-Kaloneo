@@ -500,14 +500,23 @@ function createKaloneoLibrary(options = {}) {
     return 'test';
   }
 
-  function scanLatestDefinitions() {
-    const byId = new Map();
+  function scanAllDefinitions() {
+    const out = [];
     for (const file of walkTestFiles(testsRoot)) {
       const definition = readJson(file);
       if (!definition || !definition.id || !definition.version) continue;
+      out.push({ definition, file });
+    }
+    return out;
+  }
+
+  function scanLatestDefinitions() {
+    const byId = new Map();
+    for (const record of scanAllDefinitions()) {
+      const definition = record.definition;
       const current = byId.get(definition.id);
       if (!current || compareVersion(definition.version, current.definition.version) > 0) {
-        byId.set(definition.id, { definition, file });
+        byId.set(definition.id, record);
       }
     }
     return byId;
@@ -898,7 +907,7 @@ function createKaloneoLibrary(options = {}) {
 
   function listTests() {
     ensureSeed();
-    return [...scanLatestDefinitions().values()]
+    return scanAllDefinitions()
       .map(toTestMetadata)
       .sort((a, b) => {
         const roleOrder = { introduction:0, test:1, fin:2 };
@@ -906,7 +915,11 @@ function createKaloneoLibrary(options = {}) {
         if (roleDelta) return roleDelta;
         const categoryDelta = a.category.localeCompare(b.category, 'fr');
         if (categoryDelta) return categoryDelta;
-        return a.title.localeCompare(b.title, 'fr');
+        const titleDelta = a.title.localeCompare(b.title, 'fr');
+        if (titleDelta) return titleDelta;
+        // Pour un même test, présenter d'abord la version la plus récente
+        // sans masquer les versions antérieures.
+        return compareVersion(b.version, a.version);
       });
   }
 
@@ -1207,16 +1220,24 @@ function createKaloneoLibrary(options = {}) {
 
   function resolveDefinition(definitions, ref, expectedRole) {
     if (!ref || typeof ref !== 'object') throw new Error('Référence de page invalide.');
-    const record = definitions.get(String(ref.id || ''));
-    if (!record) throw new Error('Page KALTEST introuvable : ' + String(ref.id || ''));
-    if (String(record.definition.version) !== String(ref.version || '')) {
-      throw new Error('Version KALTEST introuvable : ' + String(ref.id || '') + ' ' + String(ref.version || ''));
+    const id = String(ref.id || '');
+    const version = String(ref.version || '');
+    // Un parcours mémorise volontairement id + version. La présence d'une
+    // V2/V3 ne doit jamais rendre sa V1 introuvable : on résout d'abord la
+    // version exacte enregistrée dans le parcours, et non la dernière version.
+    const file = exactTestFile(id, version);
+    if (!file) {
+      const latest = definitions && typeof definitions.get === 'function' ? definitions.get(id) : null;
+      if (!latest) throw new Error('Page KALTEST introuvable : ' + id);
+      throw new Error('Version KALTEST introuvable : ' + id + ' ' + version);
     }
-    const role = roleOf(record.definition);
+    const definition = readJson(file);
+    if (!definition) throw new Error('Version KALTEST illisible : ' + id + ' ' + version);
+    const role = roleOf(definition);
     if (role !== expectedRole) {
-      throw new Error('Type de page invalide pour ' + String(ref.id || '') + ' : ' + role + ' au lieu de ' + expectedRole + '.');
+      throw new Error('Type de page invalide pour ' + id + ' : ' + role + ' au lieu de ' + expectedRole + '.');
     }
-    return record.definition;
+    return definition;
   }
 
   function resolveMaskRef(ref) {
