@@ -20,6 +20,8 @@ const candidate = {
   lieu:'Lorient',
   groupe:'7',
   date:'2026-09-18',
+  naissance:'1980-01-01',
+  ss7:'0123456',
   parcours:'Parcours long'
 };
 
@@ -103,6 +105,8 @@ try {
 
   const list = handlers.get('candidate-catalog:list');
   const detail = handlers.get('candidate-catalog:detail');
+  const listPersons = handlers.get('candidate-catalog:list-persons');
+  const personDetail = handlers.get('candidate-catalog:person-detail');
   const loadBilan = handlers.get('candidate-catalog:load-bilan');
   const beginBilan = handlers.get('candidate-catalog:begin-bilan');
   const beginResults = handlers.get('candidate-catalog:begin-results');
@@ -114,9 +118,10 @@ try {
   const saveWorkspaceSync = listeners.get('candidate-catalog:workspace-save-sync');
   const sync = handlers.get('candidate-catalog:sync');
   const deleteCandidate = handlers.get('candidate-catalog:delete');
+  const deletePerson = handlers.get('candidate-catalog:delete-person');
   const saveCurrentBilan = handlers.get('bilan-history:save-current');
   const saveBilanRevision = handlers.get('bilan-history:save-revision');
-  assert(list && detail && loadBilan && beginBilan && beginResults && endResults && loadResultsWorkspaceSync && saveWorkspace && endBilan && loadWorkspaceSync && saveWorkspaceSync && sync && deleteCandidate && saveCurrentBilan && saveBilanRevision, 'Handlers catalogue/bilan/résultats/protection suppression absents.');
+  assert(list && listPersons && personDetail && detail && loadBilan && beginBilan && beginResults && endResults && loadResultsWorkspaceSync && saveWorkspace && endBilan && loadWorkspaceSync && saveWorkspaceSync && sync && deleteCandidate && deletePerson && saveCurrentBilan && saveBilanRevision, 'Handlers catalogue/bilan/résultats/protection suppression absents.');
 
   const first = list();
   assert.strictEqual(first.length, 1, 'Le candidat historique doit être migré une seule fois.');
@@ -124,6 +129,12 @@ try {
   assert.strictEqual(first[0].replayCount, 1, 'Le parcours historique doit être rattaché au dossier candidat.');
   assert.strictEqual(first[0].bilanCount, 1, 'Le bilan historique doit être rattaché au dossier candidat.');
   assert.strictEqual(first[0].parcours, 'Parcours long', 'Le nom du parcours effectué doit être exposé dans la fiche candidat.');
+  assert.strictEqual(first[0].personIdentifier, '0123456', 'L’ancien champ ss7 doit être migré vers N° identifiant sans perdre sa valeur.');
+  assert(/^PERS-[A-F0-9]{24}$/.test(first[0].personId), 'Un personId interne stable doit être attribué au candidat.');
+  const firstPersons = listPersons();
+  assert.strictEqual(firstPersons.length, 1, 'Une seule personne doit être visible pour la première évaluation.');
+  assert.strictEqual(firstPersons[0].evaluationCount, 1);
+  assert.strictEqual(firstPersons[0].personIdentifier, '0123456');
 
   const newDir = path.join(sebRoot, 'Candidats', codedFolderName('candidate-xx'));
   assert(fs.existsSync(newDir), 'La copie autonome du candidat doit exister.');
@@ -138,7 +149,13 @@ try {
   for (const rel of ['donnees','resultats','replay',path.join('bilan','historique'),path.join('bilan','exports')]) {
     fs.mkdirSync(path.join(separateDir, rel), { recursive:true });
   }
-  const secondCandidate = { ...candidate, date:'2026-09-20' };
+  const secondCandidate = {
+    ...candidate,
+    ss7:undefined,
+    personIdentifier:'0123456',
+    date:'2026-09-20',
+    parcours:'Parcours court'
+  };
   writeJson(path.join(separateDir, 'manifest.json'), {
     schemaVersion:1,
     candidateId:'candidate-xx-second',
@@ -158,7 +175,56 @@ try {
   assert(separateSync && separateSync.ok && separateSync.consolidatedDuplicates === 0, 'Deux candidateId différents ne doivent jamais être fusionnés.');
   assert(fs.existsSync(newDir), 'Le premier parcours doit rester intact.');
   assert(fs.existsSync(separateDir), 'La seconde évaluation doit rester intacte.');
-  assert.strictEqual(list().length, 2, 'La même personne évaluée à nouveau doit apparaître dans deux dossiers distincts.');
+  assert.strictEqual(list().length, 2, 'La même personne évaluée à nouveau doit rester dans deux dossiers techniques distincts.');
+  const groupedAfterSecond = listPersons();
+  assert.strictEqual(groupedAfterSecond.length, 1, 'Deux évaluations de la même personne doivent être regroupées sur une seule ligne candidat.');
+  assert.strictEqual(groupedAfterSecond[0].evaluationCount, 2, 'La fiche candidat doit annoncer ses deux évaluations.');
+  assert.deepStrictEqual(
+    groupedAfterSecond[0].evaluations.map((item) => item.candidateId).sort(),
+    ['candidate-xx','candidate-xx-second'].sort(),
+    'Les deux candidateId doivent rester séparés à l’intérieur de la même personne.'
+  );
+
+  // Même N° identifiant de test, mais autre nom : surtout ne pas fusionner.
+  const collisionDir = path.join(sebRoot, 'Candidats', codedFolderName('candidate-other-name'));
+  for (const rel of ['donnees','resultats','replay',path.join('bilan','historique'),path.join('bilan','exports')]) {
+    fs.mkdirSync(path.join(collisionDir, rel), { recursive:true });
+  }
+  const collisionCandidate = {
+    nom:'AUTRE',
+    prenom:'PERSONNE',
+    naissance:'1980-01-01',
+    personIdentifier:'0123456',
+    lieu:'Lorient',
+    groupe:'7',
+    date:'2026-09-21',
+    parcours:'Parcours collision'
+  };
+  writeJson(path.join(collisionDir, 'manifest.json'), {
+    schemaVersion:1,
+    candidateId:'candidate-other-name',
+    folderName:path.basename(collisionDir),
+    status:'TERMINE',
+    createdAt:'2026-09-21T08:00:00.000Z',
+    updatedAt:'2026-09-21T10:00:00.000Z',
+    candidat:{ ...collisionCandidate, 'prénom':collisionCandidate.prenom }
+  });
+  writeJson(path.join(collisionDir, 'donnees', 'candidat.json'), { ...collisionCandidate, 'prénom':collisionCandidate.prenom });
+  writeJson(path.join(collisionDir, 'donnees', 'evaluation-state.json'), { version:1, sessionStorage:{ candidat_data:JSON.stringify(collisionCandidate) }, localStorage:{} });
+  writeJson(path.join(collisionDir, 'donnees', 'progression.json'), {});
+  writeJson(path.join(collisionDir, 'resultats', 'reponses.json'), {});
+  writeJson(path.join(collisionDir, 'resultats', 'scores.json'), {});
+
+  const personsWithCollision = listPersons();
+  assert.strictEqual(personsWithCollision.length, 2, 'Le même N° identifiant avec un autre nom doit produire deux candidats séparés.');
+  assert(personsWithCollision.every((person) => person.personIdentifier === '0123456'), 'Les deux candidats de test doivent conserver le même N° identifiant.');
+  assert(personsWithCollision.every((person) => person.identifierCollision === true), 'La collision d’identifiant doit être signalée sans fusion automatique.');
+  const xxPerson = personsWithCollision.find((person) => person.nom === 'XX');
+  assert(xxPerson && xxPerson.evaluationCount === 2, 'Les deux évaluations de XX doivent rester regroupées malgré la collision avec un autre nom.');
+  const xxPersonDetail = personDetail(null, xxPerson.personId);
+  assert(xxPersonDetail && xxPersonDetail.ok && xxPersonDetail.person.evaluations.length === 2, 'La fiche personne doit exposer ses évaluations séparées.');
+
+  fs.rmSync(collisionDir, { recursive:true, force:true });
   fs.rmSync(separateDir, { recursive:true, force:true });
 
   const duplicateDir = path.join(sebRoot, 'Candidats', codedFolderName('candidate-xx') + '_2');
@@ -331,16 +397,56 @@ try {
     localStorage:{}
   });
 
+  // Distinguer suppression d’une évaluation et suppression globale du candidat.
+  const finalSecondDir = path.join(sebRoot, 'Candidats', codedFolderName('candidate-xx-final-second'));
+  for (const rel of ['donnees','resultats','replay',path.join('bilan','historique'),path.join('bilan','exports')]) {
+    fs.mkdirSync(path.join(finalSecondDir, rel), { recursive:true });
+  }
+  const finalSecond = {
+    ...candidate,
+    ss7:undefined,
+    personIdentifier:'0123456',
+    groupe:'8',
+    date:'2026-10-01',
+    parcours:'Parcours supplémentaire'
+  };
+  writeJson(path.join(finalSecondDir, 'manifest.json'), {
+    schemaVersion:1,
+    candidateId:'candidate-xx-final-second',
+    folderName:path.basename(finalSecondDir),
+    status:'TERMINE',
+    createdAt:'2026-10-01T08:00:00.000Z',
+    updatedAt:'2026-10-01T10:00:00.000Z',
+    candidat:{ ...finalSecond, 'prénom':finalSecond.prenom }
+  });
+  writeJson(path.join(finalSecondDir, 'donnees', 'candidat.json'), { ...finalSecond, 'prénom':finalSecond.prenom });
+  writeJson(path.join(finalSecondDir, 'donnees', 'evaluation-state.json'), { version:1, sessionStorage:{ candidat_data:JSON.stringify(finalSecond) }, localStorage:{} });
+  writeJson(path.join(finalSecondDir, 'donnees', 'progression.json'), {});
+  writeJson(path.join(finalSecondDir, 'resultats', 'reponses.json'), {});
+  writeJson(path.join(finalSecondDir, 'resultats', 'scores.json'), {});
+
+  let groupedForDelete = listPersons();
+  assert.strictEqual(groupedForDelete.length, 1);
+  assert.strictEqual(groupedForDelete[0].evaluationCount, 2);
+
+  const deletedEvaluation = deleteCandidate(null, 'candidate-xx-final-second');
+  assert(deletedEvaluation && deletedEvaluation.ok === true, 'Supprimer une évaluation doit réussir sans supprimer la personne entière.');
+  assert.strictEqual(fs.existsSync(finalSecondDir), false, 'Seule l’évaluation choisie doit être supprimée.');
+  assert.strictEqual(fs.existsSync(newDir), true, 'L’autre évaluation de la personne doit rester intacte.');
+  groupedForDelete = listPersons();
+  assert.strictEqual(groupedForDelete.length, 1);
+  assert.strictEqual(groupedForDelete[0].evaluationCount, 1);
+
   activeCandidateForDelete = { candidateId:'candidate-xx' };
-  const refusedActiveDelete = deleteCandidate(null, 'candidate-xx');
-  assert(refusedActiveDelete && refusedActiveDelete.ok === false, 'Le candidat actif ne doit jamais pouvoir être supprimé.');
-  assert(/actif/i.test(String(refusedActiveDelete.error || '')), 'Le refus doit indiquer que le parcours est actif.');
-  assert.strictEqual(fs.existsSync(newDir), true, 'Le dossier actif doit rester intact après refus de suppression.');
+  const refusedActiveDelete = deletePerson(null, groupedForDelete[0].personId);
+  assert(refusedActiveDelete && refusedActiveDelete.ok === false, 'Le candidat ne doit pas pouvoir être supprimé globalement si une évaluation est active.');
+  assert(/active/i.test(String(refusedActiveDelete.error || '')), 'Le refus global doit indiquer qu’une évaluation est active.');
+  assert.strictEqual(fs.existsSync(newDir), true, 'Le dossier actif doit rester intact après refus de suppression globale.');
 
   activeCandidateForDelete = null;
-  const deleted = deleteCandidate(null, 'candidate-xx');
-  assert(deleted && deleted.ok === true, 'La suppression administrateur d’un candidat fermé doit réussir.');
-  assert.strictEqual(fs.existsSync(newDir), false, 'Le dossier candidat doit être supprimé.');
+  const deleted = deletePerson(null, groupedForDelete[0].personId);
+  assert(deleted && deleted.ok === true && deleted.removedEvaluations === 1, 'La suppression globale du candidat doit supprimer toutes ses évaluations restantes.');
+  assert.strictEqual(fs.existsSync(newDir), false, 'Le dernier dossier d’évaluation du candidat doit être supprimé.');
   assert.strictEqual(fs.existsSync(legacyDir), false, 'La copie historique Admin associée doit être supprimée.');
   assert.strictEqual(fs.existsSync(path.join(replayRoot, replayName)), false, 'Le replay historique associé doit être supprimé.');
   assert.strictEqual(fs.existsSync(path.join(bilanRoot, bilanName)), false, 'Le bilan historique global associé doit être supprimé.');
@@ -348,7 +454,7 @@ try {
   assert.strictEqual(fs.existsSync(path.join(userDataPath, 'evaluation-state.json')), false, 'L’état local associé doit être nettoyé.');
   assert.strictEqual(list().length, 0, 'Le candidat supprimé ne doit plus apparaître dans le catalogue.');
 
-  console.log('Candidate Catalog Separate Evaluations + Safe Admin Delete Test: OK');
+  console.log('Candidate Catalog Person Grouping + Separate Evaluations + Safe Delete Test: OK');
 } finally {
   fs.rmSync(root, { recursive:true, force:true });
 }
