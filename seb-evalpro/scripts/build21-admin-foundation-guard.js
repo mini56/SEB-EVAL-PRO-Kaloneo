@@ -123,6 +123,10 @@ assert(catalogMain.includes("ipcMain.handle('candidate-catalog:list'"), 'catalog
 assert(catalogMain.includes("ipcMain.handle('candidate-catalog:list-persons'"), 'catalogue candidat : regroupement par personne absent.');
 assert(catalogMain.includes("ipcMain.handle('candidate-catalog:person-detail'"), 'catalogue candidat : fiche personne absente.');
 assert(catalogMain.includes("ipcMain.handle('candidate-catalog:delete-person'"), 'catalogue candidat : suppression globale personne absente.');
+assert(catalogMain.includes("ipcMain.handle('candidate-catalog:trash-list'"), 'catalogue candidat : liste Corbeille absente.');
+assert(catalogMain.includes("ipcMain.handle('candidate-catalog:trash-restore'"), 'catalogue candidat : restauration depuis Corbeille absente.');
+assert(catalogMain.includes("ipcMain.handle('candidate-catalog:trash-empty'"), 'catalogue candidat : vidage définitif de Corbeille absent.');
+assert(catalogMain.includes("moveRecordToTrash"), 'catalogue candidat : suppression ne passe pas par une Corbeille récupérable.');
 assert(catalogMain.includes("function listPersonGroups()"), 'catalogue candidat : agrégation des évaluations par personId absente.');
 assert(catalogMain.includes("identifierCollision"), 'catalogue candidat : collision de N° identifiant non signalée.');
 assert(catalogMain.includes("ipcMain.handle('candidate-catalog:detail'"), 'catalogue candidat : détail IPC absent.');
@@ -147,6 +151,10 @@ assert(catalog.includes("N° identifiant"), 'N° identifiant absent de la Liste 
 assert(catalog.includes("Supprimer l’évaluation"), 'suppression d’une seule évaluation absente.');
 assert(catalog.includes("Supprimer le candidat"), 'suppression globale du candidat absente.');
 assert(catalog.includes("Tout sélectionner"), 'sélection de toutes les évaluations d’une personne absente du mode Export.');
+assert(catalog.includes('id="seb-cc-trash"') && catalog.includes('Corbeille vide'), 'bouton Corbeille vide absent de la Liste des candidats.');
+assert(catalog.includes('Corbeille pleine ('), 'état Corbeille pleine absent.');
+assert(catalog.includes("ipcRenderer.invoke('candidate-catalog:trash-restore'"), 'bouton Restaurer non raccordé.');
+assert(catalog.includes("Vider définitivement la corbeille"), 'confirmation forte de vidage définitif absente.');
 
 const main = read('src/main.js');
 assert(main.includes('function loadAdminCandidateBrowser'), 'route principale du catalogue candidat absente.');
@@ -169,6 +177,8 @@ assert(!identityRuntime.includes('7 premiers chiffres du n° de sécurité socia
 const transferMain = read('src/candidate-transfer-main.js');
 assert(transferMain.includes('function exportSelected('), 'moteur export sélectionné absent.');
 assert(transferMain.includes("parcours non terminé"), 'moteur export sélectionné ne protège pas les parcours en cours.');
+assert(transferMain.includes("candidateTrashRoot"), 'moteur Import ne connaît pas la Corbeille candidats.');
+assert(transferMain.includes("trashSkipped"), 'moteur Import ne protège pas les évaluations déjà dans la Corbeille.');
 assert(main.includes("ipcMain.handle('admin:open-bilan'"), 'IPC Bilan absent.');
 assert(main.includes("ipcMain.handle('admin:open-candidate-results'"), 'IPC Résultats absent.');
 assert(main.includes("ipcMain.handle('admin:open-tests-parcours'"), 'IPC Tests / Parcours absent.');
