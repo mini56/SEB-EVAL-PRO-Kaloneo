@@ -150,8 +150,8 @@
       "left": {
         "type": "image",
         "orientation": "portrait",
-        "src": "",
-        "alt": "Illustration de l’exercice sur les horaires",
+        "src": "imageqcm/kaloneo-reception-controle-horaires.webp",
+        "alt": "Suivi des horaires dans un atelier logistique",
         "placeholder": "Image verticale"
       },
       "right": {
