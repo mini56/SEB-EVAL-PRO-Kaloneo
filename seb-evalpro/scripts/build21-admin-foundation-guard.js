@@ -36,7 +36,9 @@ const exactBuild21 = {
   'src/replay-main.js': '004baf83051d805bdd47c3fe865d5ffd6175f38c',
   'src/bilan-history-preload.js': '7f53efab6addbf19a1cb8b42aff5233ff4db5416',
   'src/bilan-history-main.js': '2e5f549fa0623c64029eb0e6f29cb6af5a9c6848',
-  'src/candidate-store-main.js': '48e47a9047b4cd303c8b80956665808cbb674165',
+  // candidate-store-main.js a volontairement évolué après le Build #21
+  // (protection des reprises puis modèle R36 personne -> évaluations).
+  // Il est donc contrôlé structurellement ci-dessous plutôt que par SHA figé.
   'src/candidate-data-crypto.js': '7344aee00420552443543fd03ac33f85dc987fdb',
   'src/candidate-folder-utils.js': 'bd3c06186a83384552416d5a1f9126f036935c2f'
 };
@@ -44,6 +46,19 @@ const exactBuild21 = {
 for (const [rel, expected] of Object.entries(exactBuild21)) {
   assert(gitBlobSha(rel) === expected, rel + ' ne correspond plus au module de référence Build #21.');
 }
+
+// candidate-store-main.js conserve les protections historiques tout en étant
+// autorisé à évoluer pour les fonctions candidat validées après le Build #21.
+const candidateStoreCore = read('src/candidate-store-main.js');
+assert(candidateStoreCore.includes("const activePointerBackupPath = path.join(systemRoot, 'active-candidate.json');"), 'copie de récupération du pointeur candidat actif absente.');
+assert(candidateStoreCore.includes('function ensureActiveCandidate(state)'), 'allocation/reprise du candidat actif absente.');
+assert(candidateStoreCore.includes('function existingCandidateForIdentity(identity)'), 'protection contre le doublon d’un parcours actif absente.');
+assert(candidateStoreCore.includes("['TERMINE', 'SESSION_FERMEE'].includes(String(manifest.status || ''))"), 'un parcours terminé peut être rouvert par une sauvegarde tardive.');
+assert(candidateStoreCore.includes('recentlyCompleted') && candidateStoreCore.includes('guardUntil'), 'protection contre la sauvegarde tardive après clôture absente.');
+assert(candidateStoreCore.includes('function completeActiveCandidate(state'), 'clôture candidat absente.');
+assert(candidateStoreCore.includes('removeActivePointer();'), 'pointeur actif non supprimé à la clôture.');
+assert(candidateStoreCore.includes('evaluationId:candidateId'), 'R36 : identifiant d’évaluation technique absent à la création.');
+assert(candidateStoreCore.includes('personId:person.personId'), 'R36 : personId interne absent à la création.');
 
 // replay-preload.js conserve le socle Build #21, mais peut évoluer pour les
 // règles Replay validées ensuite (ex. exclusion des pages de transition).
