@@ -161,7 +161,8 @@ app.whenReady().then(async()=>{
       launchDisabled:document.getElementById('seb-cc-export-launch')?.disabled
     }))()`);
     if(exportMode.personRows!==2||exportMode.evalRows!==3||exportMode.evalButtons.filter(x=>!x.disabled).length!==2||
-       exportMode.evalButtons.filter(x=>x.disabled).length!==1||!exportMode.launchDisabled){
+       exportMode.evalButtons.filter(x=>x.disabled).length!==1||!exportMode.launchDisabled||
+       exportMode.evalButtons.filter(x=>!x.disabled).some(x=>!/^↑ Exporter$/.test(x.text))){
       return fail('sélection des évaluations dans le mode Export incorrecte',exportMode);
     }
 
