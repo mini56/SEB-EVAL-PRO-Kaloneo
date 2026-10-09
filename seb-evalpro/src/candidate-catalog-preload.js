@@ -60,11 +60,12 @@ function addStyle() {
     .seb-delete-actions .danger{background:#fff!important;color:#c00000!important;border-color:#c00000!important}
     .seb-delete-actions .danger:hover{background:#fff!important;color:#c00000!important;border-color:#c00000!important}
     .seb-cc-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid #ddd;background:#fff}
-    .seb-cc-foot-left,.seb-cc-foot-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .seb-cc-foot-left,.seb-cc-foot-right{display:flex;align-items:center;gap:10px;flex-wrap:nowrap}
+    .seb-cc-foot button{height:38px!important;min-height:38px!important;box-sizing:border-box!important;padding:0 14px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;line-height:1!important;margin:0!important}
     .seb-cc-foot button:disabled,.seb-cc-actions button:disabled{opacity:.48;cursor:default;box-shadow:none}
-    #seb-cc-trash{width:42px;height:42px;min-width:42px;padding:4px!important;display:inline-flex;align-items:center;justify-content:center}
-    #seb-cc-trash img{width:32px;height:32px;display:block;object-fit:contain;pointer-events:none}
-    #seb-cc-trash[data-state="empty"]{border-color:#98a2b3!important}
+    #seb-cc-trash{width:38px!important;height:38px!important;min-width:38px!important;padding:0!important}
+    #seb-cc-trash img{width:26px;height:26px;display:block;object-fit:contain;pointer-events:none}
+    #seb-cc-trash[data-state="empty"]{border-color:#98a2b3!important;background:#fff!important}
     #seb-cc-trash[data-state="full"]{border-color:#d48a00!important;background:#fffaf0!important}
     .seb-trash-deleted-at{font-size:12px;color:#777}
     .seb-cc-row.export-selected{border-color:#16834f;background:#f1fbf6;box-shadow:inset 0 0 0 1px #16834f}
@@ -662,7 +663,7 @@ function openCatalog(initialCandidateId = '') {
           </div>
           <div class="seb-cc-foot-right">
             <button type="button" id="seb-cc-close">Fermer</button>
-            <button type="button" id="seb-cc-trash" data-state="empty" data-seb-no-normalize="1" title="Corbeille" aria-label="Corbeille vide"><img src="assets/candidate-trash-empty.png" alt=""></button>
+            <button type="button" id="seb-cc-trash" data-state="empty" data-seb-no-normalize="1" title="Corbeille" aria-label="Corbeille vide"><img src="assets/candidate-trash-empty-simple.svg" alt=""></button>
           </div>
         </div>
       </div>`;
@@ -829,7 +830,7 @@ function openCatalog(initialCandidateId = '') {
       const total = Number(count || 0);
       const full = total > 0;
       trashButton.dataset.state = full ? 'full' : 'empty';
-      trashButton.innerHTML = '<img src="' + (full ? 'assets/candidate-trash-full.png' : 'assets/candidate-trash-empty.png') + '" alt="">';
+      trashButton.innerHTML = '<img src="' + (full ? 'assets/candidate-trash-full-simple.svg' : 'assets/candidate-trash-empty.png') + '" alt="">';
       trashButton.title = full ? ('Corbeille — ' + total + ' élément' + (total > 1 ? 's' : '')) : 'Corbeille — vide';
       trashButton.setAttribute('aria-label', full ? ('Corbeille pleine, ' + total + ' élément' + (total > 1 ? 's' : '')) : 'Corbeille vide');
     };
