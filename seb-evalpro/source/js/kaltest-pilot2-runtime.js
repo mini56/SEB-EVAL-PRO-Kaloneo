@@ -2894,7 +2894,9 @@
     const width = Math.max(1, items.clientWidth || items.getBoundingClientRect().width || 1);
     const height = Math.max(1, items.clientHeight || items.getBoundingClientRect().height || 1);
     const itemSize = Math.max(1, buttons[0].getBoundingClientRect().width || buttons[0].offsetWidth || 54);
-    const margin = 7;
+    // Marge volontairement large : un objet sélectionné grossit légèrement
+    // (transform:scale), le nuage doit rester sans contact même dans cet état.
+    const margin = 16;
     const maxX = Math.max(0, width - itemSize);
     const maxY = Math.max(0, height - itemSize);
     const testState = testStateFor(test);
