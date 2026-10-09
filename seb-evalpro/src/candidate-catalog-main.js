@@ -19,6 +19,10 @@ const {
   copyDirectoryIfMissing,
   copyDirectoryAtomically
 } = require('./candidate-folder-utils');
+const {
+  candidatePersonIdentity,
+  enrichCandidatePersonIdentity
+} = require('./candidate-person-identity');
 
 module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnlocked, getAdminDocumentPassword, getActiveCandidate, dataRoot = null }) {
   const editionCapabilities = getEditionCapabilities();
@@ -82,6 +86,93 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
       c.groupe
     ].map(normalize);
     return parts.every(Boolean) ? parts.join('|') : '';
+  }
+
+  function personIdentityForRecord(record) {
+    const c = {
+      ...((record && record.manifest && record.manifest.candidat) || {}),
+      ...((record && record.candidate) || {})
+    };
+    const derived = candidatePersonIdentity(c, record && record.candidateId);
+    return {
+      personId:String((record && record.manifest && record.manifest.personId) || c.personId || derived.personId),
+      personIdentifier:String((record && record.manifest && record.manifest.personIdentifier) || c.personIdentifier || derived.personIdentifier || ''),
+      legacyFallback:derived.legacyFallback
+    };
+  }
+
+  function backfillPersonIdentities() {
+    ensureDir(candidatesRoot);
+    let updated = 0;
+    const records = listCandidateDirs(candidatesRoot, false);
+    for (const record of records) {
+      const person = personIdentityForRecord(record);
+      const manifestPath = path.join(record.candidateDir, 'manifest.json');
+      const candidatePath = path.join(record.candidateDir, 'donnees', 'candidat.json');
+      const statePath = path.join(record.candidateDir, 'donnees', 'evaluation-state.json');
+      const manifest = readJson(manifestPath) || record.manifest || {};
+      const candidate = readJson(candidatePath) || record.candidate || manifest.candidat || {};
+      const enriched = {
+        ...enrichCandidatePersonIdentity(candidate, record.candidateId),
+        personId:person.personId,
+        personIdentifier:person.personIdentifier,
+        evaluationId:String(manifest.evaluationId || record.candidateId || '')
+      };
+
+      let changed = false;
+      if (String(manifest.personId || '') !== person.personId ||
+          String(manifest.personIdentifier || '') !== person.personIdentifier ||
+          String(manifest.evaluationId || '') !== String(record.candidateId || '')) {
+        writeJson(manifestPath, {
+          ...manifest,
+          candidateId:String(record.candidateId || manifest.candidateId || ''),
+          evaluationId:String(record.candidateId || manifest.evaluationId || ''),
+          personId:person.personId,
+          personIdentifier:person.personIdentifier,
+          candidat:enriched
+        });
+        changed = true;
+      }
+
+      if (candidate.personId !== enriched.personId ||
+          candidate.personIdentifier !== enriched.personIdentifier ||
+          candidate.evaluationId !== enriched.evaluationId) {
+        writeJson(candidatePath, enriched);
+        changed = true;
+      }
+
+      const saved = readJson(statePath);
+      if (saved && saved.sessionStorage && saved.sessionStorage.candidat_data) {
+        let stored = null;
+        try {
+          stored = typeof saved.sessionStorage.candidat_data === 'string'
+            ? JSON.parse(saved.sessionStorage.candidat_data)
+            : saved.sessionStorage.candidat_data;
+        } catch (_) {}
+        if (stored && typeof stored === 'object') {
+          const storedEnriched = {
+            ...stored,
+            personId:person.personId,
+            personIdentifier:person.personIdentifier,
+            evaluationId:String(record.candidateId || '')
+          };
+          if (stored.personId !== storedEnriched.personId ||
+              stored.personIdentifier !== storedEnriched.personIdentifier ||
+              stored.evaluationId !== storedEnriched.evaluationId) {
+            writeJson(statePath, {
+              ...saved,
+              sessionStorage:{
+                ...saved.sessionStorage,
+                candidat_data:JSON.stringify(storedEnriched)
+              }
+            });
+            changed = true;
+          }
+        }
+      }
+      if (changed) updated += 1;
+    }
+    return updated;
   }
 
   function fileSha256(file) {
@@ -402,9 +493,11 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
     const firstPass = consolidateDuplicateCandidateFolders();
     const migratedCandidates = migrateLegacyCandidateFolders();
     const secondPass = consolidateDuplicateCandidateFolders();
+    const personIdentityUpdated = backfillPersonIdentities();
     const artifacts = syncLegacyArtifacts();
     return {
       migratedCandidates,
+      personIdentityUpdated,
       consolidatedDuplicates:firstPass.consolidated + secondPass.consolidated,
       archivedDuplicates:firstPass.archived + secondPass.archived,
       mergedDuplicateFiles:firstPass.mergedFiles + secondPass.mergedFiles,
@@ -493,11 +586,16 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
     };
     const bilans = bilanEntries(record.candidateDir);
     const replays = replayEntries(record.candidateDir);
+    const person = personIdentityForRecord(record);
     return {
       candidateId: record.candidateId,
+      evaluationId:String((record.manifest && record.manifest.evaluationId) || record.candidateId || ''),
+      personId:person.personId,
+      personIdentifier:person.personIdentifier,
       folderName: record.folderName,
       nom: c.nom || '',
       prenom: c.prenom || c['prénom'] || '',
+      naissance:c.naissance || c.dateNaissance || '',
       lieu: c.lieu || c.ville || '',
       groupe: c.groupe || '',
       date: c.date || '',
@@ -514,6 +612,63 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
 
   function findById(candidateId) {
     return listCandidateDirs(candidatesRoot, false).find((r) => r.candidateId === String(candidateId || '')) || null;
+  }
+
+  function listPersonGroups() {
+    const evaluations = listCandidateDirs(candidatesRoot, false).map(serialize);
+    const groups = new Map();
+    for (const evaluation of evaluations) {
+      const key = String(evaluation.personId || ('EVAL-' + evaluation.candidateId));
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(evaluation);
+    }
+
+    const persons = [...groups.entries()].map(([personId, personEvaluations]) => {
+      const sorted = personEvaluations.slice().sort((a,b) =>
+        String(b.date || b.updatedAt || '').localeCompare(String(a.date || a.updatedAt || ''))
+      );
+      const latest = sorted[0] || {};
+      return {
+        personId,
+        personIdentifier:String(latest.personIdentifier || ''),
+        nom:String(latest.nom || ''),
+        prenom:String(latest.prenom || ''),
+        naissance:String(latest.naissance || ''),
+        lieu:String(latest.lieu || ''),
+        groupe:String(latest.groupe || ''),
+        latestDate:String(latest.date || ''),
+        evaluationCount:sorted.length,
+        completedCount:sorted.filter((item) => ['TERMINE','SESSION_FERMEE'].includes(String(item.status || ''))).length,
+        activeCount:sorted.filter((item) => String(item.status || '') === 'EN_COURS').length,
+        bilanCount:sorted.reduce((sum,item) => sum + Number(item.bilanCount || 0), 0),
+        revisionCount:sorted.reduce((sum,item) => sum + Number(item.revisionCount || 0), 0),
+        evaluations:sorted
+      };
+    });
+
+    const identifierOwners = new Map();
+    for (const person of persons) {
+      const identifier = String(person.personIdentifier || '');
+      if (!identifier) continue;
+      if (!identifierOwners.has(identifier)) identifierOwners.set(identifier, new Set());
+      identifierOwners.get(identifier).add(person.personId);
+    }
+    for (const person of persons) {
+      const owners = identifierOwners.get(String(person.personIdentifier || ''));
+      person.identifierCollision = Boolean(owners && owners.size > 1);
+    }
+
+    return persons.sort((a,b) =>
+      [a.nom,a.prenom,a.personIdentifier].join('|').localeCompare(
+        [b.nom,b.prenom,b.personIdentifier].join('|'),
+        'fr',
+        { sensitivity:'base' }
+      )
+    );
+  }
+
+  function findPersonById(personId) {
+    return listPersonGroups().find((person) => String(person.personId || '') === String(personId || '')) || null;
   }
 
   function clone(value) {
@@ -742,6 +897,20 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
       .sort((a,b) => [a.nom,a.prenom,a.date].join('|').localeCompare([b.nom,b.prenom,b.date].join('|'), 'fr', { sensitivity:'base' }));
   });
 
+  ipcMain.handle('candidate-catalog:list-persons', () => {
+    if (!getAdminUnlocked()) return [];
+    synchronize();
+    return listPersonGroups();
+  });
+
+  ipcMain.handle('candidate-catalog:person-detail', (_event, personId) => {
+    if (!getAdminUnlocked()) return { ok:false, error:'Accès administrateur requis.' };
+    synchronize();
+    const person = findPersonById(personId);
+    if (!person) return { ok:false, error:'Candidat introuvable.' };
+    return { ok:true, person };
+  });
+
   ipcMain.handle('candidate-catalog:delete', (_event, candidateId) => {
     if (!getAdminUnlocked()) return { ok:false, error:'Accès administrateur requis.' };
     synchronize();
@@ -773,6 +942,50 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
       };
     } catch (error) {
       return { ok:false, error:'Suppression impossible : ' + String(error && error.message ? error.message : error) };
+    }
+  });
+
+  ipcMain.handle('candidate-catalog:delete-person', (_event, personId) => {
+    if (!getAdminUnlocked()) return { ok:false, error:'Accès administrateur requis.' };
+    synchronize();
+    const person = findPersonById(personId);
+    if (!person) return { ok:false, error:'Candidat introuvable.' };
+
+    const active = typeof getActiveCandidate === 'function' ? getActiveCandidate() : null;
+    const ids = new Set(person.evaluations.map((item) => String(item.candidateId || '')));
+    if (active && ids.has(String(active.candidateId || ''))) {
+      return { ok:false, error:'Impossible de supprimer ce candidat : une de ses évaluations est actuellement active.' };
+    }
+
+    const recordsBeforeDelete = listCandidateDirs(candidatesRoot, false);
+    let removedEvaluations = 0;
+    const cleanupTotals = {
+      removedLegacyFolders:0,
+      removedReplay:0,
+      removedBilans:0,
+      removedWords:0,
+      removedDuplicateArchives:0
+    };
+
+    try {
+      for (const evaluation of person.evaluations) {
+        const record = recordsBeforeDelete.find((item) => String(item.candidateId || '') === String(evaluation.candidateId || ''));
+        if (!record) continue;
+        const candidate = record.candidate || (record.manifest && record.manifest.candidat) || {};
+        fs.rmSync(record.candidateDir, { recursive:true, force:true });
+        removedEvaluations += 1;
+        const cleanup = removeLegacyCandidateCopies(candidate, record, recordsBeforeDelete);
+        for (const key of Object.keys(cleanupTotals)) cleanupTotals[key] += Number(cleanup[key] || 0);
+        if (!active) removeCandidateRuntimeState(candidate);
+      }
+      return {
+        ok:true,
+        personId:String(person.personId || ''),
+        removedEvaluations,
+        ...cleanupTotals
+      };
+    } catch (error) {
+      return { ok:false, error:'Suppression du candidat impossible : ' + String(error && error.message ? error.message : error) };
     }
   });
 
