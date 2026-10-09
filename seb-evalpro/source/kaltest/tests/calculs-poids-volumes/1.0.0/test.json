@@ -50,7 +50,7 @@
       "right": {
         "type": "image",
         "orientation": "portrait",
-        "src": "",
+        "src": "imageqcm/calculs-poids-volumes.jpg",
         "alt": "Illustration de l’exercice",
         "placeholder": "Image verticale"
       }
