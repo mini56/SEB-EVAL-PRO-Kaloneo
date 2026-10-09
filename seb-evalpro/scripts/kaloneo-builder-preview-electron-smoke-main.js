@@ -538,6 +538,7 @@ app.whenReady().then(async()=>{
       save.click();
       await new Promise(resolve=>setTimeout(resolve,420));
       return {
+        ok:true,
         before,
         after:{
           version:version?.value||'',
