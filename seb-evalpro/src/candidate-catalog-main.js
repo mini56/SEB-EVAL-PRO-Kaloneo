@@ -29,6 +29,7 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
   const documentsPath = app.getPath('documents');
   const root = dataRoot || path.join(documentsPath, 'SEB EvalPro');
   const candidatesRoot = path.join(root, 'Candidats');
+  const candidateTrashRoot = path.join(root, 'Corbeille', 'Candidats');
   const legacyAdminRoot = path.join(root, 'Admin');
   const globalReplayRoot = path.join(root, 'parcours');
   const globalBilanRoot = path.join(root, 'Bilans', 'Historique');
@@ -412,9 +413,12 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
 
   function migrateLegacyCandidateFolders() {
     ensureDir(candidatesRoot);
+    ensureDir(candidateTrashRoot);
     const current = listCandidateDirs(candidatesRoot, false);
+    const trashedIds = new Set(listCandidateDirs(candidateTrashRoot, false).map((record) => String(record.candidateId || '')));
     let copied = 0;
     for (const legacy of listCandidateDirs(legacyAdminRoot, true)) {
+      if (trashedIds.has(String(legacy.candidateId || ''))) continue;
       if (current.some((r) => String(r.candidateId) === String(legacy.candidateId))) continue;
       if (selectCandidate(current, legacy.candidate)) continue;
       const base = codedFolderName(legacy.candidateId, legacy.manifest && legacy.manifest.shortId);
@@ -900,6 +904,113 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
     return { removedLegacyFolders, removedReplay, removedBilans, removedWords, removedDuplicateArchives };
   }
 
+  function trashMeta(record) {
+    return readJson(path.join(record.candidateDir, 'trash-meta.json')) || {};
+  }
+
+  function listTrashEntries() {
+    ensureDir(candidateTrashRoot);
+    return listCandidateDirs(candidateTrashRoot, false)
+      .map((record) => {
+        const item = serialize(record);
+        const meta = trashMeta(record);
+        return {
+          ...item,
+          trashFolderName:record.folderName,
+          deletedAt:String(meta.deletedAt || ''),
+          deletedAs:String(meta.deletedAs || 'evaluation'),
+          deletedPersonId:String(meta.personId || item.personId || '')
+        };
+      })
+      .sort((a,b) => String(b.deletedAt || '').localeCompare(String(a.deletedAt || '')));
+  }
+
+  function moveRecordToTrash(record, deletedAs = 'evaluation', personId = '') {
+    ensureDir(candidateTrashRoot);
+    if (!record || !record.candidateDir || !fs.existsSync(record.candidateDir)) throw new Error('Évaluation introuvable.');
+    const base = String(record.folderName || codedFolderName(record.candidateId, record.manifest && record.manifest.shortId));
+    const target = uniqueFolderPath(candidateTrashRoot, base);
+    fs.renameSync(record.candidateDir, target);
+    writeJson(path.join(target, 'trash-meta.json'), {
+      schemaVersion:1,
+      candidateId:String(record.candidateId || ''),
+      personId:String(personId || personIdentityForRecord(record).personId || ''),
+      deletedAs:String(deletedAs || 'evaluation'),
+      deletedAt:new Date().toISOString(),
+      originalFolderName:base
+    });
+    const manifestPath = path.join(target, 'manifest.json');
+    const manifest = readJson(manifestPath) || {};
+    writeJson(manifestPath, {
+      ...manifest,
+      folderName:path.basename(target),
+      trashed:true,
+      trashedAt:new Date().toISOString()
+    });
+    return target;
+  }
+
+  function restoreTrashRecord(record) {
+    if (!record) throw new Error('Évaluation supprimée introuvable.');
+    if (listCandidateDirs(candidatesRoot, false).some((item) => String(item.candidateId) === String(record.candidateId))) {
+      throw new Error('Cette évaluation existe déjà dans la Liste des candidats.');
+    }
+    const meta = trashMeta(record);
+    const base = String(meta.originalFolderName || codedFolderName(record.candidateId, record.manifest && record.manifest.shortId));
+    const target = fs.existsSync(path.join(candidatesRoot, base))
+      ? uniqueFolderPath(candidatesRoot, base)
+      : path.join(candidatesRoot, base);
+    ensureDir(candidatesRoot);
+    fs.renameSync(record.candidateDir, target);
+    try { fs.rmSync(path.join(target, 'trash-meta.json'), { force:true }); } catch (_) {}
+    const manifestPath = path.join(target, 'manifest.json');
+    const manifest = readJson(manifestPath) || {};
+    const restored = { ...manifest, folderName:path.basename(target), trashed:false, restoredAt:new Date().toISOString() };
+    delete restored.trashedAt;
+    writeJson(manifestPath, restored);
+    return target;
+  }
+
+  ipcMain.handle('candidate-catalog:trash-list', () => {
+    if (!getAdminUnlocked()) return { ok:false, error:'Accès administrateur requis.' };
+    return { ok:true, entries:listTrashEntries() };
+  });
+
+  ipcMain.handle('candidate-catalog:trash-restore', (_event, candidateId) => {
+    if (!getAdminUnlocked()) return { ok:false, error:'Accès administrateur requis.' };
+    const record = listCandidateDirs(candidateTrashRoot, false)
+      .find((item) => String(item.candidateId || '') === String(candidateId || ''));
+    if (!record) return { ok:false, error:'Évaluation supprimée introuvable.' };
+    try {
+      restoreTrashRecord(record);
+      synchronize();
+      return { ok:true, candidateId:String(record.candidateId || '') };
+    } catch (error) {
+      return { ok:false, error:'Restauration impossible : ' + String(error && error.message ? error.message : error) };
+    }
+  });
+
+  ipcMain.handle('candidate-catalog:trash-empty', () => {
+    if (!getAdminUnlocked()) return { ok:false, error:'Accès administrateur requis.' };
+    const trashRecords = listCandidateDirs(candidateTrashRoot, false);
+    const currentRecords = listCandidateDirs(candidatesRoot, false);
+    let purged = 0;
+    try {
+      for (const record of trashRecords) {
+        const candidate = {
+          ...((record.manifest && record.manifest.candidat) || {}),
+          ...(record.candidate || {})
+        };
+        removeLegacyCandidateCopies(candidate, record, [...currentRecords, record]);
+        fs.rmSync(record.candidateDir, { recursive:true, force:true });
+        purged += 1;
+      }
+      return { ok:true, purged };
+    } catch (error) {
+      return { ok:false, error:'Vidage de la corbeille impossible : ' + String(error && error.message ? error.message : error) };
+    }
+  });
+
   ipcMain.handle('candidate-catalog:list', () => {
     if (!getAdminUnlocked()) return [];
     synchronize();
@@ -925,34 +1036,17 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
   ipcMain.handle('candidate-catalog:delete', (_event, candidateId) => {
     if (!getAdminUnlocked()) return { ok:false, error:'Accès administrateur requis.' };
     synchronize();
-
     const record = findById(candidateId);
     if (!record) return { ok:false, error:'Candidat introuvable.' };
-
     const active = typeof getActiveCandidate === 'function' ? getActiveCandidate() : null;
     if (active && String(active.candidateId || '') === String(record.candidateId || '')) {
-      return { ok:false, error:'Impossible de supprimer le candidat dont le parcours est actuellement actif.' };
+      return { ok:false, error:'Impossible de supprimer l’évaluation dont le parcours est actuellement actif.' };
     }
-
-    const recordsBeforeDelete = listCandidateDirs(candidatesRoot, false);
-    const candidate = record.candidate || (record.manifest && record.manifest.candidat) || {};
     try {
-      fs.rmSync(record.candidateDir, { recursive:true, force:true });
-
-      // Nettoyer aussi les anciennes copies techniques liées à ce candidat.
-      const cleanup = removeLegacyCandidateCopies(candidate, record, recordsBeforeDelete);
-
-      // Ne toucher à l'état runtime que s'il n'existe aucun autre candidat actif.
-      if (!active) removeCandidateRuntimeState(candidate);
-
-      return {
-        ok:true,
-        candidateId:String(record.candidateId || ''),
-        removedFolder:true,
-        ...cleanup
-      };
+      moveRecordToTrash(record, 'evaluation', personIdentityForRecord(record).personId);
+      return { ok:true, candidateId:String(record.candidateId || ''), movedToTrash:true };
     } catch (error) {
-      return { ok:false, error:'Suppression impossible : ' + String(error && error.message ? error.message : error) };
+      return { ok:false, error:'Mise en corbeille impossible : ' + String(error && error.message ? error.message : error) };
     }
   });
 
@@ -961,42 +1055,23 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
     synchronize();
     const person = findPersonById(personId);
     if (!person) return { ok:false, error:'Candidat introuvable.' };
-
     const active = typeof getActiveCandidate === 'function' ? getActiveCandidate() : null;
     const ids = new Set(person.evaluations.map((item) => String(item.candidateId || '')));
     if (active && ids.has(String(active.candidateId || ''))) {
       return { ok:false, error:'Impossible de supprimer ce candidat : une de ses évaluations est actuellement active.' };
     }
-
-    const recordsBeforeDelete = listCandidateDirs(candidatesRoot, false);
-    let removedEvaluations = 0;
-    const cleanupTotals = {
-      removedLegacyFolders:0,
-      removedReplay:0,
-      removedBilans:0,
-      removedWords:0,
-      removedDuplicateArchives:0
-    };
-
+    const records = listCandidateDirs(candidatesRoot, false);
+    let movedEvaluations = 0;
     try {
       for (const evaluation of person.evaluations) {
-        const record = recordsBeforeDelete.find((item) => String(item.candidateId || '') === String(evaluation.candidateId || ''));
+        const record = records.find((item) => String(item.candidateId || '') === String(evaluation.candidateId || ''));
         if (!record) continue;
-        const candidate = record.candidate || (record.manifest && record.manifest.candidat) || {};
-        fs.rmSync(record.candidateDir, { recursive:true, force:true });
-        removedEvaluations += 1;
-        const cleanup = removeLegacyCandidateCopies(candidate, record, recordsBeforeDelete);
-        for (const key of Object.keys(cleanupTotals)) cleanupTotals[key] += Number(cleanup[key] || 0);
-        if (!active) removeCandidateRuntimeState(candidate);
+        moveRecordToTrash(record, 'person', person.personId);
+        movedEvaluations += 1;
       }
-      return {
-        ok:true,
-        personId:String(person.personId || ''),
-        removedEvaluations,
-        ...cleanupTotals
-      };
+      return { ok:true, personId:String(person.personId || ''), movedEvaluations, movedToTrash:true };
     } catch (error) {
-      return { ok:false, error:'Suppression du candidat impossible : ' + String(error && error.message ? error.message : error) };
+      return { ok:false, error:'Mise en corbeille du candidat impossible : ' + String(error && error.message ? error.message : error) };
     }
   });
 
