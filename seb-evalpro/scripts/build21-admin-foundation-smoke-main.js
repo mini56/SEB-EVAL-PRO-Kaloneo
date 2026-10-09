@@ -23,6 +23,17 @@ let openTestsParcoursCalls = 0;
 let closeTestsParcoursCalls = 0;
 let endBilanCalls = 0;
 let returnCandidateCalls = 0;
+let lastExportOptions = null;
+const catalogItems = [
+  {
+    candidateId:'CAND-DONE-1', nom:'Candidat', prenom:'Terminé', lieu:'Lorient', groupe:'1', date:'2026-10-09',
+    status:'TERMINE', bilanCount:1, revisionCount:0, hasOriginalBilan:true, replayCount:1, exportCount:1
+  },
+  {
+    candidateId:'CAND-ACTIVE-1', nom:'Candidat', prenom:'En cours', lieu:'Auray', groupe:'2', date:'2026-10-09',
+    status:'EN_COURS', bilanCount:0, revisionCount:0, hasOriginalBilan:false, replayCount:0, exportCount:0
+  }
+];
 
 ipcMain.on('app:edition-sync', (event) => {
   event.returnValue = {
@@ -74,7 +85,16 @@ ipcMain.handle('ai:rewrite-synthesis', () => ({ ok:false }));
 ipcMain.handle('replay:capture-page', () => ({ ok:true }));
 ipcMain.handle('replay:list', () => []);
 ipcMain.handle('bilan-history:list', () => []);
-ipcMain.handle('candidate-catalog:list', () => []);
+ipcMain.handle('candidate-catalog:list', () => catalogItems);
+ipcMain.handle('admin:export-candidates', (_event, _password, options = {}) => {
+  lastExportOptions = JSON.parse(JSON.stringify(options || {}));
+  const count = Array.isArray(options.candidateIds) ? options.candidateIds.length : 0;
+  return {
+    ok:true, total:count, added:count, updated:0, skipped:0, verifiedFiles:count,
+    destinationRoot:'USB-SMOKE', invalidSkipped:0
+  };
+});
+ipcMain.handle('admin:import-candidates', () => ({ ok:true, total:0, added:0, updated:0, skipped:0, verifiedFiles:0, destinationRoot:'ADMIN-SMOKE' }));
 ipcMain.handle('candidate-catalog:sync', () => ({ ok:true }));
 ipcMain.handle('candidate-catalog:detail', () => ({ ok:false }));
 
@@ -202,8 +222,11 @@ app.whenReady().then(async () => {
       die('état Admin avec parcours actif incorrect', unlockedActive);
       return;
     }
-    if (unlockedActive.exportText !== '↑ Exporter dossiers' || unlockedActive.importText !== '↓ Importer dossiers') {
-      die('flèches Export / Import incorrectes', unlockedActive);
+    const legacyTransferButtons = unlockedActive.buttons.filter((b) =>
+      ['seb-evalpro-export-candidates','seb-evalpro-import-candidates'].includes(b.id)
+    );
+    if (legacyTransferButtons.some((b) => b.physical)) {
+      die('Import / Export candidats doivent être retirés de la barre Admin', legacyTransferButtons);
       return;
     }
 
@@ -305,10 +328,12 @@ app.whenReady().then(async () => {
       return {
         list:visible('seb-evalpro-open-candidate'),
         listText:String(document.getElementById('seb-evalpro-open-candidate')?.textContent||'').trim(),
-        privacy:visible('seb-evalpro-show-privacy')
+        privacy:visible('seb-evalpro-show-privacy'),
+        legacyExport:visible('seb-evalpro-export-candidates'),
+        legacyImport:visible('seb-evalpro-import-candidates')
       };
     })()`);
-    if (!homeState.list || homeState.listText!=='Lister les candidats' || !homeState.privacy) {
+    if (!homeState.list || homeState.listText!=='Lister les candidats' || !homeState.privacy || homeState.legacyExport || homeState.legacyImport) {
       die('barre de l’espace Administrateur incorrecte', homeState);
       return;
     }
@@ -327,6 +352,98 @@ app.whenReady().then(async () => {
       die('Masquer l’écran d’accueil ne restaure pas la page Admin');
       return;
     }
+
+    // 5b. Import / Export candidats se fait maintenant dans la Liste des candidats.
+    await win.webContents.executeJavaScript("document.getElementById('seb-evalpro-open-candidate').click();true");
+    await wait(180);
+    const catalogTransferUi=await win.webContents.executeJavaScript(`(()=>{
+      const visible=id=>{const e=document.getElementById(id);if(!e)return false;const c=getComputedStyle(e),r=e.getBoundingClientRect();return !e.hidden&&c.display!=='none'&&c.visibility!=='hidden'&&r.width>0&&r.height>0;};
+      return {
+        catalog:!!document.getElementById('seb-candidate-catalog'),
+        importVisible:visible('seb-cc-import'),
+        exportVisible:visible('seb-cc-export-mode'),
+        closeVisible:visible('seb-cc-close'),
+        rows:document.querySelectorAll('.seb-cc-row').length
+      };
+    })()`);
+    if (!catalogTransferUi.catalog || !catalogTransferUi.importVisible || !catalogTransferUi.exportVisible || !catalogTransferUi.closeVisible || catalogTransferUi.rows!==2) {
+      die('boutons Import / Export absents de la Liste des candidats', catalogTransferUi);
+      return;
+    }
+
+    // Import conserve le processus existant : le clic ouvre bien la demande de mot de passe.
+    await win.webContents.executeJavaScript("document.getElementById('seb-cc-import').click();true");
+    await wait(100);
+    const importPasswordDialog=await win.webContents.executeJavaScript("String(document.querySelector('#seb-evalpro-transfer-password-dialog .seb-transfer-password-title')?.textContent||'').trim()");
+    if (!/Import USB sécurisé/i.test(importPasswordDialog)) {
+      die('Importer candidat ne lance plus le processus USB existant', {importPasswordDialog});
+      return;
+    }
+    await win.webContents.executeJavaScript("document.getElementById('seb-transfer-password-cancel').click();true");
+    await wait(80);
+
+    await win.webContents.executeJavaScript("document.getElementById('seb-cc-export-mode').click();true");
+    await wait(80);
+    const exportMode=await win.webContents.executeJavaScript(`(()=>({
+      importHidden:document.getElementById('seb-cc-import').hidden,
+      exportHidden:document.getElementById('seb-cc-export-mode').hidden,
+      cancelVisible:!document.getElementById('seb-cc-export-cancel').hidden,
+      launchVisible:!document.getElementById('seb-cc-export-launch').hidden,
+      launchDisabled:document.getElementById('seb-cc-export-launch').disabled,
+      rowButtons:[...document.querySelectorAll('.seb-cc-actions button')].map(b=>({text:b.textContent.trim(),disabled:b.disabled}))
+    }))()`);
+    if (!exportMode.importHidden || !exportMode.exportHidden || !exportMode.cancelVisible || !exportMode.launchVisible || !exportMode.launchDisabled ||
+        exportMode.rowButtons.length!==2 || exportMode.rowButtons[0].text!=='Exporter' || exportMode.rowButtons[0].disabled ||
+        exportMode.rowButtons[1].text!=='Parcours en cours' || !exportMode.rowButtons[1].disabled) {
+      die('mode de sélection Export candidats incorrect', exportMode);
+      return;
+    }
+
+    await win.webContents.executeJavaScript("document.querySelector('.seb-cc-actions button:not(:disabled)').click();true");
+    await wait(70);
+    const selectedExport=await win.webContents.executeJavaScript(`(()=>({
+      launch:String(document.getElementById('seb-cc-export-launch').textContent||'').trim(),
+      launchDisabled:document.getElementById('seb-cc-export-launch').disabled,
+      selected:String(document.querySelector('.seb-cc-actions button:not(:disabled)')?.textContent||'').trim()
+    }))()`);
+    if (selectedExport.launch!=='Lancer l’export (1)' || selectedExport.launchDisabled || selectedExport.selected!=='✓ Sélectionné') {
+      die('sélection d’un candidat pour export incorrecte', selectedExport);
+      return;
+    }
+
+    await win.webContents.executeJavaScript("document.getElementById('seb-cc-export-launch').click();true");
+    await wait(90);
+    await win.webContents.executeJavaScript(`(()=>{
+      document.getElementById('seb-transfer-password').value='USB-Test-2026!';
+      document.getElementById('seb-transfer-password-confirm').value='USB-Test-2026!';
+      document.getElementById('seb-transfer-password-ok').click();
+      return true;
+    })()`);
+    await wait(90);
+    await win.webContents.executeJavaScript("document.getElementById('seb-export-existing').click();true");
+    await wait(140);
+    if (!lastExportOptions || JSON.stringify(lastExportOptions.candidateIds)!==JSON.stringify(['CAND-DONE-1'])) {
+      die('la sélection de candidats n’est pas transmise au moteur d’export', lastExportOptions||{});
+      return;
+    }
+    const exportDoneDialog=await win.webContents.executeJavaScript("String(document.querySelector('#seb-evalpro-transfer-dialog .seb-transfer-title')?.textContent||'').trim()");
+    if (exportDoneDialog!=='Export terminé') {
+      die('processus normal d’export non terminé après sélection', {exportDoneDialog});
+      return;
+    }
+    await win.webContents.executeJavaScript("document.getElementById('seb-transfer-ok').click();true");
+    await wait(80);
+    const afterSelectedExport=await win.webContents.executeJavaScript(`(()=>({
+      normalImport:!document.getElementById('seb-cc-import').hidden,
+      normalExport:!document.getElementById('seb-cc-export-mode').hidden,
+      launchHidden:document.getElementById('seb-cc-export-launch').hidden
+    }))()`);
+    if (!afterSelectedExport.normalImport || !afterSelectedExport.normalExport || !afterSelectedExport.launchHidden) {
+      die('la Liste des candidats ne revient pas au mode normal après export', afterSelectedExport);
+      return;
+    }
+    await win.webContents.executeJavaScript("document.getElementById('seb-cc-close').click();true");
+    await wait(80);
 
     // 6. Tests / Parcours : KALONÉO intégré + retour Fermer.
     await win.webContents.executeJavaScript("document.getElementById('seb-evalpro-tests-parcours').click();true");
