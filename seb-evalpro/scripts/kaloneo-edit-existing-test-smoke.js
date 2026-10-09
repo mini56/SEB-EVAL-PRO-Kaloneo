@@ -84,6 +84,30 @@ try {
   const persistedV2 = library.getTest('organisation_demenagement', '2.0.0')?.definition;
   const persistedV1 = library.getTest('organisation_demenagement', '1.0.0')?.definition;
 
+  const organisationVersions = library.listTests()
+    .filter(item => item.id === 'organisation_demenagement')
+    .map(item => item.version);
+  if (!organisationVersions.includes('1.0.0') || !organisationVersions.includes('2.0.0')) {
+    fail('la bibliothèque masque une version Organisation quand V1 et V2 coexistent', organisationVersions);
+  }
+  const v1Meta = library.listTests().find(item => item.id === 'organisation_demenagement' && item.version === '1.0.0');
+  if (!v1Meta?.protectedVersion) {
+    fail('la V1 Organisation fournie doit rester visible et protégée', v1Meta);
+  }
+
+  const baseRuntime = library.resolveParcoursRuntime('parcours-de-base');
+  if (!baseRuntime?.ok) fail('le Parcours de base ne se résout plus après création de la V2', baseRuntime);
+  const baseOrganisation = baseRuntime.runtime.tests.find(item => item.id === 'organisation_demenagement');
+  if (baseOrganisation?.version !== '1.0.0') {
+    fail('le Parcours de base doit rester verrouillé sur Organisation V1', baseOrganisation);
+  }
+
+  const baseDetails = library.getParcoursDetails('parcours-de-base');
+  const detailOrganisation = baseDetails?.details?.tests?.find(entry => entry.ref?.id === 'organisation_demenagement');
+  if (!baseDetails?.ok || detailOrganisation?.meta?.version !== '1.0.0') {
+    fail('les détails du Parcours de base doivent encore retrouver Organisation V1', baseDetails);
+  }
+
   if (!persistedV2?.kaloneoLibrary?.adminModified ||
       persistedV2.presentation?.builderContent?.find(item => item.type === 'image')?.zone !== 'right') {
     fail('la V2 admin ne survit pas à la resynchronisation de bibliothèque', persistedV2);
@@ -93,6 +117,8 @@ try {
   }
 
   console.log('KALONEO_EDIT_EXISTING_TEST=OK');
+  console.log('KALONEO_VERSIONED_LIBRARY_V1_V2=OK');
+  console.log('KALONEO_BASE_PARCOURS_PINNED_V1=OK');
   console.log(JSON.stringify({
     v1:{version:v1.version,layout:v1.presentation?.layout?.ratio},
     v2:{
