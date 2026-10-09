@@ -395,6 +395,7 @@
     return {
       idLocked:state.idLocked,
       sourceDefinition:state.sourceDefinition ? Core.clone(state.sourceDefinition) : null,
+      sourceProtectedVersion:state.sourceProtectedVersion===true,
       meta:collectMeta(),
       blocks:Core.clone(state.blocks)
     };
@@ -506,8 +507,10 @@
       const model=JSON.parse(entry.json);
       state.idLocked=Boolean(model.idLocked);
       state.sourceDefinition=model.sourceDefinition||null;
+      state.sourceProtectedVersion=model.sourceProtectedVersion===true;
       state.blocks=Array.isArray(model.blocks)?model.blocks:[];
       applyMeta(model.meta||defaultMeta());
+      syncProtectedVersionUi();
       renderIconPicker();
       renderBlocks();
       refreshPreview();
@@ -549,8 +552,10 @@
       if (!data || !data.meta) return false;
       state.idLocked=Boolean(data.idLocked);
       state.sourceDefinition=data.sourceDefinition||null;
+      state.sourceProtectedVersion=data.sourceProtectedVersion===true;
       state.blocks=Array.isArray(data.blocks)?data.blocks:[];
       applyMeta(data.meta);
+      syncProtectedVersionUi();
       return true;
     } catch (_) {
       return false;
@@ -1835,6 +1840,44 @@
     changed();renderBlocks();
   }
 
+  function syncProtectedVersionUi() {
+    const version=$('test-version');
+    const save=$('save-draft');
+    const protectedSource=state.sourceProtectedVersion===true;
+    if(version){
+      version.readOnly=protectedSource;
+      version.setAttribute('aria-readonly',protectedSource?'true':'false');
+      version.title=protectedSource
+        ? 'Version KALONÉO protégée. Une modification sera enregistrée automatiquement sous une nouvelle version.'
+        : '';
+    }
+    if(save){
+      save.textContent=protectedSource?'Créer une nouvelle version':'Enregistrer';
+      save.title=protectedSource
+        ? 'Conserver la V1 intacte et enregistrer les modifications sous la prochaine version disponible.'
+        : 'Enregistrer le test dans la bibliothèque.';
+    }
+  }
+
+  async function nextAdminVersion(id) {
+    const bridge=window.sebEvalPro;
+    let versions=[];
+    if(bridge && typeof bridge.kaloneoListTests==='function'){
+      try{
+        const result=await bridge.kaloneoListTests();
+        versions=(Array.isArray(result?.tests)?result.tests:[])
+          .filter(item=>String(item?.id||'')===String(id||''))
+          .map(item=>String(item?.version||''));
+      }catch(_){}
+    }
+    let maxMajor=1;
+    versions.forEach(version=>{
+      const major=Number(String(version||'').split('.')[0]);
+      if(Number.isFinite(major)&&major>maxMajor)maxMajor=major;
+    });
+    return String(Math.max(2,maxMajor+1))+'.0.0';
+  }
+
   function loadDefinition(definition, statusLabel='Test KALTEST ouvert depuis la bibliothèque', options={}) {
     const analysis=Core.analyzeDefinition(definition);
     if(!analysis.ok) throw new Error(analysis.errors.join('\\n'));
@@ -1845,6 +1888,7 @@
     state.sourceProtectedVersion=options.protectedVersion===true;
     state.blocks=model.blocks;
     applyMeta(model.meta);
+    syncProtectedVersionUi();
     renderIconPicker();
     $('test-template').value=model.meta.template && Array.from($('test-template').options).some(o=>o.value===model.meta.template)
       ? model.meta.template : 'generic';
@@ -1973,8 +2017,15 @@
   }
 
   async function saveToLibrary(options={}) {
+    const protectedClone=state.sourceProtectedVersion===true;
+    const originalVersion=$('test-version')?.value||'1.0.0';
+    if(protectedClone){
+      const nextVersion=await nextAdminVersion($('test-id')?.value||normalizeIdFromTitle());
+      $('test-version').value=nextVersion;
+    }
     refreshPreview();
     if(!validate()) {
+      if(protectedClone)$('test-version').value=originalVersion;
       alert('Le test contient encore des éléments obligatoires à corriger.');
       return false;
     }
@@ -1990,6 +2041,7 @@
         setTimeout(()=>$('draft-status').textContent='Brouillon local',1800);
         return true;
       }
+      if(protectedClone)$('test-version').value=originalVersion;
       alert('L’enregistrement dans la bibliothèque est disponible depuis SEB EvalPro.');
       return false;
     }
@@ -2003,11 +2055,13 @@
         result=await bridge.kaloneoSaveTest(data,true);
       }
     } catch(error) {
+      if(protectedClone)$('test-version').value=originalVersion;
       alert('Enregistrement impossible : '+String(error?.message||error));
       return false;
     }
 
     if(!result || result.ok!==true) {
+      if(protectedClone)$('test-version').value=originalVersion;
       if(result?.code==='PROTECTED_VERSION') {
         alert(
           'Cette V1 est fournie avec KALONÉO et reste protégée.\n\n' +
@@ -2019,9 +2073,13 @@
       return false;
     }
 
+    if(protectedClone){
+      state.sourceProtectedVersion=false;
+      syncProtectedVersionUi();
+    }
     saveDraft(false);
     markCurrentSaved();
-    transientStatus('Enregistré dans la bibliothèque',1800);
+    transientStatus(protectedClone?'Nouvelle version créée et enregistrée':'Enregistré dans la bibliothèque',1800);
     if(options.exportJson===true) exportDefinition(data);
     return true;
   }
@@ -2065,6 +2123,7 @@
     state.sourceProtectedVersion=false;
     state.blocks=[baseBlock('text')];
     applyMeta(defaultMeta());
+    syncProtectedVersionUi();
     renderIconPicker();
     renderBlocks();
     refreshPreview();
@@ -2091,7 +2150,16 @@
       try {
         const preview = await window.sebEvalPro.kaloneoConsumePreviewDefinition();
         if(preview?.ok && preview.definition) {
-          loadDefinition(preview.definition,'Retour de l’aperçu Electron — même test restauré',{markSaved:false});
+          let protectedFromDraft=false;
+          try{
+            const draft=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');
+            protectedFromDraft=draft?.sourceProtectedVersion===true;
+          }catch(_){}
+          loadDefinition(
+            preview.definition,
+            'Retour de l’aperçu Electron — même test restauré',
+            {markSaved:false,protectedVersion:protectedFromDraft}
+          );
           restored = true;
         }
       } catch (_) {}
@@ -2101,8 +2169,10 @@
     if(!restored || state.blocks.length===0) {
       state.idLocked=false;
       state.sourceDefinition=null;
+      state.sourceProtectedVersion=false;
       state.blocks=[baseBlock('text')];
       applyMeta(defaultMeta());
+      syncProtectedVersionUi();
     }
 
     if(window.KaloneoIconLibrary?.count!==70) {
@@ -2247,6 +2317,7 @@
       window.addEventListener('resize',fitMiniPreview);
     }
 
+    syncProtectedVersionUi();
     renderBlocks();
     refreshPreview();
     if(!restored)resetHistory({markSaved:true});
