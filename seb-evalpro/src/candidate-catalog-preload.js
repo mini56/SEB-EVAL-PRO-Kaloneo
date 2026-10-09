@@ -59,14 +59,17 @@ function addStyle() {
     .seb-delete-actions button:hover{background:#fff!important;color:#0070c0!important;border-color:#0070c0!important}
     .seb-delete-actions .danger{background:#fff!important;color:#c00000!important;border-color:#c00000!important}
     .seb-delete-actions .danger:hover{background:#fff!important;color:#c00000!important;border-color:#c00000!important}
+    #seb-candidate-catalog .seb-cc-shell{width:min(1262px,calc(100vw - 24px));max-height:90vh;display:grid;grid-template-columns:minmax(0,1180px) 72px;gap:10px;align-items:end}
+    #seb-candidate-catalog .seb-cc-shell>.seb-cc-card{width:100%;max-height:90vh}
     .seb-cc-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid #ddd;background:#fff}
     .seb-cc-foot-left,.seb-cc-foot-right{display:flex;align-items:center;gap:10px;flex-wrap:nowrap}
     .seb-cc-foot button{height:38px!important;min-height:38px!important;box-sizing:border-box!important;padding:0 14px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;line-height:1!important;margin:0!important}
     .seb-cc-foot button:disabled,.seb-cc-actions button:disabled{opacity:.48;cursor:default;box-shadow:none}
-    #seb-cc-trash{width:38px!important;height:38px!important;min-width:38px!important;padding:0!important}
-    #seb-cc-trash img{width:26px;height:26px;display:block;object-fit:contain;pointer-events:none}
-    #seb-cc-trash[data-state="empty"]{border-color:#98a2b3!important;background:#fff!important}
-    #seb-cc-trash[data-state="full"]{border-color:#d48a00!important;background:#fffaf0!important}
+    #seb-cc-trash{width:72px!important;height:72px!important;min-width:72px!important;padding:5px!important;box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border:2px solid #9fb5c8!important;border-radius:10px!important;background:#fff!important;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.20);margin:0 0 0 0!important}
+    #seb-cc-trash:hover{background:#f7fbff!important;border-color:#0070c0!important}
+    #seb-cc-trash img{width:60px;height:60px;display:block;object-fit:contain;pointer-events:none}
+    #seb-cc-trash[data-state="full"]{border-color:#f28c00!important;background:#fff!important}
+    @media(max-width:980px){#seb-candidate-catalog .seb-cc-shell{grid-template-columns:minmax(0,1fr) 64px;gap:8px}#seb-cc-trash{width:64px!important;height:64px!important;min-width:64px!important}#seb-cc-trash img{width:52px;height:52px}}
     .seb-trash-deleted-at{font-size:12px;color:#777}
     .seb-cc-row.export-selected{border-color:#16834f;background:#f1fbf6;box-shadow:inset 0 0 0 1px #16834f}
     .seb-cc-actions .selected{border-color:#16834f!important;color:#16834f!important;background:#f1fbf6!important}
@@ -650,22 +653,24 @@ function openCatalog(initialCandidateId = '') {
     const overlay = document.createElement('div');
     overlay.id = 'seb-candidate-catalog';
     overlay.innerHTML = `
-      <div class="seb-cc-card" role="dialog" aria-modal="true" aria-label="Liste des candidats">
-        <div class="seb-cc-head"><div class="seb-cc-title">Liste des candidats</div><div class="seb-cc-badge">CANDIDATS</div></div>
-        <div class="seb-cc-search-wrap"><input id="seb-cc-search" class="seb-cc-search" type="search" autocomplete="off" placeholder="Rechercher un nom, prénom, N° identifiant, ville, groupe, parcours ou date…"></div>
-        <div class="seb-cc-body"><div id="seb-cc-list">Chargement…</div></div>
-        <div class="seb-cc-foot">
-          <div class="seb-cc-foot-left">
-            <button type="button" id="seb-cc-import" data-seb-no-normalize="1">↓ Importer candidat</button>
-            <button type="button" id="seb-cc-export-mode" data-seb-no-normalize="1">↑ Exporter candidat</button>
-            <button type="button" id="seb-cc-export-launch" class="primary" hidden disabled>Lancer l’export (0)</button>
-            <button type="button" id="seb-cc-export-cancel" hidden>Annuler la sélection</button>
-          </div>
-          <div class="seb-cc-foot-right">
-            <button type="button" id="seb-cc-close">Fermer</button>
-            <button type="button" id="seb-cc-trash" data-state="empty" data-seb-no-normalize="1" title="Corbeille" aria-label="Corbeille vide"><img src="assets/candidate-trash-empty-simple.svg" alt=""></button>
+      <div class="seb-cc-shell">
+        <div class="seb-cc-card" role="dialog" aria-modal="true" aria-label="Liste des candidats">
+          <div class="seb-cc-head"><div class="seb-cc-title">Liste des candidats</div><div class="seb-cc-badge">CANDIDATS</div></div>
+          <div class="seb-cc-search-wrap"><input id="seb-cc-search" class="seb-cc-search" type="search" autocomplete="off" placeholder="Rechercher un nom, prénom, N° identifiant, ville, groupe, parcours ou date…"></div>
+          <div class="seb-cc-body"><div id="seb-cc-list">Chargement…</div></div>
+          <div class="seb-cc-foot">
+            <div class="seb-cc-foot-left">
+              <button type="button" id="seb-cc-import" data-seb-no-normalize="1">↓ Importer candidat</button>
+              <button type="button" id="seb-cc-export-mode" data-seb-no-normalize="1">↑ Exporter candidat</button>
+              <button type="button" id="seb-cc-export-launch" class="primary" hidden disabled>Lancer l’export (0)</button>
+              <button type="button" id="seb-cc-export-cancel" hidden>Annuler la sélection</button>
+            </div>
+            <div class="seb-cc-foot-right">
+              <button type="button" id="seb-cc-close">Fermer</button>
+            </div>
           </div>
         </div>
+        <button type="button" id="seb-cc-trash" data-state="empty" data-seb-no-normalize="1" title="Corbeille — vide" aria-label="Corbeille vide"><img src="assets/candidate-trash-empty.png" alt=""></button>
       </div>`;
     document.body.appendChild(overlay);
     const list = overlay.querySelector('#seb-cc-list');
@@ -830,7 +835,7 @@ function openCatalog(initialCandidateId = '') {
       const total = Number(count || 0);
       const full = total > 0;
       trashButton.dataset.state = full ? 'full' : 'empty';
-      trashButton.innerHTML = '<img src="' + (full ? 'assets/candidate-trash-full-simple.svg' : 'assets/candidate-trash-empty-simple.svg') + '" alt="">';
+      trashButton.innerHTML = '<img src="' + (full ? 'assets/candidate-trash-full.png' : 'assets/candidate-trash-empty.png') + '" alt="">';
       trashButton.title = full ? ('Corbeille — ' + total + ' élément' + (total > 1 ? 's' : '')) : 'Corbeille — vide';
       trashButton.setAttribute('aria-label', full ? ('Corbeille pleine, ' + total + ' élément' + (total > 1 ? 's' : '')) : 'Corbeille vide');
     };
