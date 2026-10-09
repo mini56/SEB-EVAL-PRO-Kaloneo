@@ -1,0 +1,48 @@
+name: Validate KALONEO R47 images and typography
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test-builder-r47-all-validated-images
+    paths:
+      - 'seb-evalpro/source/imageqcm/**'
+      - 'seb-evalpro/source/kaltest/tests/**'
+      - 'seb-evalpro/source/css/kaltest-pilot2.css'
+      - 'seb-evalpro/scripts/kaltest-eleven-images-guard.js'
+      - 'seb-evalpro/scripts/kaltest-typography-audit-electron-main.js'
+      - '.github/workflows/validate-r47-images-typography.yml'
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: seb-evalpro
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Verify eleven validated visual references
+        run: node scripts/kaltest-eleven-images-guard.js
+
+      - name: Generate KALTEST candidate data
+        run: node scripts/build-kaltest-pilot2-data.js
+
+      - name: Prepare real web app and guards
+        run: npm run prepare:web
+
+      - name: Verify first five visuals in real Electron
+        run: npx electron --no-sandbox scripts/kaltest-five-images-electron-smoke-main.js
+
+      - name: Audit typography in real 1366x768 Electron
+        run: npx electron --no-sandbox scripts/kaltest-typography-audit-electron-main.js
