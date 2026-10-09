@@ -34,6 +34,8 @@ let adminCandidateResultsWorkspace = null;
 let adminNavigationLeaving = false;
 let candidateJourneyCompleted = false;
 let candidateCompletionInFlight = false;
+let candidateExportAction = null;
+let candidateImportAction = null;
 
 function objectToStorage(storage, values) {
   if (!storage || !values || typeof values !== 'object') return;
@@ -850,11 +852,11 @@ function sebSyncAdminBarState() {
   if (returnButton) returnButton.hidden = true;
   if (exportCandidatesButton) {
     exportCandidatesButton.textContent = '↑ Exporter dossiers';
-    exportCandidatesButton.hidden = !adminUnlocked;
+    exportCandidatesButton.hidden = true;
   }
   if (importCandidatesButton) {
     importCandidatesButton.textContent = '↓ Importer dossiers';
-    importCandidatesButton.hidden = !adminUnlocked;
+    importCandidatesButton.hidden = true;
   }
   if (testsParcoursButton) {
     testsParcoursButton.hidden = true;
@@ -1445,8 +1447,9 @@ function injectAdminBar() {
     returnButton.hidden = true;
     exportCandidatesButton.textContent = '↑ Exporter dossiers';
     importCandidatesButton.textContent = '↓ Importer dossiers';
-    exportCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canExport;
-    importCandidatesButton.hidden = !adminUnlocked || !editionCapabilities.canImport;
+    // R35 : Import / Export candidats se gèrent depuis la fenêtre Liste des candidats.
+    exportCandidatesButton.hidden = true;
+    importCandidatesButton.hidden = true;
     testsParcoursButton.hidden = true;
     chooseParcoursButton.hidden = true;
     showPrivacyButton.hidden = !adminUnlocked;
@@ -1605,8 +1608,16 @@ function injectAdminBar() {
     }
   });
 
-  exportCandidatesButton.addEventListener('click', async () => {
+  candidateExportAction = async (candidateIds = null) => {
     showBar();
+    const selectedCandidateIds = Array.isArray(candidateIds)
+      ? [...new Set(candidateIds.map((id) => String(id || '').trim()).filter(Boolean))]
+      : null;
+    if (selectedCandidateIds && !selectedCandidateIds.length) {
+      await showTransferMessage('Export candidats', 'Sélectionnez au moins un candidat à exporter.');
+      return false;
+    }
+
     // SEB_ADMIN_EXPORT_REQUIRES_CLOSED_CANDIDATE
     const candidateFolderOpen = !!document.getElementById('seb-candidate-detail')
       || !!adminCandidateWorkspace
@@ -1616,46 +1627,50 @@ function injectAdminBar() {
     if (candidateFolderOpen) {
       await showTransferMessage('Export impossible', 'Fermez le dossier candidat avant de lancer l’export.', true);
       scheduleHideBar();
-      return;
+      return false;
     }
 
     saveNow(true);
     exportCandidatesButton.disabled = true;
     importCandidatesButton.disabled = true;
     try {
-      // SEB_ADMIN_EXPORT_FINALIZES_ACTIVE_CANDIDATE
-      const activeCandidate = await ipcRenderer.invoke('candidate:active').catch(() => null);
-      if (activeCandidate && String(activeCandidate.status || '') === 'EN_COURS') {
-        const confirmed = await createExportCandidateFinishDialog(activeCandidate);
-        if (!confirmed) return;
+      // Compatibilité de l'ancien accès global : sans sélection explicite, l'export
+      // peut encore proposer de clôturer le parcours actif. Depuis la Liste des
+      // candidats, seuls les parcours déjà terminés peuvent être sélectionnés.
+      if (!selectedCandidateIds) {
+        const activeCandidate = await ipcRenderer.invoke('candidate:active').catch(() => null);
+        if (activeCandidate && String(activeCandidate.status || '') === 'EN_COURS') {
+          const confirmed = await createExportCandidateFinishDialog(activeCandidate);
+          if (!confirmed) return false;
 
-        const completed = await ipcRenderer.invoke('candidate:complete-active', 'admin-export').catch((error) => ({
-          ok:false,
-          error:String(error && error.message ? error.message : error)
-        }));
-        if (!completed || !completed.ok) {
-          await showTransferMessage(
-            'Fin de parcours impossible',
-            completed && completed.error ? completed.error : 'Le parcours n’a pas pu être terminé avant l’export.',
-            true
-          );
-          return;
+          const completed = await ipcRenderer.invoke('candidate:complete-active', 'admin-export').catch((error) => ({
+            ok:false,
+            error:String(error && error.message ? error.message : error)
+          }));
+          if (!completed || !completed.ok) {
+            await showTransferMessage(
+              'Fin de parcours impossible',
+              completed && completed.error ? completed.error : 'Le parcours n’a pas pu être terminé avant l’export.',
+              true
+            );
+            return false;
+          }
+
+          finishCandidateButton.hidden = true;
+          await refreshCandidateBadge();
         }
-
-        finishCandidateButton.hidden = true;
-        await refreshCandidateBadge();
       }
 
       const password = await createTransferPasswordDialog('export');
-      if (!password) return;
+      if (!password) return false;
 
       const destinationMode = await createExportDestinationModeDialog();
-      if (!destinationMode) return;
+      if (!destinationMode) return false;
 
       let newFolderName = '';
       if (destinationMode === 'create') {
         newFolderName = await createTransferNameDialog();
-        if (!newFolderName) return;
+        if (!newFolderName) return false;
       }
 
       let progress = null;
@@ -1667,41 +1682,44 @@ function injectAdminBar() {
       try {
         result = await ipcRenderer.invoke('admin:export-candidates', password, {
           mode:destinationMode,
-          folderName:newFolderName
+          folderName:newFolderName,
+          candidateIds:selectedCandidateIds
         });
       } finally {
         ipcRenderer.removeListener('admin:export-progress', onExportProgress);
         if (progress) progress.close();
       }
-      if (!result || result.cancelled) return;
+      if (!result || result.cancelled) return false;
       if (!result.ok) {
         await showTransferMessage('Export impossible', result.error || 'Une erreur est survenue pendant l’export.', true);
-        return;
+        return false;
       }
       if (!result.total) {
         await showTransferMessage('Export candidats', 'Aucun dossier candidat n’a été trouvé sur ce PC.');
-        return;
+        return false;
       }
       await showTransferMessage(
         'Export terminé',
-        `Copie des fichiers terminée.\nVous pouvez retirer la clé USB en toute sécurité.\n\n${result.added} fichier(s) candidat chiffré(s) créé(s), ${result.skipped || 0} déjà présent(s) et ignoré(s).\n${result.verifiedFiles || 0} fichier(s) vérifié(s).${result.invalidSkipped ? `\n${result.invalidSkipped} dossier(s) candidat local(aux) illisible(s) ignoré(s) sans bloquer l’export.` : ''}\n\nClé : ${result.destinationRoot}`
+        `Copie des fichiers terminée.\nVous pouvez retirer la clé USB en toute sécurité.\n\n${result.added} fichier(s) candidat chiffré(s) créé(s), ${result.updated || 0} mis à jour, ${result.skipped || 0} déjà présent(s) et ignoré(s).\n${result.verifiedFiles || 0} fichier(s) vérifié(s).${result.invalidSkipped ? `\n${result.invalidSkipped} dossier(s) candidat local(aux) illisible(s) ignoré(s) sans bloquer l’export.` : ''}\n\nClé : ${result.destinationRoot}`
       );
+      return true;
     } catch (error) {
       await showTransferMessage('Export impossible', String(error && error.message ? error.message : error), true);
+      return false;
     } finally {
       exportCandidatesButton.disabled = false;
       importCandidatesButton.disabled = false;
       scheduleHideBar();
     }
-  });
+  };
 
-  importCandidatesButton.addEventListener('click', async () => {
+  candidateImportAction = async () => {
     showBar();
     exportCandidatesButton.disabled = true;
     importCandidatesButton.disabled = true;
     try {
       const password = await createTransferPasswordDialog('import');
-      if (!password) return;
+      if (!password) return false;
       let progress = null;
       const onImportProgress = (_event, payload = {}) => {
         if (payload && payload.state === 'started' && !progress) progress = showTransferProgress('import');
@@ -1714,27 +1732,32 @@ function injectAdminBar() {
         ipcRenderer.removeListener('admin:import-progress', onImportProgress);
         if (progress) progress.close();
       }
-      if (!result || result.cancelled) return;
+      if (!result || result.cancelled) return false;
       if (!result.ok) {
         await showTransferMessage('Import impossible', result.error || 'Une erreur est survenue pendant l’import.', true);
-        return;
+        return false;
       }
       if (!result.total) {
         await showTransferMessage('Import candidats', 'Aucun fichier candidat chiffré (.seb) n’a été trouvé sur la clé sélectionnée.');
-        return;
+        return false;
       }
       await showTransferMessage(
         'Import terminé',
         `${result.total} dossier(s) candidat(s) détecté(s).\n${result.added} ajouté(s), ${result.updated || 0} mis à jour, ${result.skipped || 0} déjà présent(s) et ignoré(s).\n${result.verifiedFiles || 0} fichier(s) vérifié(s).\n\nDossier SEB EvalPro : ${result.destinationRoot}`
       );
+      return true;
     } catch (error) {
       await showTransferMessage('Import impossible', String(error && error.message ? error.message : error), true);
+      return false;
     } finally {
       exportCandidatesButton.disabled = false;
       importCandidatesButton.disabled = false;
       scheduleHideBar();
     }
-  });
+  };
+
+  exportCandidatesButton.addEventListener('click', () => { candidateExportAction(null); });
+  importCandidatesButton.addEventListener('click', () => { candidateImportAction(); });
 
   finishCandidateButton.addEventListener('click', async () => {
     showBar();
@@ -2035,7 +2058,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   replayPrototype.install();
   replayNavigationCapture.install();
   bilanHistory.install();
-  candidateCatalog.install({ beforeNavigate: () => saveNow(true) });
+  candidateCatalog.install({
+    beforeNavigate: () => saveNow(true),
+    onImportCandidates: () => candidateImportAction ? candidateImportAction() : Promise.resolve(false),
+    onExportCandidates: (candidateIds) => candidateExportAction ? candidateExportAction(candidateIds) : Promise.resolve(false)
+  });
   if (adminCandidateResultsWorkspace) {
     showReadOnlyCandidateResults();
   } else {
