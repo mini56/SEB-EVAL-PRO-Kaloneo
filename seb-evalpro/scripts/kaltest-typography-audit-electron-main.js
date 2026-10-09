@@ -66,6 +66,7 @@ async function inspect(win) {
       for(const el of root?.querySelectorAll('*')||[]) {
         if(!visible(el)) continue;
         if(!directText(el)&&!controls.has(el.tagName)) continue;
+        if(el.tagName==='INPUT' && ['checkbox','radio','hidden'].includes(String(el.type||'').toLowerCase())) continue;
         const size=parseFloat(getComputedStyle(el).fontSize||'0');
         const text=(el.innerText||el.value||el.getAttribute('aria-label')||'').trim().replace(/\\s+/g,' ').slice(0,90);
         if(!text&&el.tagName!=='INPUT'&&el.tagName!=='TEXTAREA'&&el.tagName!=='SELECT') continue;
@@ -122,8 +123,17 @@ app.whenReady().then(async()=>{
       else await loadSegment(win,item.segment,item.id);
       const result=await inspect(win);
       console.log('KALTEST_TYPO_AUDIT '+JSON.stringify(result));
+      if(result.below15.length){
+        throw new Error(item.id+' : texte fonctionnel inférieur à 15 px '+JSON.stringify(result.below15));
+      }
+      if(item.id==='calculs_commandes_atelier'||item.id==='calculs_poids_volumes'){
+        const k=result.key;
+        if((k.title||0)<28||(k.progress||0)<15||(k.context||0)<17||(k.questions||0)<18||(k.table||0)<17||(k.field||0)<17){
+          throw new Error(item.id+' : règle typographique des deux premiers tests non respectée '+JSON.stringify(k));
+        }
+      }
     }
-    console.log('KALTEST_TYPOGRAPHY_AUDIT=OK');
+    console.log('KALTEST_TYPOGRAPHY_GUARD=OK');
     win.destroy();
     app.exit(0);
   }catch(error){
