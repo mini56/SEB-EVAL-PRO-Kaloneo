@@ -3065,3 +3065,169 @@ body.seb-kaltest-legacy-full #kaltest-content{
   padding:8px 10px;
   border-radius:9px;
 }
+
+
+/* R47 — plancher typographique candidat : lisibilité validée sans miniaturiser le texte.
+   Les écrans denses gagnent de la place par les marges/espacements, pas par une police minuscule. */
+#page-exercise .kaltest-heading h2{
+  font-size:28px!important;
+  line-height:1.05!important;
+}
+#page-exercise .kaltest-progress{
+  font-size:15px!important;
+}
+#page-exercise .kaltest-context p,
+#page-exercise .kaltest-context strong{
+  font-size:17px!important;
+  line-height:1.2!important;
+}
+
+/* Deux premiers tests : même gabarit 60/40, questions + tableau sous le texte à gauche. */
+body[data-seb-kaltest-id="calculs_commandes_atelier"] .kaltest-questionnaire-left,
+body[data-seb-kaltest-id="calculs_poids_volumes"] .kaltest-questionnaire-left{
+  gap:8px!important;
+}
+body[data-seb-kaltest-id="calculs_commandes_atelier"] .kaltest-questionnaire-left .kaltest-question-list,
+body[data-seb-kaltest-id="calculs_poids_volumes"] .kaltest-questionnaire-left .kaltest-question-list{
+  font-size:18px!important;
+  line-height:1.2!important;
+}
+body[data-seb-kaltest-id="calculs_commandes_atelier"] .kaltest-questionnaire-left .kaltest-question-list li,
+body[data-seb-kaltest-id="calculs_poids_volumes"] .kaltest-questionnaire-left .kaltest-question-list li{
+  margin:4px 0!important;
+}
+body[data-seb-kaltest-id="calculs_commandes_atelier"] .kaltest-questionnaire-left .kaltest-table,
+body[data-seb-kaltest-id="calculs_poids_volumes"] .kaltest-questionnaire-left .kaltest-table{
+  font-size:17px!important;
+}
+body[data-seb-kaltest-id="calculs_commandes_atelier"] .kaltest-questionnaire-left .kaltest-table th,
+body[data-seb-kaltest-id="calculs_poids_volumes"] .kaltest-questionnaire-left .kaltest-table th{
+  padding:4px 7px!important;
+}
+body[data-seb-kaltest-id="calculs_commandes_atelier"] .kaltest-questionnaire-left .kaltest-table td,
+body[data-seb-kaltest-id="calculs_poids_volumes"] .kaltest-questionnaire-left .kaltest-table td{
+  padding:3px 6px!important;
+}
+body[data-seb-kaltest-id="calculs_commandes_atelier"] .kaltest-questionnaire-left .kaltest-table input,
+body[data-seb-kaltest-id="calculs_poids_volumes"] .kaltest-questionnaire-left .kaltest-table input{
+  min-height:31px!important;
+  padding:3px 6px!important;
+  font-size:17px!important;
+}
+
+/* Horaires : conserver un tableau lisible même quand la hauteur utile diminue. */
+body[data-seb-kaltest-id="horaires_reception_controle"] .kaltest-schedule-work .kaltest-table{
+  font-size:15px!important;
+}
+body[data-seb-kaltest-id="horaires_reception_controle"] .kaltest-schedule-work .kaltest-table input{
+  font-size:17px!important;
+}
+body[data-seb-kaltest-id="horaires_reception_controle"] .kaltest-average-row{
+  font-size:15px!important;
+}
+
+/* Texte à trous : mots et tableau ne passent jamais sous le seuil de lisibilité. */
+body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] .kaltest-inline-flow{
+  font-size:17px!important;
+}
+body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] .kaltest-word-bank span,
+body[data-seb-kaltest-id="texte_a_trous_stage_logistique"] .kaltest-choice-table{
+  font-size:15px!important;
+}
+
+/* Conversions : exercice dense, mais texte/tableau à 15 px minimum et champs à 17 px. */
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-work .kaltest-question-list,
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-table{
+  font-size:15px!important;
+  line-height:1.1!important;
+}
+body[data-seb-kaltest-id="conversions_atelier_expedition"] .kaltest-conversions-table input{
+  font-size:17px!important;
+  min-height:26px!important;
+}
+
+/* Fractions / organisation. */
+body[data-seb-kaltest-id="fractions_preparation_lots"] .kaltest-fraction-item{
+  font-size:15px!important;
+}
+body[data-seb-kaltest-id="organisation_demenagement"] .kaltest-organisation-row{
+  font-size:15px!important;
+}
+
+/* Planning cantine : on compacte les cellules, jamais la lisibilité. */
+body[data-seb-kaltest-id="planning_cantine"] .kaltest-planning-table{
+  font-size:15px!important;
+}
+body[data-seb-kaltest-id="planning_cantine"] .kaltest-planning-table th,
+body[data-seb-kaltest-id="planning_cantine"] .kaltest-planning-table td{
+  padding:2px 3px!important;
+}
+body[data-seb-kaltest-id="planning_cantine"] .kaltest-planning-table select{
+  min-height:28px!important;
+  font-size:17px!important;
+}
+body[data-seb-kaltest-id="planning_cantine"] .kaltest-planning-lists,
+body[data-seb-kaltest-id="planning_cantine"] .kaltest-planning-guide li{
+  font-size:15px!important;
+}
+
+/* Autoévaluations. */
+body[data-seb-kaltest-id="autoevaluation_savoirs"] .kaltest-autoeval-choice,
+body[data-seb-kaltest-id="autoevaluation_tic"] .kaltest-autoeval-choice{
+  font-size:16px!important;
+}
+body[data-seb-kaltest-id="autoevaluation_savoirs"] .kaltest-autoeval-comment textarea,
+body[data-seb-kaltest-id="autoevaluation_tic"] .kaltest-autoeval-comment textarea{
+  font-size:17px!important;
+}
+
+/* Briques / LEGO : libellés de mesure et aide restent lisibles. */
+body[data-seb-kaltest-id="construction_briques"] .kaltest-brique-autoeval p,
+body[data-seb-kaltest-id="construction_briques"] .kaltest-brique-admin p,
+body[data-seb-kaltest-id="construction_briques"] .kaltest-brique-admin-status{
+  font-size:15px!important;
+}
+body[data-seb-kaltest-id="construction_briques"] .kaltest-brique-auto-choice{
+  font-size:15px!important;
+}
+body[data-seb-kaltest-id="construction_briques"] .kaltest-brique-measures label{
+  font-size:16px!important;
+}
+body[data-seb-kaltest-id="construction_briques"] .kaltest-brique-comment textarea,
+body[data-seb-kaltest-id="construction_briques"] .kaltest-brique-measures input,
+body[data-seb-kaltest-id="construction_briques"] .kaltest-brique-code input{
+  font-size:17px!important;
+}
+
+/* Tri et messagerie : seuil fonctionnel de 15 px, champs de saisie à 17 px. */
+body[data-seb-kaltest-id="tri_chevilles"] .kaltest-tri-guide ul,
+body[data-seb-kaltest-id="tri_chevilles"] .kaltest-tri-autoeval>p,
+body[data-seb-kaltest-id="tri_chevilles"] .kaltest-tri-auto-choice,
+body[data-seb-kaltest-id="tri_chevilles"] .kaltest-tri-comment,
+body[data-seb-kaltest-id="tri_chevilles"] .kaltest-tri-row.head,
+body[data-seb-kaltest-id="tri_chevilles"] .kaltest-tri-results{
+  font-size:15px!important;
+}
+body[data-seb-kaltest-id="tri_chevilles"] .kaltest-tri-row input,
+body[data-seb-kaltest-id="tri_chevilles"] .kaltest-tri-comment textarea{
+  font-size:17px!important;
+}
+body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-instruction-list p,
+body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-attachment{
+  font-size:15px!important;
+}
+body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-field{
+  font-size:16px!important;
+}
+body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-field input,
+body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-field textarea{
+  font-size:17px!important;
+}
+
+/* Boutons d'action du test : libellé constant et lisible. */
+#page-exercise button.seb-action-btn,
+#page-exercise button.seb-btn-nav,
+#page-exercise button.seb-btn-timer-start,
+#page-exercise button.seb-btn-timer-stop{
+  font-size:16px!important;
+}
