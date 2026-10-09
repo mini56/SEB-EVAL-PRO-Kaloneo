@@ -206,6 +206,12 @@ jobs:
       - name: Verify candidate catalog including parcours name
         run: node scripts/candidate-catalog-smoke.js
 
+      - name: Verify selected candidate encrypted export engine
+        run: node scripts/candidate-transfer-smoke.js
+
+      - name: Verify candidate Import Export ergonomics in real Electron
+        run: npx electron --no-sandbox scripts/candidate-transfer-ui-electron-smoke-main.js
+
       - name: Verify selected parcours candidate runtime in real Electron
         run: npx electron --no-sandbox scripts/kaloneo-selected-parcours-electron-smoke-main.js
 
