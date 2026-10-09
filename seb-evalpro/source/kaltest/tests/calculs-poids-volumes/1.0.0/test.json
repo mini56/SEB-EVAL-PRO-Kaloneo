@@ -50,8 +50,8 @@
       "right": {
         "type": "image",
         "orientation": "portrait",
-        "src": "",
-        "alt": "Illustration de l’exercice",
+        "src": "imageqcm/kaloneo-calculs-poids-volumes.webp",
+        "alt": "Mesure et préparation des colis en atelier logistique",
         "placeholder": "Image verticale"
       }
     }
