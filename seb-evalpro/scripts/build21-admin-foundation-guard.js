@@ -152,14 +152,17 @@ assert(catalog.includes("Supprimer l’évaluation"), 'suppression d’une seule
 assert(catalog.includes("Supprimer le candidat"), 'suppression globale du candidat absente.');
 assert(catalog.includes("Tout sélectionner"), 'sélection de toutes les évaluations d’une personne absente du mode Export.');
 assert(catalog.includes('id="seb-cc-trash"') && catalog.includes('Corbeille vide'), 'bouton Corbeille vide absent de la Liste des candidats.');
-assert(catalog.includes('candidate-trash-full.png') && catalog.includes('candidate-trash-empty.png'), 'icônes Corbeille pleine/vide absentes.');
+assert(catalog.includes('candidate-trash-full-simple.svg') && catalog.includes('candidate-trash-empty-simple.svg'), 'icônes Corbeille pleine/vide absentes.');
 assert(catalog.includes('data-seb-no-normalize="1"'), 'protection des icônes spécifiques du footer candidat absente.');
 assert(catalog.includes('↓ Importer candidat'), 'flèche descendante Importer candidat absente.');
 assert(catalog.includes('↑ Exporter candidat'), 'flèche montante Exporter candidat absente.');
+assert(catalog.includes('.seb-cc-foot button{height:38px!important;min-height:38px!important'), 'hauteur unique 38 px du footer candidat absente.');
+assert(catalog.includes('#seb-cc-trash{width:38px!important;height:38px!important'), 'bouton Corbeille non normalisé en 38 × 38 px.');
+assert(catalog.includes('#seb-cc-trash img{width:26px;height:26px'), 'icône Corbeille non optimisée pour petite taille.');
 assert(catalog.indexOf('id="seb-cc-export-launch"') < catalog.indexOf('id="seb-cc-export-cancel"'), 'Lancer l export doit précéder Annuler la sélection.');
 assert(catalog.includes('<button type="button" id="seb-cc-close">Fermer</button>') && catalog.includes('id="seb-cc-trash"'), 'Fermer / Corbeille absents du footer.');
-assert(fs.existsSync(path.join(ROOT, 'source', 'assets', 'candidate-trash-empty.png')), 'icône Corbeille vide absente.');
-assert(fs.existsSync(path.join(ROOT, 'source', 'assets', 'candidate-trash-full.png')), 'icône Corbeille pleine absente.');
+assert(fs.existsSync(path.join(ROOT, 'source', 'assets', 'candidate-trash-empty-simple.svg')), 'icône Corbeille vide absente.');
+assert(fs.existsSync(path.join(ROOT, 'source', 'assets', 'candidate-trash-full-simple.svg')), 'icône Corbeille pleine absente.');
 assert(catalog.includes("ipcRenderer.invoke('candidate-catalog:trash-restore'"), 'bouton Restaurer non raccordé.');
 assert(catalog.includes("Vider définitivement la corbeille"), 'confirmation forte de vidage définitif absente.');
 
