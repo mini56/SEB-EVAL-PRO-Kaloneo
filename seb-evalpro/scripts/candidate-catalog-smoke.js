@@ -119,9 +119,12 @@ try {
   const sync = handlers.get('candidate-catalog:sync');
   const deleteCandidate = handlers.get('candidate-catalog:delete');
   const deletePerson = handlers.get('candidate-catalog:delete-person');
+  const trashList = handlers.get('candidate-catalog:trash-list');
+  const trashRestore = handlers.get('candidate-catalog:trash-restore');
+  const trashEmpty = handlers.get('candidate-catalog:trash-empty');
   const saveCurrentBilan = handlers.get('bilan-history:save-current');
   const saveBilanRevision = handlers.get('bilan-history:save-revision');
-  assert(list && listPersons && personDetail && detail && loadBilan && beginBilan && beginResults && endResults && loadResultsWorkspaceSync && saveWorkspace && endBilan && loadWorkspaceSync && saveWorkspaceSync && sync && deleteCandidate && deletePerson && saveCurrentBilan && saveBilanRevision, 'Handlers catalogue/bilan/résultats/protection suppression absents.');
+  assert(list && listPersons && personDetail && detail && loadBilan && beginBilan && beginResults && endResults && loadResultsWorkspaceSync && saveWorkspace && endBilan && loadWorkspaceSync && saveWorkspaceSync && sync && deleteCandidate && deletePerson && trashList && trashRestore && trashEmpty && saveCurrentBilan && saveBilanRevision, 'Handlers catalogue/bilan/résultats/corbeille absents.');
 
   const first = list();
   assert.strictEqual(first.length, 1, 'Le candidat historique doit être migré une seule fois.');
@@ -430,31 +433,57 @@ try {
   assert.strictEqual(groupedForDelete[0].evaluationCount, 2);
 
   const deletedEvaluation = deleteCandidate(null, 'candidate-xx-final-second');
-  assert(deletedEvaluation && deletedEvaluation.ok === true, 'Supprimer une évaluation doit réussir sans supprimer la personne entière.');
-  assert.strictEqual(fs.existsSync(finalSecondDir), false, 'Seule l’évaluation choisie doit être supprimée.');
+  assert(deletedEvaluation && deletedEvaluation.ok === true && deletedEvaluation.movedToTrash === true, 'Supprimer une évaluation doit la placer dans la Corbeille.');
+  assert.strictEqual(fs.existsSync(finalSecondDir), false, 'L’évaluation choisie ne doit plus rester dans la liste active.');
   assert.strictEqual(fs.existsSync(newDir), true, 'L’autre évaluation de la personne doit rester intacte.');
+  let trash = trashList();
+  assert(trash && trash.ok && trash.entries.length === 1, 'La Corbeille doit contenir l’évaluation supprimée.');
+  assert.strictEqual(trash.entries[0].candidateId, 'candidate-xx-final-second');
+  assert.strictEqual(trash.entries[0].parcours, 'Parcours supplémentaire');
   groupedForDelete = listPersons();
   assert.strictEqual(groupedForDelete.length, 1);
   assert.strictEqual(groupedForDelete[0].evaluationCount, 1);
 
+  const restoredEvaluation = trashRestore(null, 'candidate-xx-final-second');
+  assert(restoredEvaluation && restoredEvaluation.ok === true, 'Une évaluation supprimée doit pouvoir être restaurée.');
+  assert.strictEqual(listPersons()[0].evaluationCount, 2, 'La restauration doit remettre l’évaluation dans la fiche candidat.');
+  assert.strictEqual(trashList().entries.length, 0, 'La Corbeille doit redevenir vide après restauration.');
+
+  // La supprimer à nouveau pour vérifier la suppression globale et le vidage définitif.
+  const reDeletedEvaluation = deleteCandidate(null, 'candidate-xx-final-second');
+  assert(reDeletedEvaluation && reDeletedEvaluation.ok === true);
+  groupedForDelete = listPersons();
+  assert.strictEqual(groupedForDelete[0].evaluationCount, 1);
+
   activeCandidateForDelete = { candidateId:'candidate-xx' };
   const refusedActiveDelete = deletePerson(null, groupedForDelete[0].personId);
-  assert(refusedActiveDelete && refusedActiveDelete.ok === false, 'Le candidat ne doit pas pouvoir être supprimé globalement si une évaluation est active.');
+  assert(refusedActiveDelete && refusedActiveDelete.ok === false, 'Le candidat ne doit pas pouvoir être placé en Corbeille si une évaluation est active.');
   assert(/active/i.test(String(refusedActiveDelete.error || '')), 'Le refus global doit indiquer qu’une évaluation est active.');
-  assert.strictEqual(fs.existsSync(newDir), true, 'Le dossier actif doit rester intact après refus de suppression globale.');
+  assert.strictEqual(fs.existsSync(newDir), true, 'Le dossier actif doit rester intact après refus.');
 
   activeCandidateForDelete = null;
   const deleted = deletePerson(null, groupedForDelete[0].personId);
-  assert(deleted && deleted.ok === true && deleted.removedEvaluations === 1, 'La suppression globale du candidat doit supprimer toutes ses évaluations restantes.');
-  assert.strictEqual(fs.existsSync(newDir), false, 'Le dernier dossier d’évaluation du candidat doit être supprimé.');
-  assert.strictEqual(fs.existsSync(legacyDir), false, 'La copie historique Admin associée doit être supprimée.');
-  assert.strictEqual(fs.existsSync(path.join(replayRoot, replayName)), false, 'Le replay historique associé doit être supprimé.');
-  assert.strictEqual(fs.existsSync(path.join(bilanRoot, bilanName)), false, 'Le bilan historique global associé doit être supprimé.');
-  assert.strictEqual(fs.existsSync(path.join(sebRoot, 'Bilans', legacyWordName)), false, 'Le Word historique associé doit être supprimé.');
-  assert.strictEqual(fs.existsSync(path.join(userDataPath, 'evaluation-state.json')), false, 'L’état local associé doit être nettoyé.');
-  assert.strictEqual(list().length, 0, 'Le candidat supprimé ne doit plus apparaître dans le catalogue.');
+  assert(deleted && deleted.ok === true && deleted.movedEvaluations === 1, 'Supprimer le candidat doit placer toutes ses évaluations actives dans la Corbeille.');
+  assert.strictEqual(fs.existsSync(newDir), false, 'Le dernier dossier actif du candidat doit quitter Candidats.');
+  assert.strictEqual(list().length, 0, 'Le candidat mis en Corbeille ne doit plus apparaître dans le catalogue.');
+  trash = trashList();
+  assert(trash && trash.ok && trash.entries.length === 2, 'La Corbeille doit contenir les deux évaluations supprimées.');
+  assert.strictEqual(fs.existsSync(legacyDir), true, 'Les anciennes copies ne doivent pas être détruites avant vidage définitif.');
 
-  console.log('Candidate Catalog Person Grouping + Separate Evaluations + Safe Delete Test: OK');
+  const emptied = trashEmpty();
+  assert(emptied && emptied.ok === true && emptied.purged === 2, 'Vider la Corbeille doit supprimer définitivement les deux évaluations.');
+  assert.strictEqual(trashList().entries.length, 0, 'La Corbeille doit être vide après vidage définitif.');
+  assert.strictEqual(fs.existsSync(legacyDir), false, 'La copie historique Admin associée doit être supprimée uniquement au vidage définitif.');
+  assert.strictEqual(fs.existsSync(path.join(replayRoot, replayName)), false, 'Le replay historique associé doit être supprimé au vidage définitif.');
+  assert.strictEqual(fs.existsSync(path.join(bilanRoot, bilanName)), false, 'Le bilan historique global associé doit être supprimé au vidage définitif.');
+  assert.strictEqual(fs.existsSync(path.join(sebRoot, 'Bilans', legacyWordName)), false, 'Le Word historique associé doit être supprimé au vidage définitif.');
+  assert.strictEqual(fs.existsSync(path.join(userDataPath, 'evaluation-state.json')), false, 'L’état local associé doit être nettoyé au vidage définitif.');
+
+  // Une synchronisation après vidage ne doit jamais ressusciter un ancien candidat.
+  sync();
+  assert.strictEqual(list().length, 0, 'Le candidat définitivement supprimé ne doit pas être recréé par la migration historique.');
+
+  console.log('Candidate Catalog Person Grouping + Recoverable Trash + Permanent Purge Test: OK');
 } finally {
   fs.rmSync(root, { recursive:true, force:true });
 }
