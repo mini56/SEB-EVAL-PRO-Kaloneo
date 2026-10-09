@@ -432,7 +432,7 @@ function confirmEmptyTrash(count) {
       <div class="seb-delete-card" role="dialog" aria-modal="true" aria-label="Vider la corbeille">
         <div class="seb-delete-head">Vider définitivement la corbeille ?</div>
         <div class="seb-delete-body">
-          <p><strong>${Number(count || 0)} évaluation${Number(count || 0) > 1 ? 's' : ''}</strong> seront définitivement supprimées.</p>
+          <p><strong>${Number(count || 0)} évaluation${Number(count || 0) > 1 ? 's' : ''}</strong> ${Number(count || 0) > 1 ? 'seront définitivement supprimées' : 'sera définitivement supprimée'}.</p>
           <p>Les candidats, résultats, replays, bilans et documents associés présents dans la Corbeille ne pourront plus être restaurés.</p>
           <p><strong>Cette opération est irréversible.</strong></p>
         </div>
