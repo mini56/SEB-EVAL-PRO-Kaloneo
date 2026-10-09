@@ -11,6 +11,7 @@ on:
       - 'seb-evalpro/source/css/kaltest-pilot2.css'
       - 'seb-evalpro/scripts/kaltest-eleven-images-guard.js'
       - 'seb-evalpro/scripts/kaltest-typography-audit-electron-main.js'
+      - 'seb-evalpro/scripts/kaltest-six-more-images-electron-smoke-main.js'
       - '.github/workflows/validate-r47-images-typography.yml'
 
 jobs:
@@ -43,6 +44,9 @@ jobs:
 
       - name: Verify first five visuals in real Electron
         run: npx electron --no-sandbox scripts/kaltest-five-images-electron-smoke-main.js
+
+      - name: Verify remaining six visuals in real Electron
+        run: npx electron --no-sandbox scripts/kaltest-six-more-images-electron-smoke-main.js
 
       - name: Audit typography in real 1366x768 Electron
         run: npx electron --no-sandbox scripts/kaltest-typography-audit-electron-main.js
