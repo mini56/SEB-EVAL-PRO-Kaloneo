@@ -1,0 +1,79 @@
+name: Validate KALONEO R46 images and layouts
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test-builder-r46-images-layout-typography
+    paths:
+      - 'seb-evalpro/source/imageqcm/**'
+      - 'seb-evalpro/source/kaltest/tests/**'
+      - 'tests/fixtures/kaltests/**'
+      - 'seb-evalpro/source/js/kaltest-pilot-data.js'
+      - '.github/workflows/validate-r46-images-layout.yml'
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: seb-evalpro
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Regenerate KALTEST pilot data
+        run: node scripts/build-kaltest-pilot2-data.js
+
+      - name: Check embedded pilot data
+        run: node scripts/kaltest-pilot-data-consistency.js
+
+      - name: Check runtime syntax
+        run: node --check source/js/kaltest-pilot2-runtime.js
+
+      - name: Validate image references and first math layouts
+        shell: pwsh
+        run: |
+          $tests = @(
+            'source/kaltest/tests/calculs-commandes-atelier/1.0.0/test.json',
+            'source/kaltest/tests/calculs-poids-volumes/1.0.0/test.json',
+            'source/kaltest/tests/horaires-reception-controle/1.0.0/test.json',
+            'source/kaltest/tests/conversions-atelier-expedition/1.0.0/test.json',
+            'source/kaltest/tests/texte-a-trous-stage-logistique/1.0.0/test.json',
+            'source/kaltest/tests/organisation-demenagement/1.0.0/test.json',
+            'source/kaltest/tests/planning-cantine/1.0.0/test.json',
+            'source/kaltest/tests/fractions-preparation-lots/1.0.0/test.json',
+            'source/kaltest/tests/autoevaluation-savoirs/1.0.0/test.json',
+            'source/kaltest/tests/autoevaluation-tic/1.0.0/test.json',
+            'source/kaltest/tests/construction-briques/1.0.0/test.json'
+          )
+          foreach ($testPath in $tests) {
+            $raw = Get-Content $testPath -Raw
+            $matches = [regex]::Matches($raw, 'imageqcm/[A-Za-z0-9_.-]+')
+            foreach ($match in $matches) {
+              $asset = Join-Path 'source' $match.Value
+              if (-not (Test-Path $asset)) { throw "Image absente : $asset (référencée par $testPath)" }
+            }
+          }
+
+          foreach ($testPath in @(
+            'source/kaltest/tests/calculs-commandes-atelier/1.0.0/test.json',
+            'source/kaltest/tests/calculs-poids-volumes/1.0.0/test.json'
+          )) {
+            $test = Get-Content $testPath -Raw | ConvertFrom-Json
+            if ($test.presentation.kaloneoLayout.type -ne 'questions-table-visual') { throw "Mauvais gabarit : $testPath" }
+            if ($test.presentation.kaloneoLayout.ratio -ne '60/40') { throw "Mauvais ratio : $testPath" }
+            if (-not $test.presentation.kaloneoLayout.right.src) { throw "Image droite absente : $testPath" }
+          }
+
+      - name: Run web guards
+        run: npm run prepare:web
