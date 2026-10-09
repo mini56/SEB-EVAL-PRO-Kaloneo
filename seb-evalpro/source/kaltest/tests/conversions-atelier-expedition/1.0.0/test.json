@@ -85,8 +85,8 @@
       "right": {
         "type": "image",
         "orientation": "portrait",
-        "src": "",
-        "alt": "Illustration de l’atelier d’expédition",
+        "src": "imageqcm/kaloneo-conversions-atelier-expedition.webp",
+        "alt": "Atelier logistique en pleine activité",
         "placeholder": "Image verticale"
       }
     }
