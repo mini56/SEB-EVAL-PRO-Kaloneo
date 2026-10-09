@@ -191,6 +191,7 @@
   }
 
   function skipButton(button) {
+    if (button && button.closest && button.closest('[data-seb-no-normalize="1"]')) return true;
     return !!button.closest(
       '#toolbar,.toolbar-row2,.ql-toolbar,#calc-container,#page-identification,' +
       '#page4 .fraction-title,#page4 .items-wrapper'
