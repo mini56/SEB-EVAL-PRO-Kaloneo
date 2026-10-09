@@ -13,6 +13,8 @@ let previewDefinition = null;
 let savedLibraryDefinition = null;
 let savedImageCalls = 0;
 let zipImportCalls = 0;
+let protectedLibraryMode = false;
+let protectedOrganisation = null;
 const imageLibraryData = 'data:image/svg+xml;base64,' + Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="180" height="120"><rect width="180" height="120" fill="#1b6c8e"/></svg>').toString('base64');
 let win = null;
 
@@ -57,7 +59,19 @@ ipcMain.handle('candidate-catalog:list',()=>[]);
 ipcMain.handle('candidate-catalog:sync',()=>({ok:true}));
 ipcMain.handle('candidate-catalog:detail',()=>({ok:false}));
 ipcMain.handle('kaloneo-library:selected-runtime',()=>({ok:false,error:'Aucun runtime candidat dans ce smoke Builder.'}));
-ipcMain.handle('kaloneo-library:list-tests',()=>({ok:true,tests:[]}));
+ipcMain.handle('kaloneo-library:list-tests',()=>({
+  ok:true,
+  tests:protectedLibraryMode ? [
+    {id:'organisation_demenagement',version:'2.0.0',title:'Organisation d’une activité',category:'organisation',role:'test',scored:true,protectedVersion:false},
+    {id:'organisation_demenagement',version:'1.0.0',title:'Organisation d’une activité',category:'organisation',role:'test',scored:true,protectedVersion:true}
+  ] : []
+}));
+ipcMain.handle('kaloneo-library:get-test',(_e,payload)=>{
+  if(protectedLibraryMode && payload?.id==='organisation_demenagement' && payload?.version==='1.0.0' && protectedOrganisation) {
+    return {ok:true,definition:JSON.parse(JSON.stringify(protectedOrganisation))};
+  }
+  return {ok:false,error:'Test smoke absent'};
+});
 ipcMain.handle('kaloneo-library:save-test',(_e,payload)=>{
   savedLibraryDefinition=JSON.parse(JSON.stringify(payload?.definition||null));
   return {ok:true,replaced:false,test:{id:savedLibraryDefinition?.id,version:savedLibraryDefinition?.version,title:savedLibraryDefinition?.title}};
@@ -87,6 +101,7 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 app.whenReady().then(async()=>{
   const root=path.join(__dirname,'..');
   const web=path.join(root,'app','web');
+  protectedOrganisation=JSON.parse(fs.readFileSync(path.join(web,'kaltest','tests','organisation-demenagement','1.0.0','test.json'),'utf8'));
   const builder=path.join(web,'kaloneo-builder','test-builder.html');
   const preview=path.join(web,'kaloneo-builder','test-preview.html');
   if(!fs.existsSync(builder)||!fs.existsSync(preview)) return fail('Builder ou page aperçu absent de app/web');
@@ -495,6 +510,61 @@ app.whenReady().then(async()=>{
       return fail('retour au Builder : le test exact de l’aperçu n’a pas été restauré',returned);
     }
 
+    protectedLibraryMode=true;
+    savedLibraryDefinition=null;
+    const protectedV1=await win.webContents.executeJavaScript(`(async()=>{
+      window.confirm=()=>true;
+      document.getElementById('open-library-test').click();
+      await new Promise(resolve=>setTimeout(resolve,180));
+      const rows=[...document.querySelectorAll('.test-library-item')];
+      const row=rows.find(node=>String(node.textContent||'').includes('v1.0.0'));
+      const open=row?.querySelector('.test-library-item-actions button');
+      if(!open)return {ok:false,reason:'V1 protégée absente de la bibliothèque'};
+      open.click();
+      await new Promise(resolve=>setTimeout(resolve,220));
+      const version=document.getElementById('test-version');
+      const save=document.getElementById('save-draft');
+      const before={
+        ok:true,
+        version:version?.value||'',
+        versionReadOnly:!!version?.readOnly,
+        saveLabel:String(save?.textContent||'').trim(),
+        saveTitle:String(save?.title||''),
+        title:document.getElementById('test-title')?.value||''
+      };
+      const scenario=document.getElementById('test-scenario');
+      scenario.value=String(scenario.value||'')+' — modification smoke';
+      scenario.dispatchEvent(new Event('input',{bubbles:true}));
+      save.click();
+      await new Promise(resolve=>setTimeout(resolve,420));
+      return {
+        before,
+        after:{
+          version:version?.value||'',
+          versionReadOnly:!!version?.readOnly,
+          saveLabel:String(save?.textContent||'').trim(),
+          status:String(document.getElementById('draft-status')?.textContent||'').trim()
+        }
+      };
+    })()`,true);
+
+    if(!protectedV1.ok||
+       protectedV1.before.version!=='1.0.0'||
+       !protectedV1.before.versionReadOnly||
+       protectedV1.before.saveLabel!=='Créer une nouvelle version'||
+       !/protégée/i.test(protectedV1.before.saveTitle)||
+       protectedV1.after.version!=='3.0.0'||
+       protectedV1.after.versionReadOnly||
+       protectedV1.after.saveLabel!=='Enregistrer'||
+       !savedLibraryDefinition||
+       savedLibraryDefinition.id!=='organisation_demenagement'||
+       savedLibraryDefinition.version!=='3.0.0'||
+       !String(savedLibraryDefinition.scenario||'').includes('modification smoke')) {
+      return fail('sécurité UI V1 protégée / création automatique nouvelle version incorrecte',{protectedV1,savedLibraryDefinition});
+    }
+
+    console.log('KALONEO_PROTECTED_V1_UI=OK');
+    console.log('KALONEO_PROTECTED_V1_NEXT_VERSION=3.0.0');
     console.log('KALONEO_BUILDER_PREVIEW_ELECTRON=OK');
     console.log(JSON.stringify({setup,shown,returned,definitionId:previewDefinition&&previewDefinition.id}));
     clearTimeout(timeout);win.destroy();app.exit(0);
