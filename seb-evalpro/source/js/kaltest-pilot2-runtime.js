@@ -2885,8 +2885,9 @@
     return fallback;
   }
 
-  function layoutFractionCloud(test, question, items) {
+  function layoutFractionCloud(test, question, items, options = {}) {
     if (!items || !question) return false;
+    const allowRegenerateSaved = options.allowRegenerateSaved === true;
     const buttons = Array.from(items.querySelectorAll('.kaltest-fraction-item'));
     if (!buttons.length) return false;
 
@@ -2908,7 +2909,11 @@
         x:Math.max(0, Math.min(maxX, Number(position?.x || 0) * maxX)),
         y:Math.max(0, Math.min(maxY, Number(position?.y || 0) * maxY))
       }));
-      if (!fractionCloudOverlap(restored, itemSize, margin)) points = restored;
+      // Comme l'ancien qcm-page4.js : au rechargement, on conserve
+      // strictement le nuage enregistré. Un contrôle de chevauchement pendant
+      // la stabilisation d'Electron peut être faux et ne doit pas remélanger
+      // les 12 images. Seul un vrai redimensionnement stable peut régénérer.
+      if (!allowRegenerateSaved || !fractionCloudOverlap(restored, itemSize, margin)) points = restored;
     }
 
     let generated = false;
@@ -2933,11 +2938,39 @@
   }
 
   function installFractionCloud(test, question, items) {
-    const relayout = () => layoutFractionCloud(test, question, items);
-    requestAnimationFrame(relayout);
+    let resizeTimer = null;
+    let stableWidth = 0;
+    let stableHeight = 0;
+    let settled = false;
+
+    const restore = () => layoutFractionCloud(test, question, items, { allowRegenerateSaved:false });
+    requestAnimationFrame(restore);
+
+    // On mémorise la géométrie une fois la page stabilisée. Les premiers
+    // ResizeObserver émis pendant le chargement ne doivent jamais remélanger
+    // un nuage restauré.
+    setTimeout(() => {
+      stableWidth = items.clientWidth || 0;
+      stableHeight = items.clientHeight || 0;
+      settled = true;
+      layoutFractionCloud(test, question, items, { allowRegenerateSaved:true });
+    }, 220);
+
     if (typeof ResizeObserver === 'function' && !items.__sebFractionCloudObserver) {
       const observer = new ResizeObserver(() => {
-        requestAnimationFrame(relayout);
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          if (!settled) {
+            restore();
+            return;
+          }
+          const width = items.clientWidth || 0;
+          const height = items.clientHeight || 0;
+          const realResize = Math.abs(width - stableWidth) > 2 || Math.abs(height - stableHeight) > 2;
+          stableWidth = width;
+          stableHeight = height;
+          layoutFractionCloud(test, question, items, { allowRegenerateSaved:realResize });
+        }, 120);
       });
       observer.observe(items);
       items.__sebFractionCloudObserver = observer;
