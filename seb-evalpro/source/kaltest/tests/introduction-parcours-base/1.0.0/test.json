@@ -40,12 +40,13 @@
         "required": true
       },
       {
-        "id": "ss7",
-        "label": "7 premiers chiffres du n° de sécurité sociale",
+        "id": "personIdentifier",
+        "label": "N° identifiant",
         "inputType": "text",
-        "inputMode": "numeric",
+        "inputMode": "text",
         "maxLength": 7,
-        "required": true
+        "required": true,
+        "pattern": "[A-Za-z0-9]{7}"
       },
       {
         "id": "lieu",
