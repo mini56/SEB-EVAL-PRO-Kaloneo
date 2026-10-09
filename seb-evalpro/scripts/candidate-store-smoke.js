@@ -24,6 +24,8 @@ try {
       candidat_data: JSON.stringify({
         nom: 'XXNOMSECRET',
         'prénom': 'YYPRENOMSECRET',
+        naissance:'1980-01-01',
+        personIdentifier:'A12B456',
         lieu: 'Lorient',
         groupe: '7',
         date: '2026-09-18'
@@ -39,6 +41,8 @@ try {
   const first = store.saveSnapshot(state);
   assert(first, 'Le dossier candidat doit être créé.');
   assert(/^CAND-[A-F0-9]{12}(?:_\d+)?$/.test(first.folderName), 'Le dossier candidat doit utiliser uniquement un identifiant technique CAND-.');
+  assert(/^PERS-[A-F0-9]{24}$/.test(first.personId), 'Le candidat doit recevoir un personId interne stable.');
+  assert.strictEqual(first.evaluationId, first.candidateId, 'L’identifiant d’évaluation doit rester le candidateId technique existant.');
   assert(fs.existsSync(path.join(first.candidateDir, 'manifest.json')));
   assert(fs.existsSync(path.join(first.candidateDir, 'donnees', 'candidat.json')));
   assert(fs.existsSync(path.join(first.candidateDir, 'donnees', 'evaluation-state.json')));
@@ -85,6 +89,9 @@ try {
   assert(!rawManifest.includes('Lorient') && !rawManifest.includes('YYPRENOMSECRET') && !rawManifest.includes('XXNOMSECRET'), 'Aucune identité candidat ne doit rester en clair dans le manifeste.');
   const manifest = readJsonFile(path.join(first.candidateDir, 'manifest.json'));
   assert.strictEqual(manifest.status, 'TERMINE');
+  assert.strictEqual(manifest.personIdentifier, 'A12B456', 'Le N° identifiant alphanumérique doit être conservé.');
+  assert.strictEqual(manifest.personId, first.personId, 'Le personId doit être persisté dans le manifeste chiffré.');
+  assert.strictEqual(manifest.evaluationId, first.candidateId);
   assert(manifest.closedAt, 'La date de fermeture doit être enregistrée.');
   assert(fs.existsSync(first.candidateDir), 'Le dossier candidat ne doit jamais être supprimé à la fermeture.');
 
@@ -103,6 +110,42 @@ try {
   assert.strictEqual(afterLateFolders.length, 1, 'Une sauvegarde tardive après fin de parcours ne doit créer aucun doublon candidat.');
   const lateManifest = readJsonFile(path.join(first.candidateDir, 'manifest.json'));
   assert.strictEqual(lateManifest.status, 'TERMINE', 'La sauvegarde tardive ne doit pas rouvrir le candidat terminé.');
+
+  // Une nouvelle évaluation de la même personne garde le même personId
+  // mais reçoit un nouveau candidateId/evaluationId.
+  const storeNextEvaluation = createCandidateStore({
+    documentsPath,
+    userDataPath:path.join(root, 'AppData-Second'),
+    now:() => new Date('2026-09-20T09:00:00.000Z')
+  });
+  const nextState = JSON.parse(JSON.stringify(state));
+  const nextCandidate = JSON.parse(nextState.sessionStorage.candidat_data);
+  nextCandidate.date = '2026-09-20';
+  nextCandidate.groupe = '8';
+  nextState.sessionStorage.candidat_data = JSON.stringify(nextCandidate);
+  const nextEvaluation = storeNextEvaluation.saveSnapshot(nextState);
+  assert(nextEvaluation && nextEvaluation.candidateId !== first.candidateId, 'Une nouvelle évaluation doit avoir un candidateId distinct.');
+  assert.strictEqual(nextEvaluation.personId, first.personId, 'La même personne doit conserver son personId entre plusieurs évaluations.');
+  storeNextEvaluation.completeActiveCandidate(nextState);
+
+  // Même N° identifiant de test mais autre nom : aucune fusion de personne.
+  const storeOtherPerson = createCandidateStore({
+    documentsPath,
+    userDataPath:path.join(root, 'AppData-Third'),
+    now:() => new Date('2026-09-21T09:00:00.000Z')
+  });
+  const otherState = JSON.parse(JSON.stringify(state));
+  const otherCandidate = JSON.parse(otherState.sessionStorage.candidat_data);
+  otherCandidate.nom = 'AUTRE-NOM';
+  otherCandidate.prenom = 'AUTRE-PRENOM';
+  otherCandidate['prénom'] = 'AUTRE-PRENOM';
+  otherCandidate.date = '2026-09-21';
+  otherState.sessionStorage.candidat_data = JSON.stringify(otherCandidate);
+  const otherEvaluation = storeOtherPerson.saveSnapshot(otherState);
+  assert(otherEvaluation && otherEvaluation.personId !== first.personId, 'Le même N° identifiant avec un autre nom/prénom ne doit jamais fusionner deux personnes.');
+  storeOtherPerson.completeActiveCandidate(otherState);
+
+  console.log('CANDIDATE_PERSON_GROUPING=OK');
 
   console.log('CANDIDATE_LATE_SAVE_NO_DUPLICATE: OK');
   console.log('Candidate Store Test #1: OK');
