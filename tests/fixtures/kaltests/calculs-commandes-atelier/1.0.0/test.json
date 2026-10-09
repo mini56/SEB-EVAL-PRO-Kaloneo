@@ -43,7 +43,7 @@
       "right": {
         "type": "image",
         "orientation": "portrait",
-        "src": "",
+        "src": "imageqcm/calculs-commandes-atelier.jpg",
         "alt": "Illustration de l’exercice",
         "placeholder": "Image verticale"
       }
