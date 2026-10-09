@@ -10,7 +10,8 @@
     sourceDefinition: null,
     blocks: [],
     imageLibraryTargetUid: null,
-    imageLibraryItems: []
+    imageLibraryItems: [],
+    sourceProtectedVersion: false
   };
   let textColorTarget = null;
   let textColorChanged = null;
@@ -1841,6 +1842,7 @@
     const model=Core.definitionToModel(definition);
     state.idLocked=true;
     state.sourceDefinition=model.sourceDefinition;
+    state.sourceProtectedVersion=options.protectedVersion===true;
     state.blocks=model.blocks;
     applyMeta(model.meta);
     renderIconPicker();
@@ -1889,7 +1891,7 @@
       text.className='test-library-item-text';
       const title=document.createElement('strong');title.textContent=item.title;
       const meta=document.createElement('span');
-      meta.textContent=libraryCategoryLabel(item.category)+' • v'+item.version+(item.category==='activite_pratique'?' • activité pratique':(item.scored?' • noté':' • non noté'));
+      meta.textContent=libraryCategoryLabel(item.category)+' • v'+item.version+(item.protectedVersion===true?' • protégée':'')+(item.category==='activite_pratique'?' • activité pratique':(item.scored?' • noté':' • non noté'));
       text.append(title,meta);
 
       const actions=document.createElement('div');
@@ -1904,7 +1906,13 @@
           const result=await window.sebEvalPro?.kaloneoGetTest?.(item.id,item.version);
           if(!result||result.ok!==true)throw new Error(result?.error||'Lecture impossible');
           if(!confirmDiscardChanges('Ouvrir un autre test'))return;
-          loadDefinition(result.definition);
+          loadDefinition(
+            result.definition,
+            item.protectedVersion===true
+              ? 'Version KALONÉO protégée — modifiez-la puis enregistrez sous V2 ou supérieure'
+              : 'Test KALTEST ouvert depuis la bibliothèque',
+            { protectedVersion:item.protectedVersion===true }
+          );
           $('test-library-dialog')?.close();
         }catch(error){alert('Ouverture impossible : '+String(error?.message||error));}
       });
@@ -2000,6 +2008,13 @@
     }
 
     if(!result || result.ok!==true) {
+      if(result?.code==='PROTECTED_VERSION') {
+        alert(
+          'Cette V1 est fournie avec KALONÉO et reste protégée.\n\n' +
+          'Pour conserver vos modifications, changez le numéro de version (par exemple 2.0.0) puis enregistrez.'
+        );
+        return false;
+      }
       alert('Enregistrement impossible : '+String(result?.error||'erreur inconnue'));
       return false;
     }
@@ -2047,6 +2062,7 @@
     if(options.clearDraft!==false)localStorage.removeItem(DRAFT_KEY);
     state.idLocked=false;
     state.sourceDefinition=null;
+    state.sourceProtectedVersion=false;
     state.blocks=[baseBlock('text')];
     applyMeta(defaultMeta());
     renderIconPicker();
