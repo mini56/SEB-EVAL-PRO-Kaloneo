@@ -38,7 +38,7 @@
     "autoevaluationForm": {
       "visual": {
         "type": "image",
-        "src": "imageqcm/imgautoevaltic.png",
+        "src": "imageqcm/kaloneo-autoevaluation-tic.webp",
         "alt": "Illustration autoévaluation des outils numériques"
       },
       "questionId": "autoeval2_choix",
