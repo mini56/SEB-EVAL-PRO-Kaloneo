@@ -26,6 +26,7 @@ function createCandidateTransfer(options = {}) {
 
   const sebRoot = dataRoot;
   const candidatesRoot = path.join(sebRoot, 'Candidats');
+  const candidateTrashRoot = path.join(sebRoot, 'Corbeille', 'Candidats');
   const legacyAdminRoot = path.join(sebRoot, 'Admin');
   const globalReplayRoot = path.join(sebRoot, 'parcours');
   const globalBilanRoot = path.join(sebRoot, 'Bilans', 'Historique');
@@ -675,6 +676,7 @@ function createCandidateTransfer(options = {}) {
       added,
       updated,
       skipped,
+      trashSkipped,
       verifiedFiles,
       copied,
       destinationRoot,
@@ -762,10 +764,12 @@ function createCandidateTransfer(options = {}) {
     packages.forEach((pack) => validateTransferPayloadForImport(pack.payload));
 
     ensureDir(candidatesRoot);
+    ensureDir(candidateTrashRoot);
     prepareCandidates();
     const destinationScan = scanLocalCandidateFolders();
     const destinationRecords = destinationScan.records;
-    let added = 0, skipped = 0, verifiedFiles = 0;
+    const trashedIds = new Set(listCandidateDirs(candidateTrashRoot, false).map((record) => String(record.candidateId || '')));
+    let added = 0, skipped = 0, trashSkipped = 0, verifiedFiles = 0;
     const copied = [];
     const createdTargets = [];
 
@@ -774,6 +778,10 @@ function createCandidateTransfer(options = {}) {
       const payload = pack.payload;
       if (destinationRecords.some((record) => String(record.candidateId) === String(payload.candidateId))) {
         skipped += 1;
+        continue;
+      }
+      if (trashedIds.has(String(payload.candidateId || ''))) {
+        trashSkipped += 1;
         continue;
       }
       const base = codedFolderName(payload.candidateId, payload.shortId);
@@ -822,7 +830,7 @@ function createCandidateTransfer(options = {}) {
     listCandidateRecords: listCandidateDirs,
     prepareCandidates,
     verifyExactCopy,
-    paths: { sebRoot, candidatesRoot, legacyAdminRoot }
+    paths: { sebRoot, candidatesRoot, candidateTrashRoot, legacyAdminRoot }
   };
 }
 
