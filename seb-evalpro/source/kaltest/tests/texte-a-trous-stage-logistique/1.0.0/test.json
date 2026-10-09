@@ -211,8 +211,8 @@
       "left": {
         "type": "image",
         "orientation": "portrait",
-        "src": "",
-        "alt": "Illustration de l’exercice Texte à trous",
+        "src": "imageqcm/kaloneo-texte-trous-stage-logistique.webp",
+        "alt": "Bureau vitré donnant sur un atelier logistique",
         "placeholder": "Image verticale"
       },
       "right": {
