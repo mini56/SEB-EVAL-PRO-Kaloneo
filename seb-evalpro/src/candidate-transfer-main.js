@@ -817,6 +817,7 @@ function createCandidateTransfer(options = {}) {
 
   return {
     exportAll,
+    exportSelected,
     importAll,
     listCandidateRecords: listCandidateDirs,
     prepareCandidates,
