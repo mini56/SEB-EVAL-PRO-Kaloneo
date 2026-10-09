@@ -3,6 +3,11 @@ const path = require('path');
 const crypto = require('crypto');
 const { encodeJson, readJsonFile } = require('./candidate-data-crypto');
 const { codedFolderName } = require('./candidate-folder-utils');
+const {
+  normalizePersonIdentifier,
+  candidatePersonIdentity,
+  enrichCandidatePersonIdentity
+} = require('./candidate-person-identity');
 
 function createCandidateStore(options = {}) {
   const documentsPath = options.documentsPath;
@@ -132,6 +137,9 @@ function createCandidateStore(options = {}) {
     const lieu = String(data.lieu || data.ville || '').trim();
     const groupe = String(data.groupe || '').trim();
     const date = String(data.date || '').trim();
+    const personIdentifier = normalizePersonIdentifier(
+      data.personIdentifier || data.identifiant || data.identifier || data.ss7 || ''
+    );
 
     if (!nom || !prenom || !lieu || !groupe) return null;
 
@@ -144,6 +152,7 @@ function createCandidateStore(options = {}) {
       lieu,
       groupe,
       date,
+      personIdentifier,
       folderDate,
       identityKey,
       original: {
@@ -152,7 +161,8 @@ function createCandidateStore(options = {}) {
         'prénom': prenom,
         lieu,
         groupe,
-        date
+        date,
+        personIdentifier
       }
     };
   }
@@ -273,9 +283,16 @@ function createCandidateStore(options = {}) {
     const manifest = record.manifest || {};
     const candidateId = String(manifest.candidateId || '');
     const shortId = String(manifest.shortId || candidateId.replace(/-/g, '').slice(0, 6).toUpperCase());
+    const person = candidatePersonIdentity({
+      ...(manifest.candidat || {}),
+      ...(identity && identity.original ? identity.original : {}),
+      personIdentifier:manifest.personIdentifier || identity?.personIdentifier || ''
+    }, candidateId);
     const pointer = {
       schemaVersion:1,
       candidateId,
+      evaluationId:String(manifest.evaluationId || candidateId),
+      personId:String(manifest.personId || person.personId),
       shortId,
       folderName:record.folderName,
       candidateDir:record.candidateDir,
@@ -312,23 +329,31 @@ function createCandidateStore(options = {}) {
     }
 
     const createdAt = now().toISOString();
+    const person = candidatePersonIdentity(identity.original, candidateId);
+    const candidateData = {
+      ...enrichCandidatePersonIdentity(identity.original, candidateId),
+      evaluationId:candidateId
+    };
     const manifest = {
       schemaVersion: 1,
       candidateId,
+      evaluationId:candidateId,
+      personId:person.personId,
+      personIdentifier:person.personIdentifier,
       shortId,
       folderName,
       status: 'EN_COURS',
       createdAt,
       updatedAt: createdAt,
       closedAt: null,
-      candidat: identity.original
+      candidat: candidateData
     };
 
     writeManifest(candidateDir, manifest);
 
     // Les fichiers de base existent dès la création du dossier candidat.
-    atomicWriteJson(path.join(candidateDir, 'donnees', 'candidat.json'), identity.original);
-    atomicWriteJson(path.join(candidateDir, 'donnees', 'evaluation-state.json'), defaultCandidateState(identity.original));
+    atomicWriteJson(path.join(candidateDir, 'donnees', 'candidat.json'), candidateData);
+    atomicWriteJson(path.join(candidateDir, 'donnees', 'evaluation-state.json'), defaultCandidateState(candidateData));
     atomicWriteJson(path.join(candidateDir, 'donnees', 'progression.json'), {
       lastPage: null,
       lastEvaluationPage: null,
@@ -340,6 +365,8 @@ function createCandidateStore(options = {}) {
     const pointer = {
       schemaVersion: 1,
       candidateId,
+      evaluationId:candidateId,
+      personId:person.personId,
       shortId,
       folderName,
       candidateDir,
@@ -372,6 +399,8 @@ function createCandidateStore(options = {}) {
       return {
         schemaVersion:1,
         candidateId:recentlyCompleted.candidateId,
+        evaluationId:recentlyCompleted.evaluationId || recentlyCompleted.candidateId,
+        personId:recentlyCompleted.personId || '',
         shortId:recentlyCompleted.shortId,
         folderName:recentlyCompleted.folderName,
         candidateDir:recentlyCompleted.candidateDir,
@@ -403,10 +432,18 @@ function createCandidateStore(options = {}) {
     ensureDirectory(path.join(candidateDir, 'donnees'));
     ensureDirectory(path.join(candidateDir, 'resultats'));
 
-    atomicWriteJson(path.join(candidateDir, 'donnees', 'evaluation-state.json'), state || {});
+    let candidateData = null;
     if (identity) {
-      atomicWriteJson(path.join(candidateDir, 'donnees', 'candidat.json'), identity.original);
+      candidateData = {
+        ...enrichCandidatePersonIdentity(identity.original, active.candidateId),
+        evaluationId:String(active.evaluationId || active.candidateId)
+      };
+      if (state && state.sessionStorage && typeof state.sessionStorage === 'object') {
+        state.sessionStorage.candidat_data = JSON.stringify(candidateData);
+      }
+      atomicWriteJson(path.join(candidateDir, 'donnees', 'candidat.json'), candidateData);
     }
+    atomicWriteJson(path.join(candidateDir, 'donnees', 'evaluation-state.json'), state || {});
 
     writeOptionalStorageJson(state, 'reponses_data', path.join(candidateDir, 'resultats', 'reponses.json'));
     writeOptionalStorageJson(state, 'scores_data', path.join(candidateDir, 'resultats', 'scores.json'));
@@ -422,15 +459,20 @@ function createCandidateStore(options = {}) {
       ...manifest,
       schemaVersion: 1,
       candidateId: active.candidateId,
+      evaluationId:String(active.evaluationId || manifest.evaluationId || active.candidateId),
+      personId:String(active.personId || candidateData?.personId || manifest.personId || ''),
+      personIdentifier:String(candidateData?.personIdentifier || manifest.personIdentifier || ''),
       shortId: active.shortId,
       folderName: active.folderName,
       status: ['TERMINE', 'SESSION_FERMEE'].includes(String(manifest.status || '')) ? String(manifest.status) : 'EN_COURS',
       updatedAt: now().toISOString(),
-      candidat: identity ? identity.original : manifest.candidat
+      candidat: candidateData || manifest.candidat
     });
 
     return {
       candidateId: active.candidateId,
+      evaluationId:String(active.evaluationId || active.candidateId),
+      personId:String(active.personId || candidateData?.personId || ''),
       shortId: active.shortId,
       folderName: active.folderName,
       candidateDir,
@@ -445,8 +487,15 @@ function createCandidateStore(options = {}) {
     const candidat = manifest.candidat || {};
     const prenom = String(candidat.prenom || candidat['prénom'] || '').trim();
     const nom = String(candidat.nom || '').trim();
+    const person = candidatePersonIdentity({
+      ...candidat,
+      personIdentifier:manifest.personIdentifier || candidat.personIdentifier || candidat.ss7 || ''
+    }, active.candidateId);
     return {
       candidateId: active.candidateId,
+      evaluationId:String(manifest.evaluationId || active.evaluationId || active.candidateId),
+      personId:String(manifest.personId || active.personId || person.personId),
+      personIdentifier:String(manifest.personIdentifier || person.personIdentifier || ''),
       shortId: active.shortId,
       folderName: active.folderName,
       candidateDir: active.candidateDir,
@@ -475,6 +524,8 @@ function createCandidateStore(options = {}) {
       ...manifest,
       schemaVersion: 1,
       candidateId: active.candidateId,
+      evaluationId:String(active.evaluationId || manifest.evaluationId || active.candidateId),
+      personId:String(active.personId || manifest.personId || ''),
       shortId: active.shortId,
       folderName: active.folderName,
       status: 'TERMINE',
@@ -487,6 +538,8 @@ function createCandidateStore(options = {}) {
     const completedIdentity = candidateIdentityFromState(state);
     recentlyCompleted = {
       candidateId: active.candidateId,
+      evaluationId:String(active.evaluationId || active.candidateId),
+      personId:String(active.personId || manifest.personId || ''),
       shortId: active.shortId,
       folderName: active.folderName,
       candidateDir: active.candidateDir,
@@ -499,6 +552,8 @@ function createCandidateStore(options = {}) {
 
     return {
       candidateId: active.candidateId,
+      evaluationId:String(active.evaluationId || active.candidateId),
+      personId:String(active.personId || manifest.personId || ''),
       folderName: active.folderName,
       candidateDir: active.candidateDir,
       status: 'TERMINE',
