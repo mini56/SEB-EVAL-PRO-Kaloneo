@@ -31,6 +31,23 @@ window.sebKaltestPilotDefinitions = Object.freeze({
         "Unités"
       ],
       "roundedInstitutionalStyle": true
+    },
+    "kaloneoLayout": {
+      "type": "questions-table-visual",
+      "ratio": "60/40",
+      "left": {
+        "order": [
+          "questions",
+          "responseTable"
+        ]
+      },
+      "right": {
+        "type": "image",
+        "orientation": "portrait",
+        "src": "imageqcm/calculs-commandes-atelier.jpg",
+        "alt": "Illustration de l’exercice",
+        "placeholder": "Image verticale"
+      }
     }
   },
   "runtime": {
