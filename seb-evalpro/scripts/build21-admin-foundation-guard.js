@@ -172,6 +172,14 @@ assert(catalog.includes("Vider définitivement la corbeille"), 'confirmation for
 const uiRuntime = read('source/js/seb-ui-runtime.js');
 assert(uiRuntime.includes("closest('[data-seb-no-normalize=\"1\"]')"), 'runtime UI ne respecte pas les boutons à icône explicite.');
 
+const fractionsRuntime = read('source/js/kaltest-pilot2-runtime.js');
+const fractionsCss = read('source/css/kaltest-pilot2.css');
+assert(fractionsRuntime.includes('function randomFractionCloudPoints('), 'Fractions KALTEST : moteur de placement aléatoire du nuage absent.');
+assert(fractionsRuntime.includes('fractionCloudPositions'), 'Fractions KALTEST : persistance des positions du nuage absente.');
+assert(fractionsRuntime.includes("items.dataset.cloudReady = '1'"), 'Fractions KALTEST : signal de nuage prêt absent.');
+assert(fractionsCss.includes('.kaltest-fraction-items.cloud{'), 'Fractions KALTEST : zone visuelle nuage absente.');
+assert(fractionsCss.includes('.kaltest-fraction-items.cloud .kaltest-fraction-item{position:absolute'), 'Fractions KALTEST : les 12 objets du nuage ne sont pas positionnés librement.');
+
 const main = read('src/main.js');
 assert(main.includes('function loadAdminCandidateBrowser'), 'route principale du catalogue candidat absente.');
 assert(main.includes("ipcMain.handle('admin:open-candidate-browser'"), 'IPC Ouvrir un candidat absent.');
