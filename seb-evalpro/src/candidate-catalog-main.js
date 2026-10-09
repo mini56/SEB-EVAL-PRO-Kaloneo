@@ -825,9 +825,17 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
 
 
   function sameCandidate(candidateA, candidateB) {
-    const a = candidateIdentityKey(candidateA);
-    const b = candidateIdentityKey(candidateB);
-    return !!a && a === b;
+    const aObj = candidateA || {};
+    const bObj = candidateB || {};
+    const aId = String(aObj.evaluationId || aObj.candidateId || '').trim();
+    const bId = String(bObj.evaluationId || bObj.candidateId || '').trim();
+    if (aId && bId) return aId === bId;
+    const a = candidateIdentityKey(aObj);
+    const b = candidateIdentityKey(bObj);
+    if (!a || a !== b) return false;
+    const aDate = normalize(aObj.date || aObj.dateTest || '');
+    const bDate = normalize(bObj.date || bObj.dateTest || '');
+    return !aDate || !bDate || aDate === bDate;
   }
 
   function removeCandidateRuntimeState(candidate) {
@@ -858,14 +866,18 @@ module.exports = function registerCandidateCatalog({ app, ipcMain, getAdminUnloc
     let removedDuplicateArchives = 0;
 
     for (const legacy of listCandidateDirs(legacyAdminRoot, true)) {
-      if (!sameCandidate(legacy.candidate, candidate)) continue;
+      const strictIdMatch = String(legacy.candidateId || '') && String(authoritativeRecord && authoritativeRecord.candidateId || '') &&
+        String(legacy.candidateId) === String(authoritativeRecord.candidateId);
+      if (!strictIdMatch && !sameCandidate(legacy.candidate, candidate)) continue;
       fs.rmSync(legacy.candidateDir, { recursive:true, force:true });
       removedLegacyFolders += 1;
     }
 
     const duplicateRoot = path.join(root, 'Corbeille', 'Doublons');
     for (const duplicate of listCandidateDirs(duplicateRoot, true)) {
-      if (!sameCandidate(duplicate.candidate, candidate)) continue;
+      const strictIdMatch = String(duplicate.candidateId || '') && String(authoritativeRecord && authoritativeRecord.candidateId || '') &&
+        String(duplicate.candidateId) === String(authoritativeRecord.candidateId);
+      if (!strictIdMatch) continue;
       fs.rmSync(duplicate.candidateDir, { recursive:true, force:true });
       removedDuplicateArchives += 1;
     }
