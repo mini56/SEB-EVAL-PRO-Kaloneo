@@ -34,7 +34,7 @@ function addStyle() {
   style.id = 'seb-candidate-catalog-style';
   style.textContent = `
     #seb-evalpro-open-candidate{background:#fff!important;color:#0070c0!important;border:2px solid #0070c0!important;font-weight:700}
-    #seb-candidate-catalog,#seb-candidate-person-detail,#seb-candidate-detail{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
+    #seb-candidate-catalog,#seb-candidate-person-detail,#seb-candidate-detail,#seb-candidate-trash{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
     .seb-cc-card{width:min(1180px,96vw);max-height:90vh;background:#fff;border-radius:10px;box-shadow:0 16px 50px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
     .seb-cc-head{background:#0070c0;color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px}
     .seb-cc-title{font-size:20px;font-weight:700;flex:1}.seb-cc-badge{font-size:12px;font-weight:700;background:#fff;color:#0070c0;border-radius:14px;padding:4px 9px}
@@ -62,6 +62,9 @@ function addStyle() {
     .seb-cc-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid #ddd;background:#fff}
     .seb-cc-foot-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .seb-cc-foot button:disabled,.seb-cc-actions button:disabled{opacity:.48;cursor:default;box-shadow:none}
+    #seb-cc-trash[data-state="empty"]{color:#667085!important;border-color:#98a2b3!important}
+    #seb-cc-trash[data-state="full"]{color:#a65c00!important;border-color:#d48a00!important;background:#fffaf0!important}
+    .seb-trash-deleted-at{font-size:12px;color:#777}
     .seb-cc-row.export-selected{border-color:#16834f;background:#f1fbf6;box-shadow:inset 0 0 0 1px #16834f}
     .seb-cc-actions .selected{border-color:#16834f!important;color:#16834f!important;background:#f1fbf6!important}
     .seb-cc-person-wrap{margin-bottom:10px}
@@ -368,8 +371,8 @@ function confirmEvaluationDelete(item) {
         <div class="seb-delete-head">Supprimer cette évaluation ?</div>
         <div class="seb-delete-body">
           <p><strong>${escapeHtml(item.parcours || 'Parcours')}</strong> — ${escapeHtml(item.date || '')}</p>
-          <p>Seule cette évaluation, avec ses résultats, son replay et ses bilans, sera supprimée.</p>
-          <p>Les autres évaluations de <strong>${escapeHtml(item.nom)} ${escapeHtml(item.prenom)}</strong> resteront intactes.</p>
+          <p>Cette évaluation, avec ses résultats, son replay et ses bilans, sera placée dans la Corbeille.</p>
+          <p>Vous pourrez la restaurer tant que la Corbeille n’a pas été vidée. Les autres évaluations de <strong>${escapeHtml(item.nom)} ${escapeHtml(item.prenom)}</strong> resteront intactes.</p>
         </div>
         <div class="seb-delete-actions">
           <button type="button" id="seb-delete-cancel">Annuler</button>
@@ -400,8 +403,8 @@ function confirmPersonDelete(person) {
         <div class="seb-delete-body">
           <p><strong>${escapeHtml(person.nom)} ${escapeHtml(person.prenom)}</strong></p>
           <p>N° identifiant : <strong>${escapeHtml(person.personIdentifier || '—')}</strong></p>
-          <p><strong>${count} évaluation${count > 1 ? 's seront supprimées' : ' sera supprimée'}</strong>, ainsi que les résultats, replays et bilans associés.</p>
-          <p>Cette suppression globale ne peut pas être annulée.</p>
+          <p><strong>${count} évaluation${count > 1 ? 's seront placées' : ' sera placée'} dans la Corbeille</strong>, avec les résultats, replays et bilans associés.</p>
+          <p>Le candidat pourra être restauré tant que la Corbeille n’a pas été vidée.</p>
         </div>
         <div class="seb-delete-actions">
           <button type="button" id="seb-delete-cancel">Annuler</button>
@@ -418,6 +421,121 @@ function confirmPersonDelete(person) {
     });
     overlay.querySelector('#seb-delete-cancel').focus();
   });
+}
+
+function confirmEmptyTrash(count) {
+  return new Promise((resolve) => {
+    document.getElementById('seb-candidate-delete-confirm')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'seb-candidate-delete-confirm';
+    overlay.innerHTML = `
+      <div class="seb-delete-card" role="dialog" aria-modal="true" aria-label="Vider la corbeille">
+        <div class="seb-delete-head">Vider définitivement la corbeille ?</div>
+        <div class="seb-delete-body">
+          <p><strong>${Number(count || 0)} évaluation${Number(count || 0) > 1 ? 's' : ''}</strong> seront définitivement supprimées.</p>
+          <p>Les candidats, résultats, replays, bilans et documents associés présents dans la Corbeille ne pourront plus être restaurés.</p>
+          <p><strong>Cette opération est irréversible.</strong></p>
+        </div>
+        <div class="seb-delete-actions">
+          <button type="button" id="seb-delete-cancel">Annuler</button>
+          <button type="button" id="seb-delete-confirm" class="danger">Vider définitivement la corbeille</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const finish = (value) => { overlay.remove(); resolve(value); };
+    overlay.querySelector('#seb-delete-cancel').addEventListener('click', () => finish(false));
+    overlay.querySelector('#seb-delete-confirm').addEventListener('click', () => finish(true));
+    overlay.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') finish(false);
+      if (event.key === 'Enter') finish(true);
+    });
+    overlay.querySelector('#seb-delete-cancel').focus();
+  });
+}
+
+async function openCandidateTrash(onChanged, onTrashStateChanged) {
+  document.getElementById('seb-candidate-trash')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'seb-candidate-trash';
+  overlay.innerHTML = `
+    <div class="seb-cc-card" role="dialog" aria-modal="true" aria-label="Corbeille candidats">
+      <div class="seb-cc-head"><div class="seb-cc-title">Corbeille</div><div class="seb-cc-badge" id="seb-trash-badge">0 ÉVALUATION</div></div>
+      <div class="seb-cc-body"><div id="seb-trash-list">Chargement…</div></div>
+      <div class="seb-cc-detail-actions">
+        <button type="button" id="seb-trash-empty" class="danger" disabled>Vider la corbeille</button>
+        <button type="button" id="seb-trash-close">Fermer</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const host = overlay.querySelector('#seb-trash-list');
+  const badge = overlay.querySelector('#seb-trash-badge');
+  const emptyButton = overlay.querySelector('#seb-trash-empty');
+  let entries = [];
+
+  const render = () => {
+    host.innerHTML = '';
+    badge.textContent = entries.length + ' ÉVALUATION' + (entries.length > 1 ? 'S' : '');
+    emptyButton.disabled = entries.length === 0;
+    if (!entries.length) {
+      host.innerHTML = '<div class="seb-cc-empty"><strong>La corbeille est vide.</strong><br>Aucun candidat ou parcours supprimé à restaurer.</div>';
+      return;
+    }
+    entries.forEach((item) => {
+      const row = document.createElement('div');
+      row.className = 'seb-cc-evaluation-row';
+      const deletedAt = item.deletedAt ? new Date(item.deletedAt).toLocaleString('fr-FR') : '—';
+      row.innerHTML = `
+        <div><strong>${escapeHtml(item.nom)} ${escapeHtml(item.prenom)}</strong><small>N° identifiant : ${escapeHtml(item.personIdentifier || '—')}</small></div>
+        <div><strong>${escapeHtml(item.parcours || 'Parcours non renseigné')}</strong><small>${escapeHtml(item.date || 'Date non renseignée')} — ${escapeHtml(item.lieu || '')} — Groupe ${escapeHtml(item.groupe || '—')}</small></div>
+        <div><span class="seb-trash-deleted-at">Supprimé le ${escapeHtml(deletedAt)}</span></div>
+        <div class="seb-cc-evaluation-actions"></div>`;
+      const restore = document.createElement('button');
+      restore.type = 'button';
+      restore.textContent = 'Restaurer';
+      restore.addEventListener('click', async () => {
+        restore.disabled = true;
+        const result = await ipcRenderer.invoke('candidate-catalog:trash-restore', item.candidateId).catch((error) => ({
+          ok:false,error:String(error && error.message ? error.message : error)
+        }));
+        if (!result || result.ok !== true) {
+          restore.disabled = false;
+          alert((result && result.error) || 'Restauration impossible.');
+          return;
+        }
+        if (typeof onChanged === 'function') await onChanged();
+        await reload();
+      });
+      row.querySelector('.seb-cc-evaluation-actions').appendChild(restore);
+      host.appendChild(row);
+    });
+  };
+
+  const reload = async () => {
+    const result = await ipcRenderer.invoke('candidate-catalog:trash-list').catch(() => ({ ok:false, entries:[] }));
+    entries = result && result.ok && Array.isArray(result.entries) ? result.entries : [];
+    render();
+    if (typeof onTrashStateChanged === 'function') onTrashStateChanged(entries.length);
+  };
+
+  emptyButton.addEventListener('click', async () => {
+    if (!entries.length || !(await confirmEmptyTrash(entries.length))) return;
+    emptyButton.disabled = true;
+    const result = await ipcRenderer.invoke('candidate-catalog:trash-empty').catch((error) => ({
+      ok:false,error:String(error && error.message ? error.message : error)
+    }));
+    if (!result || result.ok !== true) {
+      emptyButton.disabled = false;
+      alert((result && result.error) || 'Vidage de la corbeille impossible.');
+      return;
+    }
+    if (typeof onChanged === 'function') await onChanged();
+    await reload();
+  });
+
+  overlay.querySelector('#seb-trash-close').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('keydown', (event) => { if (event.key === 'Escape') overlay.remove(); });
+  await reload();
 }
 
 async function openPersonDetail(personId, onChanged) {
@@ -537,6 +655,7 @@ function openCatalog(initialCandidateId = '') {
           <div class="seb-cc-foot-left">
             <button type="button" id="seb-cc-import">Importer candidat</button>
             <button type="button" id="seb-cc-export-mode">Exporter candidat</button>
+            <button type="button" id="seb-cc-trash" data-state="empty">🗑 Corbeille vide</button>
             <button type="button" id="seb-cc-export-cancel" hidden>Annuler la sélection</button>
             <button type="button" id="seb-cc-export-launch" class="primary" hidden disabled>Lancer l’export (0)</button>
           </div>
@@ -548,6 +667,7 @@ function openCatalog(initialCandidateId = '') {
     const search = overlay.querySelector('#seb-cc-search');
     const importButton = overlay.querySelector('#seb-cc-import');
     const exportModeButton = overlay.querySelector('#seb-cc-export-mode');
+    const trashButton = overlay.querySelector('#seb-cc-trash');
     const exportCancelButton = overlay.querySelector('#seb-cc-export-cancel');
     const exportLaunchButton = overlay.querySelector('#seb-cc-export-launch');
     let persons = [];
@@ -557,6 +677,7 @@ function openCatalog(initialCandidateId = '') {
     const updateExportFooter = () => {
       importButton.hidden = exportMode || !editionCapabilities.canImport;
       exportModeButton.hidden = exportMode || !editionCapabilities.canExport;
+      trashButton.hidden = exportMode;
       exportCancelButton.hidden = !exportMode;
       exportLaunchButton.hidden = !exportMode;
       exportLaunchButton.disabled = selectedExportIds.size === 0;
@@ -699,13 +820,28 @@ function openCatalog(initialCandidateId = '') {
       });
     };
 
+    const updateTrashState = (count) => {
+      const total = Number(count || 0);
+      trashButton.dataset.state = total > 0 ? 'full' : 'empty';
+      trashButton.textContent = total > 0 ? ('🗑 Corbeille pleine (' + total + ')') : '🗑 Corbeille vide';
+      trashButton.title = total > 0 ? 'Ouvrir la corbeille et restaurer des éléments supprimés.' : 'La corbeille est vide.';
+    };
+    const refreshTrashState = async () => {
+      const result = await ipcRenderer.invoke('candidate-catalog:trash-list').catch(() => ({ ok:false, entries:[] }));
+      updateTrashState(result && result.ok && Array.isArray(result.entries) ? result.entries.length : 0);
+    };
     const reload = async () => {
       try { persons = await ipcRenderer.invoke('candidate-catalog:list-persons'); } catch (_) { persons = []; }
       render();
+      await refreshTrashState();
     };
     await reload();
     updateExportFooter();
     search.addEventListener('input', render);
+
+    trashButton.addEventListener('click', async () => {
+      await openCandidateTrash(reload, updateTrashState);
+    });
 
     importButton.addEventListener('click', async () => {
       if (typeof importCandidatesAction !== 'function') return;
@@ -757,6 +893,7 @@ function openCatalog(initialCandidateId = '') {
     const close = () => {
       document.getElementById('seb-candidate-person-detail')?.remove();
       document.getElementById('seb-candidate-detail')?.remove();
+      document.getElementById('seb-candidate-trash')?.remove();
       overlay.remove();
       resolve();
     };
