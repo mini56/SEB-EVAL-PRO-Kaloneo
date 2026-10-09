@@ -97,8 +97,8 @@ app.whenReady().then(async()=>{
       return {
         rows:document.querySelectorAll('.seb-cc-row').length,
         importText:String(document.getElementById('seb-cc-import')?.textContent||'').trim(),
-        exportText:String(document.getElementById('seb-cc-export-mode')?.textContent||'').trim(),
-        closeText:String(document.getElementById('seb-cc-close')?.textContent||'').trim(),
+        exportText:String(document.getElementById('seb-cc-export-mode')?.textContent||'').trim().replace(/^[^A-Za-zÀ-ÿ]+\s*/u,''),
+        closeText:String(document.getElementById('seb-cc-close')?.textContent||'').trim().replace(/^[^A-Za-zÀ-ÿ]+\s*/u,''),
         bottomLeft:Boolean(card&&foot&&imp&&exp&&close&&imp.left<close.left&&exp.left<close.left&&imp.top>=foot.top-1&&exp.top>=foot.top-1)
       };
     })()`);
@@ -122,7 +122,10 @@ app.whenReady().then(async()=>{
       cancelVisible:!document.getElementById('seb-cc-export-cancel').hidden,
       launchVisible:!document.getElementById('seb-cc-export-launch').hidden,
       launchDisabled:document.getElementById('seb-cc-export-launch').disabled,
-      choices:[...document.querySelectorAll('.seb-cc-actions button')].map(b=>({text:b.textContent.trim(),disabled:b.disabled}))
+      choices:[...document.querySelectorAll('.seb-cc-actions button')].map(b=>({
+        text:b.textContent.trim().replace(/^[^A-Za-zÀ-ÿ]+\s*/u,''),
+        disabled:b.disabled
+      }))
     }))()`);
     if(!selection.normalImportHidden||!selection.normalExportHidden||!selection.cancelVisible||!selection.launchVisible||!selection.launchDisabled||
        selection.choices.length!==3||selection.choices[0].text!=='Exporter'||selection.choices[0].disabled||
@@ -136,9 +139,9 @@ app.whenReady().then(async()=>{
     await wait(70);
     const selected=await win.webContents.executeJavaScript(`(()=>({
       launch:String(document.getElementById('seb-cc-export-launch')?.textContent||'').trim(),
-      selected:[...document.querySelectorAll('.seb-cc-actions button')].map(b=>b.textContent.trim())
+      selected:[...document.querySelectorAll('.seb-cc-actions button')].map(b=>b.textContent.trim().replace(/^[^A-Za-zÀ-ÿ]+\s*/u,''))
     }))()`);
-    if(selected.launch!=='Lancer l’export (1)'||selected.selected[1]!=='✓ Sélectionné')return fail('sélection individuelle non mémorisée',selected);
+    if(selected.launch!=='Lancer l’export (1)'||selected.selected[1]!=='Sélectionné')return fail('sélection individuelle non mémorisée',selected);
 
     await win.webContents.executeJavaScript("document.getElementById('seb-cc-export-launch').click();true");
     await wait(90);
