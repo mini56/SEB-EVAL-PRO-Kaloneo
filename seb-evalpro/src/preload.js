@@ -1743,7 +1743,7 @@ function injectAdminBar() {
       }
       await showTransferMessage(
         'Import terminé',
-        `${result.total} dossier(s) candidat(s) détecté(s).\n${result.added} ajouté(s), ${result.updated || 0} mis à jour, ${result.skipped || 0} déjà présent(s) et ignoré(s).\n${result.verifiedFiles || 0} fichier(s) vérifié(s).\n\nDossier SEB EvalPro : ${result.destinationRoot}`
+        `${result.total} dossier(s) candidat(s) détecté(s).\n${result.added} ajouté(s), ${result.updated || 0} mis à jour, ${result.skipped || 0} déjà présent(s) et ignoré(s).${result.trashSkipped ? `\n${result.trashSkipped} évaluation(s) déjà présente(s) dans la Corbeille : non réimportée(s). Restaurez-les depuis la Corbeille si nécessaire.` : ''}\n${result.verifiedFiles || 0} fichier(s) vérifié(s).\n\nDossier SEB EvalPro : ${result.destinationRoot}`
       );
       return true;
     } catch (error) {
