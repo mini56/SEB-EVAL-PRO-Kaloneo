@@ -116,9 +116,25 @@ try {
     fail('une V1 volontairement modifiée par l’admin est réécrasée par le seed système', persistedV1);
   }
 
+  const deleteV1 = library.deleteTest('organisation_demenagement', '1.0.0');
+  if (deleteV1?.ok || deleteV1?.code !== 'PROTECTED') {
+    fail('la V1 système Organisation doit rester impossible à supprimer', deleteV1);
+  }
+  const deleteV2 = library.deleteTest('organisation_demenagement', '2.0.0');
+  if (!deleteV2?.ok) {
+    fail('une V2 admin inutilisée doit pouvoir être supprimée', deleteV2);
+  }
+  if (library.getTest('organisation_demenagement', '2.0.0')?.ok) {
+    fail('la V2 admin supprimée est encore présente');
+  }
+  if (!library.getTest('organisation_demenagement', '1.0.0')?.ok) {
+    fail('la suppression de V2 ne doit jamais toucher la V1 système');
+  }
+
   console.log('KALONEO_EDIT_EXISTING_TEST=OK');
   console.log('KALONEO_VERSIONED_LIBRARY_V1_V2=OK');
   console.log('KALONEO_BASE_PARCOURS_PINNED_V1=OK');
+  console.log('KALONEO_V1_PROTECTED_V2_DELETABLE=OK');
   console.log(JSON.stringify({
     v1:{version:v1.version,layout:v1.presentation?.layout?.ratio},
     v2:{
