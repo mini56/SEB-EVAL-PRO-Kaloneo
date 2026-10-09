@@ -64,6 +64,19 @@ function addStyle() {
     .seb-cc-foot button:disabled,.seb-cc-actions button:disabled{opacity:.48;cursor:default;box-shadow:none}
     .seb-cc-row.export-selected{border-color:#16834f;background:#f1fbf6;box-shadow:inset 0 0 0 1px #16834f}
     .seb-cc-actions .selected{border-color:#16834f!important;color:#16834f!important;background:#f1fbf6!important}
+    .seb-cc-person-wrap{margin-bottom:10px}
+    .seb-cc-person-wrap>.seb-cc-row{margin-bottom:0}
+    .seb-cc-person-identifier{font-weight:700;color:#005b9f}
+    .seb-cc-identifier-warning{color:#a65c00;font-weight:700}
+    .seb-cc-export-evaluations{margin:0 10px;padding:8px 10px 2px;border:1px solid #cbd4e2;border-top:0;border-radius:0 0 7px 7px;background:#fbfcfe}
+    .seb-cc-evaluation-row{display:grid;grid-template-columns:1fr 1.3fr .85fr auto;gap:10px;align-items:center;padding:9px 10px;border-bottom:1px solid #e2e6ed}
+    .seb-cc-evaluation-row:last-child{border-bottom:0}
+    .seb-cc-evaluation-row small{display:block;color:#666;margin-top:3px}
+    .seb-cc-evaluation-actions{display:flex;gap:7px;justify-content:flex-end}
+    .seb-cc-evaluation-actions button{font:700 14px Arial,sans-serif;padding:8px 14px;border:2px solid #0070c0!important;border-radius:6px;background:#fff!important;color:#0070c0!important;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.18)}
+    .seb-cc-evaluation-actions button:disabled{opacity:.48;cursor:default;box-shadow:none}
+    .seb-cc-evaluation-actions .danger{color:#c00000!important;border-color:#c00000!important}
+    .seb-cc-evaluation-actions .selected{border-color:#16834f!important;color:#16834f!important;background:#f1fbf6!important}
     .seb-cc-empty{padding:35px;text-align:center;color:#555}
     .seb-cc-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 18px;padding:14px 16px;background:#f7f9fc;border-bottom:1px solid #ddd;font-size:14px}
     .seb-cc-section{padding:14px 16px}.seb-cc-section h3{margin:0 0 10px;color:#005b9f}
@@ -120,6 +133,16 @@ function bilanLabel(item) {
   if (!item.bilanCount) return 'Bilan : non enregistré';
   if (item.revisionCount) return `Bilan disponible<br><b>${item.revisionCount} révision(s)</b>`;
   return 'Bilan disponible<br><b>Original</b>';
+}
+
+function personSummaryLabel(person) {
+  const evaluations = Number(person.evaluationCount || 0);
+  const bilans = Number(person.bilanCount || 0);
+  return `${evaluations} évaluation${evaluations > 1 ? 's' : ''}<br><b>${bilans ? bilans + ' bilan' + (bilans > 1 ? 's' : '') : 'Aucun bilan'}</b>`;
+}
+
+function evaluationStatusLabel(status) {
+  return String(status || '') === 'EN_COURS' ? 'Parcours en cours' : 'Parcours terminé';
 }
 
 
@@ -335,6 +358,170 @@ async function beginCandidateBilan(candidateId, detailOverlay = null) {
   return true;
 }
 
+function confirmEvaluationDelete(item) {
+  return new Promise((resolve) => {
+    document.getElementById('seb-candidate-delete-confirm')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'seb-candidate-delete-confirm';
+    overlay.innerHTML = `
+      <div class="seb-delete-card" role="dialog" aria-modal="true" aria-label="Supprimer l’évaluation">
+        <div class="seb-delete-head">Supprimer cette évaluation ?</div>
+        <div class="seb-delete-body">
+          <p><strong>${escapeHtml(item.parcours || 'Parcours')}</strong> — ${escapeHtml(item.date || '')}</p>
+          <p>Seule cette évaluation, avec ses résultats, son replay et ses bilans, sera supprimée.</p>
+          <p>Les autres évaluations de <strong>${escapeHtml(item.nom)} ${escapeHtml(item.prenom)}</strong> resteront intactes.</p>
+        </div>
+        <div class="seb-delete-actions">
+          <button type="button" id="seb-delete-cancel">Annuler</button>
+          <button type="button" id="seb-delete-confirm" class="danger">Supprimer l’évaluation</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const finish = (value) => { overlay.remove(); resolve(value); };
+    overlay.querySelector('#seb-delete-cancel').addEventListener('click', () => finish(false));
+    overlay.querySelector('#seb-delete-confirm').addEventListener('click', () => finish(true));
+    overlay.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') finish(false);
+      if (event.key === 'Enter') finish(true);
+    });
+    overlay.querySelector('#seb-delete-cancel').focus();
+  });
+}
+
+function confirmPersonDelete(person) {
+  return new Promise((resolve) => {
+    document.getElementById('seb-candidate-delete-confirm')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'seb-candidate-delete-confirm';
+    const count = Number(person.evaluationCount || person.evaluations?.length || 0);
+    overlay.innerHTML = `
+      <div class="seb-delete-card" role="dialog" aria-modal="true" aria-label="Supprimer le candidat">
+        <div class="seb-delete-head">Supprimer le candidat et toutes ses évaluations ?</div>
+        <div class="seb-delete-body">
+          <p><strong>${escapeHtml(person.nom)} ${escapeHtml(person.prenom)}</strong></p>
+          <p>N° identifiant : <strong>${escapeHtml(person.personIdentifier || '—')}</strong></p>
+          <p><strong>${count} évaluation${count > 1 ? 's seront supprimées' : ' sera supprimée'}</strong>, ainsi que les résultats, replays et bilans associés.</p>
+          <p>Cette suppression globale ne peut pas être annulée.</p>
+        </div>
+        <div class="seb-delete-actions">
+          <button type="button" id="seb-delete-cancel">Annuler</button>
+          <button type="button" id="seb-delete-confirm" class="danger">Supprimer le candidat</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const finish = (value) => { overlay.remove(); resolve(value); };
+    overlay.querySelector('#seb-delete-cancel').addEventListener('click', () => finish(false));
+    overlay.querySelector('#seb-delete-confirm').addEventListener('click', () => finish(true));
+    overlay.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') finish(false);
+      if (event.key === 'Enter') finish(true);
+    });
+    overlay.querySelector('#seb-delete-cancel').focus();
+  });
+}
+
+async function openPersonDetail(personId, onChanged) {
+  document.getElementById('seb-candidate-person-detail')?.remove();
+  const result = await ipcRenderer.invoke('candidate-catalog:person-detail', personId);
+  if (!result || !result.ok) {
+    alert((result && result.error) || 'Impossible d’ouvrir ce candidat.');
+    return;
+  }
+  const person = result.person;
+  const overlay = document.createElement('div');
+  overlay.id = 'seb-candidate-person-detail';
+  overlay.innerHTML = `
+    <div class="seb-cc-card" role="dialog" aria-modal="true" aria-label="Évaluations du candidat">
+      <div class="seb-cc-head">
+        <div class="seb-cc-title">${escapeHtml(person.nom)} ${escapeHtml(person.prenom)}</div>
+        <div class="seb-cc-badge">${Number(person.evaluationCount || 0)} ÉVALUATION${Number(person.evaluationCount || 0) > 1 ? 'S' : ''}</div>
+      </div>
+      <div class="seb-cc-meta">
+        <div><b>N° identifiant :</b> ${escapeHtml(person.personIdentifier || '—')}</div>
+        <div><b>Dernière ville :</b> ${escapeHtml(person.lieu || '—')}</div>
+        <div><b>Dernier groupe :</b> ${escapeHtml(person.groupe || '—')}</div>
+        <div><b>Évaluations :</b> ${Number(person.evaluationCount || 0)}</div>
+        <div><b>Bilans :</b> ${Number(person.bilanCount || 0)}</div>
+        <div><b>Dernière date :</b> ${escapeHtml(person.latestDate || '—')}</div>
+      </div>
+      <div class="seb-cc-body">
+        <div class="seb-cc-section">
+          <h3>Évaluations / parcours</h3>
+          <div id="seb-cc-person-evaluations"></div>
+        </div>
+      </div>
+      <div class="seb-cc-detail-actions">
+        <button type="button" id="seb-cc-person-delete" class="danger">Supprimer le candidat</button>
+        <button type="button" id="seb-cc-person-close">Fermer</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const host = overlay.querySelector('#seb-cc-person-evaluations');
+  (person.evaluations || []).forEach((evaluation) => {
+    const row = document.createElement('div');
+    row.className = 'seb-cc-evaluation-row';
+    row.innerHTML = `
+      <div><strong>${escapeHtml(evaluation.date || 'Date non renseignée')}</strong><small>${escapeHtml(evaluationStatusLabel(evaluation.status))}</small></div>
+      <div><strong>${escapeHtml(evaluation.parcours || 'Parcours non renseigné')}</strong><small>${escapeHtml(evaluation.lieu || '')} — Groupe ${escapeHtml(evaluation.groupe || '—')}</small></div>
+      <div>${bilanLabel(evaluation)}</div>
+      <div class="seb-cc-evaluation-actions"></div>`;
+    const actions = row.querySelector('.seb-cc-evaluation-actions');
+
+    const open = document.createElement('button');
+    open.type = 'button';
+    open.textContent = 'Ouvrir';
+    open.addEventListener('click', async () => {
+      overlay.remove();
+      await openCandidateDetail(evaluation.candidateId, async () => {
+        if (typeof onChanged === 'function') await onChanged();
+      });
+    });
+    actions.append(open);
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'danger';
+    remove.textContent = 'Supprimer l’évaluation';
+    remove.addEventListener('click', async () => {
+      if (!(await confirmEvaluationDelete(evaluation))) return;
+      open.disabled = true;
+      remove.disabled = true;
+      const deleted = await ipcRenderer.invoke('candidate-catalog:delete', evaluation.candidateId).catch((error) => ({
+        ok:false,
+        error:String(error && error.message ? error.message : error)
+      }));
+      if (!deleted || deleted.ok !== true) {
+        open.disabled = false;
+        remove.disabled = false;
+        alert((deleted && deleted.error) || 'Suppression impossible.');
+        return;
+      }
+      overlay.remove();
+      if (typeof onChanged === 'function') await onChanged();
+      const refreshed = await ipcRenderer.invoke('candidate-catalog:person-detail', personId).catch(() => null);
+      if (refreshed && refreshed.ok) await openPersonDetail(personId, onChanged);
+    });
+    actions.append(remove);
+    host.appendChild(row);
+  });
+
+  overlay.querySelector('#seb-cc-person-delete').addEventListener('click', async () => {
+    if (!(await confirmPersonDelete(person))) return;
+    const deleted = await ipcRenderer.invoke('candidate-catalog:delete-person', person.personId).catch((error) => ({
+      ok:false,
+      error:String(error && error.message ? error.message : error)
+    }));
+    if (!deleted || deleted.ok !== true) {
+      alert((deleted && deleted.error) || 'Suppression impossible.');
+      return;
+    }
+    overlay.remove();
+    if (typeof onChanged === 'function') await onChanged();
+  });
+  overlay.querySelector('#seb-cc-person-close').addEventListener('click', () => overlay.remove());
+}
+
 function openCatalog(initialCandidateId = '') {
   return new Promise(async (resolve) => {
     addStyle();
@@ -344,8 +531,8 @@ function openCatalog(initialCandidateId = '') {
     overlay.id = 'seb-candidate-catalog';
     overlay.innerHTML = `
       <div class="seb-cc-card" role="dialog" aria-modal="true" aria-label="Liste des candidats">
-        <div class="seb-cc-head"><div class="seb-cc-title">Liste des candidats</div><div class="seb-cc-badge">DOSSIERS CANDIDATS</div></div>
-        <div class="seb-cc-search-wrap"><input id="seb-cc-search" class="seb-cc-search" type="search" autocomplete="off" placeholder="Rechercher un nom, prénom, ville, groupe ou date…"></div>
+        <div class="seb-cc-head"><div class="seb-cc-title">Liste des candidats</div><div class="seb-cc-badge">CANDIDATS</div></div>
+        <div class="seb-cc-search-wrap"><input id="seb-cc-search" class="seb-cc-search" type="search" autocomplete="off" placeholder="Rechercher un nom, prénom, N° identifiant, ville, groupe, parcours ou date…"></div>
         <div class="seb-cc-body"><div id="seb-cc-list">Chargement…</div></div>
         <div class="seb-cc-foot">
           <div class="seb-cc-foot-left">
@@ -364,7 +551,7 @@ function openCatalog(initialCandidateId = '') {
     const exportModeButton = overlay.querySelector('#seb-cc-export-mode');
     const exportCancelButton = overlay.querySelector('#seb-cc-export-cancel');
     const exportLaunchButton = overlay.querySelector('#seb-cc-export-launch');
-    let items = [];
+    let persons = [];
     let exportMode = false;
     const selectedExportIds = new Set();
 
@@ -377,76 +564,144 @@ function openCatalog(initialCandidateId = '') {
       exportLaunchButton.textContent = 'Lancer l’export (' + selectedExportIds.size + ')';
     };
 
+    const searchableText = (person) => [
+      person.nom,
+      person.prenom,
+      person.personIdentifier,
+      person.lieu,
+      person.groupe,
+      person.latestDate,
+      ...(person.evaluations || []).flatMap((evaluation) => [
+        evaluation.parcours,
+        evaluation.date,
+        evaluation.lieu,
+        evaluation.groupe
+      ])
+    ].join(' ');
+
     const render = () => {
       const q = norm(search.value);
-      const shown = items.filter((item) => !q || norm([item.nom,item.prenom,item.lieu,item.groupe,item.date].join(' ')).includes(q));
+      const shown = persons.filter((person) => !q || norm(searchableText(person)).includes(q));
       list.innerHTML = '';
       if (!shown.length) {
         list.innerHTML = '<div class="seb-cc-empty">Aucun candidat correspondant.</div>';
         return;
       }
-      shown.forEach((item) => {
+
+      shown.forEach((person) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'seb-cc-person-wrap';
+
         const row = document.createElement('div');
         row.className = 'seb-cc-row';
+        const collision = person.identifierCollision
+          ? '<small class="seb-cc-identifier-warning">Identifiant partagé avec un autre nom : candidats conservés séparément.</small>'
+          : '';
         row.innerHTML = `
-          <div><strong>${escapeHtml(item.nom)} ${escapeHtml(item.prenom)}</strong><small>${escapeHtml(item.date)}</small></div>
-          <div><b>${escapeHtml(item.lieu)}</b><small>Groupe : ${escapeHtml(item.groupe)}</small></div>
-          <div class="seb-cc-bilan">${bilanLabel(item)}</div>
+          <div>
+            <strong>${escapeHtml(person.nom)} ${escapeHtml(person.prenom)}</strong>
+            <small class="seb-cc-person-identifier">N° identifiant : ${escapeHtml(person.personIdentifier || '—')}</small>
+            ${collision}
+          </div>
+          <div><b>${escapeHtml(person.lieu || '—')}</b><small>Groupe : ${escapeHtml(person.groupe || '—')} — Dernière évaluation : ${escapeHtml(person.latestDate || '—')}</small></div>
+          <div class="seb-cc-bilan">${personSummaryLabel(person)}</div>
           <div class="seb-cc-actions"></div>`;
         const actions = row.querySelector('.seb-cc-actions');
+
         if (exportMode) {
-          const selectable = ['TERMINE','SESSION_FERMEE'].includes(String(item.status || ''));
-          const selected = selectedExportIds.has(String(item.candidateId || ''));
-          row.classList.toggle('export-selected', selected);
-          const choose = document.createElement('button');
-          choose.type = 'button';
-          choose.className = selected ? 'selected' : 'primary';
-          choose.disabled = !selectable;
-          choose.textContent = selectable ? (selected ? '✓ Sélectionné' : 'Exporter') : 'Parcours en cours';
-          choose.title = selectable ? 'Ajouter ou retirer ce candidat de l’export' : 'Ce candidat doit terminer son parcours avant de pouvoir être exporté.';
-          choose.addEventListener('click', () => {
-            const id = String(item.candidateId || '');
-            if (!id || !selectable) return;
-            if (selectedExportIds.has(id)) selectedExportIds.delete(id);
-            else selectedExportIds.add(id);
+          const completed = (person.evaluations || []).filter((evaluation) =>
+            ['TERMINE','SESSION_FERMEE'].includes(String(evaluation.status || ''))
+          );
+          const selectedCount = completed.filter((evaluation) => selectedExportIds.has(String(evaluation.candidateId || ''))).length;
+          const toggleAll = document.createElement('button');
+          toggleAll.type = 'button';
+          toggleAll.disabled = completed.length === 0;
+          toggleAll.textContent = completed.length && selectedCount === completed.length ? 'Tout retirer' : 'Tout sélectionner';
+          toggleAll.addEventListener('click', () => {
+            if (!completed.length) return;
+            const removeAll = completed.every((evaluation) => selectedExportIds.has(String(evaluation.candidateId || '')));
+            completed.forEach((evaluation) => {
+              const id = String(evaluation.candidateId || '');
+              if (!id) return;
+              if (removeAll) selectedExportIds.delete(id);
+              else selectedExportIds.add(id);
+            });
             updateExportFooter();
             render();
           });
-          actions.append(choose);
+          actions.append(toggleAll);
         } else {
           const open = document.createElement('button');
-          open.type='button'; open.className='primary'; open.textContent='Ouvrir';
-          open.addEventListener('click', () => openCandidateDetail(item.candidateId, reload));
+          open.type = 'button';
+          open.className = 'primary';
+          open.textContent = 'Ouvrir';
+          open.addEventListener('click', () => openPersonDetail(person.personId, reload));
           actions.append(open);
 
           const remove = document.createElement('button');
-          remove.type='button';
-          remove.className='danger';
-          remove.textContent='Supprimer';
+          remove.type = 'button';
+          remove.className = 'danger';
+          remove.textContent = 'Supprimer';
           remove.addEventListener('click', async () => {
-            if (!(await confirmCandidateDelete(item))) return;
-            remove.disabled = true;
+            if (!(await confirmPersonDelete(person))) return;
             open.disabled = true;
-            const result = await ipcRenderer.invoke('candidate-catalog:delete', item.candidateId).catch((error) => ({
+            remove.disabled = true;
+            const deleted = await ipcRenderer.invoke('candidate-catalog:delete-person', person.personId).catch((error) => ({
               ok:false,
               error:String(error && error.message ? error.message : error)
             }));
-            if (!result || result.ok !== true) {
-              remove.disabled = false;
+            if (!deleted || deleted.ok !== true) {
               open.disabled = false;
-              window.alert((result && result.error) || 'Suppression impossible.');
+              remove.disabled = false;
+              alert((deleted && deleted.error) || 'Suppression impossible.');
               return;
             }
             await reload();
           });
-          actions.append(remove);
+          actions.append(open, remove);
         }
-        list.appendChild(row);
+        wrap.appendChild(row);
+
+        if (exportMode) {
+          const evalHost = document.createElement('div');
+          evalHost.className = 'seb-cc-export-evaluations';
+          (person.evaluations || []).forEach((evaluation) => {
+            const evalRow = document.createElement('div');
+            evalRow.className = 'seb-cc-evaluation-row';
+            const selectable = ['TERMINE','SESSION_FERMEE'].includes(String(evaluation.status || ''));
+            const selected = selectedExportIds.has(String(evaluation.candidateId || ''));
+            if (selected) evalRow.classList.add('export-selected');
+            evalRow.innerHTML = `
+              <div><strong>${escapeHtml(evaluation.date || 'Date non renseignée')}</strong><small>${escapeHtml(evaluationStatusLabel(evaluation.status))}</small></div>
+              <div><strong>${escapeHtml(evaluation.parcours || 'Parcours non renseigné')}</strong><small>${escapeHtml(evaluation.lieu || '')} — Groupe ${escapeHtml(evaluation.groupe || '—')}</small></div>
+              <div>${bilanLabel(evaluation)}</div>
+              <div class="seb-cc-evaluation-actions"></div>`;
+            const evalActions = evalRow.querySelector('.seb-cc-evaluation-actions');
+            const choose = document.createElement('button');
+            choose.type = 'button';
+            choose.disabled = !selectable;
+            choose.className = selected ? 'selected' : '';
+            choose.textContent = selectable ? (selected ? '✓ Sélectionné' : 'Exporter') : 'Parcours en cours';
+            choose.addEventListener('click', () => {
+              const id = String(evaluation.candidateId || '');
+              if (!id || !selectable) return;
+              if (selectedExportIds.has(id)) selectedExportIds.delete(id);
+              else selectedExportIds.add(id);
+              updateExportFooter();
+              render();
+            });
+            evalActions.appendChild(choose);
+            evalHost.appendChild(evalRow);
+          });
+          wrap.appendChild(evalHost);
+        }
+
+        list.appendChild(wrap);
       });
     };
 
     const reload = async () => {
-      try { items = await ipcRenderer.invoke('candidate-catalog:list'); } catch (_) { items = []; }
+      try { persons = await ipcRenderer.invoke('candidate-catalog:list-persons'); } catch (_) { persons = []; }
       render();
     };
     await reload();
@@ -500,13 +755,23 @@ function openCatalog(initialCandidateId = '') {
     });
 
     const closeButton = overlay.querySelector('#seb-cc-close');
-    const close = () => { overlay.remove(); resolve(); };
+    const close = () => {
+      document.getElementById('seb-candidate-person-detail')?.remove();
+      document.getElementById('seb-candidate-detail')?.remove();
+      overlay.remove();
+      resolve();
+    };
     closeButton.hidden = false;
     closeButton.addEventListener('click', close);
     overlay.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+
     const selectedId = String(initialCandidateId || '').trim();
-    if (selectedId && items.some((item) => String(item.candidateId) === selectedId)) {
-      await openCandidateDetail(selectedId, render);
+    if (selectedId) {
+      const person = persons.find((entry) =>
+        (entry.evaluations || []).some((evaluation) => String(evaluation.candidateId || '') === selectedId)
+      );
+      if (person) await openPersonDetail(person.personId, reload);
+      else search.focus();
     } else {
       search.focus();
     }
