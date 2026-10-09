@@ -41,5 +41,20 @@ if (orders.presentation?.kaloneoLayout?.type !== 'questions-table-visual' ||
   fail('Calculs de commandes : la mise en page cible questions + tableau / image n’est pas verrouillée.');
 }
 
+const generator = fs.readFileSync(path.join(root,'scripts','build-kaltest-pilot2-data.js'),'utf8');
+for (const folder of [
+  'calculs-commandes-atelier',
+  'calculs-poids-volumes',
+  'horaires-reception-controle',
+  'texte-a-trous-stage-logistique',
+  'conversions-atelier-expedition'
+]) {
+  const canonical = "'seb-evalpro/source/kaltest/tests/" + folder + "/1.0.0/test.json'";
+  const legacyFixture = "'tests/fixtures/kaltests/" + folder + "/1.0.0/test.json'";
+  if (!generator.includes(canonical)) fail(folder + ' : le générateur candidat ne lit pas la définition canonique.');
+  if (generator.includes(legacyFixture)) fail(folder + ' : le générateur candidat lit encore une fixture ancienne.');
+}
+
+console.log('KALTEST_FIVE_IMAGES_GENERATOR=CANONICAL');
 console.log('KALTEST_FIVE_IMAGES_GUARD=OK');
 console.log('KALTEST_FIVE_IMAGES_LAYOUTS=OK');
