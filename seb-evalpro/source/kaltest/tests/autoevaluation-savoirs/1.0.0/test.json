@@ -37,7 +37,7 @@
     "autoevaluationForm": {
       "visual": {
         "type": "image",
-        "src": "imageqcm/imgautoevcalc.png",
+        "src": "imageqcm/autoevaluation-savoirs.jpg",
         "alt": "Illustration autoévaluation"
       },
       "questionId": "autoeval1_choix",
