@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const pkg = require(path.join(root, 'package.json'));
 const preload = fs.readFileSync(path.join(root, 'src', 'preload.js'), 'utf8');
 const installer = fs.readFileSync(path.join(root, 'build', 'installer.nsh'), 'utf8');
-const r47Builder = fs.readFileSync(path.join(root, 'build', 'kaloneo-test-builder-r46-builder.yml'), 'utf8');
+const r47Builder = fs.readFileSync(path.join(root, 'build', 'kaloneo-test-builder-r47-builder.yml'), 'utf8');
 
 function fail(message) {
   console.error('SEB EvalPro garde barre Admin / build: ' + message);
