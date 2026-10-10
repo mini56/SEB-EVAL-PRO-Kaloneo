@@ -564,6 +564,67 @@ app.whenReady().then(async()=>{
       return fail('sécurité UI V1 protégée / création automatique nouvelle version incorrecte',{protectedV1,savedLibraryDefinition});
     }
 
+
+    // R48.2 : reproduire la vraie page Restaurant avec interligne aéré,
+    // sans barre de défilement dans le planning ou la colonne gauche.
+    const restaurantSetup=await win.webContents.executeJavaScript(`(()=>{
+      window.confirm=()=>true;
+      const load=document.getElementById('r48-demo-restaurant');
+      if(!load)return {ok:false,reason:'Bouton Restaurant R48 manquant'};
+      load.click();
+      const blocks=[...document.querySelectorAll('.exercise-block')];
+      const labels=[...blocks.flatMap(b=>[...b.querySelectorAll('label')])];
+      const interline=labels.find(x=>/Interligne/.test(x.textContent||'') && x.querySelector('select'))?.querySelector('select');
+      if(!interline)return {ok:false,reason:'Réglage interligne absent'};
+      interline.value='1.5';
+      interline.dispatchEvent(new Event('change',{bubbles:true}));
+      const preview=document.getElementById('open-electron-preview');
+      if(!preview)return {ok:false,reason:'Bouton aperçu absent'};
+      preview.click();
+      return {ok:true,blocks:blocks.length,interline:interline.value};
+    })()`,true);
+    if(!restaurantSetup.ok)return fail('R48.2 : chargement Restaurant / interligne impossible',restaurantSetup);
+    for(let attempt=0;attempt<30;attempt++){
+      await wait(150);
+      const p=await win.webContents.executeJavaScript('location.pathname');
+      if(/test-preview\\.html$/i.test(p)) break;
+    }
+    await wait(400);
+    const restaurantFit=await win.webContents.executeJavaScript(`(()=>{
+      const zones=[...document.querySelectorAll('.kb-zone')];
+      const grid=document.querySelector('.kb-table-wrap');
+      const indications=zones[0]?.lastElementChild;
+      const bottomLeft=zones[0]?.getBoundingClientRect().bottom||0;
+      const bottomInd=indications?.getBoundingClientRect().bottom||0;
+      const selects=[...document.querySelectorAll('.kb-table-wrap select')];
+      const measure=node=>!node?null:{
+        clientHeight:node.clientHeight,scrollHeight:node.scrollHeight,
+        clientWidth:node.clientWidth,scrollWidth:node.scrollWidth,
+        overflowY:getComputedStyle(node).overflowY
+      };
+      return {
+        page:location.pathname,
+        zones:zones.map(measure),
+        grid:measure(grid),
+        indications:measure(indications),
+        bottomLeft,bottomInd,
+        selects:selects.length,
+        instructionPresent:!!indications&&String(indications.textContent||'').includes('Jacqueline'),
+        imagePresent:!!zones[1]?.querySelector('img')
+      };
+    })()`);
+    if(!/test-preview\\.html$/i.test(restaurantFit.page)||
+      restaurantFit.zones.length!==2||
+      !restaurantFit.grid||restaurantFit.selects!==15||
+      !restaurantFit.instructionPresent||!restaurantFit.imagePresent||
+      restaurantFit.zones.some(z=>z.scrollHeight>z.clientHeight+2)||
+      restaurantFit.grid.scrollHeight>restaurantFit.grid.clientHeight+2||
+      restaurantFit.bottomInd<restaurantFit.bottomLeft-3||
+      restaurantFit.bottomInd>restaurantFit.bottomLeft+3){
+      return fail('R48.2 : Restaurant doit être entièrement visible sans scrollbars',restaurantFit);
+    }
+    console.log('R48_2_RESTAURANT_NO_SCROLL_ELECTRON=OK',JSON.stringify(restaurantFit));
+
     console.log('KALONEO_PROTECTED_V1_UI=OK');
     console.log('KALONEO_PROTECTED_V1_NEXT_VERSION=3.0.0');
     console.log('KALONEO_BUILDER_PREVIEW_ELECTRON=OK');
