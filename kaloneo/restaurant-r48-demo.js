@@ -335,7 +335,8 @@ window.KaloneoRestaurantR48Demo={
                 "points": 1
               }
             ]
-          ]
+          ],
+          "compact": true
         }
       },
       {
@@ -344,7 +345,7 @@ window.KaloneoRestaurantR48Demo={
         "text": "[b]Liste des plats :[/b] Galettes au blé noir, Spaghettis, Assiette de fruits de mer, Pavé de saumon, Kig-Ha-Farz\n[b]Liste des desserts :[/b] Profiteroles, Kouign-Amann, Tarte au citron, Crumble aux fruits rouges, Crème brûlée",
         "style": {
           "backgroundColor": "#EEF6FD",
-          "fontSize": 16
+          "fontSize": 14
         }
       },
       {

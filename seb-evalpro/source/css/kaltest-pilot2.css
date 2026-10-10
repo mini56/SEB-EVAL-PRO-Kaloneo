@@ -3248,3 +3248,8 @@ body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-field textarea{
   flex:1 1 0;
   min-height:0;
 }
+
+/* R48.2 — même grille compacte sur le vrai parcours candidat. */
+.kaltest-builder-grid-compact th{padding:3px 5px;}
+.kaltest-builder-grid-compact td{padding:2px 3px;}
+.kaltest-builder-grid-compact select,.kaltest-builder-grid-compact input{min-height:28px;height:28px;padding:2px 4px;}

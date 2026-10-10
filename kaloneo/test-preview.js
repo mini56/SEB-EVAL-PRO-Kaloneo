@@ -113,6 +113,7 @@ function renderGrid(block){
   const wrap=el('div','kb-block kb-table-wrap');
   if(t.title) wrap.append(el('div','kb-question-label',t.title));
   const table=el('table','kb-table');
+  if(t.compact===true)table.classList.add('kb-compact-grid');
   if(t.layoutOnly===true){table.classList.add('kaloneo-layout-only');table.style.border='0';table.style.background='transparent';}
   if(Array.isArray(t.headers)&&t.headers.length){
     const thead=el('thead');const tr=el('tr');

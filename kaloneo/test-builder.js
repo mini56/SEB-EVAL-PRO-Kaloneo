@@ -826,6 +826,11 @@
     check.addEventListener('change',()=>{table.layoutOnly=check.checked;changed();});
     layoutLabel.append(check,document.createTextNode(' Tableau de mise en page : bordures invisibles (ne change pas les réponses)'));
     body.appendChild(layoutLabel);
+    const compactLabel=document.createElement('label');compactLabel.className='inline-checkbox';
+    const compactCheck=document.createElement('input');compactCheck.type='checkbox';compactCheck.checked=table.compact===true;
+    compactCheck.addEventListener('change',()=>{table.compact=compactCheck.checked;changed();});
+    compactLabel.append(compactCheck,document.createTextNode(' Tableau compact : réduire les espacements sans modifier les choix'));
+    body.appendChild(compactLabel);
 
     const columns=document.createElement('div');
     columns.className='grid-columns-editor';

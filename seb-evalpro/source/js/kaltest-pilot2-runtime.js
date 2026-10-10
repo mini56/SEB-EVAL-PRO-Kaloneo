@@ -1272,6 +1272,7 @@
 
     const table = document.createElement('table');
     table.className = 'kaltest-table kaltest-builder-grid';
+    if(definition.compact===true)table.classList.add('kaltest-builder-grid-compact');
     if (definition.layoutOnly === true) {table.classList.add('kaloneo-layout-only');table.style.border='0';table.style.background='transparent';}
 
     if (Array.isArray(definition.headers) && definition.headers.length) {
