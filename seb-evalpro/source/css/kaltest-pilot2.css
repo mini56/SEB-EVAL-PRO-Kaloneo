@@ -3321,7 +3321,7 @@ body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-paper-sur
 body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-paper-surface #editor {flex:1 1 auto;min-height:0;border:1px solid #b8c4cd;border-radius:2px;background:white;box-shadow:0 1px 4px #b3bec8;padding:16px 20px;}
 body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-tool {gap:0;padding:0;overflow:hidden;}
 body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-zone:first-child {background-image:url("../assets/typewriter-vintage.svg");background-repeat:no-repeat;background-position:center bottom 13px;background-size:min(80%,450px) auto;padding-bottom:205px;}
-@media (max-width:1250px) {
+@media (max-width:1600px) {
  body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-formatbar {flex-wrap:wrap;justify-content:flex-start;}
  body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-group {flex:0 0 auto;}
  body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-ribbon {gap:3px;}
