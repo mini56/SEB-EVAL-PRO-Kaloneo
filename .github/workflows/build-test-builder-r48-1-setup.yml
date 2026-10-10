@@ -157,6 +157,9 @@ jobs:
           $catalog = Get-Content src/candidate-catalog-main.js -Raw
           if (-not $catalog.Contains("decryptBilanDocxBuffer")) { throw "Ouverture transparente du Word protégé absente de l Admin." }
 
+      - name: Verify R48.1 builder layout and immutable Restaurant questions
+        run: node scripts/kaloneo-builder-r48-1-layout-smoke.js
+
       - name: Verify native DOCX package and exported table content
         shell: pwsh
         run: |
