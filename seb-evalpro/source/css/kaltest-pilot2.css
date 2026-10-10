@@ -3326,3 +3326,50 @@ body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtim
  body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-group {flex:0 0 auto;}
  body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-ribbon {gap:3px;}
 }
+
+/* R49 refinement: fixed, deliberate toolbar grouping at 1366px */
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-ribbon {
+  padding:7px 8px;gap:6px;background:#eaf1f6;
+}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-topbar {
+  width:100%;min-height:40px;display:flex;justify-content:space-between;align-items:center;
+  padding:0 4px 6px;box-sizing:border-box;
+}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-clipboard {
+  display:flex;gap:7px;align-items:center;
+}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-formatbar {
+  display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:minmax(61px,auto);
+  align-items:stretch;gap:2px;width:100%;
+}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-group {
+  display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;
+  gap:4px;min-width:0;padding:19px 3px 3px;box-sizing:border-box;
+}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-font {grid-column:span 5;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-style {grid-column:span 7;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-paragraph {grid-column:span 4;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-lists {grid-column:span 4;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-spacing {grid-column:span 3;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-insert {grid-column:span 1;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-group-label {top:2px;left:7px;font-size:12px;line-height:14px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-formatbar button,
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-formatbar select,
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-formatbar .color-picker-btn {
+  flex:0 0 auto;height:34px;min-width:32px;max-width:100%;padding:3px 5px;box-sizing:border-box;
+  white-space:nowrap;overflow:hidden;text-overflow:clip;line-height:25px;font-size:13px;
+}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-font #nw-font {width:140px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-font #nw-size {width:61px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-spacing #nw-line-height {width:90px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-lists button {min-width:54px;font-size:16px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-paragraph button {min-width:42px;font-size:17px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-insert button {min-width:30px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-paper-surface {min-height:0;flex:1 1 auto;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-zone:first-child {
+  background-image:url("../assets/typewriter-reference.png");
+  background-size:min(80%,440px) auto;
+  background-position:center bottom 5px;
+  background-repeat:no-repeat;
+  padding-bottom:300px;
+}
