@@ -3144,123 +3144,48 @@
     wrap.className = 'kaltest-text-editor-tool';
     wrap.dataset.scoringProfile = config.scoringProfile;
 
-    // Interface d'édition historique conservée (mêmes commandes et couleurs).
+    // Groupes visuels uniquement : les IDs et le moteur Quill restent inchangés.
     wrap.innerHTML = `
-<div id="toolbar" class="kaltest-text-editor-toolbar">
-	<div class="flex-spacer"></div>
-      <div class="menu-container">
-        <button id="nw-file-menu-button" type="button" style="padding:6px 12px;">📂 Fichier ▼</button>
-        <div id="menu-fichier">
-          <div id="nw-file-open">📂 Ouvrir</div>
-          <div id="nw-file-save">💾 Enregistrer (.html)</div>
-          <div id="nw-file-save-as">💾 Enregistrer sous...</div>
-          <div id="nw-file-close">❌ Fermer</div>
+      <div class="kaltest-word-ribbon">
+        <div id="toolbar" class="kaltest-word-topbar kaltest-text-editor-toolbar">
+          <div class="menu-container kaltest-word-file">
+            <button id="nw-file-menu-button" type="button">📂 Fichier ▼</button>
+            <div id="menu-fichier">
+              <div id="nw-file-open">📂 Ouvrir</div>
+              <div id="nw-file-save">💾 Enregistrer (.html)</div>
+              <div id="nw-file-save-as">💾 Enregistrer sous...</div>
+              <div id="nw-file-close">❌ Fermer</div>
+            </div>
+          </div>
+          <div class="kaltest-word-clipboard">
+            <button id="btn-cut" type="button" title="Couper">✂ Couper</button>
+            <button id="btn-copy" type="button" title="Copier">▣ Copier</button>
+            <button id="btn-paste" type="button" title="Coller">▤ Coller</button>
+          </div>
+        </div>
+        <div class="toolbar-row2 kaltest-word-formatbar kaltest-text-editor-toolbar">
+          <div class="kaltest-word-group kaltest-word-font"><span class="kaltest-word-group-label">Police</span>
+            <select id="nw-font" title="Changer la police"><option value="Arial">Arial</option><option value="Calibri" selected>Calibri</option><option value="Times New Roman">Times New Roman</option><option value="Courier New">Courier New</option><option value="Georgia">Georgia</option></select>
+            <select id="nw-size" title="Taille du texte"><option value="10pt">10</option><option value="12pt">12</option><option value="14pt" selected>14</option><option value="16pt">16</option><option value="18pt">18</option><option value="24pt">24</option><option value="32pt">32</option><option value="48pt">48</option></select>
+          </div>
+          <div class="kaltest-word-group kaltest-word-style"><span class="kaltest-word-group-label">Style</span>
+            <button id="btn-bold" type="button" title="Gras"><b>G</b></button><button id="btn-italic" type="button" title="Italique"><i>I</i></button><button id="btn-underline" type="button" title="Souligné"><u>U</u></button>
+            <div class="color-picker-container"><button id="nw-text-color-button" class="color-picker-btn" type="button" title="Couleur du texte"><span class="color-indicator" id="text-color-indicator"></span><strong>A</strong></button><div class="color-picker-menu" id="text-color-menu"><button type="button" class="color-swatch" data-seb-color-type="text" data-seb-color="#000000" title="Noir"></button><button type="button" class="color-swatch" data-seb-color-type="text" data-seb-color="#0000FF" title="Bleu"></button><button type="button" class="color-swatch" data-seb-color-type="text" data-seb-color="#FF0000" title="Rouge"></button><input type="color" id="custom-text-color" value="#000000" title="Couleur personnalisée"></div></div>
+            <div class="color-picker-container"><button id="nw-highlight-color-button" class="color-picker-btn" type="button" title="Surlignage"><span class="color-indicator" id="highlight-color-indicator"></span>🖍</button><div class="color-picker-menu" id="highlight-color-menu"><button type="button" class="color-swatch" data-seb-color-type="highlight" data-seb-color="#FFFF00" title="Jaune"></button><button type="button" class="color-swatch" data-seb-color-type="highlight" data-seb-color="#90EE90" title="Vert"></button><input type="color" id="custom-highlight-color" value="#FFFF00" title="Surlignage personnalisé"></div></div>
+          </div>
+          <div class="kaltest-word-group kaltest-word-paragraph"><span class="kaltest-word-group-label">Paragraphe</span>
+            <button id="btn-left" type="button" title="Aligner à gauche">☰</button><button id="btn-center" type="button" title="Centrer">≡</button><button id="btn-right" type="button" title="Aligner à droite">☷</button>
+          </div>
+          <div class="kaltest-word-group kaltest-word-lists"><span class="kaltest-word-group-label">Listes</span>
+            <button id="btn-ul" type="button" title="Liste à puces">• Liste</button><button id="btn-ol" type="button" title="Liste numérotée">1. Liste</button>
+          </div>
+          <div class="kaltest-word-group kaltest-word-spacing"><span class="kaltest-word-group-label">Interligne</span>
+            <select id="nw-line-height" title="Interligne"><option value="1">Simple</option><option value="1.15">1.15</option><option value="1.5">1.5</option><option value="2">Double</option></select>
+          </div>
+          <div class="kaltest-word-group kaltest-word-insert"><span class="kaltest-word-group-label">Insérer</span><button id="nw-image-button" type="button" title="Insérer une image">🖼️</button></div>
         </div>
       </div>
-      <div class="flex-spacer"></div>
-      <button id="btn-bold" title="Gras"><b>G</b></button>
-      <button id="btn-italic" title="Italique"><i>I</i></button>
-      <button id="btn-underline" title="Souligné"><u>U</u></button>
-      <button id="btn-ul" title="Liste à puces">• Liste</button>
-      <button id="btn-ol" title="Liste numérotée">1. Liste</button>
-      
-      <button id="btn-left" title="Aligner à gauche">
-        <div class="align-icon align-left">
-          <span></span><span></span><span></span>
-        </div>
-      </button>
-      <button id="btn-center" title="Centrer">
-        <div class="align-icon align-center">
-          <span></span><span></span><span></span>
-        </div>
-      </button>
-      <button id="btn-right" title="Aligner à droite">
-        <div class="align-icon align-right">
-          <span></span><span></span><span></span>
-        </div>
-      </button>
-      <button id="btn-cut" type="button" title="Couper"><span>Couper</span></button>
-      <button id="btn-copy" type="button" title="Copier"><span>Copier</span></button>
-      <button id="btn-paste" type="button" title="Coller"><span>Coller</span></button>
-	  </div>
-	  <div class="toolbar-row2 kaltest-text-editor-toolbar">
-	  <div class="flex-spacer"></div>
-      <select id="nw-font" title="Changer la police">
-        <option value="Arial">Arial</option>
-        <option value="Calibri" selected>Calibri</option>
-        <option value="Times New Roman">Times New Roman</option>
-        <option value="Courier New">Courier New</option>
-        <option value="Georgia">Georgia</option>
-      </select>
-      <select id="nw-size" title="Taille du texte">
-        <option value="10pt">10</option>
-        <option value="12pt">12</option>
-        <option value="14pt" selected>14</option>
-        <option value="16pt">16</option>
-        <option value="18pt">18</option>
-        <option value="24pt">24</option>
-        <option value="32pt">32</option>
-        <option value="48pt">48</option>
-      </select>
-      
-      <div class="color-picker-container">
-        <div id="nw-text-color-button" class="color-picker-btn" title="Couleurs du texte">
-          <span class="color-indicator" id="text-color-indicator" style="background:#000000;"></span>
-          <span style="font-size:24px;"><strong>A</strong></span>
-        </div>
-        <div class="color-picker-menu" id="text-color-menu">
-          <div class="color-grid">
-            <div class="color-swatch" style="background:#000000;" data-seb-color-type="text" data-seb-color="#000000"></div>
-            <div class="color-swatch" style="background:#FF0000;" data-seb-color-type="text" data-seb-color="#FF0000"></div>
-            <div class="color-swatch" style="background:#00FF00;" data-seb-color-type="text" data-seb-color="#00FF00"></div>
-            <div class="color-swatch" style="background:#0000FF;" data-seb-color-type="text" data-seb-color="#0000FF"></div>
-            <div class="color-swatch" style="background:#FFFF00;" data-seb-color-type="text" data-seb-color="#FFFF00"></div>
-            <div class="color-swatch" style="background:#FF00FF;" data-seb-color-type="text" data-seb-color="#FF00FF"></div>
-            <div class="color-swatch" style="background:#00FFFF;" data-seb-color-type="text" data-seb-color="#00FFFF"></div>
-            <div class="color-swatch" style="background:#FFFFFF; border-color:#666;" data-seb-color-type="text" data-seb-color="#FFFFFF"></div>
-          </div>
-          <div class="custom-color-row">
-            <label>Personnalisée:</label>
-            <input type="color" id="custom-text-color" value="#000000">
-          </div>
-        </div>
-      </div>
-      
-      <div class="color-picker-container">
-        <div id="nw-highlight-color-button" class="color-picker-btn" title="Surlignage du texte">
-          <span class="color-indicator" id="highlight-color-indicator" style="background:#FFFFFF;"></span>
-          <span><img src="imageqcm/stabilot.png" alt="Img" style="width:24px;height:24px;"></span>
-        </div>
-        <div class="color-picker-menu" id="highlight-color-menu">
-          <div class="color-grid">
-            <div class="color-swatch" style="background:#FFFF00;" data-seb-color-type="highlight" data-seb-color="#FFFF00"></div>
-            <div class="color-swatch" style="background:#00FF00;" data-seb-color-type="highlight" data-seb-color="#00FF00"></div>
-            <div class="color-swatch" style="background:#00FFFF;" data-seb-color-type="highlight" data-seb-color="#00FFFF"></div>
-            <div class="color-swatch" style="background:#FF00FF;" data-seb-color-type="highlight" data-seb-color="#FF00FF"></div>
-            <div class="color-swatch" style="background:#FFA500;" data-seb-color-type="highlight" data-seb-color="#FFA500"></div>
-            <div class="color-swatch" style="background:#FFB6C1;" data-seb-color-type="highlight" data-seb-color="#FFB6C1"></div>
-            <div class="color-swatch" style="background:#90EE90;" data-seb-color-type="highlight" data-seb-color="#90EE90"></div>
-            <div class="color-swatch" style="background:#FFFFFF; border-color:#666;" data-seb-color-type="highlight" data-seb-color="#FFFFFF"></div>
-          </div>
-          <div class="custom-color-row">
-            <label>Personnalisée:</label>
-            <input type="color" id="custom-highlight-color" value="#FFFF00">
-          </div>
-        </div>
-      </div>
-      
-      <select id="nw-line-height" title="Interligne">
-        <option value="1">Simple</option><option value="1.15">1.15</option>
-        <option value="1.5">1.5</option><option value="2">Double</option>
-      </select>
-      <button id="nw-image-button" type="button" title="Insérer une image">
-        <img src="imageqcm/avatar_transparant.png" alt="Img" style="width:24px;height:24px;">
-      </button>
-
-      <div class="flex-spacer"></div>
-    </div>
-
-          <div id="editor" class="kaltest-text-editor-paper" spellcheck="false"></div>
+      <div class="kaltest-word-paper-surface"><div id="editor" class="kaltest-text-editor-paper" spellcheck="false"></div></div>
     `;
 
     if (!config.fileSimulation) {
