@@ -1278,6 +1278,31 @@
     const table = document.createElement('table');
     table.className = 'kaltest-table kaltest-builder-grid';
     if(definition.compact===true)table.classList.add('kaltest-builder-grid-compact');
+    // R48.8 — Si toutes les largeurs restent automatiques, ne jamais
+    // laisser la longueur des options des <select> déterminer la largeur.
+    // Colonne des libellés + jours réguliers ; les largeurs saisies dans
+    // le Builder restent prioritaires.
+    const columnCount=Math.max(
+      Number(definition.cols)||0,
+      Array.isArray(definition.headers)?definition.headers.length:0,
+      ...((definition.cells||[]).map(row=>Array.isArray(row)?row.length:0))
+    );
+    const noCustomColumnWidths=Array.from({length:columnCount},(_,i)=>
+      !(Number(definition.columns?.[i]?.widthChars)>=3)).every(Boolean);
+    const hasMergedCells=(definition.cells||[]).some(row=>(row||[]).some(cell=>
+      Number(cell?.rowSpan)>1||Number(cell?.colSpan)>1));
+    if(definition.compact===true && columnCount>=5 && noCustomColumnWidths && !hasMergedCells){
+      table.classList.add('kaltest-builder-grid-auto-fit');
+      const colgroup=document.createElement('colgroup');
+      for(let i=0;i<columnCount;i++){
+        const col=document.createElement('col');
+        // Première colonne: texte court. Les suivantes ont toutes
+        // exactement la même part du reste.
+        col.style.width=(i===0?'12%':(88/(columnCount-1))+'%');
+        colgroup.appendChild(col);
+      }
+      table.appendChild(colgroup);
+    }
     if (definition.layoutOnly === true) {table.classList.add('kaloneo-layout-only');table.style.border='0';table.style.background='transparent';}
 
     if (Array.isArray(definition.headers) && definition.headers.length) {
