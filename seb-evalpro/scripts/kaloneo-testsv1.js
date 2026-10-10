@@ -96,6 +96,7 @@ function writeOfficialSeedOverrides({repoRoot,sourceTestsDir,outputTestsDir}){
     manifest.push({id,version:'1.0.0',relative:record.relative.replace(/\\/g,'/'),sha256:record.sha256});
   }
   const manifestFile=path.join(path.dirname(outputTestsDir),'TESTS_V1-manifest.json');
+  fs.mkdirSync(path.dirname(manifestFile),{recursive:true});
   fs.writeFileSync(manifestFile,JSON.stringify({format:'kaloneo-official-v1-overrides',version:1,tests:manifest},null,2)+'\n');
   console.log('TESTS_V1: '+manifest.length+' V1 officielle(s) intégrée(s) dans app/web');
   return manifest;
