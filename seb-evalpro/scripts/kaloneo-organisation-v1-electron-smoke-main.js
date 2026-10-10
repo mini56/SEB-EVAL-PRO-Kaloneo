@@ -96,7 +96,7 @@ app.whenReady().then(async () => {
 
     if (!result?.hasOrganisation || result.hasBuilder || result.rowCount !== 8 ||
         !result.inputsBeforeText ||
-        !/imageqcm\/demenagement\.png$/i.test(result.imageSrc) ||
+        result.imageSrc !== String(organisation?.presentation?.organisationList?.visual?.src || '') ||
         result.firstText !== 'Emballer les pièces et protéger les machines fragiles.') {
       return fail('le rendu V1 Organisation n’est plus fidèle à la page historique', result);
     }
