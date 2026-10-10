@@ -1291,14 +1291,18 @@
       !(Number(definition.columns?.[i]?.widthChars)>=3)).every(Boolean);
     const hasMergedCells=(definition.cells||[]).some(row=>(row||[]).some(cell=>
       Number(cell?.rowSpan)>1||Number(cell?.colSpan)>1));
-    if(definition.compact===true && columnCount>=5 && noCustomColumnWidths && !hasMergedCells){
+    // R48.9 : règle explicite validée pour Restaurant uniquement.
+    // Les autres tests gardent leur comportement R48.7, sans régression.
+    if(test?.id==='planning_cantine_r48_demo' &&
+      definition.compact===true && columnCount===6 &&
+      noCustomColumnWidths && !hasMergedCells){
       table.classList.add('kaltest-builder-grid-auto-fit');
       const colgroup=document.createElement('colgroup');
       for(let i=0;i<columnCount;i++){
         const col=document.createElement('col');
-        // Première colonne: texte court. Les suivantes ont toutes
-        // exactement la même part du reste.
-        col.style.width=(i===0?'12%':(88/(columnCount-1))+'%');
+        // Six colonnes rigoureusement égales. Pas de répartition spéciale
+        // pour « Planning ». Les menus se calent dans chaque cellule.
+        col.style.width=(100/columnCount)+'%';
         colgroup.appendChild(col);
       }
       table.appendChild(colgroup);

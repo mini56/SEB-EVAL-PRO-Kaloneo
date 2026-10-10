@@ -153,9 +153,11 @@ app.whenReady().then(async()=>{
   assert.equal(snapMetrics.friday,true);
   assert.equal(snapMetrics.autoFit,true,'auto sizing must choose equal-day layout');
   assert.equal(snapMetrics.headerWidths.length,6,'all six headers must be visible');
-  const days=snapMetrics.headerWidths.slice(1);
-  const equal=Math.max(...days)-Math.min(...days);
-  assert.ok(equal<=2,'weekday column widths must be equal, delta='+equal+'px');
+  const widths=snapMetrics.headerWidths;
+  const equal=Math.max(...widths)-Math.min(...widths);
+  assert.ok(equal<=2,'ALL SIX columns must be equal, delta='+equal+'px');
+  assert.ok(widths.every(width=>width>=80),
+    'Every column must remain usable for its dropdown and heading');
   assert.ok(snapMetrics.headerRight[5]<=snapMetrics.zoneRight+2,
     'Vendredi must be fully inside the left zone');
   assert.ok(snapMetrics.gridScrollWidth<=snapMetrics.gridClientWidth+2,
@@ -166,7 +168,7 @@ app.whenReady().then(async()=>{
   assert.equal(snapMetrics.inputWidths.length,5,'all weekday dropdowns must exist');
   assert.ok(Math.max(...snapMetrics.inputWidths)-Math.min(...snapMetrics.inputWidths)<=2,
     'weekday dropdowns must have equal widths');
-  console.log('R48_8_EQUAL_DAY_COLUMNS=OK',JSON.stringify(snapMetrics));
+  console.log('R48_9_ALL_SIX_COLUMNS_EQUAL=OK',JSON.stringify(snapMetrics));
   const picture=await worker.webContents.capturePage();
   assert.ok(!picture.isEmpty(),'candidate miniature screenshot is empty');
   const size=picture.getSize();
