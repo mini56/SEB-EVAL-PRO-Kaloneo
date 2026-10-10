@@ -592,7 +592,7 @@ app.whenReady().then(async()=>{
     for(let attempt=0;attempt<30;attempt++){
       await wait(150);
       const p=await win.webContents.executeJavaScript('location.pathname');
-      if(/test-preview\\.html$/i.test(p)) break;
+      if(/test-preview\.html$/i.test(p)) break;
     }
     await wait(400);
     const restaurantFit=await win.webContents.executeJavaScript(`(()=>{
@@ -619,7 +619,7 @@ app.whenReady().then(async()=>{
         imagePresent:!!zones[1]?.querySelector('img')
       };
     })()`);
-    if(!/test-preview\\.html$/i.test(restaurantFit.page)||
+    if(!/test-preview\.html$/i.test(restaurantFit.page)||
       restaurantFit.viewport.width<1300||restaurantFit.viewport.height<690||
       restaurantFit.zones.length!==2||
       !restaurantFit.grid||restaurantFit.selects!==15||
