@@ -89,6 +89,12 @@
         </label>
       </div>
 
+      <div class="developer-v1-panel" aria-label="Gestion des versions originales">
+        <button type="button" id="developer-unlock" class="mini-btn">Mode Développeur</button>
+        <button type="button" id="developer-export-v1" class="mini-btn" hidden>Exporter cette V1 vers TESTS_V1</button>
+        <span id="developer-mode-status" class="muted">V1 protégées — déverrouillage Développeur nécessaire</span>
+      </div>
+
       <div class="icon-library-panel">
         <div class="section-title-row">
           <div>
@@ -383,6 +389,20 @@
     </div>
     <p id="image-library-status" class="muted"></p>
     <div id="image-library-list" class="image-library-grid" aria-label="Bibliothèque d’images KALONÉO"></div>
+  </dialog>
+
+  <dialog id="developer-unlock-dialog" class="test-library-dialog developer-password-dialog">
+    <div class="section-title-row">
+      <h2>Accès Développeur KALONÉO</h2>
+      <button id="developer-unlock-cancel" class="mini-btn" type="button">Annuler</button>
+    </div>
+    <p>Le mode Développeur permet de modifier une V1 en conservant son numéro et de l’exporter pour GitHub / TESTS_V1. Il est désactivé à la fermeture de la session Admin.</p>
+    <label>Mot de passe Développeur
+      <input id="developer-password" type="password" autocomplete="off" spellcheck="false">
+    </label>
+    <div class="developer-password-actions">
+      <button id="developer-unlock-confirm" type="button" class="seb-action-btn seb-btn-nav">Déverrouiller</button>
+    </div>
   </dialog>
 
   <dialog id="test-library-dialog" class="test-library-dialog">

@@ -984,3 +984,13 @@ body{
 .candidate-preview-viewport>.candidate-preview{visibility:hidden!important;}
 
 .candidate-preview-warning{font-size:12px;color:#004E70;margin:8px 0 0;min-height:16px;}
+
+/* TESTS_V1 — commandes optionnelles de l'éditeur, pas de changement dans
+   le gabarit candidat ni dans les réglages de tableau. */
+.developer-v1-panel{display:flex;flex-wrap:wrap;align-items:center;gap:9px;padding:7px 0 10px;margin-bottom:10px;border-bottom:1px solid #dde6ed}
+.developer-v1-panel .muted{font-size:12px}
+.developer-v1-panel [hidden]{display:none!important}
+.developer-password-dialog{max-width:min(520px,90vw)}
+.developer-password-dialog>label{display:grid;gap:8px;margin-top:12px}
+.developer-password-dialog input{height:36px;padding:6px}
+.developer-password-actions{margin-top:14px;display:flex;justify-content:flex-end}

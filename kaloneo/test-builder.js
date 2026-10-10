@@ -13,6 +13,7 @@
     imageLibraryItems: [],
     sourceProtectedVersion: false
   };
+  let developerUnlocked=false;
   let textColorTarget = null;
   let textColorChanged = null;
 
@@ -1980,18 +1981,30 @@
     const version=$('test-version');
     const save=$('save-draft');
     const protectedSource=state.sourceProtectedVersion===true;
+    const developerEditing=protectedSource&&developerUnlocked;
+    const exportV1=$('developer-export-v1');
+    const stateText=$('developer-mode-status');
+    if(exportV1)exportV1.hidden=!developerEditing;
+    if(stateText)stateText.textContent=developerUnlocked
+      ? 'Mode Développeur actif — V1 modifiables et exportables'
+      : 'V1 protégées — déverrouillage Développeur nécessaire';
     if(version){
+      // Le numéro de V1 reste 1.0.0 même en mode Développeur.
       version.readOnly=protectedSource;
       version.setAttribute('aria-readonly',protectedSource?'true':'false');
       version.title=protectedSource
-        ? 'Version KALONÉO protégée. Une modification sera enregistrée automatiquement sous une nouvelle version.'
+        ? (developerEditing
+          ? 'V1 officielle : son numéro reste 1.0.0, export possible vers TESTS_V1.'
+          : 'Version KALONÉO protégée. Les modifications seront enregistrées sous une nouvelle version.')
         : '';
     }
     if(save){
-      save.textContent=protectedSource?'Créer une nouvelle version':'Enregistrer';
-      save.title=protectedSource
-        ? 'V1 KALONÉO protégée : conserver la V1 intacte et enregistrer les modifications sous la prochaine version disponible.'
-        : 'Enregistrer le test dans la bibliothèque.';
+      save.textContent=developerEditing?'Enregistrer V1':protectedSource?'Créer une nouvelle version':'Enregistrer';
+      save.title=developerEditing
+        ? 'Enregistrer cette V1 corrigée localement (avec copie de sécurité). Puis exporter vers TESTS_V1.'
+        : protectedSource
+          ? 'V1 protégée : enregistrer les modifications sous la prochaine version disponible.'
+          : 'Enregistrer le test dans la bibliothèque.';
     }
   }
 
@@ -2169,14 +2182,16 @@
 
   async function saveToLibrary(options={}) {
     const protectedClone=state.sourceProtectedVersion===true;
+    const developerEditing=protectedClone&&developerUnlocked;
+    const createNewVersion=protectedClone&&!developerEditing;
     const originalVersion=$('test-version')?.value||'1.0.0';
-    if(protectedClone){
+    if(createNewVersion){
       const nextVersion=await nextAdminVersion($('test-id')?.value||normalizeIdFromTitle());
       $('test-version').value=nextVersion;
     }
     refreshPreview();
     if(!validate()) {
-      if(protectedClone)$('test-version').value=originalVersion;
+      if(createNewVersion)$('test-version').value=originalVersion;
       alert('Le test contient encore des éléments obligatoires à corriger.');
       return false;
     }
@@ -2187,21 +2202,26 @@
     if(!bridge || typeof bridge.kaloneoSaveTest!=='function') {
       if(options.exportJson===true) {
         exportDefinition(data);
-        if(protectedClone)$('test-version').value=originalVersion;
+        if(createNewVersion)$('test-version').value=originalVersion;
         saveDraft(false);
         $('draft-status').textContent='test.json généré — hors SEB EvalPro';
         setTimeout(()=>$('draft-status').textContent='Brouillon local',1800);
         return true;
       }
-      if(protectedClone)$('test-version').value=originalVersion;
+      if(createNewVersion)$('test-version').value=originalVersion;
       alert('L’enregistrement dans la bibliothèque est disponible depuis SEB EvalPro.');
       return false;
     }
 
+    if(developerEditing && !confirm(
+      'Enregistrer la V1 officielle « '+data.title+' » (1.0.0) ?\\n\\n' +
+      'La version locale actuelle sera sauvegardée automatiquement dans les copies de sécurité.\\n' +
+      'Pour rendre cette V1 officielle dans les prochaines compilations, exportez-la ensuite vers TESTS_V1.'
+    ))return false;
     let result;
     try {
-      result=await bridge.kaloneoSaveTest(data,false);
-      if(protectedClone){
+      result=await bridge.kaloneoSaveTest(data,developerEditing,developerEditing);
+      if(createNewVersion){
         // Une V1 protégée ne doit jamais écraser une V2/V3 existante.
         // Même si la liste des versions était momentanément indisponible,
         // on cherche automatiquement le prochain numéro libre.
@@ -2219,13 +2239,13 @@
         result=await bridge.kaloneoSaveTest(data,true);
       }
     } catch(error) {
-      if(protectedClone)$('test-version').value=originalVersion;
+      if(createNewVersion)$('test-version').value=originalVersion;
       alert('Enregistrement impossible : '+String(error?.message||error));
       return false;
     }
 
     if(!result || result.ok!==true) {
-      if(protectedClone)$('test-version').value=originalVersion;
+      if(createNewVersion)$('test-version').value=originalVersion;
       if(result?.code==='PROTECTED_VERSION') {
         alert(
           'Cette V1 est fournie avec KALONÉO et reste protégée.\n\n' +
@@ -2237,15 +2257,63 @@
       return false;
     }
 
-    if(protectedClone){
+    if(createNewVersion){
       state.sourceProtectedVersion=false;
       syncProtectedVersionUi();
     }
     saveDraft(false);
     markCurrentSaved();
-    transientStatus(protectedClone?'Nouvelle version créée et enregistrée':'Enregistré dans la bibliothèque',1800);
+    transientStatus(developerEditing?'V1 corrigée sauvegardée — exportez-la vers TESTS_V1':
+      createNewVersion?'Nouvelle version créée et enregistrée':'Enregistré dans la bibliothèque',2500);
     if(options.exportJson===true) exportDefinition(data);
     return true;
+  }
+
+  async function exportOfficialV1() {
+    if(!developerUnlocked || !state.sourceProtectedVersion){
+      alert('Ouvrez une V1 protégée et activez le mode Développeur pour l’exporter.');
+      return;
+    }
+    if(!validate()){
+      alert('V1 incomplète : corrigez les champs obligatoires avant de l’exporter.');
+      return;
+    }
+    const definition=Core.modelToDefinition(currentModel());
+    if(definition.version!=='1.0.0'){
+      alert('L’export officiel doit conserver le numéro 1.0.0.');
+      return;
+    }
+    const bridge=window.sebEvalPro;
+    try {
+      const result=await bridge?.kaloneoDeveloperExportV1?.(definition);
+      if(result?.canceled)return;
+      if(!result?.ok)throw new Error(result?.error||'Échec de l’export V1.');
+      transientStatus('V1 exportée : '+result.filePath,5000);
+    }catch(error){
+      alert('Export V1 impossible : '+String(error?.message||error));
+    }
+  }
+
+  async function openDeveloperMode() {
+    if(developerUnlocked)return;
+    const dialog=$('developer-unlock-dialog');
+    dialog.showModal();
+    $('developer-password').value='';
+    requestAnimationFrame(()=>$('developer-password').focus());
+  }
+  async function confirmDeveloperUnlock() {
+    const password=$('developer-password').value;
+    try {
+      const status=await window.sebEvalPro?.kaloneoDeveloperUnlock?.(password);
+      $('developer-password').value='';
+      if(!status?.ok)throw new Error(status?.error||'Accès refusé.');
+      developerUnlocked=true;
+      $('developer-unlock-dialog').close();
+      syncProtectedVersionUi();
+      transientStatus('Mode Développeur actif',2000);
+    }catch(error){
+      alert('Déverrouillage refusé : '+String(error?.message||error));
+    }
   }
 
   async function downloadJson() {
@@ -2306,6 +2374,10 @@
   }
 
   async function install() {
+    try {
+      const status=await window.sebEvalPro?.kaloneoDeveloperStatus?.();
+      developerUnlocked=status?.unlocked===true;
+    }catch(_){developerUnlocked=false;}
     const params = new URLSearchParams(window.location.search || '');
     const resumeFromPreview = params.get('resume') === 'preview';
     let restored = false;
@@ -2351,6 +2423,19 @@
     });
 
     $('back-tests').addEventListener('click',closeBuilder);
+    $('developer-unlock').addEventListener('click',openDeveloperMode);
+    $('developer-unlock-cancel').addEventListener('click',()=>{
+      $('developer-password').value='';
+      $('developer-unlock-dialog').close();
+    });
+    $('developer-unlock-confirm').addEventListener('click',confirmDeveloperUnlock);
+    $('developer-password').addEventListener('keydown',event=>{
+      if(event.key==='Enter'){
+        event.preventDefault();
+        void confirmDeveloperUnlock();
+      }
+    });
+    $('developer-export-v1').addEventListener('click',exportOfficialV1);
     $('undo-change').addEventListener('click',undoChange);
     $('redo-change').addEventListener('click',redoChange);
     $('open-library-test').addEventListener('click',()=>{openLibraryDialog().catch(error=>alert('Bibliothèque inaccessible : '+String(error?.message||error)));});
