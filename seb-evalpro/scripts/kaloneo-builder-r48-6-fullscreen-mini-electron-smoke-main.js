@@ -94,6 +94,7 @@ app.whenReady().then(async()=>{
   worker.webContents.setZoomFactor(factor);
   worker.setContentSize(Math.round(1366*factor),Math.round(768*factor));
   await worker.loadFile(path.join(web,'kaltest-pilot2.html'),{query:{kaloneoPreview:'1'}});
+  worker.webContents.setZoomFactor(factor);
   const snapMetrics=await worker.webContents.executeJavaScript(`(async()=>{
     await document.fonts.ready;
     await Promise.all([...document.images].map(img=>img.complete?
@@ -113,6 +114,9 @@ app.whenReady().then(async()=>{
     };
   })()`,true);
   assert.equal(snapMetrics.real,true);
+  console.log('R48_6_DEBUG_VIEWPORT',JSON.stringify({factor,bounds,
+    contentBounds:worker.getContentBounds(),zoom:worker.webContents.getZoomFactor(),
+    metrics:snapMetrics}));
   assert.ok(Math.abs(snapMetrics.width-1366)<=2 && Math.abs(snapMetrics.height-768)<=2,
     'hidden Window must use full candidate CSS resolution');
   assert.equal(snapMetrics.questions,15);

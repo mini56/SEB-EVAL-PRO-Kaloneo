@@ -1518,6 +1518,8 @@ ipcMain.handle('kaloneo-builder:render-mini-preview', (event, definition) => {
     worker.webContents.setZoomFactor(factor);
     worker.setContentSize(Math.round(1366*factor),Math.round(768*factor));
     await worker.loadFile(source,{query:{kaloneoPreview:'1'}});
+    // Chromium peut réinitialiser le zoom d'un nouvel URL file://.
+    worker.webContents.setZoomFactor(factor);
     const report=await worker.webContents.executeJavaScript(`(async()=>{
       await document.fonts.ready;
       await Promise.all([...document.images].map(img=>img.complete?
