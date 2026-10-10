@@ -3302,3 +3302,27 @@ body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-to
 /* E-mail V1 : énoncé continu, sans cartouches d'aide disposés comme des réponses. */
 body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-instruction-list {display:block;}
 body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-instruction-list p {border:0;background:transparent;border-radius:0;padding:0;margin:0 0 9px;line-height:1.35;font-weight:400;}
+
+/* Traitement de texte : ruban de bureautique structuré et lisible, sans toucher à Quill. */
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-ribbon {display:flex;flex-direction:column;gap:6px;flex:0 0 auto;padding:7px 8px 9px;background:#eef4f9;border:1px solid #cad7e2;border-radius:9px 9px 0 0;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-topbar {display:flex;align-items:center;justify-content:flex-start;gap:12px;min-height:37px;padding-bottom:5px;border-bottom:1px solid #d4e0ea;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-clipboard {display:flex;gap:5px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-formatbar {display:flex;align-items:stretch;justify-content:space-between;gap:3px;flex-wrap:nowrap;width:100%;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-group {display:flex;align-items:flex-end;justify-content:center;gap:3px;position:relative;padding:21px 6px 3px;border-right:1px solid #cbd7e2;min-width:0;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-group:last-child {border:0;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-group-label {position:absolute;top:3px;left:6px;font:600 12px/15px Arial,sans-serif;color:#385873;white-space:nowrap;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar button,body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar select,body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .color-picker-btn {height:36px;min-width:33px;padding:4px 6px;font:14px Arial,sans-serif;background:#fff;border-color:#a9bfd1;border-radius:5px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-topbar button {padding:5px 11px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-font #nw-font {width:94px;min-width:0;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-font #nw-size {width:58px;min-width:0;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-spacing select {width:76px;min-width:0;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-style .color-picker-menu {top:38px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-paper-surface {display:flex;flex:1 1 auto;min-height:0;padding:8px;background:#dde6ee;overflow:hidden;border-radius:0 0 9px 9px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-paper-surface #editor {flex:1 1 auto;min-height:0;border:1px solid #b8c4cd;border-radius:2px;background:white;box-shadow:0 1px 4px #b3bec8;padding:16px 20px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-tool {gap:0;padding:0;overflow:hidden;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-builder-runtime-zone:first-child {background-image:url("../assets/typewriter-vintage.svg");background-repeat:no-repeat;background-position:center bottom 13px;background-size:min(80%,450px) auto;padding-bottom:205px;}
+@media (max-width:1250px) {
+ body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-formatbar {flex-wrap:wrap;justify-content:flex-start;}
+ body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-group {flex:0 0 auto;}
+ body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-word-ribbon {gap:3px;}
+}
