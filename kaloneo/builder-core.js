@@ -546,7 +546,13 @@
     if(presetKeepsQuestions&&rebuilt.length===0){
       def.questions=clone(def.questions||[]);
     }else if(rebuilt.length||Object.prototype.hasOwnProperty.call(def,'questions')){
-      def.questions=rebuilt.map(q=>Object.assign({},existing.get(q.id)||{},q));
+      def.questions=rebuilt.map(q=>{
+        const previous=existing.get(q.id);
+        // R48.1: une grille importée peut conserver ses libellés historiques.
+        // L'éditeur ne doit pas les écraser par « Réponse id » lors d'un changement de style.
+        const prompt=(previous?.prompt && q.prompt==='Réponse '+q.id)?previous.prompt:q.prompt;
+        return Object.assign({},previous||{},q,{prompt});
+      });
     }else if(Object.prototype.hasOwnProperty.call(def,'questions')){
       delete def.questions;
     }
