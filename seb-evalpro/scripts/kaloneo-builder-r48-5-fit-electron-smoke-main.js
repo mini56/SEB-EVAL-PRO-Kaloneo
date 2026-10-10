@@ -47,7 +47,11 @@ app.whenReady().then(async()=>{
   const win=new BrowserWindow({show:true,width:1366,height:768,webPreferences:{preload:path.join(root,'src','preload.js'),nodeIntegration:false,contextIsolation:true,sandbox:false}});
   win.webContents.on('preload-error',(_e,p,error)=>fail(new Error('Preload '+p+': '+error)));
   await win.loadFile(path.join(web,'kaltest-pilot2.html'),{query:{kaloneoPreview:'1'}});
-  await wait(1100);
+  // Runner GitHub Windows plafonné à 1024 px physiques : zoom CSS pour tester
+  // une surface utile équivalente à 1366×720, sans déformer la disposition.
+  win.webContents.setZoomFactor(0.75);
+  win.setContentSize(1024,540);
+  await wait(1200);
   const result=await win.webContents.executeJavaScript(`(()=>{
     const target=document.getElementById('kaltest-content');
     const selectors=[...target.querySelectorAll('select')];
@@ -100,6 +104,8 @@ app.whenReady().then(async()=>{
       guidance:measure(guidance),headers,lastLineRects};
   })()`);
   console.log('R48_5_GEOMETRY',JSON.stringify(fit));
+  assert.ok(fit.viewport[0]>=1300&&fit.viewport[1]>=690,
+    'Electron CI must emulate at least 1300×690 CSS pixels');
   assert.equal(fit.headers.length,6,'six planning columns must exist');
   assert.equal(fit.headers[5].text,'Vendredi','last column must be Vendredi');
   assert.ok(fit.headers[5].rect.right<=fit.zone.right+2,'Friday column must remain fully visible');
