@@ -8,7 +8,7 @@ directories:
 
 extraMetadata:
   main: src/kaltest-pilot21-main.js
-  version: 0.0.66
+  version: 0.0.67
 
 files:
   - src/**/*
@@ -26,4 +26,4 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: "SEB EvalPro Kalonéo - PILOTE 22 R47"
   deleteAppDataOnUninstall: false
-  artifactName: "SEB-EvalPro-Kaloneo-PILOTE-22-R47-0.0.66-Windows-Setup.${ext}"
+  artifactName: "SEB-EvalPro-Kaloneo-PILOTE-22-R47-0.0.67-Windows-Setup.${ext}"
