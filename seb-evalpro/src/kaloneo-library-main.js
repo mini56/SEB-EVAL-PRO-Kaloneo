@@ -56,6 +56,11 @@ function createKaloneoLibrary(options = {}) {
   const parcoursRoot = path.join(root, 'Parcours');
   const maskScreensRoot = path.join(root, 'Ecrans-masquage');
   const selectedParcoursFile = path.join(root, 'selected-parcours.json');
+  // Sauvegardes privées et temporaires avant publication officielle GitHub.
+  const developerV1DraftsFile = path.join(root, 'developer-v1-drafts.json');
+  const developerV1BackupsDir = path.join(root, 'Backups-V1');
+  const sha256=(text)=>crypto.createHash('sha256').update(text,'utf8').digest('hex');
+  const v1DraftKey=(definition)=>String(definition?.id||'')+'@'+String(definition?.version||'');
 
   function ensureDirectory(directory) {
     fs.mkdirSync(directory, { recursive:true });
@@ -445,6 +450,8 @@ function createKaloneoLibrary(options = {}) {
         ? manifest.tests.filter(x=>x?.version==='1.0.0').map(x=>String(x.id))
         : []
     );
+    const developerDrafts=readJson(developerV1DraftsFile)||{};
+    let draftsChanged=false;
 
     for (const seedFile of walkTestFiles(source)) {
       const seedDefinition = readJson(seedFile);
@@ -461,8 +468,19 @@ function createKaloneoLibrary(options = {}) {
       // utilisent d'autres numéros de version et ne sont donc jamais touchées.
       const currentJson = currentDefinition ? JSON.stringify(currentDefinition) : '';
       const seedJson = JSON.stringify(seedDefinition);
+      const key=v1DraftKey(seedDefinition);
+      const draft=developerDrafts[key];
+      // Pendant les travaux, conserver localement la V1 retouchée.
+      // Quand la V1 officielle GitHub change, elle reprend priorité.
+      if(draft?.seedHash===sha256(seedJson) && currentDefinition &&
+          currentJson!==seedJson)continue;
+      if(draft){
+        delete developerDrafts[key];
+        draftsChanged=true;
+      }
       if (currentJson !== seedJson) atomicWriteJson(targetFile, seedDefinition);
     }
+    if(draftsChanged)atomicWriteJson(developerV1DraftsFile,developerDrafts);
   }
 
   function walkNamedFiles(directory, filename, out = []) {
@@ -630,7 +648,8 @@ function createKaloneoLibrary(options = {}) {
     // Les versions fournies par KALONÉO (V1 système) sont en lecture seule.
     // Une personnalisation doit être enregistrée sous une nouvelle version
     // (V2, V3, ...), jamais écraser le seed système.
-    if (seedContainsTest(value.id, value.version)) {
+    const isProtected=seedContainsTest(value.id,value.version);
+    if(isProtected && options.allowSeedOverwrite!==true) {
       return {
         ok:false,
         code:'PROTECTED_VERSION',
@@ -649,6 +668,23 @@ function createKaloneoLibrary(options = {}) {
       safeSegment(value.version, '1.0.0'),
       'test.json'
     );
+    if(isProtected){
+      if(!existing)return {ok:false,error:'V1 protégée introuvable.'};
+      const seedFile=walkTestFiles(seedTestsRoot).find(file=>{
+        const test=readJson(file);
+        return test?.id===value.id && test?.version===value.version;
+      });
+      const seed=seedFile&&readJson(seedFile);
+      if(!seed)return {ok:false,error:'Source V1 protégée introuvable.'};
+      // Avant chaque remplacement : copie de sécurité dans le stockage interne.
+      const stamp=now().toISOString().replace(/[^0-9TZ]/g,'');
+      const backup=path.join(developerV1BackupsDir,safeSegment(value.id),stamp+'-'+process.pid+'.json');
+      ensureDirectory(path.dirname(backup));
+      fs.copyFileSync(existing,backup);
+      const draft=readJson(developerV1DraftsFile)||{};
+      draft[v1DraftKey(value)]={seedHash:sha256(JSON.stringify(seed)),savedAt:now().toISOString()};
+      atomicWriteJson(developerV1DraftsFile,draft);
+    }
     atomicWriteJson(target, value);
     const record = { definition:value, file:target };
     return { ok:true, replaced:Boolean(existing), test:toTestMetadata(record) };

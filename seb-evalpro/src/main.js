@@ -17,6 +17,10 @@ const kaloneoFullParcoursRoute = require('./kaloneo-full-parcours-route');
 const { buildBilanDocxBuffer } = require('./bilan-docx-main');
 
 const ADMIN_PASSWORD_SHA256 = 'c800892ba3f11b33d36eedf7d3c4297f2b6c02e2c347dda8954b4c577f6666b5';
+// Mot de passe développeur défini par le responsable KALONÉO.
+// Le hash ne protège pas contre l'analyse d'un programme local ; le contrôle
+// est une séparation des opérations, pas un coffre-fort cryptographique.
+const DEVELOPER_PASSWORD_SHA256 = 'a4dd456bdab5214bd0de2f32b5cf036d4bc7466130ce54b75faf44e834801269';
 const STATE_VERSION = 1;
 const MIN_SPLASH_MS = 1400;
 const DESIGN_WIDTH = 1600;
@@ -26,6 +30,7 @@ let mainWindow = null;
 let splashWindow = null;
 let splashStartedAt = 0;
 let adminSessionUnlocked = false;
+let developerSessionUnlocked = false;
 let adminSessionDocumentPassword = '';
 let downloadRoutingInstalled = false;
 const editionCapabilities = getEditionCapabilities();
@@ -758,6 +763,7 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
     adminSessionUnlocked = false;
+    developerSessionUnlocked = false;
     if(kaloneoMiniPreviewWorker && !kaloneoMiniPreviewWorker.isDestroyed()){
       kaloneoMiniPreviewWorker.destroy();
     }
@@ -898,12 +904,55 @@ ipcMain.handle('admin:verify-password', (_event, password) => {
 });
 
 ipcMain.handle('admin:status', () => adminSessionUnlocked);
+ipcMain.handle('kaloneo-developer:status', () => ({
+  ok:adminSessionUnlocked,
+  unlocked:adminSessionUnlocked && developerSessionUnlocked
+}));
+ipcMain.handle('kaloneo-developer:unlock', (_event,password) => {
+  if(!adminSessionUnlocked)return {ok:false,error:'Ouvrez d’abord la session Administrateur.'};
+  if(getCandidateStore().getActiveCandidate())
+    return {ok:false,error:'Impossible pendant une évaluation active.'};
+  const given=crypto.createHash('sha256').update(String(password||'').trim().toUpperCase(),'utf8').digest('hex');
+  const expected=Buffer.from(DEVELOPER_PASSWORD_SHA256);
+  const received=Buffer.from(given);
+  if(received.length!==expected.length || !crypto.timingSafeEqual(received,expected))
+    return {ok:false,error:'Mot de passe Développeur incorrect.'};
+  developerSessionUnlocked=true;
+  return {ok:true,unlocked:true};
+});
+ipcMain.handle('kaloneo-developer:export-v1', async (_event,definition)=>{
+  if(!adminSessionUnlocked || !developerSessionUnlocked)
+    return {ok:false,error:'Mode Développeur requis.'};
+  if(getCandidateStore().getActiveCandidate())
+    return {ok:false,error:'Export V1 interdit pendant une évaluation active.'};
+  if(!definition || typeof definition!=='object' || Array.isArray(definition) ||
+      Number(definition.kaltestFormat)!==1 ||
+      String(definition.version)!=='1.0.0')
+    return {ok:false,error:'L’export officiel exige un test KALTEST V1 (1.0.0).'};
+  const id=String(definition.id||'');
+  if(!/^[a-z0-9][a-z0-9_-]{0,99}$/i.test(id))
+    return {ok:false,error:'Identifiant KALTEST invalide.'};
+  const official=getKaloneoLibrary().listTests().some(test=>
+    test.id===id && test.version==='1.0.0' && test.protectedVersion===true);
+  if(!official)return {ok:false,error:'Aucune V1 officielle correspondante.'};
+  const selected=await dialog.showSaveDialog(mainWindow,{
+    title:'Exporter la V1 corrigée pour GitHub / TESTS_V1',
+    defaultPath:id+'.json',
+    filters:[{name:'KALONÉO — TESTS_V1',extensions:['json']}]
+  });
+  if(selected.canceled||!selected.filePath)return {ok:false,canceled:true};
+  const exported=JSON.parse(JSON.stringify(definition));
+  // Le dépôt GitHub vérifiera que le nom du fichier = l’ID.
+  fs.writeFileSync(selected.filePath,JSON.stringify(exported,null,2)+'\\n','utf8');
+  return {ok:true,filePath:selected.filePath,id,version:'1.0.0'};
+});
 ipcMain.on('app:edition-sync', (event) => { event.returnValue = { ...editionCapabilities }; });
 ipcMain.handle('app:edition', () => ({ ...editionCapabilities }));
 
 ipcMain.handle('admin:lock', () => {
   // SEB_ADMIN_LOCK_RETURNS_TO_PRIVACY
   adminSessionUnlocked = false;
+  developerSessionUnlocked = false;
   adminSessionDocumentPassword = '';
   adminExportCandidateDir = null;
   adminCandidateResultsMode = false;
@@ -1113,7 +1162,10 @@ ipcMain.handle('kaloneo-library:save-test', (_event, payload) => {
   if (!adminSessionUnlocked) return { ok:false, error:'Accès administrateur requis.' };
   if (getCandidateStore().getActiveCandidate()) return { ok:false, error:'Impossible de modifier les tests pendant une évaluation active.' };
   try {
-    return getKaloneoLibrary().saveTest(payload && payload.definition, { overwrite:payload && payload.overwrite === true });
+    return getKaloneoLibrary().saveTest(payload && payload.definition, {
+      overwrite:payload && payload.overwrite === true,
+      allowSeedOverwrite:developerSessionUnlocked && payload?.developerOverride===true
+    });
   } catch (error) {
     return { ok:false, error:error && error.message ? error.message : String(error) };
   }

@@ -2137,7 +2137,13 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   kaloneoListTests: () => ipcRenderer.invoke('kaloneo-library:list-tests'),
   kaloneoTestMetadataSync: () => ipcRenderer.sendSync('kaloneo-library:test-metadata-sync'),
   kaloneoGetTest: (id, version) => ipcRenderer.invoke('kaloneo-library:get-test', { id, version }),
-  kaloneoSaveTest: (definition, overwrite) => ipcRenderer.invoke('kaloneo-library:save-test', { definition, overwrite:overwrite === true }),
+  kaloneoSaveTest: (definition, overwrite, developerOverride=false) =>
+    ipcRenderer.invoke('kaloneo-library:save-test', {
+      definition,overwrite:overwrite === true,developerOverride:developerOverride===true
+    }),
+  kaloneoDeveloperStatus: () => ipcRenderer.invoke('kaloneo-developer:status'),
+  kaloneoDeveloperUnlock: (password) => ipcRenderer.invoke('kaloneo-developer:unlock',password),
+  kaloneoDeveloperExportV1: (definition) => ipcRenderer.invoke('kaloneo-developer:export-v1',definition),
   kaloneoDeleteTest: (id, version) => ipcRenderer.invoke('kaloneo-library:delete-test', { id, version }),
   kaloneoExportTest: (id, version) => ipcRenderer.invoke('kaloneo-transfer:export-test', { id, version }),
   kaloneoImportTest: () => ipcRenderer.invoke('kaloneo-transfer:import-test'),
