@@ -34,6 +34,7 @@ let candidateTransfer = null;
 let candidateProtection = null;
 let kaloneoLibrary = null;
 let kaloneoBuilderPreviewDefinition = null;
+let kaloneoBuilderPreviewFullscreenActive = false;
 let kaloneoMaskPreviewDefinition = null;
 let adminExportCandidateDir = null;
 let adminCandidateResultsMode = false;
@@ -59,6 +60,17 @@ function getAdminTaskbarOverlayIcon() {
 function applyAdminWindowMode(unlocked) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   const isUnlocked = !!unlocked;
+  if(isUnlocked && kaloneoBuilderPreviewFullscreenActive) {
+    // R48.6 — exactement la surface candidat, sans chrome ni barre Windows.
+    // Reste dans le contexte Admin : aucun verrou candidat/session activé.
+    try { mainWindow.setAlwaysOnTop(false); } catch (_) {}
+    try { mainWindow.setSkipTaskbar(true); } catch (_) {}
+    try { mainWindow.setFullScreen(true); } catch (_) {}
+    try { mainWindow.setKiosk(true); } catch (_) {}
+    try { mainWindow.setMenuBarVisibility(false); } catch (_) {}
+    try { mainWindow.focus(); } catch (_) {}
+    return;
+  }
 
   if (isUnlocked) {
     try { stopCandidateKeyGuard(); } catch (_) {}
@@ -633,6 +645,11 @@ function createWindow() {
 
   mainWindow.webContents.on('did-navigate', (_event, url) => {
     const page = safePageName(url);
+    if (kaloneoBuilderPreviewFullscreenActive &&
+      /\/kaltest-pilot2\.html\?kaloneoPreview=1(?:&|$)/.test(String(url))) {
+      applyAdaptiveZoom();
+      return; // ne jamais faire du test aperçu la dernière route candidat
+    }
     if (adminCandidateResultsMode || isAdminNavigationPage(page)) {
       applyAdaptiveZoom();
       return;
@@ -1419,10 +1436,14 @@ ipcMain.handle('kaloneo-builder:open-preview', (_event, definition) => {
   try {
     kaloneoBuilderPreviewDefinition = JSON.parse(JSON.stringify(definition));
     adminCandidateResultsMode = false;
+    kaloneoBuilderPreviewFullscreenActive=true;
+    applyAdminWindowMode(true);
     mainWindow.loadFile(target, {query:{kaloneoPreview:'1'}});
     return { ok:true };
   } catch (error) {
     kaloneoBuilderPreviewDefinition = null;
+    kaloneoBuilderPreviewFullscreenActive=false;
+    applyAdminWindowMode(true);
     return { ok:false, error:error && error.message ? error.message : String(error) };
   }
 });
@@ -1450,9 +1471,11 @@ ipcMain.handle('kaloneo-builder:consume-preview', () => {
 });
 
 ipcMain.handle('kaloneo-builder:close-preview', () => {
-  if (!mainWindow || mainWindow.isDestroyed() || !adminSessionUnlocked) return false;
+  if (!mainWindow || mainWindow.isDestroyed() || !adminSessionUnlocked ||
+      !kaloneoBuilderPreviewFullscreenActive) return false;
   const target = path.join(__dirname, '..', 'app', 'web', 'kaloneo-builder', 'test-builder.html');
   if (!fs.existsSync(target)) return false;
+  kaloneoBuilderPreviewFullscreenActive=false;
   mainWindow.loadFile(target, { query:{ resume:'preview' } });
   return true;
 });

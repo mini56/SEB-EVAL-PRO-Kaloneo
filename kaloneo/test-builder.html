@@ -269,8 +269,8 @@
     <section class="builder-preview seb-card">
       <div class="preview-toolbar">
         <div>
-          <h2>Aperçu de construction</h2>
-          <p class="muted">Miniature automatique de la page. Utilisez l’aperçu Electron pour contrôler le rendu réel.</p>
+          <h2>Aperçu fidèle du candidat</h2>
+          <p class="muted">Image réduite du véritable moteur candidat (1366 × 768). Les avertissements signalent les débordements.</p>
         </div>
         <div class="preview-toolbar-actions">
           <button id="r48-demo-restaurant" class="seb-action-btn seb-btn-functional" type="button">Charger le Restaurant R48</button>
@@ -279,6 +279,8 @@
       </div>
 
       <div id="candidate-preview-viewport" class="candidate-preview-viewport">
+        <img id="candidate-preview-snapshot" class="candidate-preview-snapshot" alt="Rendu réel de la page candidat, réduit proportionnellement" hidden>
+        <div id="candidate-preview-status" class="candidate-preview-status" role="status">Préparation de l’aperçu candidat…</div>
       <div id="candidate-preview" class="candidate-preview">
         <div class="preview-heading">
           <div class="preview-title-with-icon">
