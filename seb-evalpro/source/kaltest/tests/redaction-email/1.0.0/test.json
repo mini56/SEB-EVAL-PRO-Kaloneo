@@ -20,16 +20,21 @@
     "defaultEnabled": false
   },
   "scenario": "Votre conseiller vous contacte par e-mail pour vous prévenir que votre rendez-vous est déplacé. Il vous demande de lui envoyer votre rapport de stage en entreprise.",
-  "instruction": "Répondez à son e-mail. Envoyez le message à conseil.perso@sauvegarde56.org, en copie à stage-pro@sauvegarde56.org. Mettez en objet « Prénom Mail-SEB », ajoutez Rapport_stage.docx et signez avec votre prénom, votre nom et votre numéro de téléphone.",
+  "instruction": "Vous devez répondre à son e-mail. Envoyez votre message sur les adresses e-mail indiquées dans les consignes, rédigez le message demandé et choisissez la pièce jointe appropriée.",
   "presentation": {
     "layout": "50-50",
     "mailComposer": {
       "instructions": [
+        "Vous devez répondre à son e-mail. Envoyez votre message sur les adresses e-mail suivantes :",
         "À votre conseiller : conseil.perso@sauvegarde56.org",
-        "En copie : stage-pro@sauvegarde56.org",
-        "Objet : Prénom Mail-SEB",
+        "En copie à votre responsable de stage : stage-pro@sauvegarde56.org",
+        "Dans l'éditeur, mettez en forme votre texte en respectant les consignes ci-dessous.",
+        "Mettez en objet : Prénom* Mail-SEB",
         "Ajoutez votre rapport en pièce jointe.",
-        "Signez avec votre prénom, votre nom et votre numéro de téléphone."
+        "Saisissez un message avec une formule de politesse en introduction et à la fin puis une signature avec votre prénom, nom et numéro de téléphone sur le modèle ci-dessous :",
+        "Prénom NOM",
+        "01.02.34.56.78",
+        "* Mettre votre prénom."
       ],
       "fields": {
         "to": "mail_to",
