@@ -277,6 +277,10 @@ function applyBlockStyle(node,block){
   if(background){
     node.style.backgroundColor=background;
   }
+  if(block?.type==='text'){
+    if(['left','center','right'].includes(block.textAlign))node.style.textAlign=block.textAlign;
+    if(['1','1.2','1.5','1.8'].includes(String(block.lineHeight||'')))node.style.lineHeight=String(block.lineHeight);
+  }
     if(block?.backgroundImage){
       const opacity=Math.max(0,Math.min(100,Number(block.backgroundOpacity??100)||0))/100;
       node.style.backgroundImage='linear-gradient(rgba(255,255,255,'+(1-opacity)+'),rgba(255,255,255,'+(1-opacity)+')),url('+JSON.stringify(String(block.backgroundImage).startsWith('imageqcm/')?'../'+block.backgroundImage:block.backgroundImage)+')';

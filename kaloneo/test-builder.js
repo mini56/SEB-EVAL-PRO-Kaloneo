@@ -22,6 +22,7 @@
   let historyIndex = -1;
   let historyTimer = null;
   let applyingHistory = false;
+  const activeGridEditorColumn=new Map(); // UI only: never saved into KALTEST
   let builderDirty = false;
   let savedFingerprint = String(localStorage.getItem(SAVED_FINGERPRINT_KEY) || '');
   let statusToken = 0;
@@ -853,6 +854,22 @@
     });
     body.appendChild(columns);
 
+    const columnNavigation=document.createElement('div');
+    columnNavigation.className='grid-column-navigation';
+    const back=document.createElement('button');back.type='button';back.className='mini-btn';back.textContent='←';back.title='Colonne précédente';
+    const forward=document.createElement('button');forward.type='button';forward.className='mini-btn';forward.textContent='→';forward.title='Colonne suivante';
+    const columnPicker=document.createElement('select');columnPicker.className='grid-column-picker';columnPicker.setAttribute('aria-label','Colonne du tableau à modifier');
+    for(let i=0;i<table.cols;i++){
+      const option=document.createElement('option');
+      option.value=String(i);option.textContent='Colonne '+(i+1)+(table.headers?.[i]?' — '+table.headers[i]:'');
+      columnPicker.append(option);
+    }
+    const initial=Math.max(0,Math.min(table.cols-1,activeGridEditorColumn.get(block.uid)||0));
+    let activeColumn=initial;
+    columnPicker.value=String(activeColumn);
+    columnNavigation.append(back,columnPicker,forward);
+    body.appendChild(columnNavigation);
+    const columnsByIndex=Array.from({length:table.cols},()=>[]);
     const scroll=document.createElement('div');
     scroll.className='grid-editor-scroll';
     const editor=document.createElement('table');
@@ -862,6 +879,12 @@
       const tr=document.createElement('tr');
       rowCells.forEach((cell,colIndex)=>{
         const td=document.createElement('td');
+        const rowLabel=document.createElement('div');
+        rowLabel.className='grid-editor-row-label';
+        rowLabel.textContent='Ligne '+(rowIndex+1)+(table.columns?.[colIndex]?.id?' · '+String(table.columns[colIndex].id):'');
+        td.appendChild(rowLabel);
+        columnsByIndex[colIndex].push(td);
+        td.hidden=(colIndex!==activeColumn);
         const kind=document.createElement('select');
         [
           ['empty','Vide'],['fixed-text','Texte fixe'],['candidate-answer','Réponse candidat'],
@@ -950,6 +973,19 @@
     });
     scroll.appendChild(editor);
     body.appendChild(scroll);
+    const showColumn=index=>{
+      activeColumn=Math.max(0,Math.min(table.cols-1,index));
+      activeGridEditorColumn.set(block.uid,activeColumn);
+      columnPicker.value=String(activeColumn);
+      back.disabled=activeColumn===0;
+      forward.disabled=activeColumn===table.cols-1;
+      columnsByIndex.forEach((tds,i)=>tds.forEach(td=>{td.hidden=(i!==activeColumn);}));
+      scroll.scrollTop=0;
+    };
+    back.addEventListener('click',()=>showColumn(activeColumn-1));
+    forward.addEventListener('click',()=>showColumn(activeColumn+1));
+    columnPicker.addEventListener('change',()=>showColumn(Number(columnPicker.value)));
+    showColumn(initial);
   }
 
   function renderInlineEditor(block,body) {
@@ -1264,6 +1300,16 @@
     });
 
     row.append(font,background);
+    if(block.type==='text'){
+      const textOptions=document.createElement('div');textOptions.className='field-row';
+      const alignment=selectField('Alignement',String(block.textAlign||''),[
+        ['','Standard'],['left','Gauche'],['center','Centré'],['right','Droite']
+      ],value=>{block.textAlign=value;changed();});
+      const spacing=selectField('Interligne',String(block.lineHeight||''),[
+        ['','Standard'],['1','Compact (1,0)'],['1.2','Normal (1,2)'],['1.5','Aéré (1,5)'],['1.8','Large (1,8)']
+      ],value=>{block.lineHeight=value;changed();});
+      textOptions.append(alignment,spacing);panel.append(title,row,textOptions);
+    }
     const bgLabel=document.createElement('strong');bgLabel.textContent='Image de fond du bloc (texte par-dessus)';
     const choose=document.createElement('button');choose.type='button';choose.className='mini-btn';
     choose.textContent=block.backgroundImage?'Changer l’image de fond':'Choisir une image de fond';
@@ -1280,7 +1326,8 @@
     const opacity=inputField('Visibilité image (%)',block.backgroundOpacity??100,v=>{block.backgroundOpacity=Math.max(0,Math.min(100,Number(v)||0));changed();},{type:'number',min:0,max:100});
     const controls=document.createElement('div');controls.className='field-row';controls.append(choose,remove);
     const options=document.createElement('div');options.className='field-row cols-3';options.append(position,fit,opacity);
-    panel.append(title,row,bgLabel,controls,options);
+    if(block.type!=='text')panel.append(title,row);
+    panel.append(bgLabel,controls,options);
     body.appendChild(panel);
   }
 
@@ -1297,6 +1344,10 @@
       node.style.backgroundColor=background;
       node.style.padding=node.style.padding||'9px 10px';
       node.style.borderRadius=node.style.borderRadius||'8px';
+    }
+    if(block?.type==='text'){
+      if(['left','center','right'].includes(block.textAlign))node.style.textAlign=block.textAlign;
+      if(['1','1.2','1.5','1.8'].includes(String(block.lineHeight||'')))node.style.lineHeight=String(block.lineHeight);
     }
     if(block?.backgroundImage){
       const opacity=Math.max(0,Math.min(100,Number(block.backgroundOpacity??100)||0))/100;

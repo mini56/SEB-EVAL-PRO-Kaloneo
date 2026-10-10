@@ -447,12 +447,23 @@ textarea {
   background:#F8FAFC;
 }
 .cell-grid-editor{
-  width:max-content;
-  min-width:100%;
+  width:100%;
+  min-width:0;
+  table-layout:fixed;
   border-collapse:collapse;
 }
-.cell-grid-editor td{
-  min-width:190px;
+.grid-column-navigation{
+  display:flex;align-items:center;gap:8px;margin:10px 0 6px;
+}
+.grid-column-picker{flex:1 1 auto;min-width:0;}
+.grid-editor-scroll{overflow-x:hidden;}
+.cell-grid-editor td[hidden]{display:none!important;}
+.cell-grid-editor .grid-editor-row-label{
+  font-weight:700;font-size:12px;color:#004e70;margin:0 0 7px;
+}
+ .cell-grid-editor td{
+  min-width:0;
+  width:100%;
   vertical-align:top;
   padding:6px;
   border:1px solid #D8DEE8;

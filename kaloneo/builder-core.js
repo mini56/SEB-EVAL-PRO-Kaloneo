@@ -233,6 +233,8 @@
     const style=item?.style||{};
     block.fontSize=Number(style.fontSize)||'';
     block.backgroundColor=String(style.backgroundColor||'');
+    block.textAlign=block.type==='text' && ['left','center','right'].includes(style.textAlign)?style.textAlign:'';
+    block.lineHeight=block.type==='text' && ['1','1.2','1.5','1.8'].includes(String(style.lineHeight||''))?String(style.lineHeight):'';
     block.backgroundImage=String(style.backgroundImage||'');
     block.backgroundFit=String(style.backgroundFit||'decorative');
     block.backgroundPosition=String(style.backgroundPosition||'right bottom');
@@ -246,6 +248,10 @@
     const backgroundColor=String(block?.backgroundColor||'').trim();
     if(Number.isFinite(fontSize)&&fontSize>=10&&fontSize<=40) style.fontSize=fontSize;
     if(backgroundColor) style.backgroundColor=backgroundColor;
+    if(block?.type==='text'){
+      if(['left','center','right'].includes(block.textAlign))style.textAlign=block.textAlign;
+      if(['1','1.2','1.5','1.8'].includes(String(block.lineHeight||'')))style.lineHeight=String(block.lineHeight);
+    }
     if(block?.backgroundImage){
       style.backgroundImage=String(block.backgroundImage);
       style.backgroundFit=['decorative','contain','cover'].includes(block.backgroundFit)?block.backgroundFit:'decorative';

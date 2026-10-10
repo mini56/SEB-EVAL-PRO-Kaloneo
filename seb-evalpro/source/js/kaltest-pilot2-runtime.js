@@ -3419,6 +3419,10 @@
       node.style.fontSize = fontSize + 'px';
       node.dataset.kaloneoFontSize = String(fontSize);
     }
+    if(item?.type==='text'){
+      if(['left','center','right'].includes(style.textAlign))node.style.textAlign=style.textAlign;
+      if(['1','1.2','1.5','1.8'].includes(String(style.lineHeight||'')))node.style.lineHeight=String(style.lineHeight);
+    }
     const backgroundColor = String(style.backgroundColor || '').trim();
     if (backgroundColor) {
       node.style.backgroundColor = backgroundColor;

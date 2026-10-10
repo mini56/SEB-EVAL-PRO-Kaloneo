@@ -155,3 +155,6 @@ body{font-family:Calibri,"Segoe UI",Arial,sans-serif;background:linear-gradient(
   grid-column:2;
   margin:0;
 }
+
+/* R48.1 — identique dans l'aperçu réel Electron. */
+.kb-zone>.kb-block:last-child{flex:1 1 auto;min-height:0;}
