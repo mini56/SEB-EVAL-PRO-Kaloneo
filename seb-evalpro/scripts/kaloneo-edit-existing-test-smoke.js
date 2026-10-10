@@ -125,7 +125,7 @@ try {
       persistedV1?.version !== '1.0.0' ||
       persistedV1?.kaloneoLibrary?.adminModified === true ||
       persistedV1?.presentation?.builderContent ||
-      persistedV1?.presentation?.organisationList?.visual?.src !== 'imageqcm/demenagement.png') {
+      persistedV1?.presentation?.organisationList?.visual?.src !== v1.presentation?.organisationList?.visual?.src) {
     fail('la vraie V1 système Organisation n’est pas restaurée depuis le seed', persistedV1);
   }
 

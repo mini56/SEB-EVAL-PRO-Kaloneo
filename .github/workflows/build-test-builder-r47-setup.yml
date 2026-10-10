@@ -291,7 +291,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SEB-EvalPro-Kaloneo-PILOTE-22-R47-Windows
-          path: seb-evalpro/dist/SEB-EvalPro-Kaloneo-PILOTE-22-R46-0.0.66-Windows-Setup.exe
+          path: seb-evalpro/dist/SEB-EvalPro-Kaloneo-PILOTE-22-R47-0.0.67-Windows-Setup.exe
           if-no-files-found: error
 
       - name: Publish test release
