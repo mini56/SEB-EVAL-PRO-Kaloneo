@@ -28,5 +28,8 @@ const runtime=fs.readFileSync(path.join(root,'source/js/kaltest-pilot2-runtime.j
 for(const js of [core,ui,runtime]) {require('node:vm').runInNewContext('new Function('+JSON.stringify(js)+')');}
 assert.ok(ui.includes('table.layoutOnly=check.checked'));
 assert.ok(ui.includes('block.backgroundImage=result.image.data'));
+assert.ok(ui.includes('r48-demo-restaurant'));
+assert.ok(fs.readFileSync(path.join(root,'../kaloneo/test-builder.html'),'utf8').includes('restaurant-r48-demo.js'));
+assert.ok(fs.existsSync(path.join(root,'../kaloneo/restaurant-r48-demo.js')));
 assert.ok(runtime.includes('!Array.isArray(test.presentation?.builderContent) && renderPlanning(test, host)'));
 console.log('R48_RESTAURANT_BUILDER_CONTRACT: OK; 15 questions and original content preserved');

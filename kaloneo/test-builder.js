@@ -1300,7 +1300,7 @@
     }
     if(block?.backgroundImage){
       const opacity=Math.max(0,Math.min(100,Number(block.backgroundOpacity??100)||0))/100;
-      node.style.backgroundImage='linear-gradient(rgba(255,255,255,'+(1-opacity)+'),rgba(255,255,255,'+(1-opacity)+')),url('+JSON.stringify(String(block.backgroundImage))+')';
+      node.style.backgroundImage='linear-gradient(rgba(255,255,255,'+(1-opacity)+'),rgba(255,255,255,'+(1-opacity)+')),url('+JSON.stringify(String(block.backgroundImage).startsWith('imageqcm/')?'../'+block.backgroundImage:block.backgroundImage)+')';
       node.style.backgroundRepeat='no-repeat';
       node.style.backgroundPosition=String(block.backgroundPosition||'right bottom');
       node.style.backgroundSize=block.backgroundFit==='cover'?'cover':block.backgroundFit==='contain'?'contain':'auto 78%';
@@ -1582,7 +1582,7 @@
       wrap.appendChild(frame);
     } else if(block.type==='image'&&block.mediaData) {
       wrap.classList.add('preview-media-block');
-      const img=document.createElement('img');img.className='preview-media';img.src=block.mediaData;img.alt=block.mediaAlt||block.mediaName||'Image';wrap.appendChild(img);
+      const img=document.createElement('img');img.className='preview-media';img.src=String(block.mediaData).startsWith('imageqcm/')?'../'+block.mediaData:block.mediaData;img.alt=block.mediaAlt||block.mediaName||'Image';wrap.appendChild(img);
     } else if(block.type==='audio'&&block.mediaData) {
       const a=document.createElement('audio');a.controls=true;a.src=block.mediaData;a.style.width='100%';wrap.appendChild(a);
     } else if(block.type==='video'&&block.mediaData) {
@@ -2326,6 +2326,12 @@
     $('test-template').addEventListener('change',()=>applyTemplate($('test-template').value));
     $('add-block').addEventListener('click',()=>{
       state.blocks.push(baseBlock('text'));changed();renderBlocks();
+    });
+    $('r48-demo-restaurant').addEventListener('click',()=>{
+      if(!confirmDiscardChanges('Charger la démonstration Restaurant R48'))return;
+      const demo=window.KaloneoRestaurantR48Demo;
+      if(!demo){alert('La démonstration Restaurant R48 est introuvable.');return;}
+      loadDefinition(Core.clone(demo),'Restaurant R48 chargé depuis le modèle intégré');
     });
     $('open-electron-preview').addEventListener('click',async()=>{
       refreshPreview();
