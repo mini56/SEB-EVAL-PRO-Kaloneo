@@ -1,0 +1,37 @@
+name: TESTS_V1 — validation des références officielles
+on:
+  push:
+    branches:
+      - feature-testsv1-canonical
+    paths:
+      - 'TESTS_V1/**'
+      - 'seb-evalpro/scripts/kaloneo-testsv1.js'
+      - 'seb-evalpro/scripts/kaloneo-testsv1-smoke.js'
+      - 'seb-evalpro/scripts/build-kaltest-pilot2-data.js'
+      - 'seb-evalpro/scripts/prepare-web.js'
+      - 'seb-evalpro/src/kaloneo-library-main.js'
+      - '.github/workflows/test-testsv1-canonical.yml'
+  workflow_dispatch:
+jobs:
+  test-testsv1:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify explicit V1 replacement contract and malformed rejection
+        working-directory: seb-evalpro
+        run: node scripts/kaloneo-testsv1-smoke.js
+      - name: Generate parcours using current official TESTS_V1 on main
+        working-directory: seb-evalpro
+        run: node scripts/build-kaltest-pilot2-data.js
+      - name: Prepare compiled candidate and library seeds
+        working-directory: seb-evalpro
+        run: node scripts/prepare-web.js
+      - name: Ensure official manifest is always available
+        working-directory: seb-evalpro
+        shell: pwsh
+        run: |
+          if (-not (Test-Path app/web/kaltest/TESTS_V1-manifest.json)) { throw 'Manifest manquant.' }
+          node -e "const m=require('./app/web/kaltest/TESTS_V1-manifest.json');if(m.format!=='kaloneo-official-v1-overrides')process.exit(2)"
