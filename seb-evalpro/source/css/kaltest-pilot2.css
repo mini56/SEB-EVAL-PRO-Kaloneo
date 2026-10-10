@@ -3298,3 +3298,7 @@ body[data-seb-kaltest-id="traitement_texte_bureautique"] #toolbar .flex-spacer {
 body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .align-icon {display:flex;flex-direction:column;gap:2px;width:18px;}
 body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .align-icon span {height:2px;background:currentColor;display:block;}
 body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .align-left span:nth-child(2),body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .align-center span:nth-child(2),body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .align-right span:nth-child(2){width:70%;}
+
+/* E-mail V1 : énoncé continu, sans cartouches d'aide disposés comme des réponses. */
+body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-instruction-list {display:block;}
+body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-instruction-list p {border:0;background:transparent;border-radius:0;padding:0;margin:0 0 9px;line-height:1.35;font-weight:400;}
