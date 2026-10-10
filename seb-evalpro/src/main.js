@@ -1355,7 +1355,7 @@ ipcMain.on('kaloneo-library:selected-runtime-sync', (event) => {
       event.returnValue={ok:true,runtime:{
         id:'kaloneo-builder-mini-preview-only',
         title:'Miniature fidèle — '+String(def.title||'Nouveau test'),
-        builderPreview:true,
+        builderPreview:true,builderMiniPreview:true,
         launchOptions:{showCorrectionsDuringParcours:false},
         introduction:null,tests:[def],fin:null
       }};

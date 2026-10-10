@@ -31,6 +31,7 @@
 
   const PARAMS = new URLSearchParams(window.location.search);
   const BUILDER_PREVIEW_MODE = selectedRuntime?.builderPreview===true && PARAMS.get('kaloneoPreview')==='1';
+  const BUILDER_MINI_PREVIEW_MODE = BUILDER_PREVIEW_MODE && selectedRuntime?.builderMiniPreview===true;
   const FULL_PARCOURS_MODE = !CUSTOM_PARCOURS_MODE && PARAMS.get('fullParcours') === '1';
   const REQUESTED_SEGMENT = CUSTOM_PARCOURS_MODE ? '' : String(PARAMS.get('segment') || '').trim();
 
@@ -4232,7 +4233,10 @@
       document.body.classList.add('kaloneo-real-candidate-preview');
       document.title='KALONÉO — Aperçu réel candidat (Electron)';
       const close=document.getElementById('kaltest-next');
-      close.addEventListener('click',()=>{window.sebEvalPro?.kaloneoClosePreview?.();});
+      // Miniature : conserver le vrai libellé candidat (« Valider », « Suivant »).
+      // Le bouton est photographié mais jamais actionnable dans une image.
+      if(!BUILDER_MINI_PREVIEW_MODE)
+        close.addEventListener('click',()=>{window.sebEvalPro?.kaloneoClosePreview?.();});
     } else {
       document.getElementById('kaltest-next').addEventListener('click', finishCurrentTest);
     }
@@ -4246,7 +4250,7 @@
 
     if (state.phase === 'exercise') renderCurrentTest();
     showPhase(state.phase || DEFAULT_PHASE, false);
-    if (BUILDER_PREVIEW_MODE) {
+    if (BUILDER_PREVIEW_MODE && !BUILDER_MINI_PREVIEW_MODE) {
       const close=document.getElementById('kaltest-next');
       if(close){
         close.textContent='Fermer l’aperçu';
