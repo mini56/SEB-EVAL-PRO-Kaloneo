@@ -565,6 +565,11 @@ app.whenReady().then(async()=>{
     }
 
 
+    // Une fenêtre Electron invisible peut être bridée à 1024 px par l'écran CI :
+    // imposer le viewport utilisé par les captures utilisateur (1366×720).
+    win.setContentSize(1366,720);
+    await wait(200);
+
     // R48.2 : reproduire la vraie page Restaurant avec interligne aéré,
     // sans barre de défilement dans le planning ou la colonne gauche.
     const restaurantSetup=await win.webContents.executeJavaScript(`(()=>{
@@ -604,6 +609,7 @@ app.whenReady().then(async()=>{
       };
       return {
         page:location.pathname,
+        viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},
         zones:zones.map(measure),
         grid:measure(grid),
         indications:measure(indications),
@@ -614,6 +620,7 @@ app.whenReady().then(async()=>{
       };
     })()`);
     if(!/test-preview\\.html$/i.test(restaurantFit.page)||
+      restaurantFit.viewport.width<1300||restaurantFit.viewport.height<690||
       restaurantFit.zones.length!==2||
       !restaurantFit.grid||restaurantFit.selects!==15||
       !restaurantFit.instructionPresent||!restaurantFit.imagePresent||
