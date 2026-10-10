@@ -10,6 +10,11 @@ on:
       - 'seb-evalpro/scripts/build-kaltest-pilot2-data.js'
       - 'seb-evalpro/scripts/prepare-web.js'
       - 'seb-evalpro/src/kaloneo-library-main.js'
+      - 'seb-evalpro/src/main.js'
+      - 'seb-evalpro/src/preload.js'
+      - 'kaloneo/test-builder.js'
+      - 'kaloneo/test-builder.html'
+      - 'seb-evalpro/scripts/kaloneo-testsv1-developer-smoke.js'
       - '.github/workflows/test-testsv1-canonical.yml'
   workflow_dispatch:
 jobs:
@@ -23,6 +28,15 @@ jobs:
       - name: Verify explicit V1 replacement contract and malformed rejection
         working-directory: seb-evalpro
         run: node scripts/kaloneo-testsv1-smoke.js
+      - name: Verify developer-only V1 overwrite, backup and canonical upgrade
+        working-directory: seb-evalpro
+        run: node scripts/kaloneo-testsv1-developer-smoke.js
+      - name: Verify main, preload and Builder JavaScript syntax
+        working-directory: seb-evalpro
+        run: |
+          node --check src/main.js
+          node --check src/preload.js
+          node --check ../kaloneo/test-builder.js
       - name: Generate parcours using current official TESTS_V1 on main
         working-directory: seb-evalpro
         run: node scripts/build-kaltest-pilot2-data.js
