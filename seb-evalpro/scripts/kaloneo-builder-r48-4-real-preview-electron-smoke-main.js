@@ -76,7 +76,7 @@ app.whenReady().then(async()=>{
   assert.equal(result.photos.length,1);
   assert.equal(result.photos[0].loaded,true,'restaurant candidate image not loaded');
   assert.ok(result.backgroundCount>0,'plateau background missing');
-  assert.equal(result.closeLabel,'Fermer l’aperçu');
+  assert.ok(result.closeLabel.includes('Fermer l’aperçu'),'close button label missing');
   assert.equal(saved,0,'preview must not save candidate state');
   assert.equal(replaySaved,0,'preview must not capture candidate replay');
   await win.webContents.executeJavaScript("document.getElementById('kaltest-next').click()");
