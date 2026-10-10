@@ -158,3 +158,17 @@ body{font-family:Calibri,"Segoe UI",Arial,sans-serif;background:linear-gradient(
 
 /* R48.1 — identique dans l'aperçu réel Electron. */
 .kb-zone>.kb-block:last-child{flex:1 1 auto;min-height:0;}
+
+/* R48.2 — un tableau doit garder sa hauteur réelle. Les autres blocs prennent
+   la place restante, sans générer une barre dans le tableau. Si le contenu ne
+   tient réellement pas, conserver le défilement plutôt que le masquer. */
+.kb-zone>.kb-table-wrap {
+  flex:0 0 auto;
+  height:auto;
+  min-height:max-content;
+  overflow:visible;
+}
+.kb-zone>.kb-block:last-child:not(.kb-table-wrap):not(.kb-media-block) {
+  flex:1 1 0;
+  min-height:0;
+}
