@@ -982,3 +982,5 @@ body{
 }
 .candidate-preview-status[hidden]{display:none!important;}
 .candidate-preview-viewport>.candidate-preview{visibility:hidden!important;}
+
+.candidate-preview-warning{font-size:12px;color:#004E70;margin:8px 0 0;min-height:16px;}

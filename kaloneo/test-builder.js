@@ -1676,6 +1676,48 @@
 
   const MINI_PREVIEW_WIDTH=1366;
   const MINI_PREVIEW_HEIGHT=768;
+  let miniPreviewTimer=null;
+  let miniPreviewRevision=0;
+  function refreshRealMiniPreview() {
+    const revision=++miniPreviewRevision;
+    if(miniPreviewTimer)clearTimeout(miniPreviewTimer);
+    const image=$('candidate-preview-snapshot');
+    const status=$('candidate-preview-status');
+    if(!image||!status)return;
+    status.textContent='Actualisation du rendu candidat…';
+    status.hidden=false;
+    image.hidden=true; // Ne jamais laisser croire que l'ancienne image est à jour.
+    miniPreviewTimer=setTimeout(async()=>{
+      const bridge=window.sebEvalPro;
+      if(!bridge?.kaloneoRenderMiniPreview) {
+        status.textContent='Miniature fidèle disponible uniquement dans Electron.';
+        return;
+      }
+      try {
+        const result=await bridge.kaloneoRenderMiniPreview(Core.modelToDefinition(currentModel()));
+        if(revision!==miniPreviewRevision)return; // capture précédente obsolète
+        if(!result?.ok||!result.image) {
+          status.textContent='Aperçu indisponible : '+String(result?.error||'rendu candidat non reçu');
+          return;
+        }
+        image.src=result.image;
+        image.hidden=false;
+        status.hidden=true;
+        const warnings=[];
+        if(result.report?.overflowZones)warnings.push('débordement de bloc');
+        if(result.report?.tableHorizontalOverflow)warnings.push('tableau trop large');
+        if(result.report?.brokenImages?.length)warnings.push('image introuvable');
+        const alert=$('candidate-preview-warning');
+        if(alert){
+          alert.textContent=warnings.length?
+            'À corriger dans le rendu candidat : '+warnings.join(', ')+'.':
+            'Réduction fidèle du rendu candidat 1366 × 768.';
+        }
+      } catch(error) {
+        if(revision===miniPreviewRevision)status.textContent='Impossible de calculer le rendu : '+String(error?.message||error);
+      }
+    },600);
+  }
 
   function fitMiniPreview() {
     const viewport=$('candidate-preview-viewport');
@@ -1749,6 +1791,7 @@
     }
     validate();
     requestAnimationFrame(fitMiniPreview);
+    refreshRealMiniPreview();
   }
 
   function validate() {

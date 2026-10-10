@@ -2163,6 +2163,7 @@ contextBridge.exposeInMainWorld('sebEvalPro', {
   kaloneoSelectedParcoursRuntimeSync: () => ipcRenderer.sendSync('kaloneo-library:selected-runtime-sync'),
   kaloneoSaveParcours: (payload) => ipcRenderer.invoke('kaloneo-library:save-parcours', payload),
   kaloneoOpenPreview: (definition) => ipcRenderer.invoke('kaloneo-builder:open-preview', definition),
+  kaloneoRenderMiniPreview: (definition) => ipcRenderer.invoke('kaloneo-builder:render-mini-preview', definition),
   kaloneoGetPreviewDefinition: () => ipcRenderer.invoke('kaloneo-builder:get-preview'),
   kaloneoConsumePreviewDefinition: () => ipcRenderer.invoke('kaloneo-builder:consume-preview'),
   kaloneoClosePreview: () => ipcRenderer.invoke('kaloneo-builder:close-preview'),

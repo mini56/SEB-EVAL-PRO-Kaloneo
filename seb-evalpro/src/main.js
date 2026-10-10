@@ -35,6 +35,9 @@ let candidateProtection = null;
 let kaloneoLibrary = null;
 let kaloneoBuilderPreviewDefinition = null;
 let kaloneoBuilderPreviewFullscreenActive = false;
+let kaloneoMiniPreviewWorker = null;
+let kaloneoMiniPreviewDefinition = null;
+let kaloneoMiniPreviewJob = Promise.resolve();
 let kaloneoMaskPreviewDefinition = null;
 let adminExportCandidateDir = null;
 let adminCandidateResultsMode = false;
@@ -755,6 +758,11 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
     adminSessionUnlocked = false;
+    if(kaloneoMiniPreviewWorker && !kaloneoMiniPreviewWorker.isDestroyed()){
+      kaloneoMiniPreviewWorker.destroy();
+    }
+    kaloneoMiniPreviewWorker=null;
+    kaloneoMiniPreviewDefinition=null;
   });
 }
 
@@ -1338,6 +1346,21 @@ ipcMain.on('kaloneo-library:selected-runtime-sync', (event) => {
     // R48.4 — le vrai moteur candidat sert lui-même à l'aperçu Builder.
     // Autorisé uniquement dans la navigation d'aperçu déclenchée par l'Admin.
     const url=String(event.sender?.getURL?.()||'');
+    const isMini=adminSessionUnlocked && Boolean(kaloneoMiniPreviewDefinition) &&
+      kaloneoMiniPreviewWorker && !kaloneoMiniPreviewWorker.isDestroyed() &&
+      event.sender === kaloneoMiniPreviewWorker.webContents &&
+      /\/kaltest-pilot2\.html\?kaloneoPreview=1(?:&|$)/.test(url);
+    if(isMini){
+      const def=JSON.parse(JSON.stringify(kaloneoMiniPreviewDefinition));
+      event.returnValue={ok:true,runtime:{
+        id:'kaloneo-builder-mini-preview-only',
+        title:'Miniature fidèle — '+String(def.title||'Nouveau test'),
+        builderPreview:true,
+        launchOptions:{showCorrectionsDuringParcours:false},
+        introduction:null,tests:[def],fin:null
+      }};
+      return;
+    }
     const isPreview=adminSessionUnlocked && Boolean(kaloneoBuilderPreviewDefinition) &&
       /\/kaltest-pilot2\.html\?kaloneoPreview=1(?:&|$)/.test(url) &&
       mainWindow && !mainWindow.isDestroyed() && event.sender===mainWindow.webContents;
@@ -1446,6 +1469,86 @@ ipcMain.handle('kaloneo-builder:open-preview', (_event, definition) => {
     applyAdminWindowMode(true);
     return { ok:false, error:error && error.message ? error.message : String(error) };
   }
+});
+
+
+/* R48.6 — Miniature réellement photographiée depuis KALTEST à 1366×768.
+   Aucune réécriture HTML/CSS du test, aucune écriture candidat. */
+function getKaloneoMiniPreviewWorker() {
+  if (kaloneoMiniPreviewWorker && !kaloneoMiniPreviewWorker.isDestroyed()) {
+    return kaloneoMiniPreviewWorker;
+  }
+  kaloneoMiniPreviewWorker=new BrowserWindow({
+    show:false, width:1366,height:768,useContentSize:true,
+    frame:false,skipTaskbar:true,paintWhenInitiallyHidden:true,
+    backgroundColor:'#ffffff',
+    webPreferences:{
+      preload:path.join(__dirname,'preload.js'),
+      contextIsolation:true,nodeIntegration:false,sandbox:false,
+      backgroundThrottling:false,devTools:false,
+      offscreen:true
+    }
+  });
+  kaloneoMiniPreviewWorker.on('closed',()=>{kaloneoMiniPreviewWorker=null;});
+  return kaloneoMiniPreviewWorker;
+}
+
+ipcMain.handle('kaloneo-builder:render-mini-preview', (event, definition) => {
+  if(!adminSessionUnlocked || !mainWindow || mainWindow.isDestroyed() ||
+      event.sender!==mainWindow.webContents ||
+      getCandidateStore().getActiveCandidate()) {
+    return {ok:false,error:'Miniature réservée au Builder en mode Admin, sans candidat actif.'};
+  }
+  if(!definition || typeof definition!=='object') {
+    return {ok:false,error:'Définition du test absente.'};
+  }
+  const submitted=JSON.parse(JSON.stringify(definition));
+  // Sérialiser les captures pour éviter qu'un nouveau modèle ne remplace celui
+  // d'une image encore en cours de génération.
+  const job=kaloneoMiniPreviewJob.catch(()=>{}).then(async()=>{
+    const worker=getKaloneoMiniPreviewWorker();
+    const source=path.join(__dirname,'..','app','web','kaltest-pilot2.html');
+    kaloneoMiniPreviewDefinition=submitted;
+    await worker.loadFile(source,{query:{kaloneoPreview:'1'}});
+    const report=await worker.webContents.executeJavaScript(`(async()=>{
+      await document.fonts.ready;
+      await Promise.all([...document.images].map(img=>img.complete?
+        Promise.resolve():new Promise(resolve=>{
+          img.addEventListener('load',resolve,{once:true});
+          img.addEventListener('error',resolve,{once:true});
+        })));
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      const content=document.getElementById('kaltest-content');
+      const zones=[...content?.querySelectorAll('.kaltest-builder-runtime-zone')||[]];
+      const table=content?.querySelector('.kaltest-builder-grid');
+      const overflowing=zones.filter(z=>z.scrollWidth>z.clientWidth+2 ||
+        z.scrollHeight>z.clientHeight+2).length;
+      return {
+        ready:document.body.classList.contains('kaloneo-real-candidate-preview') &&
+          Boolean(document.querySelector('#page-exercise.visible')),
+        width:innerWidth,height:innerHeight,
+        questionCount:content?.querySelectorAll('[data-question-id]').length||0,
+        overflowZones:overflowing,
+        tableHorizontalOverflow:!!table && table.scrollWidth>table.clientWidth+2,
+        brokenImages:[...document.images].filter(img=>!img.complete||!img.naturalWidth)
+          .map(img=>img.getAttribute('src')).filter(Boolean)
+      };
+    })()`,true);
+    if(!report.ready) return {ok:false,error:'Le moteur candidat n\u0027a pas terminé son affichage.'};
+    if(report.width!==1366||report.height!==768) {
+      return {ok:false,error:'Viewport différent du candidat : '+report.width+' × '+report.height};
+    }
+    const screenshot=await worker.webContents.capturePage();
+    if(screenshot.isEmpty())return {ok:false,error:'Capture candidat vide.'};
+    const size=screenshot.getSize();
+    const ratio=size.width/Math.max(1,size.height);
+    if(Math.abs(ratio-1366/768)>0.025) {
+      return {ok:false,error:'Capture tronquée : '+size.width+' × '+size.height};
+    }
+    return {ok:true,image:screenshot.resize({width:1366,height:768}).toDataURL(),report};
+  });
+  kaloneoMiniPreviewJob=job;
+  return job.catch(error=>({ok:false,error:String(error?.message||error)}));
 });
 
 ipcMain.handle('kaloneo-builder:get-preview', () => {
