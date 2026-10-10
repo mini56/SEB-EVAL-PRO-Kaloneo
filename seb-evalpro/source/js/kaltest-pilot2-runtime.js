@@ -3177,7 +3177,7 @@
             <button id="btn-left" type="button" title="Aligner à gauche">☰</button><button id="btn-center" type="button" title="Centrer">≡</button><button id="btn-right" type="button" title="Aligner à droite">☷</button>
           </div>
           <div class="kaltest-word-group kaltest-word-lists"><span class="kaltest-word-group-label">Listes</span>
-            <button id="btn-ul" type="button" title="Liste à puces">• Liste</button><button id="btn-ol" type="button" title="Liste numérotée">1. Liste</button>
+            <button id="btn-ul" type="button" title="Liste à puces">•</button><button id="btn-ol" type="button" title="Liste numérotée">1.</button>
           </div>
           <div class="kaltest-word-group kaltest-word-spacing"><span class="kaltest-word-group-label">Interligne</span>
             <select id="nw-line-height" title="Interligne"><option value="1">Simple</option><option value="1.15">1.15</option><option value="1.5">1.5</option><option value="2">Double</option></select>
