@@ -436,9 +436,20 @@ function createKaloneoLibrary(options = {}) {
     if (!source || !fs.existsSync(source)) return;
     copyMissingTree(source, destination);
 
+    // Official TESTS_V1 takes precedence when a new Setup is installed.
+    // A protected V1 that is absent from this manifest still uses the
+    // historical seed synchronization, unchanged.
+    const manifest=readJson(path.join(path.dirname(source),'TESTS_V1-manifest.json'));
+    const official=new Set(
+      manifest?.format==='kaloneo-official-v1-overrides' && Array.isArray(manifest.tests)
+        ? manifest.tests.filter(x=>x?.version==='1.0.0').map(x=>String(x.id))
+        : []
+    );
+
     for (const seedFile of walkTestFiles(source)) {
       const seedDefinition = readJson(seedFile);
-      if (!isBundledMigratedTest(seedDefinition)) continue;
+      if(!official.has(String(seedDefinition?.id||'')) &&
+        !isBundledMigratedTest(seedDefinition)) continue;
 
       const relative = path.relative(source, seedFile);
       const targetFile = path.join(destination, relative);

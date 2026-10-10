@@ -7,6 +7,7 @@ const sourceDir = path.join(root, 'source');
 const overridesDir = path.join(root, 'overrides');
 const kaloneoBuilderDir = path.join(repoRoot, 'kaloneo');
 const outputDir = path.join(root, 'app', 'web');
+const {writeOfficialSeedOverrides}=require('./kaloneo-testsv1');
 
 function fail(message) {
   console.error('SEB EvalPro prepare:web: ' + message);
@@ -61,6 +62,10 @@ fs.rmSync(outputDir,{recursive:true,force:true});
 fs.mkdirSync(outputDir,{recursive:true});
 copyTree(sourceDir,outputDir,new Set(['QCM.lnk','README.md']));
 copyTree(overridesDir,outputDir);
+writeOfficialSeedOverrides({
+  repoRoot,sourceTestsDir:path.join(sourceDir,'kaltest','tests'),
+  outputTestsDir:path.join(outputDir,'kaltest','tests')
+});
 if (!fs.existsSync(kaloneoBuilderDir)) fail('générateur KALONÉO canonique absent: kaloneo/');
 copyTree(kaloneoBuilderDir,path.join(outputDir,'kaloneo-builder'));
 assertCleanHtml(outputDir,'app/web');

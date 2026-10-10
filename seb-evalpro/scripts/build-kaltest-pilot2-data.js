@@ -6,6 +6,9 @@ const path = require('path');
 const sebRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(sebRoot, '..');
 const output = path.join(sebRoot, 'source', 'js', 'kaltest-pilot2-data.js');
+const {syncFromMainInCi,loadOfficialOverrides}=require('./kaloneo-testsv1');
+syncFromMainInCi(repoRoot);
+const officialV1=loadOfficialOverrides(repoRoot,path.join(sebRoot,'source','kaltest','tests')).overrides;
 
 const testPaths = [
   'seb-evalpro/source/kaltest/tests/calculs-commandes-atelier/1.0.0/test.json',
@@ -35,7 +38,8 @@ const testPaths = [
 const tests = testPaths.map(relative => {
   const file = path.join(repoRoot, relative);
   if (!fs.existsSync(file)) throw new Error('KALTEST absent : ' + relative);
-  return JSON.parse(fs.readFileSync(file, 'utf8'));
+  const baseline=JSON.parse(fs.readFileSync(file, 'utf8'));
+  return officialV1.get(baseline.id)?.definition || baseline;
 });
 
 const ids = tests.map(test => test.id);
@@ -59,4 +63,4 @@ fs.writeFileSync(
   'utf8'
 );
 
-console.log('KALTEST_PILOT2_DATA: OK — ' + tests.length + ' tests');
+console.log('KALTEST_PILOT2_DATA: OK — ' + tests.length + ' tests, TESTS_V1: '+officialV1.size);
