@@ -206,7 +206,7 @@
           enterSeb();
           return;
         }
-        hint.textContent = 'Ouvrez le dossier SEB avant d’enregistrer le document.';
+        hint.textContent = ''; // Aucune indication sur le bon dossier : exercice évalué.
         return;
       }
       const name = cleanFilename(nameInput.value);
