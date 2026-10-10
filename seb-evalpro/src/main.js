@@ -1509,6 +1509,14 @@ ipcMain.handle('kaloneo-builder:render-mini-preview', (event, definition) => {
     const worker=getKaloneoMiniPreviewWorker();
     const source=path.join(__dirname,'..','app','web','kaltest-pilot2.html');
     kaloneoMiniPreviewDefinition=submitted;
+    // Les machines Windows et les runners CI peuvent limiter la taille
+    // physique d'une fenêtre cachée. Le zoom crée malgré cela exactement
+    // le même viewport CSS qu'un candidat sur 1366×768.
+    const bounds=worker.getContentBounds();
+    const factor=Math.min(1,bounds.width/1366,bounds.height/768);
+    if(!(factor>0.25))return {ok:false,error:'Surface de capture indisponible.'};
+    worker.webContents.setZoomFactor(factor);
+    worker.setContentSize(Math.round(1366*factor),Math.round(768*factor));
     await worker.loadFile(source,{query:{kaloneoPreview:'1'}});
     const report=await worker.webContents.executeJavaScript(`(async()=>{
       await document.fonts.ready;
@@ -1535,7 +1543,7 @@ ipcMain.handle('kaloneo-builder:render-mini-preview', (event, definition) => {
       };
     })()`,true);
     if(!report.ready) return {ok:false,error:'Le moteur candidat n\u0027a pas terminé son affichage.'};
-    if(report.width!==1366||report.height!==768) {
+    if(Math.abs(report.width-1366)>2||Math.abs(report.height-768)>2) {
       return {ok:false,error:'Viewport différent du candidat : '+report.width+' × '+report.height};
     }
     const screenshot=await worker.webContents.capturePage();

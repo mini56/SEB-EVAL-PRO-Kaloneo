@@ -89,6 +89,10 @@ app.whenReady().then(async()=>{
       nodeIntegration:false,contextIsolation:true,sandbox:false,
       offscreen:true,backgroundThrottling:false}
   });
+  const bounds=worker.getContentBounds();
+  const factor=Math.min(1,bounds.width/1366,bounds.height/768);
+  worker.webContents.setZoomFactor(factor);
+  worker.setContentSize(Math.round(1366*factor),Math.round(768*factor));
   await worker.loadFile(path.join(web,'kaltest-pilot2.html'),{query:{kaloneoPreview:'1'}});
   const snapMetrics=await worker.webContents.executeJavaScript(`(async()=>{
     await document.fonts.ready;
@@ -109,7 +113,8 @@ app.whenReady().then(async()=>{
     };
   })()`,true);
   assert.equal(snapMetrics.real,true);
-  assert.deepEqual([snapMetrics.width,snapMetrics.height],[1366,768]);
+  assert.ok(Math.abs(snapMetrics.width-1366)<=2 && Math.abs(snapMetrics.height-768)<=2,
+    'hidden Window must use full candidate CSS resolution');
   assert.equal(snapMetrics.questions,15);
   assert.equal(snapMetrics.friday,true);
   const picture=await worker.webContents.capturePage();
