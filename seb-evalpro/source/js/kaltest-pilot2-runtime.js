@@ -1277,6 +1277,12 @@
     const table = document.createElement('table');
     table.className = 'kaltest-table kaltest-builder-grid';
     if(definition.compact===true)table.classList.add('kaltest-builder-grid-compact');
+    // Les grilles compactes d'au moins 5 colonnes doivent toujours tenir
+    // dans la zone disponible. Respecter les largeurs explicites du Builder.
+    if(definition.compact===true && Number(definition.cols)>=5 &&
+      !(definition.columns||[]).some(c=>Number(c?.widthChars)>=3)){
+      table.classList.add('kaltest-builder-grid-fit');
+    }
     if (definition.layoutOnly === true) {table.classList.add('kaloneo-layout-only');table.style.border='0';table.style.background='transparent';}
 
     if (Array.isArray(definition.headers) && definition.headers.length) {
@@ -3473,6 +3479,16 @@
 
     if (item.type === 'text') {
       renderRichContext(wrap, item.text || '');
+      // Réserver une véritable zone d'exclusion au texte au-dessus de
+      // l'illustration décorative, au lieu de recouvrir les dernières lignes.
+      // La forme de flottaison suit l'illustration dans le coin inférieur droit.
+      if(item?.style?.backgroundImage && item.style.backgroundFit==='decorative' &&
+          String(item.style.backgroundPosition||'right bottom')==='right bottom'){
+        const guard=document.createElement('span');
+        guard.className='kaltest-builder-background-text-guard';
+        guard.setAttribute('aria-hidden','true');
+        wrap.insertBefore(guard,wrap.firstChild);
+      }
       return wrap;
     }
     if (item.type === 'html' || item.type === 'html-js') {

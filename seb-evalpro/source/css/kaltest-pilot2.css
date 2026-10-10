@@ -3253,3 +3253,38 @@ body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-field textarea{
 .kaltest-builder-grid-compact th{padding:3px 5px;}
 .kaltest-builder-grid-compact td{padding:2px 3px;}
 .kaltest-builder-grid-compact select,.kaltest-builder-grid-compact input{min-height:28px;height:28px;padding:2px 4px;}
+
+/* R48.5 — toute la semaine visible en 50/50. Ne pas masquer les cellules :
+   le tableau lui-même et ses sélecteurs se compressent dans le bloc. */
+.kaltest-builder-grid-fit{
+  width:100%;
+  max-width:100%;
+  table-layout:fixed;
+}
+.kaltest-builder-grid-fit th,.kaltest-builder-grid-fit td{
+  min-width:0;
+  max-width:none;
+  overflow-wrap:break-word;
+}
+.kaltest-builder-grid-fit tr>*:first-child{width:12%;}
+.kaltest-builder-grid-fit select,
+.kaltest-builder-grid-fit input{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  font-size:13px;
+  padding:2px 2px;
+}
+
+/* R48.5 — la silhouette du plateau crée de la place dans les lignes du
+   bas. Les indications ne passent plus devant l'illustration. */
+.kaltest-builder-background-text-guard{
+  float:right;
+  width:54%;
+  height:100%;
+  display:block;
+  shape-outside:polygon(100% 0%,100% 100%,0% 100%,0% 70%,14% 59%,44% 49%,100% 42%);
+  pointer-events:none;
+}
