@@ -3234,3 +3234,17 @@ body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-field textarea{
 
 /* R48.1 — le dernier contenu s'étend dans le reste de sa colonne. */
 .kaltest-builder-runtime-zone>.kaltest-builder-content-item:last-child{flex:1 1 auto;min-height:0;}
+
+/* R48.2 — comportement identique dans la page candidat générique Builder.
+   Ne pas laisser la grille du planning se comprimer et s'auto-faire défiler. */
+.kaltest-builder-runtime-zone>.kaltest-builder-grid-wrap {
+  flex:0 0 auto;
+  height:auto;
+  min-height:max-content;
+  max-height:none;
+  overflow:visible;
+}
+.kaltest-builder-runtime-zone>.kaltest-builder-content-item:last-child {
+  flex:1 1 0;
+  min-height:0;
+}
