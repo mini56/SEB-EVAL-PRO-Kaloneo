@@ -3289,3 +3289,12 @@ body.kaloneo-real-candidate-preview #seb-evalpro-top-hotzone {
   opacity:.65;
   cursor:wait;
 }
+
+/* Traitement de texte V1 : barre historique rangée sur deux lignes. */
+body[data-seb-kaltest-id="traitement_texte_bureautique"] #toolbar,
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .toolbar-row2 {justify-content:center; flex-wrap:nowrap; gap:4px; width:100%;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .toolbar-row2 .flex-spacer,
+body[data-seb-kaltest-id="traitement_texte_bureautique"] #toolbar .flex-spacer {flex:1 1 0;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .align-icon {display:flex;flex-direction:column;gap:2px;width:18px;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .align-icon span {height:2px;background:currentColor;display:block;}
+body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .align-left span:nth-child(2),body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .align-center span:nth-child(2),body[data-seb-kaltest-id="traitement_texte_bureautique"] .kaltest-text-editor-toolbar .align-right span:nth-child(2){width:70%;}
