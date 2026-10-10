@@ -3289,3 +3289,28 @@ body.kaloneo-real-candidate-preview #seb-evalpro-top-hotzone {
   opacity:.65;
   cursor:wait;
 }
+
+/* Largeurs du Builder — quand aucune colonne ne possède de largeur ch,
+   toutes partagent la largeur disponible. Les règles spéciales et les
+   largeurs manuelles restent inchangées. */
+.kaltest-builder-grid-equal-auto{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  table-layout:fixed!important;
+}
+.kaltest-builder-grid-equal-auto th,
+.kaltest-builder-grid-equal-auto td{
+  min-width:0!important;
+  box-sizing:border-box;
+}
+.kaltest-builder-grid-equal-auto td>select.step,
+.kaltest-builder-grid-equal-auto td>input.step,
+.kaltest-builder-grid-equal-auto td>textarea.step{
+  display:block;
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+}
