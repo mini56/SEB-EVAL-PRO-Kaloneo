@@ -3932,7 +3932,7 @@
       // Rédaction e-mail migrée dans le moteur KALTEST commun.
     } else if (renderStock(test, host)) {
       // Ranger le stock migré dans le moteur KALTEST commun.
-    } else if (renderPlanning(test, host)) {
+    } else if (!Array.isArray(test.presentation?.builderContent) && renderPlanning(test, host)) {
       // Planning cantine migré dans le moteur KALTEST commun.
     } else if (Array.isArray(test.presentation?.builderContent) && renderBuilderContent(test, host)) {
       // Une version explicitement enregistrée par le Builder est prioritaire
