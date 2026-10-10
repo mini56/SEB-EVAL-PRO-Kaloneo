@@ -1272,6 +1272,7 @@
 
     const table = document.createElement('table');
     table.className = 'kaltest-table kaltest-builder-grid';
+    if (definition.layoutOnly === true) {table.classList.add('kaloneo-layout-only');table.style.border='0';table.style.background='transparent';}
 
     if (Array.isArray(definition.headers) && definition.headers.length) {
       const thead = document.createElement('thead');
@@ -1296,6 +1297,7 @@
         const cellDefinition = rowDefinition[columnIndex] || {};
         const td = document.createElement('td');
         applyBuilderColumn(td, definition.columns?.[columnIndex]);
+        if(definition.layoutOnly===true){td.style.border='0';td.style.background='transparent';}
 
         const rowSpan = Math.max(1, Number(cellDefinition.rowSpan) || 1);
         const colSpan = Math.max(1, Number(cellDefinition.colSpan) || 1);
@@ -3422,6 +3424,13 @@
       node.style.backgroundColor = backgroundColor;
       node.style.padding = node.style.padding || '8px 10px';
       node.style.borderRadius = node.style.borderRadius || '9px';
+    }
+    if(style.backgroundImage){
+      const opacity=Math.max(0,Math.min(100,Number(style.backgroundOpacity??100)||0))/100;
+      node.style.backgroundImage='linear-gradient(rgba(255,255,255,'+(1-opacity)+'),rgba(255,255,255,'+(1-opacity)+')),url('+JSON.stringify(String(style.backgroundImage))+')';
+      node.style.backgroundRepeat='no-repeat';
+      node.style.backgroundPosition=String(style.backgroundPosition||'right bottom');
+      node.style.backgroundSize=style.backgroundFit==='cover'?'cover':style.backgroundFit==='contain'?'contain':'auto 78%';
     }
     return node;
   }

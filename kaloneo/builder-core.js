@@ -233,6 +233,10 @@
     const style=item?.style||{};
     block.fontSize=Number(style.fontSize)||'';
     block.backgroundColor=String(style.backgroundColor||'');
+    block.backgroundImage=String(style.backgroundImage||'');
+    block.backgroundFit=String(style.backgroundFit||'decorative');
+    block.backgroundPosition=String(style.backgroundPosition||'right bottom');
+    block.backgroundOpacity=Number.isFinite(Number(style.backgroundOpacity))?Number(style.backgroundOpacity):100;
     return block;
   }
 
@@ -242,6 +246,12 @@
     const backgroundColor=String(block?.backgroundColor||'').trim();
     if(Number.isFinite(fontSize)&&fontSize>=10&&fontSize<=40) style.fontSize=fontSize;
     if(backgroundColor) style.backgroundColor=backgroundColor;
+    if(block?.backgroundImage){
+      style.backgroundImage=String(block.backgroundImage);
+      style.backgroundFit=['decorative','contain','cover'].includes(block.backgroundFit)?block.backgroundFit:'decorative';
+      style.backgroundPosition=String(block.backgroundPosition||'right bottom');
+      style.backgroundOpacity=Math.max(0,Math.min(100,Number(block.backgroundOpacity??100)||0));
+    }
     return Object.keys(style).length?style:undefined;
   }
 

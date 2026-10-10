@@ -51,7 +51,7 @@
   }
 
   function baseBlock(type='text') {
-    const styled=block=>Object.assign({fontSize:'',backgroundColor:''},block);
+    const styled=block=>Object.assign({fontSize:'',backgroundColor:'',backgroundImage:'',backgroundFit:'decorative',backgroundPosition:'right bottom',backgroundOpacity:100},block);
     if (type === 'table-grid') return styled(Core.createGridBlock(3, 3));
     if (type === 'response-table') {
       return styled({
@@ -820,6 +820,11 @@
       inputField('Colonnes',table.cols,value=>{resizeGrid(table,table.rows,value);changed();renderBlocks();},{type:'number',min:1,max:20})
     );
     body.appendChild(dims);
+    const layoutLabel=document.createElement('label');layoutLabel.className='inline-checkbox';
+    const check=document.createElement('input');check.type='checkbox';check.checked=table.layoutOnly===true;
+    check.addEventListener('change',()=>{table.layoutOnly=check.checked;changed();});
+    layoutLabel.append(check,document.createTextNode(' Tableau de mise en page : bordures invisibles (ne change pas les réponses)'));
+    body.appendChild(layoutLabel);
 
     const columns=document.createElement('div');
     columns.className='grid-columns-editor';
@@ -1002,6 +1007,13 @@
       return true;
     }
 
+    if(String(state.imageLibraryTargetUid||'').startsWith('__block_background__:')){
+      const uidValue=String(state.imageLibraryTargetUid).slice('__block_background__:'.length);
+      const block=blockByUid(uidValue);
+      if(!block)return false;
+      block.backgroundImage=result.image.data;
+      changed();renderBlocks();$('image-library-dialog')?.close();return true;
+    }
     const target=blockByUid(state.imageLibraryTargetUid);
     if(!target || target.type!=='image') return false;
     target.mediaName=result.image.name||'image';
@@ -1252,7 +1264,23 @@
     });
 
     row.append(font,background);
-    panel.append(title,row);
+    const bgLabel=document.createElement('strong');bgLabel.textContent='Image de fond du bloc (texte par-dessus)';
+    const choose=document.createElement('button');choose.type='button';choose.className='mini-btn';
+    choose.textContent=block.backgroundImage?'Changer l’image de fond':'Choisir une image de fond';
+    choose.addEventListener('click',()=>openImageLibrary('__block_background__:'+block.uid).catch(error=>alert(String(error?.message||error))));
+    const remove=document.createElement('button');remove.type='button';remove.className='mini-btn danger';
+    remove.textContent='Retirer le fond';remove.disabled=!block.backgroundImage;
+    remove.addEventListener('click',()=>{block.backgroundImage='';changed();renderBlocks();});
+    const position=selectField('Position',String(block.backgroundPosition||'right bottom'),[
+      ['right bottom','Bas droite'],['center center','Centre'],['left bottom','Bas gauche'],['right center','Droite']
+    ],v=>{block.backgroundPosition=v;changed();});
+    const fit=selectField('Taille du fond',String(block.backgroundFit||'decorative'),[
+      ['decorative','Illustration partielle'],['contain','Image entière'],['cover','Remplir']
+    ],v=>{block.backgroundFit=v;changed();});
+    const opacity=inputField('Visibilité image (%)',block.backgroundOpacity??100,v=>{block.backgroundOpacity=Math.max(0,Math.min(100,Number(v)||0));changed();},{type:'number',min:0,max:100});
+    const controls=document.createElement('div');controls.className='field-row';controls.append(choose,remove);
+    const options=document.createElement('div');options.className='field-row cols-3';options.append(position,fit,opacity);
+    panel.append(title,row,bgLabel,controls,options);
     body.appendChild(panel);
   }
 
@@ -1269,6 +1297,13 @@
       node.style.backgroundColor=background;
       node.style.padding=node.style.padding||'9px 10px';
       node.style.borderRadius=node.style.borderRadius||'8px';
+    }
+    if(block?.backgroundImage){
+      const opacity=Math.max(0,Math.min(100,Number(block.backgroundOpacity??100)||0))/100;
+      node.style.backgroundImage='linear-gradient(rgba(255,255,255,'+(1-opacity)+'),rgba(255,255,255,'+(1-opacity)+')),url('+JSON.stringify(String(block.backgroundImage))+')';
+      node.style.backgroundRepeat='no-repeat';
+      node.style.backgroundPosition=String(block.backgroundPosition||'right bottom');
+      node.style.backgroundSize=block.backgroundFit==='cover'?'cover':block.backgroundFit==='contain'?'contain':'auto 78%';
     }
     return node;
   }
@@ -1452,6 +1487,7 @@
     if(t.title) {const h=document.createElement('h3');h.textContent=t.title;wrap.appendChild(h);}
     const table=document.createElement('table');
     table.className='preview-grid-table';
+    if(t.layoutOnly===true){table.classList.add('kaloneo-layout-only');table.style.border='0';table.style.background='transparent';}
     if(Array.isArray(t.headers)&&t.headers.length) {
       const tr=document.createElement('tr');
       t.headers.forEach((h,i)=>{const th=document.createElement('th');th.textContent=h;applyPreviewColumn(th,t.columns?.[i]);tr.appendChild(th);});
@@ -1462,6 +1498,7 @@
       const tr=document.createElement('tr');
       row.forEach((cell,i)=>{
         const td=document.createElement('td');
+        if(t.layoutOnly===true){td.style.border='0';td.style.background='transparent';}
         applyPreviewColumn(td,t.columns?.[i]);
         if((cell.rowSpan||1)>1) td.rowSpan=cell.rowSpan;
         if((cell.colSpan||1)>1) td.colSpan=cell.colSpan;

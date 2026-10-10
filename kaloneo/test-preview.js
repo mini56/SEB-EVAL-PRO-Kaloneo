@@ -113,6 +113,7 @@ function renderGrid(block){
   const wrap=el('div','kb-block kb-table-wrap');
   if(t.title) wrap.append(el('div','kb-question-label',t.title));
   const table=el('table','kb-table');
+  if(t.layoutOnly===true){table.classList.add('kaloneo-layout-only');table.style.border='0';table.style.background='transparent';}
   if(Array.isArray(t.headers)&&t.headers.length){
     const thead=el('thead');const tr=el('tr');
     t.headers.forEach((h,i)=>{const th=el('th','',h);applyColumn(th,t.columns?.[i]);tr.append(th);});
@@ -124,6 +125,7 @@ function renderGrid(block){
     (row||[]).forEach((cell,c)=>{
       if(cell?.hidden===true)return;
       const td=el('td');applyColumn(td,t.columns?.[c]);
+      if(t.layoutOnly===true){td.style.border='0';td.style.background='transparent';}
       if(Number(cell?.rowSpan)>1) td.rowSpan=Number(cell.rowSpan);
       if(Number(cell?.colSpan)>1) td.colSpan=Number(cell.colSpan);
       const kind=String(cell?.kind||'empty');
@@ -275,6 +277,14 @@ function applyBlockStyle(node,block){
   if(background){
     node.style.backgroundColor=background;
   }
+    if(block?.backgroundImage){
+      const opacity=Math.max(0,Math.min(100,Number(block.backgroundOpacity??100)||0))/100;
+      node.style.backgroundImage='linear-gradient(rgba(255,255,255,'+(1-opacity)+'),rgba(255,255,255,'+(1-opacity)+')),url('+JSON.stringify(String(block.backgroundImage))+')';
+      node.style.backgroundRepeat='no-repeat';
+      node.style.backgroundPosition=String(block.backgroundPosition||'right bottom');
+      node.style.backgroundSize=block.backgroundFit==='cover'?'cover':block.backgroundFit==='contain'?'contain':'auto 78%';
+    }
+
   return node;
 }
 
