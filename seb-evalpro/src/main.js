@@ -1318,6 +1318,23 @@ ipcMain.handle('kaloneo-library:selected-runtime', () => {
 
 ipcMain.on('kaloneo-library:selected-runtime-sync', (event) => {
   try {
+    // R48.4 — le vrai moteur candidat sert lui-même à l'aperçu Builder.
+    // Autorisé uniquement dans la navigation d'aperçu déclenchée par l'Admin.
+    const url=String(event.sender?.getURL?.()||'');
+    const isPreview=adminSessionUnlocked && Boolean(kaloneoBuilderPreviewDefinition) &&
+      /\/kaltest-pilot2\.html\?kaloneoPreview=1(?:&|$)/.test(url) &&
+      mainWindow && !mainWindow.isDestroyed() && event.sender===mainWindow.webContents;
+    if(isPreview){
+      const def=JSON.parse(JSON.stringify(kaloneoBuilderPreviewDefinition));
+      event.returnValue={ok:true,runtime:{
+        id:'kaloneo-builder-preview-only',
+        title:'Aperçu candidat — '+String(def.title||'Nouveau test'),
+        builderPreview:true,
+        launchOptions:{showCorrectionsDuringParcours:false},
+        introduction:null,tests:[def],fin:null
+      }};
+      return;
+    }
     event.returnValue = getKaloneoLibrary().resolveParcoursRuntime();
   } catch (error) {
     event.returnValue = { ok:false, error:error && error.message ? error.message : String(error) };
@@ -1394,14 +1411,15 @@ ipcMain.handle('kaloneo-builder:open-preview', (_event, definition) => {
   if (!definition || typeof definition !== 'object') {
     return { ok:false, error:'Définition KALTEST absente.' };
   }
-  const target = path.join(__dirname, '..', 'app', 'web', 'kaloneo-builder', 'test-preview.html');
+  // Ouvrir directement la page candidat réelle (CSS + JS de production).
+  const target = path.join(__dirname, '..', 'app', 'web', 'kaltest-pilot2.html');
   if (!fs.existsSync(target)) {
-    return { ok:false, error:'Page d’aperçu KALONÉO absente.' };
+    return { ok:false, error:'Moteur candidat KALTEST absent.' };
   }
   try {
     kaloneoBuilderPreviewDefinition = JSON.parse(JSON.stringify(definition));
     adminCandidateResultsMode = false;
-    mainWindow.loadFile(target);
+    mainWindow.loadFile(target, {query:{kaloneoPreview:'1'}});
     return { ok:true };
   } catch (error) {
     kaloneoBuilderPreviewDefinition = null;

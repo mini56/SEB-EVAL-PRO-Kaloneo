@@ -30,6 +30,7 @@
     : STATIC_DATA;
 
   const PARAMS = new URLSearchParams(window.location.search);
+  const BUILDER_PREVIEW_MODE = selectedRuntime?.builderPreview===true && PARAMS.get('kaloneoPreview')==='1';
   const FULL_PARCOURS_MODE = !CUSTOM_PARCOURS_MODE && PARAMS.get('fullParcours') === '1';
   const REQUESTED_SEGMENT = CUSTOM_PARCOURS_MODE ? '' : String(PARAMS.get('segment') || '').trim();
 
@@ -155,7 +156,7 @@
       })
     : DATA.tests.slice();
   const PILOT11_MODE = Boolean(SEGMENT);
-  const DEFAULT_PHASE = SEGMENT?.startPhase || 'identification';
+  const DEFAULT_PHASE = BUILDER_PREVIEW_MODE ? 'exercise' : (SEGMENT?.startPhase || 'identification');
   const STATE_KEY = 'seb_kaltest_pilot2_state_v1' +
     ((SEGMENT_KEY === 'all' || SEGMENT_KEY === 'initial') ? '' : ':' + SEGMENT_KEY);
 
@@ -189,6 +190,7 @@
   }
 
   function readState() {
+    if (BUILDER_PREVIEW_MODE) return emptyState();
     try {
       const parsed = JSON.parse(sessionStorage.getItem(STATE_KEY) || 'null');
       if (!parsed || typeof parsed !== 'object') return emptyState();
@@ -265,11 +267,13 @@
   }
 
   function persist() {
+    if (BUILDER_PREVIEW_MODE) return; // aucun état candidat sauvegardé depuis un aperçu
     sessionStorage.setItem(STATE_KEY, JSON.stringify(state));
     try { window.sebEvalPro?.save?.(); } catch (_) {}
   }
 
   function replay(type, detail) {
+    if (BUILDER_PREVIEW_MODE) return;
     const active = currentTest();
     if (active?.presentation?.transitionVideo) return;
     state.replay.push({
@@ -4001,6 +4005,7 @@
   }
 
   async function captureReplayPage() {
+    if (BUILDER_PREVIEW_MODE) return;
     try {
       if (window.sebEvalPro?.captureReplay) {
         await window.sebEvalPro.captureReplay();
@@ -4009,6 +4014,7 @@
   }
 
   async function finishCurrentTest() {
+    if (BUILDER_PREVIEW_MODE) return; // aucun score ou changement d'étape en aperçu
     const test = currentTest();
     const testState = currentTestState();
     const status = document.getElementById('exercise-status');
@@ -4142,6 +4148,7 @@
   }
 
   async function onAbandon(record) {
+    if (BUILDER_PREVIEW_MODE) return;
     const test = currentTest();
     const testState = currentTestState();
     if (!test || !testState) return;
@@ -4221,7 +4228,14 @@
       showPhase('exercise');
     });
 
-    document.getElementById('kaltest-next').addEventListener('click', finishCurrentTest);
+    if (BUILDER_PREVIEW_MODE) {
+      document.body.classList.add('kaloneo-real-candidate-preview');
+      document.title='KALONÉO — Aperçu réel candidat (Electron)';
+      const close=document.getElementById('kaltest-next');
+      close.addEventListener('click',()=>{window.sebEvalPro?.kaloneoClosePreview?.();});
+    } else {
+      document.getElementById('kaltest-next').addEventListener('click', finishCurrentTest);
+    }
 
     installKeyboardNavigation();
 
@@ -4232,6 +4246,15 @@
 
     if (state.phase === 'exercise') renderCurrentTest();
     showPhase(state.phase || DEFAULT_PHASE, false);
+    if (BUILDER_PREVIEW_MODE) {
+      const close=document.getElementById('kaltest-next');
+      if(close){
+        close.textContent='Fermer l’aperçu';
+        close.title='Retourner dans le Test Builder, sans enregistrer de réponse';
+        close.classList.add('kaloneo-preview-close');
+      }
+      document.getElementById('kaltest-progress').textContent='APERÇU CANDIDAT RÉEL — aucune réponse enregistrée';
+    }
 
     replay('PILOT2_READY', {
       tests:DATA.tests.map(test => test.id),

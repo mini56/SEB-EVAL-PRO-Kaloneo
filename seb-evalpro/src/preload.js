@@ -132,10 +132,15 @@ function isAdminKaloneoBuilderPreviewPage(page = pageName()) {
   return String(page || '').toLowerCase() === 'test-preview.html';
 }
 
+function isKaloneoRealCandidatePreviewPage(page = pageName()) {
+  return String(page||'').toLowerCase()==='kaltest-pilot2.html' &&
+    new URLSearchParams(window.location.search).get('kaloneoPreview')==='1';
+}
+
 function isTestsParcoursWorkspacePage(page = pageName()) {
   return isAdminTestsParcoursPage(page) || isAdminParcoursBuilderPage(page) ||
     isAdminKaloneoBuilderPage(page) || isAdminMaskBuilderPage(page) ||
-    isAdminKaloneoBuilderPreviewPage(page);
+    isAdminKaloneoBuilderPreviewPage(page) || isKaloneoRealCandidatePreviewPage(page);
 }
 
 function isAdminNavigationPage(page = pageName()) {
@@ -2055,8 +2060,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   sebSyncAdminBarState();
   setTimeout(sebSyncAdminBarState, 80);
   setTimeout(sebSyncAdminBarState, 300);
-  replayPrototype.install();
-  replayNavigationCapture.install();
+  if (!isKaloneoRealCandidatePreviewPage()) {
+    replayPrototype.install();
+    replayNavigationCapture.install();
+  }
   bilanHistory.install();
   candidateCatalog.install({
     beforeNavigate: () => saveNow(true),
