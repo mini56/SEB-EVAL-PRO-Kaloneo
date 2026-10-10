@@ -300,8 +300,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'seb-kaloneo-parcours-v1-test-r47'
-          $title = 'SEB EvalPro Kalonéo — PILOTE 22 R47 TEST'
+          $tag = 'seb-kaloneo-parcours-v1-test-r48'
+          $title = 'SEB EvalPro Kalonéo — PILOTE 22 R48 TEST'
           if (gh release view $tag 2>$null) {
             gh release delete $tag --yes --cleanup-tag
           }
