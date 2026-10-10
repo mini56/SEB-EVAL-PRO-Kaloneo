@@ -4235,8 +4235,43 @@
       const close=document.getElementById('kaltest-next');
       // Miniature : conserver le vrai libellé candidat (« Valider », « Suivant »).
       // Le bouton est photographié mais jamais actionnable dans une image.
-      if(!BUILDER_MINI_PREVIEW_MODE)
-        close.addEventListener('click',()=>{window.sebEvalPro?.kaloneoClosePreview?.();});
+      if(!BUILDER_MINI_PREVIEW_MODE) {
+        // R48.7 : ne jamais dépendre de la barre d'exercice, qui occupe 0 px
+        // en mode candidat (barre de navigation Electron distincte).
+        let closingPreview=false;
+        const exitPreview=async()=>{
+          if(closingPreview)return;
+          closingPreview=true;
+          const exit=document.getElementById('kaloneo-builder-preview-exit');
+          if(exit)exit.disabled=true;
+          try {
+            const ok=await window.sebEvalPro?.kaloneoClosePreview?.();
+            if(ok!==true)throw new Error('Retour au Builder refusé.');
+          }catch(error){
+            closingPreview=false;
+            if(exit)exit.disabled=false;
+            window.alert('Impossible de fermer l’aperçu : '+String(error?.message||error));
+          }
+        };
+        // Conserver l'ancien bouton comme secours, mais ajouter un vrai bouton
+        // indépendant du footer compressé.
+        close.addEventListener('click',exitPreview);
+        const exit=document.createElement('button');
+        exit.id='kaloneo-builder-preview-exit';
+        exit.type='button';
+        exit.textContent='✕ Fermer l’aperçu';
+        exit.title='Revenir au Test Builder (Échap), sans sauvegarder de réponse';
+        exit.setAttribute('aria-label','Fermer l’aperçu et revenir au Test Builder');
+        exit.addEventListener('click',exitPreview);
+        document.body.appendChild(exit);
+        document.addEventListener('keydown',(event)=>{
+          if(event.key==='Escape'){
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            void exitPreview();
+          }
+        },true);
+      }
     } else {
       document.getElementById('kaltest-next').addEventListener('click', finishCurrentTest);
     }

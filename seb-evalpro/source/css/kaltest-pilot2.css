@@ -3253,3 +3253,39 @@ body[data-seb-kaltest-id="redaction_email"] .kaltest-mail-field textarea{
 .kaltest-builder-grid-compact th{padding:3px 5px;}
 .kaltest-builder-grid-compact td{padding:2px 3px;}
 .kaltest-builder-grid-compact select,.kaltest-builder-grid-compact input{min-height:28px;height:28px;padding:2px 4px;}
+
+/* R48.7 — sortie sûre et toujours visible de l'aperçu candidat. Aucun
+   effet dans le parcours réel ni dans la miniature du Builder. */
+body.kaloneo-real-candidate-preview #seb-evalpro-topbar,
+body.kaloneo-real-candidate-preview #seb-evalpro-top-hotzone {
+  display:none!important;
+}
+#kaloneo-builder-preview-exit {
+  position:fixed!important;
+  top:5px!important;
+  right:12px!important;
+  z-index:2147483647!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:170px;
+  min-height:36px;
+  padding:5px 13px;
+  border:2px solid #b52323;
+  border-radius:8px;
+  background:#ffffff;
+  color:#a10f0f;
+  font:700 14px Calibri,Arial,sans-serif;
+  cursor:pointer;
+  box-shadow:0 1px 5px rgba(0,0,0,.15);
+}
+#kaloneo-builder-preview-exit:hover,
+#kaloneo-builder-preview-exit:focus-visible{
+  background:#fff0f0;
+  outline:2px solid #b52323;
+  outline-offset:1px;
+}
+#kaloneo-builder-preview-exit:disabled{
+  opacity:.65;
+  cursor:wait;
+}
