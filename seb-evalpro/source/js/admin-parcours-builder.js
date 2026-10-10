@@ -84,6 +84,33 @@
     return labels[raw] || raw.charAt(0).toUpperCase() + raw.slice(1);
   }
 
+  // R48.3 — libellés exclusivement administrateur : ne modifie jamais le titre
+  // KALTEST transmis au candidat, ni l'identifiant/version sauvegardés.
+  function testTitleDuplicate(item) {
+    return item && item.role==='test' && state.library.some(other =>
+      other!==item && other.role==='test' &&
+      String(other.title||'')===String(item.title||'') &&
+      keyOf(other)!==keyOf(item));
+  }
+
+  function testOriginLabel(item) {
+    if (item.protectedVersion === true) return 'Original KALONÉO';
+    if (String(item.id)==='planning_cantine_r48_demo') return 'Essai Builder R48';
+    return item.adminModified === true ? 'Personnalisé' : 'Autre version';
+  }
+
+  function testAdminTitle(item) {
+    if (!testTitleDuplicate(item)) return String(item.title||'');
+    const title=String(item.title||'');
+    const shortTitle=title==='Planification — Le restaurant'?'Le restaurant':title;
+    return shortTitle+' — '+testOriginLabel(item);
+  }
+
+  function testAdminIdentity(item) {
+    if (!testTitleDuplicate(item)) return '';
+    return testOriginLabel(item)+' • ID : '+String(item.id||'');
+  }
+
   function libraryItem(id, version) {
     return [...state.library, ...state.maskScreens].find(item => String(item.id) === String(id) && String(item.version) === String(version)) || null;
   }
@@ -328,7 +355,7 @@
     card.dataset.version = item.version;
     card.dataset.role = item.role;
 
-    card.querySelector('.card-title').textContent = item.title;
+    card.querySelector('.card-title').textContent = testAdminTitle(item);
     card.querySelector('.card-category').textContent = categoryLabel(item.category);
 
     const details = ['v' + item.version];
@@ -347,10 +374,13 @@
     } else {
       details.push('page de fin');
     }
+    const identity=testAdminIdentity(item);
+    if(identity) details.push(identity);
     card.querySelector('.card-meta').textContent = details.join(' • ');
+    if(identity)card.title=String(item.title)+' — '+identity;
 
     card.addEventListener('mousedown', event => {
-      armMouseDrag(event, { source:'library', id:item.id, version:item.version, role:item.role }, card, item.title);
+      armMouseDrag(event, { source:'library', id:item.id, version:item.version, role:item.role }, card, testAdminTitle(item));
     });
     card.addEventListener('dragstart', event => {
       card.classList.add('dragging');
@@ -389,7 +419,7 @@
     const testGroups = new Map();
     for (const item of state.library) {
       if (item.role !== 'test' || used.has(item.id)) continue;
-      const haystack = (item.title + ' ' + item.category + ' ' + item.description).toLocaleLowerCase('fr-FR');
+      const haystack = (item.title + ' ' + item.category + ' ' + item.description + ' ' + item.id + ' ' + testAdminTitle(item)).toLocaleLowerCase('fr-FR');
       if (search && !haystack.includes(search)) continue;
       const label = categoryLabel(item.category);
       if (!testGroups.has(label)) testGroups.set(label, []);
@@ -408,7 +438,7 @@
     if (search) {
       for (const group of groups) {
         group[1] = group[1].filter(item => {
-          const haystack = (item.title + ' ' + item.category + ' ' + item.description).toLocaleLowerCase('fr-FR');
+          const haystack = (item.title + ' ' + item.category + ' ' + item.description + ' ' + item.id + ' ' + testAdminTitle(item)).toLocaleLowerCase('fr-FR');
           return haystack.includes(search);
         });
       }
@@ -478,9 +508,11 @@
       card.dataset.index = String(index);
       card.dataset.testId = String(item.id);
       card.querySelector('.sequence-index').textContent = String(index + 2);
-      card.querySelector('.sequence-title').textContent = item.title;
+      card.querySelector('.sequence-title').textContent = testAdminTitle(item);
       card.querySelector('.sequence-meta').textContent =
-        categoryLabel(item.category) + ' • v' + item.version + ' • ' + (item.scored ? 'noté' : 'non noté');
+        categoryLabel(item.category) + ' • v' + item.version + ' • ' +
+        (item.scored ? 'noté' : 'non noté') +
+        (testAdminIdentity(item) ? ' • '+testAdminIdentity(item) : '');
 
       const up = card.querySelector('.move-up');
       const down = card.querySelector('.move-down');
@@ -491,7 +523,7 @@
       card.querySelector('.remove-test').addEventListener('click', () => removeTest(index));
 
       card.addEventListener('mousedown', event => {
-        armMouseDrag(event, { source:'sequence', role:'test', id:item.id, version:item.version }, card, item.title);
+        armMouseDrag(event, { source:'sequence', role:'test', id:item.id, version:item.version }, card, testAdminTitle(item));
       });
       card.addEventListener('dragstart', event => {
         state.draggingIndex = index;

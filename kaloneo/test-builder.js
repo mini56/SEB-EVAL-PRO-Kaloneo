@@ -2011,6 +2011,17 @@
     return labels[raw]||raw.replace(/[_-]+/g,' ').replace(/^./,char=>char.toUpperCase());
   }
 
+  function testLibraryAdminName(item,items) {
+    const count=(items||[]).filter(other=>
+      other?.role==='test' && String(other.title||'')===String(item.title||'') &&
+      (String(other.id)!==String(item.id) || String(other.version)!==String(item.version))).length;
+    if(!count)return String(item.title||'');
+    const origin=item.protectedVersion===true?'Original KALONÉO':
+      String(item.id)==='planning_cantine_r48_demo'?'Essai Builder R48':'Personnalisé';
+    const title=String(item.title||'');
+    return (title==='Planification — Le restaurant'?'Le restaurant':title)+' — '+origin;
+  }
+
   function renderLibraryTests(items) {
     const root=$('test-library-list');
     if(!root)return;
@@ -2026,9 +2037,13 @@
       row.className='test-library-item';
       const text=document.createElement('div');
       text.className='test-library-item-text';
-      const title=document.createElement('strong');title.textContent=item.title;
+      const title=document.createElement('strong');title.textContent=testLibraryAdminName(item,items);
       const meta=document.createElement('span');
-      meta.textContent=libraryCategoryLabel(item.category)+' • v'+item.version+(item.protectedVersion===true?' • protégée':'')+(item.category==='activite_pratique'?' • activité pratique':(item.scored?' • noté':' • non noté'));
+      const duplicated=testLibraryAdminName(item,items)!==item.title;
+      meta.textContent=libraryCategoryLabel(item.category)+' • v'+item.version+
+        (item.protectedVersion===true?' • protégée':'')+
+        (item.category==='activite_pratique'?' • activité pratique':(item.scored?' • noté':' • non noté'))+
+        (duplicated?' • ID : '+item.id:'');
       text.append(title,meta);
 
       const actions=document.createElement('div');
